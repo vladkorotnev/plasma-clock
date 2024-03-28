@@ -8,9 +8,9 @@ PlasmaDisplayIface plasma(
     HWCONF_PLASMA_DATABUS_GPIOS,
     HWCONF_PLASMA_CLK_GPIO,
     HWCONF_PLASMA_RESET_GPIO,
-    HWCONF_PLASMA_RTZ_GPIO,
     HWCONF_PLASMA_BRIGHT_GPIO,
-    HWCONF_PLASMA_SHOW_GPIO
+    HWCONF_PLASMA_SHOW_GPIO,
+    HWCONF_PLASMA_HV_EN_GPIO
 );
 
 void setup() {
@@ -18,6 +18,7 @@ void setup() {
     Serial.begin(115200);
     plasma.reset();
 
+    plasma.set_power(true);
     plasma.set_show(true);
     plasma.set_bright(false);
 
@@ -32,8 +33,14 @@ uint16_t now = 1;
 bool dir = true;
 
 void loop() {
-    if(now == 0x8000) dir = false;
-    else if(now == 1) dir = true;
+    if(now == 0x8000) {
+        dir = false;
+        plasma.set_bright(true);
+    }
+    else if(now == 1) {
+        dir = true;
+        plasma.set_bright(false);
+    }
 
     plasma.write_column(now);
 
