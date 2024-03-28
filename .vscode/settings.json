@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.asm": "z80-macroasm",
+        "random": "cpp"
+    }
+}
