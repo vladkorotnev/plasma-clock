@@ -2,15 +2,29 @@
 #include <string.h>
 #include <Arduino.h>
 
-static const int DESIRED_FPS = 60;
+static const int DESIRED_FPS = 63;
+
+#define EVT_BIT_ENDED_DRAWING (1 << 0)
+
 static char LOG_TAG[] = "PDFB";
+
+#define LOCK_BUFFER_OR_DIE if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");return;}
+#define UNLOCK_BUFFER xSemaphoreGive(buffer_semaphore)
 
 PlasmaDisplayFramebuffer::PlasmaDisplayFramebuffer(PlasmaDisplayIface * disp) {
     display = disp;
     buffer_semaphore = xSemaphoreCreateBinary();
+    vsync_group = xEventGroupCreate();
     xSemaphoreGive(buffer_semaphore);
     setup_task();
     clear();
+}
+
+PlasmaDisplayFramebuffer::~PlasmaDisplayFramebuffer() {
+    if(hTask != NULL) {
+        ESP_LOGV(LOG_TAG, "Stopping task");
+        vTaskDelete(hTask);
+    }
 }
 
 extern "C" void TaskFunction( void * pvParameter );
@@ -19,8 +33,30 @@ void TaskFunction( void * pvParameter )
 {
     ESP_LOGV(LOG_TAG, "Running task");
     PlasmaDisplayFramebuffer * fb = static_cast<PlasmaDisplayFramebuffer*> ( pvParameter );
+#ifdef PDFB_PERF_LOGS
+    static TickType_t last_draw_at = 0;
+    static TickType_t avg_frametime = 0;
+    static uint16_t perf_counter = 0;
+#endif
+
     while(1) {
         fb->write_all_if_needed();
+#ifdef PDFB_PERF_LOGS
+#ifndef PDFB_PERF_LOG_INTERVAL
+#define PDFB_PERF_LOG_INTERVAL 600
+#endif
+        perf_counter++;
+        if(perf_counter >= PDFB_PERF_LOG_INTERVAL) {
+            perf_counter = 0;
+            ESP_LOGV(LOG_TAG, "Avg frametime=%lu, FPS=%lu", pdTICKS_TO_MS(avg_frametime), 1000/pdTICKS_TO_MS(avg_frametime));
+        }
+
+        TickType_t now = xTaskGetTickCount();
+        avg_frametime += (now - last_draw_at);
+        avg_frametime /= 2;
+        last_draw_at = now;
+#endif
+
         vTaskDelay(pdMS_TO_TICKS(1000 / DESIRED_FPS));
     }
 }
@@ -39,34 +75,30 @@ void PlasmaDisplayFramebuffer::setup_task() {
     }
 }
 
+void PlasmaDisplayFramebuffer::wait_next_frame() {
+    xEventGroupWaitBits(vsync_group, EVT_BIT_ENDED_DRAWING, false, true, portMAX_DELAY);
+}
+
 void PlasmaDisplayFramebuffer::clear() {
-    if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {
-        ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");
-        return;
-    }
+    LOCK_BUFFER_OR_DIE;
 
     memset(buffer, 0x0, PDFB_BUFFER_SIZE);
     is_dirty = true;
 
-    xSemaphoreGive(buffer_semaphore);
+    UNLOCK_BUFFER;
 }
 
 void PlasmaDisplayFramebuffer::write_all() {
-    if(buffer_semaphore == NULL) {
-        ESP_LOGE(LOG_TAG, "Semaphore is null"); return;
-    }
+    LOCK_BUFFER_OR_DIE;
 
-    if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {
-        ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");
-        return;
-    }
-
+    xEventGroupClearBits(vsync_group, EVT_BIT_ENDED_DRAWING);
     for(int i = 0; i < PDFB_BUFFER_SIZE; i++) {
         display->write_stride(buffer[i]);
     }
     is_dirty = false;
+    xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);
 
-    xSemaphoreGive(buffer_semaphore);
+    UNLOCK_BUFFER;
 }
 
 inline void PlasmaDisplayFramebuffer::write_all_if_needed() {
@@ -87,10 +119,7 @@ void PlasmaDisplayFramebuffer::plot_pixel(int x, int y, bool state) {
     }
     uint8_t target_bitmask = 1 << y;
 
-    if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {
-        ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");
-        return;
-    }
+    LOCK_BUFFER_OR_DIE;
 
     if(state) {
         buffer[target_idx] |= target_bitmask;
@@ -99,5 +128,6 @@ void PlasmaDisplayFramebuffer::plot_pixel(int x, int y, bool state) {
     }
 
     is_dirty = true;
-    xSemaphoreGive(buffer_semaphore);
+
+    UNLOCK_BUFFER;
 }

@@ -470,6 +470,8 @@
                 "PLATFORMIO=60114",
                 "ARDUINO_NodeMCU_32S",
                 "CORE_DEBUG_LEVEL=9",
+                "PDFB_PERF_LOGS",
+                "PDFB_PERF_LOG_INTERVAL=1200",
                 "HAVE_CONFIG_H",
                 "MBEDTLS_CONFIG_FILE=\"mbedtls/esp_config.h\"",
                 "UNITY_INCLUDE_CONFIG_H",
