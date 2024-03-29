@@ -2,6 +2,7 @@
 #include <plasma/iface.h>
 #include <plasma/framebuffer.h>
 #include <fonts.h>
+#include <console.h>
 #include "hw_config.h"
 
 static char LOG_TAG[] = "APL_MAIN";
@@ -16,12 +17,7 @@ static PlasmaDisplayIface plasma(
 );
 
 static PlasmaDisplayFramebuffer * fb;
-
-void writestr(const char * string, int x) {
-    for(int i = 0; i < strlen(string); i++) {
-        fb->put_glyph(&xnu_font, string[i], x + i * 8, 1);
-    }
-}
+static Console * con;
 
 void setup() {
     // Set up serial for logs
@@ -33,36 +29,32 @@ void setup() {
     plasma.set_bright(false);
 
     fb = new PlasmaDisplayFramebuffer(&plasma);
+    con = new Console(&keyrus0816_font, fb);
+    con->set_cursor(true);
+    con->print("BOOT");
 
+    delay(1000);
 
-    ESP_LOGI(LOG_TAG, "Plot");
-
-    for(int i = 0; i < fb->width; i++) {
-        fb->plot_pixel(i, i % fb->height, true);
-        fb->wait_next_frame();
-    }
-
-    writestr("OELUTZ", 0);
+    con->set_font(&keyrus0808_font);
+    con->write('\n');
+    delay(500);
 
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }
 
 
 void loop() {
-    writestr("|(^_^)|", 48);
-    delay(250);
-    writestr("(/^_^)/", 48);
-    delay(250);
-    writestr("(-^_^)-", 48);
-    delay(250);
-    writestr("(\\^_^)\\", 48);
-    delay(250);
-    writestr("(|^_^|)", 48);
-    delay(250);
-    writestr("/(^_^/)", 48);
-    delay(250);
-    writestr("-(^_^-)", 48);
-    delay(250);
-    writestr("\\(^_^\\)", 48);
-    delay(250);
+    const char * sas = "Wake up, Neo.";
+    const char * sus = "You obosralsya.";
+    for(int i = 0; i < strlen(sas); i++) {
+        con->write(sas[i]);
+        delay(100);
+    }
+    delay(1000);
+    con->write('\n');
+     for(int i = 0; i < strlen(sus); i++) {
+        con->write(sus[i]);
+        delay(100);
+    }
+    delay(1000);
 }

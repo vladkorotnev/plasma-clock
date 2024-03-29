@@ -5,7 +5,7 @@
 typedef struct font_definition {
     char16_t start_character;
     char16_t end_character;
-    uint8_t height;
+    uint8_t width, height;
     const uint8_t* data;
 } font_definition_t;
 

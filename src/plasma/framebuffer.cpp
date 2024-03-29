@@ -156,3 +156,23 @@ void PlasmaDisplayFramebuffer::put_glyph(const font_definition_t * font, const u
     sprite_t char_sprite = sprite_from_glyph(font, glyph);
     put_sprite(&char_sprite, x, y);
 }
+
+void PlasmaDisplayFramebuffer::scroll(int dx, int dy) {
+    LOCK_BUFFER_OR_DIE;
+
+    if(dy != 0) {
+        fanta_offset_y(buffer, dy, width);
+    }
+
+    if(dx > 0) {
+        size_t dst_index = dx * 2;
+        memcpy(&buffer[dst_index], buffer, PDFB_BUFFER_SIZE - dst_index);
+        memset(buffer, 0, dst_index);
+    } else if (dx < 0) {
+        size_t src_index = abs(dx) * 2;
+        memcpy(buffer, &buffer[src_index], PDFB_BUFFER_SIZE - src_index);
+        memset(&buffer[src_index], 0, PDFB_BUFFER_SIZE - src_index);
+    }
+
+    UNLOCK_BUFFER;
+}

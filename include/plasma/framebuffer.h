@@ -24,6 +24,8 @@ public:
     void put_sprite(const sprite_t * sprite, int x, int y);
     void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y);
 
+    void scroll(int dx, int dy);
+
     inline void write_all_if_needed();
 
 private:
