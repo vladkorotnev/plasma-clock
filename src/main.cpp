@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include <plasma/iface.h>
 #include <plasma/framebuffer.h>
+#include <fonts.h>
 #include "hw_config.h"
 
 static char LOG_TAG[] = "APL_MAIN";
@@ -16,6 +17,12 @@ static PlasmaDisplayIface plasma(
 
 static PlasmaDisplayFramebuffer * fb;
 
+void writestr(const char * string, int x) {
+    for(int i = 0; i < strlen(string); i++) {
+        fb->put_glyph(&xnu_font, string[i], x + i * 8, 1);
+    }
+}
+
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
@@ -23,7 +30,7 @@ void setup() {
 
     plasma.set_power(true);
     plasma.set_show(true);
-    plasma.set_bright(true);
+    plasma.set_bright(false);
 
     fb = new PlasmaDisplayFramebuffer(&plasma);
 
@@ -35,17 +42,27 @@ void setup() {
         fb->wait_next_frame();
     }
 
-    delay(2000);
+    writestr("OELUTZ", 0);
 
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }
 
-uint16_t now = 1;
-bool dir = true;
 
 void loop() {
-    fb->plot_pixel(random(0, fb->width), random(0, fb->height), true);
-    fb->plot_pixel(random(0, fb->width), random(0, fb->height), false);
-
-    fb->wait_next_frame();
+    writestr("|(^_^)|", 48);
+    delay(250);
+    writestr("(/^_^)/", 48);
+    delay(250);
+    writestr("(-^_^)-", 48);
+    delay(250);
+    writestr("(\\^_^)\\", 48);
+    delay(250);
+    writestr("(|^_^|)", 48);
+    delay(250);
+    writestr("/(^_^/)", 48);
+    delay(250);
+    writestr("-(^_^-)", 48);
+    delay(250);
+    writestr("\\(^_^\\)", 48);
+    delay(250);
 }

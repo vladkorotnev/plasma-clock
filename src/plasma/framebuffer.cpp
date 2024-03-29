@@ -131,3 +131,28 @@ void PlasmaDisplayFramebuffer::plot_pixel(int x, int y, bool state) {
 
     UNLOCK_BUFFER;
 }
+
+void PlasmaDisplayFramebuffer::put_sprite(const sprite_t * sprite, int x, int y) {    
+    LOCK_BUFFER_OR_DIE;
+
+    uint8_t * fanta = sprite_to_fanta(sprite);
+
+    fanta_offset_y(fanta, y, sprite->width);
+    size_t target_idx = x * 2;
+
+    for(int i = 0; i < sprite->width*2; i++) {
+        if(target_idx + i > PDFB_BUFFER_SIZE - 1) break;
+        buffer[target_idx + i] = fanta[i];
+    }
+
+    free(fanta);
+
+    is_dirty = true;
+
+    UNLOCK_BUFFER;
+}
+
+void PlasmaDisplayFramebuffer::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y) {
+    sprite_t char_sprite = sprite_from_glyph(font, glyph);
+    put_sprite(&char_sprite, x, y);
+}

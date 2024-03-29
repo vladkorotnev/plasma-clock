@@ -1,8 +1,11 @@
 #pragma once
 #include "iface.h"
+#include "sprite.h"
+#include "font.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/event_groups.h>
+
 class PlasmaDisplayFramebuffer {
 public:
     static const int width = 101;
@@ -17,6 +20,9 @@ public:
 
     void wait_next_frame();
     void plot_pixel(int x, int y, bool state);
+
+    void put_sprite(const sprite_t * sprite, int x, int y);
+    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y);
 
     inline void write_all_if_needed();
 
