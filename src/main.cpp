@@ -30,22 +30,18 @@ void setup() {
 
     fb = new PlasmaDisplayFramebuffer(&plasma);
     con = new Console(&keyrus0816_font, fb);
-    con->set_cursor(true);
+    con->set_cursor(false);
     con->print("BOOT");
 
     delay(1000);
 
+    con->clear();
     con->set_font(&keyrus0808_font);
-    con->write('\n');
+    con->set_cursor(true);
     delay(500);
 
-   // vTaskDelete(NULL); // Get rid of setup() and loop() task
-}
-
-
-void loop() {
-    const char * sas = "Wake up, Neo.";
-    const char * sus = "You obosralsya.";
+    const char * sas = "Wake up, Neo";
+    const char * sus = "You obosralsya";
     for(int i = 0; i < strlen(sas); i++) {
         con->write(sas[i]);
         delay(100);
@@ -57,4 +53,12 @@ void loop() {
         delay(100);
     }
     delay(1000);
+    con->write('\n');
+
+   // vTaskDelete(NULL); // Get rid of setup() and loop() task
+}
+
+void loop() {
+    con->write(random(33, 93));
+    delay(100);
 }

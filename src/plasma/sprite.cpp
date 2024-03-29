@@ -15,6 +15,9 @@ uint8_t* sprite_to_fanta(const sprite_t* sprite) {
 
     memset(columns, 0, required_size * sizeof(uint16_t));
 
+    // TODO: this is horizontally flipped, and looks like all my font data is as well.
+    //       Need to flip this routine and then flip all the font sprites to accomodate for proper horizontal
+    //       data layout (MSB on the left).
     for(int i = 0; i < sprite->width; i++) {
         for(int j = std::min(sprite->height, (uint8_t) 16) - 1; j >= 0; j--) {
             columns[i] <<= 1;

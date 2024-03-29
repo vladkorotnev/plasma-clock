@@ -137,12 +137,23 @@ void PlasmaDisplayFramebuffer::put_sprite(const sprite_t * sprite, int x, int y)
 
     uint8_t * fanta = sprite_to_fanta(sprite);
 
+    uint16_t fanta_column_mask = 0x0;
+    for(int i = y; i < y + sprite->height; i++) {
+        if(i < 0) continue;
+        if(i > 16) break;
+        fanta_column_mask |= (1 << i);
+    }
+
     fanta_offset_y(fanta, y, sprite->width);
+
     size_t target_idx = x * 2;
+    uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
 
     for(int i = 0; i < sprite->width*2; i++) {
         if(target_idx + i > PDFB_BUFFER_SIZE - 1) break;
-        buffer[target_idx + i] = fanta[i];
+        uint8_t current_mask = mask_data[i % 2];
+
+        buffer[target_idx + i] = fanta[i] | (buffer[target_idx + i] & ~current_mask);
     }
 
     free(fanta);

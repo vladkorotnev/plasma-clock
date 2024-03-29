@@ -2,6 +2,8 @@
 #include <string.h>
 #include <Arduino.h>
 
+static const char CURSOR_ON = 22;
+static const char CURSOR_OFF = ' ';
 static char LOG_TAG[] = "CONS";
 
 extern "C" void ConsoleTaskFunction( void * pvParameter );
@@ -31,7 +33,7 @@ Console::Console(const font_definition_t * f, PlasmaDisplayFramebuffer * fb) {
     if(xTaskCreate(
         ConsoleTaskFunction,
         "CONS",
-        20000,
+        4096,
         this,
         10,
         &hTask
@@ -51,7 +53,9 @@ void Console::task() {
     char * next_line = nullptr;
     if(xQueueReceive(hQueue, &next_line, pdMS_TO_TICKS( 500 )) == pdTRUE) {
         // Output next line
-        cursor_state = false;
+        if(cursor_enable && cursor_state) {
+            disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+        }
         for(int i = 0; i < strlen(next_line); i++) {
             char ch = next_line[i];
 
@@ -74,20 +78,28 @@ void Console::task() {
             }
         }
         free(next_line);
+
+        cursor_state = false;
     }
 
     if(cursor_enable) {
         cursor_state = !cursor_state;
-        disp->put_glyph(font, cursor_state ? '_' : ' ', cursor_x, cursor_y);
+        disp->put_glyph(font, cursor_state ? CURSOR_ON : CURSOR_OFF, cursor_x, cursor_y);
     }
+}
+
+void Console::clear() {
+    disp->clear();
+    cursor_x = 0;
+    cursor_y = 0;
 }
 
 void Console::set_cursor(bool enable) {
     if(enable && !cursor_enable) {
         cursor_state = true;
-        disp->put_glyph(font, '_', cursor_x, cursor_y);
+        disp->put_glyph(font, CURSOR_ON, cursor_x, cursor_y);
     } else if(!enable && cursor_enable) {
-        disp->put_glyph(font, ' ', cursor_x, cursor_y);
+        disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
     }
     cursor_enable = enable;
 }

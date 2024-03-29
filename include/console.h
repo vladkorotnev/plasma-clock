@@ -8,6 +8,8 @@ class Console {
 public:
     Console(const font_definition_t*, PlasmaDisplayFramebuffer*);
     ~Console();
+
+    void clear();
     void write(char);
     void print(const char *);
     void set_cursor(bool);
