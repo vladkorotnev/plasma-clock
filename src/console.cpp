@@ -113,12 +113,24 @@ void Console::cursor_newline() {
     }
 }
 
-void Console::print(const char * text) {
-    size_t len = strlen(text);
-    char * msg = (char*) malloc(len + 1);
-    memcpy(msg, text, len);
-    msg[len] = 0x0;
-    xQueueSend(hQueue, (void*) &msg, portMAX_DELAY);
+void Console::print(const char * text, ...) {
+    va_list arg1, arg2;
+
+    va_start(arg1, text);
+
+    // Find the total length
+    va_copy(arg2, arg1);
+    size_t size = vsnprintf(NULL, 0, text, arg2)  + 1;
+    va_end(arg2);
+
+    char *szBuff = (char*) malloc(size);
+    vsnprintf(szBuff, size, text, arg1);
+
+    va_end(arg1);
+
+    ESP_LOGV(LOG_TAG, "%s", szBuff);
+
+    xQueueSend(hQueue, (void*) &szBuff, portMAX_DELAY);
 }
 
 void Console::write(char ch) {

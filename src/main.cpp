@@ -4,6 +4,7 @@
 #include <fonts.h>
 #include <console.h>
 #include "hw_config.h"
+#include <AM232X.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -18,6 +19,8 @@ static PlasmaDisplayIface plasma(
 
 static PlasmaDisplayFramebuffer * fb;
 static Console * con;
+
+static AM2322 * tempSens;
 
 void setup() {
     // Set up serial for logs
@@ -35,9 +38,33 @@ void setup() {
 
     delay(1000);
 
+    ledcSetup(0, 2000, 8);
+    ledcAttachPin(HWCONF_BEEPER_GPIO, 0);
+    ledcWriteTone(0, 2000);
+    delay(125);
+    ledcWriteTone(0, 1000);
+    delay(125);
+    ledcWrite(0, 0);
+
     con->clear();
     con->set_font(&keyrus0808_font);
     con->set_cursor(true);
+
+    pinMode(HWCONF_MOTION_GPIO, INPUT_PULLDOWN);
+    pinMode(HWCONF_LIGHTSENSE_GPIO, ANALOG);
+
+    Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
+    tempSens = new AM2322(&Wire);
+
+    if(!tempSens->begin()) {
+        ESP_LOGE(LOG_TAG, "Init temp sens error");
+        con->print("T: Init Error\n");
+    } else {
+        tempSens->wakeUp();
+        ESP_LOGI(LOG_TAG, "Temp sens wake up");
+        con->print("T: OK\n");
+    }
+
     delay(500);
 
     const char * sas = "Wake up, Neo";
@@ -59,6 +86,44 @@ void setup() {
 }
 
 void loop() {
-    con->write(random(33, 93));
-    delay(100);
+    static bool motn;
+    bool motnNew;
+    motnNew = digitalRead(HWCONF_MOTION_GPIO);
+    if(motnNew != motn) {
+        con->print("MOT: %s\n", motnNew ? "YES" : "no");
+        motn = motnNew;
+    }
+
+    static int light;
+    int lightNew = analogRead(HWCONF_LIGHTSENSE_GPIO);
+
+    if(abs(light - lightNew) > 500) {
+        con->print("Light: %i\n", lightNew);
+        light = lightNew;
+        if(light > 2500) {
+            plasma.set_bright(true);
+        } else if (light < 1000) {
+            plasma.set_bright(false);
+        }
+    }
+
+    static float oldTemp, oldHum;
+    static long lastTempRead = millis();
+    if(millis() - lastTempRead > 3000) {
+        int status = tempSens->read();
+        if(status != AM232X_OK) {
+            ESP_LOGE(LOG_TAG, "Temp sens error %i\n", status);
+            con->print("T: err %i\n", status);
+        } else {
+            float temp = tempSens->getTemperature();
+            float hum = tempSens->getHumidity();
+            if(temp != oldTemp || hum != oldHum) {
+                con->print("T=%.2f, H=%.2f\n", temp, hum);
+                oldTemp = temp;
+                oldHum = hum;
+            }
+        }
+
+        lastTempRead = millis();
+    }
 }

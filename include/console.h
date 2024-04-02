@@ -11,7 +11,7 @@ public:
 
     void clear();
     void write(char);
-    void print(const char *);
+    void print(const char *, ...);
     void set_cursor(bool);
     void set_font(const font_definition_t*);
 
