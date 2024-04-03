@@ -6,6 +6,7 @@
 #include "hw_config.h"
 #include <AM232X.h>
 #include <sensor/sensors.h>
+#include <network/netmgr.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -22,7 +23,16 @@ static PlasmaDisplayFramebuffer * fb;
 static Console * con;
 static SensorPool * sensors;
 
+void beep(int f, int t) {
+    ledcWriteTone(0, f);
+    delay(t);
+    ledcWrite(0, 0);
+}
+
 void setup() {
+    ledcSetup(0, 2000, 8);
+    ledcAttachPin(HWCONF_BEEPER_GPIO, 0);
+
     // Set up serial for logs
     Serial.begin(115200);
     plasma.reset();
@@ -32,40 +42,58 @@ void setup() {
     plasma.set_bright(false);
 
     fb = new PlasmaDisplayFramebuffer(&plasma);
-    con = new Console(&keyrus0816_font, fb);
-    con->set_cursor(false);
-    con->print("BOOT");
-
+    con = new Console(&keyrus0808_font, fb);
+    con->set_cursor(true);
+    
+    con->print("SAS-DOS v1.0");
     delay(1000);
-
-    ledcSetup(0, 2000, 8);
-    ledcAttachPin(HWCONF_BEEPER_GPIO, 0);
-    ledcWriteTone(0, 2000);
-    delay(125);
-    ledcWriteTone(0, 1000);
-    delay(125);
-    ledcWrite(0, 0);
+ 
+    beep(2000, 125);
+    beep(1000, 125);
 
     con->clear();
     con->set_font(&sg8bit_font);
     con->set_cursor(true);
 
+    con->print("WiFi init.");
+    NetworkManager::startup();
+    while(!NetworkManager::is_up()) {
+        delay(1000);
+        con->write('.');
+    }
+
+    con->clear();
+    con->print("Network:");
+    con->print(NetworkManager::network_name());
+    delay(2000);
+    con->print(NetworkManager::current_ip());
+    delay(2000);
+
     sensors = new SensorPool();
 
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(1000));
+    con->print("L sensor OK");
+
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
+    con->print("M sensor OK");
 
     Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
     AM2322* tempSens = new AM2322(&Wire);
 
     if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("T sens err");
+        beep(500, 125);
+    } else {
+        con->print("T sensor OK");
     }
+    delay(3000);
     if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("H sens err");
+        beep(500, 125);
+    } else {
+        con->print("H sensor OK");
     }
 
-    delay(500);
 
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }

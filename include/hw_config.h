@@ -28,7 +28,7 @@ const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_12;
 
 // ---- Connection & setting of EYE BOARD ----
 const gpio_num_t HWCONF_MOTION_GPIO = GPIO_NUM_14;
-const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_27;
+const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_35;
 const unsigned int HWCONF_LIGHTSENSE_MINIMUM = 0;
 const unsigned int HWCONF_LIGHTSENSE_MAXIMUM = 4096;
 
