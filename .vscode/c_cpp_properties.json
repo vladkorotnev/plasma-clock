@@ -10,6 +10,8 @@
             "includePath": [
                 "d:/Code/plasma-clock/include",
                 "d:/Code/plasma-clock/src",
+                "d:/Code/plasma-clock/lib/AM232X",
+                "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -200,7 +202,6 @@
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/variants/nodemcu-32s",
-                "d:/Code/plasma-clock/lib/AM232X",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -233,7 +234,6 @@
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                 "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                 ""
             ],
             "browse": {
@@ -241,6 +241,8 @@
                 "path": [
                     "d:/Code/plasma-clock/include",
                     "d:/Code/plasma-clock/src",
+                    "d:/Code/plasma-clock/lib/AM232X",
+                    "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/newlib/platform_include",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/include/freertos/include/esp_additions/freertos",
@@ -431,7 +433,6 @@
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/tools/sdk/esp32/dio_qspi/include",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/cores/esp32",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/variants/nodemcu-32s",
-                    "d:/Code/plasma-clock/lib/AM232X",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/ArduinoOTA/src",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/AsyncUDP/src",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/BLE/src",
@@ -464,7 +465,6 @@
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/WiFi/src",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/WiFiClientSecure/src",
                     "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/WiFiProv/src",
-                    "C:/Users/akasaka/.platformio/packages/framework-arduinoespressif32/libraries/Wire/src",
                     ""
                 ]
             },

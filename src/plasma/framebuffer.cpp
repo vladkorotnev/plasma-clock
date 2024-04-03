@@ -27,9 +27,9 @@ PlasmaDisplayFramebuffer::~PlasmaDisplayFramebuffer() {
     }
 }
 
-extern "C" void TaskFunction( void * pvParameter );
+extern "C" void FbTaskFunc( void * pvParameter );
 
-void TaskFunction( void * pvParameter )
+void FbTaskFunc( void * pvParameter )
 {
     ESP_LOGV(LOG_TAG, "Running task");
     PlasmaDisplayFramebuffer * fb = static_cast<PlasmaDisplayFramebuffer*> ( pvParameter );
@@ -64,7 +64,7 @@ void TaskFunction( void * pvParameter )
 void PlasmaDisplayFramebuffer::setup_task() {
     ESP_LOGV(LOG_TAG, "Creating task");
     if(xTaskCreate(
-        TaskFunction,
+        FbTaskFunc,
         "FBuf",
         4096,
         this,

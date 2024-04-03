@@ -120,15 +120,16 @@ void Console::print(const char * text, ...) {
 
     // Find the total length
     va_copy(arg2, arg1);
-    size_t size = vsnprintf(NULL, 0, text, arg2)  + 1;
+    size_t size = vsnprintf(NULL, 0, text, arg2)  + 2;
     va_end(arg2);
 
     char *szBuff = (char*) malloc(size);
-    vsnprintf(szBuff, size, text, arg1);
+    vsnprintf(&szBuff[1], size, text, arg1);
+    szBuff[0] = '\n';
 
     va_end(arg1);
 
-    ESP_LOGV(LOG_TAG, "%s", szBuff);
+    ESP_LOGV(LOG_TAG, "%s", &szBuff[1]);
 
     xQueueSend(hQueue, (void*) &szBuff, portMAX_DELAY);
 }

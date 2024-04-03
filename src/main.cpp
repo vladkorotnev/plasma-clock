@@ -5,6 +5,7 @@
 #include <console.h>
 #include "hw_config.h"
 #include <AM232X.h>
+#include <sensor/sensors.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -19,8 +20,7 @@ static PlasmaDisplayIface plasma(
 
 static PlasmaDisplayFramebuffer * fb;
 static Console * con;
-
-static AM2322 * tempSens;
+static SensorPool * sensors;
 
 void setup() {
     // Set up serial for logs
@@ -50,37 +50,22 @@ void setup() {
     con->set_font(&keyrus0808_font);
     con->set_cursor(true);
 
-    pinMode(HWCONF_MOTION_GPIO, INPUT_PULLDOWN);
-    pinMode(HWCONF_LIGHTSENSE_GPIO, ANALOG);
+    sensors = new SensorPool();
+
+    sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(1000));
+    sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
 
     Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
-    tempSens = new AM2322(&Wire);
+    AM2322* tempSens = new AM2322(&Wire);
 
-    if(!tempSens->begin()) {
-        ESP_LOGE(LOG_TAG, "Init temp sens error");
-        con->print("T: Init Error\n");
-    } else {
-        tempSens->wakeUp();
-        ESP_LOGI(LOG_TAG, "Temp sens wake up");
-        con->print("T: OK\n");
+    if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
+        con->print("T sens err");
+    }
+    if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
+        con->print("H sens err");
     }
 
     delay(500);
-
-    const char * sas = "Wake up, Neo";
-    const char * sus = "You obosralsya";
-    for(int i = 0; i < strlen(sas); i++) {
-        con->write(sas[i]);
-        delay(100);
-    }
-    delay(1000);
-    con->write('\n');
-     for(int i = 0; i < strlen(sus); i++) {
-        con->write(sus[i]);
-        delay(100);
-    }
-    delay(1000);
-    con->write('\n');
 
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }
@@ -88,17 +73,20 @@ void setup() {
 void loop() {
     static bool motn;
     bool motnNew;
-    motnNew = digitalRead(HWCONF_MOTION_GPIO);
+    motnNew = (sensors->get_info(SENSOR_ID_MOTION)->last_result > 0);
     if(motnNew != motn) {
-        con->print("MOT: %s\n", motnNew ? "YES" : "no");
+        con->print("MOT: %s", motnNew ? "YES" : "no");
+        ledcWriteTone(0, motnNew ? 2000:1000);
+        delay(125);
+        ledcWrite(0, 0);
         motn = motnNew;
     }
 
     static int light;
-    int lightNew = analogRead(HWCONF_LIGHTSENSE_GPIO);
+    int lightNew = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT)->last_result;
 
     if(abs(light - lightNew) > 500) {
-        con->print("Light: %i\n", lightNew);
+        con->print("Light: %i", lightNew);
         light = lightNew;
         if(light > 2500) {
             plasma.set_bright(true);
@@ -107,21 +95,13 @@ void loop() {
         }
     }
 
-    static float oldTemp, oldHum;
     static long lastTempRead = millis();
-    if(millis() - lastTempRead > 3000) {
-        int status = tempSens->read();
-        if(status != AM232X_OK) {
-            ESP_LOGE(LOG_TAG, "Temp sens error %i\n", status);
-            con->print("T: err %i\n", status);
-        } else {
-            float temp = tempSens->getTemperature();
-            float hum = tempSens->getHumidity();
-            if(temp != oldTemp || hum != oldHum) {
-                con->print("T=%.2f, H=%.2f\n", temp, hum);
-                oldTemp = temp;
-                oldHum = hum;
-            }
+    if(millis() - lastTempRead > 5000) {
+        sensor_info_t * hum = sensors->get_info(SENSOR_ID_AMBIENT_HUMIDITY);
+        sensor_info_t * temp = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
+
+        if(hum != nullptr && temp != nullptr) {
+            con->print("T=%i, H=%i", temp->last_result, hum->last_result);
         }
 
         lastTempRead = millis();
