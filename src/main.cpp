@@ -47,7 +47,7 @@ void setup() {
     ledcWrite(0, 0);
 
     con->clear();
-    con->set_font(&keyrus0808_font);
+    con->set_font(&sg8bit_font);
     con->set_cursor(true);
 
     sensors = new SensorPool();
@@ -76,7 +76,7 @@ void loop() {
     motnNew = (sensors->get_info(SENSOR_ID_MOTION)->last_result > 0);
     if(motnNew != motn) {
         con->print("MOT: %s", motnNew ? "YES" : "no");
-        ledcWriteTone(0, motnNew ? 2000:1000);
+        // ledcWriteTone(0, motnNew ? 2000:1000);
         delay(125);
         ledcWrite(0, 0);
         motn = motnNew;
@@ -101,7 +101,7 @@ void loop() {
         sensor_info_t * temp = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
 
         if(hum != nullptr && temp != nullptr) {
-            con->print("T=%i, H=%i", temp->last_result, hum->last_result);
+            con->print("T%i H%i", temp->last_result, hum->last_result);
         }
 
         lastTempRead = millis();

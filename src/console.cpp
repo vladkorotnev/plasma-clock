@@ -2,7 +2,6 @@
 #include <string.h>
 #include <Arduino.h>
 
-static const char CURSOR_ON = 22;
 static const char CURSOR_OFF = ' ';
 static char LOG_TAG[] = "CONS";
 
@@ -84,7 +83,7 @@ void Console::task() {
 
     if(cursor_enable) {
         cursor_state = !cursor_state;
-        disp->put_glyph(font, cursor_state ? CURSOR_ON : CURSOR_OFF, cursor_x, cursor_y);
+        disp->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
     }
 }
 
@@ -97,7 +96,7 @@ void Console::clear() {
 void Console::set_cursor(bool enable) {
     if(enable && !cursor_enable) {
         cursor_state = true;
-        disp->put_glyph(font, CURSOR_ON, cursor_x, cursor_y);
+        disp->put_glyph(font, font->cursor_character, cursor_x, cursor_y);
     } else if(!enable && cursor_enable) {
         disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
     }

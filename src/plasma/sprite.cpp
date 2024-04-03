@@ -11,17 +11,15 @@ uint8_t* sprite_to_fanta(const sprite_t* sprite) {
     uint16_t * columns = (uint16_t*) malloc(required_size * sizeof(uint16_t));
     if(columns == nullptr) {
         ESP_LOGE(LOG_TAG, "Allocation failed");
+        return nullptr;
     }
 
     memset(columns, 0, required_size * sizeof(uint16_t));
 
-    // TODO: this is horizontally flipped, and looks like all my font data is as well.
-    //       Need to flip this routine and then flip all the font sprites to accomodate for proper horizontal
-    //       data layout (MSB on the left).
     for(int i = 0; i < sprite->width; i++) {
         for(int j = std::min(sprite->height, (uint8_t) 16) - 1; j >= 0; j--) {
             columns[i] <<= 1;
-            columns[i] |= ((sprite->data[j + i / 8] >> i) & 1);
+            columns[i] |= (sprite->data[j + i / 8] >> (7 - (i % 8)) & 1);
         }
     }
 
