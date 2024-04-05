@@ -9,6 +9,8 @@
 #include <network/netmgr.h>
 #include <network/otafvu.h>
 #include <service/power_management.h>
+#include <service/time.h>
+#include <views/simple_clock.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -25,6 +27,8 @@ static PlasmaDisplayFramebuffer * fb;
 static Console * con;
 static SensorPool * sensors;
 static OTAFVUManager * ota;
+
+static SimpleClock * clockView;
 
 void beep(int f, int t) {
     ledcWriteTone(0, f);
@@ -77,7 +81,7 @@ void setup() {
 
     sensors = new SensorPool();
 
-    sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(1000));
+    sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
     con->print("L sensor OK");
 
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
@@ -100,10 +104,17 @@ void setup() {
         con->print("H sensor OK");
     }
 
+    clockView = new SimpleClock(fb);
+
+    // Finish all preparations, clear the screen and disable console
+    con->set_active(false);
+    fb->clear();
+    timekeeping_begin();
     power_mgmt_start(sensors, &plasma);
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }
 
 void loop() {
-    
+    clockView->render();
+    fb->wait_next_frame();
 }
