@@ -9,6 +9,7 @@ public:
     Console(const font_definition_t*, PlasmaDisplayFramebuffer*);
     ~Console();
 
+    void set_active(bool);
     void clear();
     void write(char);
     void print(const char *, ...);
@@ -25,6 +26,7 @@ private:
     int cursor_x, cursor_y;
     volatile bool cursor_enable;
     volatile bool cursor_state;
+    bool active;
 
     void cursor_newline();
 };

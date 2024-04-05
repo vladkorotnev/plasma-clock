@@ -7,6 +7,7 @@
 #include <AM232X.h>
 #include <sensor/sensors.h>
 #include <network/netmgr.h>
+#include <network/otafvu.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -22,6 +23,7 @@ static PlasmaDisplayIface plasma(
 static PlasmaDisplayFramebuffer * fb;
 static Console * con;
 static SensorPool * sensors;
+static OTAFVUManager * ota;
 
 void beep(int f, int t) {
     ledcWriteTone(0, f);
@@ -39,13 +41,13 @@ void setup() {
 
     plasma.set_power(true);
     plasma.set_show(true);
-    plasma.set_bright(false);
+    plasma.set_bright(true);
 
     fb = new PlasmaDisplayFramebuffer(&plasma);
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     
-    con->print("SAS-DOS v1.0");
+    con->print("SAS-DOS v1.0\n");
     delay(1000);
  
     beep(2000, 125);
@@ -68,6 +70,8 @@ void setup() {
     delay(2000);
     con->print(NetworkManager::current_ip());
     delay(2000);
+
+    ota = new OTAFVUManager(con);
 
     sensors = new SensorPool();
 
@@ -94,44 +98,9 @@ void setup() {
         con->print("H sensor OK");
     }
 
-
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }
 
 void loop() {
-    static bool motn;
-    bool motnNew;
-    motnNew = (sensors->get_info(SENSOR_ID_MOTION)->last_result > 0);
-    if(motnNew != motn) {
-        con->print("MOT: %s", motnNew ? "YES" : "no");
-        // ledcWriteTone(0, motnNew ? 2000:1000);
-        delay(125);
-        ledcWrite(0, 0);
-        motn = motnNew;
-    }
-
-    static int light;
-    int lightNew = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT)->last_result;
-
-    if(abs(light - lightNew) > 500) {
-        con->print("Light: %i", lightNew);
-        light = lightNew;
-        if(light > 2500) {
-            plasma.set_bright(true);
-        } else if (light < 1000) {
-            plasma.set_bright(false);
-        }
-    }
-
-    static long lastTempRead = millis();
-    if(millis() - lastTempRead > 5000) {
-        sensor_info_t * hum = sensors->get_info(SENSOR_ID_AMBIENT_HUMIDITY);
-        sensor_info_t * temp = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
-
-        if(hum != nullptr && temp != nullptr) {
-            con->print("T%i H%i", temp->last_result, hum->last_result);
-        }
-
-        lastTempRead = millis();
-    }
+    
 }

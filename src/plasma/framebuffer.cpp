@@ -101,7 +101,7 @@ void PlasmaDisplayFramebuffer::write_all() {
     UNLOCK_BUFFER;
 }
 
-inline void PlasmaDisplayFramebuffer::write_all_if_needed() {
+void PlasmaDisplayFramebuffer::write_all_if_needed() {
     if(!is_dirty) return;
     write_all();
 }

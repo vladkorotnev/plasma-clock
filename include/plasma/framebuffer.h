@@ -26,7 +26,7 @@ public:
 
     void scroll(int dx, int dy);
 
-    inline void write_all_if_needed();
+    void write_all_if_needed();
 
 private:
     static const size_t PDFB_BUFFER_SIZE = width * (height / 8);

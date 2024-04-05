@@ -27,6 +27,7 @@ Console::Console(const font_definition_t * f, PlasmaDisplayFramebuffer * fb) {
     cursor_enable = true;
     cursor_state = false;
     hQueue = xQueueCreate(10, sizeof(char *));
+    active = true;
 
     ESP_LOGV(LOG_TAG, "Creating task");
     if(xTaskCreate(
@@ -52,28 +53,30 @@ void Console::task() {
     char * next_line = nullptr;
     if(xQueueReceive(hQueue, &next_line, pdMS_TO_TICKS( 500 )) == pdTRUE) {
         // Output next line
-        if(cursor_enable && cursor_state) {
-            disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
-        }
-        for(int i = 0; i < strlen(next_line); i++) {
-            char ch = next_line[i];
+        if(active) {
+            if(cursor_enable && cursor_state) {
+                disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+            }
+            for(int i = 0; i < strlen(next_line); i++) {
+                char ch = next_line[i];
 
-            switch(ch) {
-                case '\n':
-                    cursor_newline();
-                case '\r':
-                    cursor_x = 0;
-                    break;
-
-                // TODO: tabs etc
-                default:
-                    if(cursor_x + font->width > disp->width) {
+                switch(ch) {
+                    case '\n':
                         cursor_newline();
+                    case '\r':
                         cursor_x = 0;
-                    }
-                    disp->put_glyph(font, ch, cursor_x, cursor_y);
-                    cursor_x += font->width;
-                    break;
+                        break;
+
+                    // TODO: tabs etc
+                    default:
+                        if(cursor_x + font->width > disp->width) {
+                            cursor_newline();
+                            cursor_x = 0;
+                        }
+                        disp->put_glyph(font, ch, cursor_x, cursor_y);
+                        cursor_x += font->width;
+                        break;
+                }
             }
         }
         free(next_line);
@@ -81,7 +84,7 @@ void Console::task() {
         cursor_state = false;
     }
 
-    if(cursor_enable) {
+    if(cursor_enable && active) {
         cursor_state = !cursor_state;
         disp->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
     }
@@ -142,4 +145,8 @@ void Console::write(char ch) {
 
 void Console::set_font(const font_definition_t* f) {
     font = f;
+}
+
+void Console::set_active(bool act) {
+    active = act;
 }
