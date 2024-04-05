@@ -1,4 +1,5 @@
 #include <network/otafvu.h>
+#include <service/power_management.h>
 #include <utils.h>
 #include <fonts.h>
 
@@ -60,6 +61,9 @@ void OTAFVUManager::get_ready() {
     ESP_LOGI(LOG_TAG, "Get ready");
     con->set_active(true);
     con->print("Start OTAFVU");
+
+    // Keep display on when updating
+    power_mgmt_pause();
 }
 
 void OTAFVUManager::shut_up_and_explode() {

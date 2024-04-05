@@ -8,6 +8,7 @@
 #include <sensor/sensors.h>
 #include <network/netmgr.h>
 #include <network/otafvu.h>
+#include <service/power_management.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -47,7 +48,8 @@ void setup() {
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     
-    con->print("SAS-DOS v1.0\n");
+    // Plasma Information System DOS
+    con->print("PIS-DOS v1.0\n");
     delay(1000);
  
     beep(2000, 125);
@@ -98,6 +100,7 @@ void setup() {
         con->print("H sensor OK");
     }
 
+    power_mgmt_start(sensors, &plasma);
    // vTaskDelete(NULL); // Get rid of setup() and loop() task
 }
 
