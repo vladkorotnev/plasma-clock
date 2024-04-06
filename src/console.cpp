@@ -133,14 +133,14 @@ void Console::print(const char * text, ...) {
 
     ESP_LOGV(LOG_TAG, "%s", &szBuff[1]);
 
-    xQueueSend(hQueue, (void*) &szBuff, portMAX_DELAY);
+    xQueueSend(hQueue, (void*) &szBuff, pdMS_TO_TICKS(1000));
 }
 
 void Console::write(char ch) {
     char * msg = (char*) malloc(2);
     msg[0] = ch;
     msg[1] = 0x0;
-    xQueueSend(hQueue, (void*) &msg, portMAX_DELAY);
+    xQueueSend(hQueue, (void*) &msg, pdMS_TO_TICKS(1000));
 }
 
 void Console::set_font(const font_definition_t* f) {

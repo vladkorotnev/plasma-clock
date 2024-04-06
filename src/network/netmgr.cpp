@@ -96,8 +96,8 @@ bool NetworkManager::is_up() {
         || (WiFi.getMode() == WIFI_AP && (WiFi.getStatusBits() & AP_STARTED_BIT != 0));
 }
 
-const char * NetworkManager::current_ip() {
-    return WiFi.localIP().toString().c_str();
+String NetworkManager::current_ip() {
+    return WiFi.localIP().toString();
 }
 
 void NetworkManager::ap_fallback() {

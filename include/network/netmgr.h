@@ -11,7 +11,7 @@ public:
     static void startup();
     static bool is_up();
 
-    static const char * current_ip();
+    static String current_ip();
     static const char * network_name();
 
     static void connect(const char *, const char *);

@@ -8,8 +8,9 @@
 
 static const int EASING_CURVE[32] = { 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-SimpleClock::SimpleClock(PlasmaDisplayFramebuffer * fb) {
+SimpleClock::SimpleClock(PlasmaDisplayFramebuffer * fb, Beeper * bp) {
     framebuffer = fb;
+    beeper = bp;
     font = &xnu_font;
 }
 
@@ -89,10 +90,10 @@ void SimpleClock::render() {
 
     phase = EASING_CURVE[phase];
 
-    if(phase == 16) {
-        ledcWriteTone(0, 100);
-    } else if (phase == 0) {
-        ledcWrite(0, 0);
+    if(phase == 13) {
+        beeper->start_tone(CHANNEL_AMBIANCE, 100);
+    } else if (phase == 15) {
+        beeper->stop_tone(CHANNEL_AMBIANCE);
     }
 
     draw_dropping_number(now.hour, next_time.hour, phase, left_offset);

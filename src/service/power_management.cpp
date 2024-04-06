@@ -10,6 +10,7 @@ static bool isDisplayOff;
 
 static SensorPool * sensors;
 static PlasmaDisplayIface * display;
+static Beeper * beeper;
 
 static int lastLightness;
 static bool isBright;
@@ -22,9 +23,13 @@ void PMTaskFunction( void * pvParameter )
 
     lastMotionTime = xTaskGetTickCount();
     isBright = true;
+    isDisplayOff = false;
+    isHvOff = false;
+    static TickType_t now;
+
 
     while(1) {
-        static TickType_t now = xTaskGetTickCount();
+        now = xTaskGetTickCount();
         // Adjust dimmer according to ambient light
         sensor_info_t * light_info = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
         if(light_info != nullptr) {
@@ -51,6 +56,7 @@ void PMTaskFunction( void * pvParameter )
                 if(isDisplayOff) {
                     ESP_LOGI(LOG_TAG, "Start display");
                     display->set_show(true);
+                    beeper->set_channel_state(CHANNEL_AMBIANCE, true);
                     isDisplayOff = false;
                 }
 
@@ -70,6 +76,7 @@ void PMTaskFunction( void * pvParameter )
                 // No motion for a while, turn off display, first only logically
                 ESP_LOGI(LOG_TAG, "Stop display");
                 display->set_show(false);
+                beeper->set_channel_state(CHANNEL_AMBIANCE, false);
                 isDisplayOff = true;
               } 
 
@@ -86,9 +93,10 @@ void PMTaskFunction( void * pvParameter )
     }
 }
 
-void power_mgmt_start(SensorPool * s, PlasmaDisplayIface * d) {
+void power_mgmt_start(SensorPool * s, PlasmaDisplayIface * d, Beeper * b) {
     sensors = s;
     display = d;
+    beeper = b;
     ESP_LOGV(LOG_TAG, "Creating task");
     if(xTaskCreate(
         PMTaskFunction,
@@ -109,6 +117,7 @@ void power_mgmt_pause() {
     display->set_power(true);
     display->set_bright(true);
     display->set_show(true);
+    beeper->set_channel_state(CHANNEL_AMBIANCE, true);
 }
 
 void power_mgmt_resume() {
@@ -118,4 +127,5 @@ void power_mgmt_resume() {
     display->set_power(!isHvOff);
     display->set_bright(!isBright);
     display->set_show(!isDisplayOff);
+    beeper->set_channel_state(CHANNEL_AMBIANCE, !isDisplayOff);
 }

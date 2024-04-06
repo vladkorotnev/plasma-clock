@@ -1,4 +1,6 @@
 #include <network/otafvu.h>
+#include <sound/melodies.h>
+#include <fonts.h>
 #include <service/power_management.h>
 #include <utils.h>
 #include <fonts.h>
@@ -17,9 +19,10 @@ void OtaFvuTaskFunction( void * pvParameter )
     }
 }
 
-OTAFVUManager::OTAFVUManager(Console* c) {
+OTAFVUManager::OTAFVUManager(Console* c, BeepSequencer*s) {
     ESP_LOGI(LOG_TAG, "Initializing");
     con = c;
+    seq = s;
 
     ArduinoOTA.setHostname((String("plasma-") + getChipId()).c_str());
 #ifndef OTAFVU_PORT
@@ -59,16 +62,27 @@ void OTAFVUManager::task() {
 
 void OTAFVUManager::get_ready() {
     ESP_LOGI(LOG_TAG, "Get ready");
+    set_suspend_all_drawing(true);
+
+    con->set_cursor(false);
     con->set_active(true);
-    con->print("Start OTAFVU");
+    con->print("OTA FVU RECV\n");
+    con->set_font(&one_pixel_bar_font);
+    con->write('|');
 
     // Keep display on when updating
     power_mgmt_pause();
+
+    seq->play_sequence(tulula_fvu, CHANNEL_SYSTEM, 0);
 }
 
 void OTAFVUManager::shut_up_and_explode() {
     ESP_LOGI(LOG_TAG, "Shut up and explode!");
+    con->set_font(&keyrus0816_font);
+    con->clear();
     con->print("OTAFVU Done!");
+    seq->play_sequence(oelutz_fvu, CHANNEL_SYSTEM, 0);
+    seq->wait_end_play();
     ESP.restart();
 }
 
@@ -95,8 +109,11 @@ void OTAFVUManager::on_error(ota_error_t error) {
 }
 
 void OTAFVUManager::on_progress(unsigned int progress, unsigned int total) {
+    static int lastPercent = 0;
     unsigned int percent =  (progress / (total / 100));
     ESP_LOGV(LOG_TAG, "Recv: %u%% [%u / %u]", percent, progress, total);
-    con->clear();
-    con->print("Recv: %u%%", percent);
+    while(lastPercent < percent) {
+        con->write('|');
+        lastPercent++;
+    }
 }

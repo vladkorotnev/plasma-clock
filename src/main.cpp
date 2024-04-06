@@ -6,13 +6,21 @@
 #include "hw_config.h"
 #include <AM232X.h>
 #include <sensor/sensors.h>
+#include <sound/sequencer.h>
+#include <sound/melodies.h>
 #include <network/netmgr.h>
 #include <network/otafvu.h>
 #include <service/power_management.h>
 #include <service/time.h>
 #include <views/simple_clock.h>
+#include <utils.h>
 
 static char LOG_TAG[] = "APL_MAIN";
+
+static bool drawing_suspended = false;
+void set_suspend_all_drawing(bool sus) {
+    drawing_suspended = sus;
+}
 
 static PlasmaDisplayIface plasma(
     HWCONF_PLASMA_DATABUS_GPIOS,
@@ -27,24 +35,17 @@ static PlasmaDisplayFramebuffer * fb;
 static Console * con;
 static SensorPool * sensors;
 static OTAFVUManager * ota;
-
+static Beeper * beepola;
+static BeepSequencer * bs;
 static SimpleClock * clockView;
 
-void beep(int f, int t) {
-    ledcWriteTone(0, f);
-    delay(t);
-    ledcWrite(0, 0);
-}
-
 void setup() {
-    ledcSetup(0, 2000, 8);
-    ledcAttachPin(HWCONF_BEEPER_GPIO, 0);
-
     // Set up serial for logs
     Serial.begin(115200);
     plasma.reset();
 
     plasma.set_power(true);
+    delay(500);
     plasma.set_show(true);
     plasma.set_bright(true);
 
@@ -56,14 +57,15 @@ void setup() {
     con->print("PIS-DOS v1.0\n");
     delay(1000);
  
-    beep(2000, 125);
-    beep(1000, 125);
+    beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
+    bs = new BeepSequencer(beepola);
+    bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, 0);
 
     con->clear();
     con->set_font(&sg8bit_font);
     con->set_cursor(true);
 
-    con->print("WiFi init.");
+    con->print("WiFi init");
     NetworkManager::startup();
     while(!NetworkManager::is_up()) {
         delay(1000);
@@ -74,10 +76,10 @@ void setup() {
     con->print("Network:");
     con->print(NetworkManager::network_name());
     delay(2000);
-    con->print(NetworkManager::current_ip());
+    con->print(NetworkManager::current_ip().c_str());
     delay(2000);
 
-    ota = new OTAFVUManager(con);
+    ota = new OTAFVUManager(con, bs);
 
     sensors = new SensorPool();
 
@@ -92,29 +94,32 @@ void setup() {
 
     if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("T sens err");
-        beep(500, 125);
+        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     } else {
         con->print("T sensor OK");
     }
     delay(3000);
     if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("H sens err");
-        beep(500, 125);
+        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     } else {
         con->print("H sensor OK");
     }
 
-    clockView = new SimpleClock(fb);
+    clockView = new SimpleClock(fb, beepola);
 
     // Finish all preparations, clear the screen and disable console
     con->set_active(false);
     fb->clear();
     timekeeping_begin();
-    power_mgmt_start(sensors, &plasma);
-   // vTaskDelete(NULL); // Get rid of setup() and loop() task
+    power_mgmt_start(sensors, &plasma, beepola);
 }
 
 void loop() {
+    if(drawing_suspended) {
+        fb->wait_next_frame();
+        return;
+    }
+
     clockView->render();
-    fb->wait_next_frame();
 }

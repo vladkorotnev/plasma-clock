@@ -76,6 +76,7 @@ void PlasmaDisplayFramebuffer::setup_task() {
 }
 
 void PlasmaDisplayFramebuffer::wait_next_frame() {
+    xEventGroupClearBits(vsync_group, EVT_BIT_ENDED_DRAWING);
     xEventGroupWaitBits(vsync_group, EVT_BIT_ENDED_DRAWING, false, true, portMAX_DELAY);
 }
 
@@ -91,7 +92,6 @@ void PlasmaDisplayFramebuffer::clear() {
 void PlasmaDisplayFramebuffer::write_all() {
     LOCK_BUFFER_OR_DIE;
 
-    xEventGroupClearBits(vsync_group, EVT_BIT_ENDED_DRAWING);
     for(int i = 0; i < PDFB_BUFFER_SIZE; i++) {
         display->write_stride(buffer[i]);
     }

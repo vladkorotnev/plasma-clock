@@ -23,14 +23,13 @@ const gpio_num_t HWCONF_PLASMA_SHOW_GPIO = GPIO_NUM_23;
 // ---- Connection to HV Board ----
 const gpio_num_t HWCONF_PLASMA_HV_EN_GPIO = GPIO_NUM_13;
 
-// ---- Connection to LV Board (or beeper directly) ----
+// ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_12;
+const uint8_t HWCONF_BEEPER_PWM_CHANNEL = 0;
 
 // ---- Connection & setting of EYE BOARD ----
 const gpio_num_t HWCONF_MOTION_GPIO = GPIO_NUM_14;
 const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_35;
-const unsigned int HWCONF_LIGHTSENSE_MINIMUM = 0;
-const unsigned int HWCONF_LIGHTSENSE_MAXIMUM = 4096;
 
 // ---- Connection of NOSE BOARD ----
 const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
