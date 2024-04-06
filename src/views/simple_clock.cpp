@@ -8,10 +8,15 @@
 
 static const int EASING_CURVE[32] = { 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-SimpleClock::SimpleClock(PlasmaDisplayFramebuffer * fb, Beeper * bp) {
+SimpleClock::SimpleClock(FantaManipulator * fb, Beeper * bp) {
     framebuffer = fb;
     beeper = bp;
     font = &xnu_font;
+
+    int char_count = 8; // XX:XX:XX
+    int text_width = char_count * font->width;
+    int left_offset = fb->get_width() / 2 - text_width / 2;
+    framebuffer = fb->slice(left_offset, text_width);
 }
 
 void itoa_padded(int i, char * a) {
@@ -56,10 +61,7 @@ void SimpleClock::draw_dropping_number(int current, int next, int phase, int lef
 
 
 void SimpleClock::render() {
-    int char_count = 8; // XX:XX:XX
-    int text_width = char_count * font->width;
-
-    int left_offset = framebuffer->width / 2 - text_width / 2;
+    int left_offset = 0;
 
     tk_time_of_day_t now = get_current_time_precise();
     

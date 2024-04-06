@@ -38,3 +38,16 @@ tk_time_of_day_t get_current_time_precise() {
 
     return time;
 }
+
+tk_date_t get_current_date() {
+    time_t now;
+    struct tm timeinfo;
+    time(&now);
+    localtime_r(&now, &timeinfo);
+    return tk_date_t {
+        .year = timeinfo.tm_year,
+        .month = timeinfo.tm_mon,
+        .day = timeinfo.tm_mday,
+        .dayOfWeek = timeinfo.tm_wday
+    };
+}

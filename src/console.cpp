@@ -51,18 +51,21 @@ Console::~Console() {
 
 void Console::task() {
     char * next_line = nullptr;
+    
     if(xQueueReceive(hQueue, &next_line, pdMS_TO_TICKS( 500 )) == pdTRUE) {
         // Output next line
         if(active) {
+            FantaManipulator * m = disp->manipulate();
+
             if(cursor_enable && cursor_state) {
-                disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+                m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
             }
             for(int i = 0; i < strlen(next_line); i++) {
                 char ch = next_line[i];
 
                 switch(ch) {
                     case '\n':
-                        cursor_newline();
+                        cursor_newline(m);
                     case '\r':
                         cursor_x = 0;
                         break;
@@ -70,10 +73,10 @@ void Console::task() {
                     // TODO: tabs etc
                     default:
                         if(cursor_x + font->width > disp->width) {
-                            cursor_newline();
+                            cursor_newline(m);
                             cursor_x = 0;
                         }
-                        disp->put_glyph(font, ch, cursor_x, cursor_y);
+                        m->put_glyph(font, ch, cursor_x, cursor_y);
                         cursor_x += font->width;
                         break;
                 }
@@ -86,7 +89,8 @@ void Console::task() {
 
     if(cursor_enable && active) {
         cursor_state = !cursor_state;
-        disp->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
+        FantaManipulator * m = disp->manipulate();
+        m->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
     }
 }
 
@@ -99,17 +103,23 @@ void Console::clear() {
 void Console::set_cursor(bool enable) {
     if(enable && !cursor_enable) {
         cursor_state = true;
-        disp->put_glyph(font, font->cursor_character, cursor_x, cursor_y);
+        if(active) {
+            FantaManipulator * m = disp->manipulate();
+            m->put_glyph(font, font->cursor_character, cursor_x, cursor_y);
+        }
     } else if(!enable && cursor_enable) {
-        disp->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+        if(active) {
+            FantaManipulator * m = disp->manipulate();
+            m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+        }
     }
     cursor_enable = enable;
 }
 
-void Console::cursor_newline() {
+void Console::cursor_newline(FantaManipulator * m) {
     if(cursor_y + font->height * 2 > disp->height) {
         // Next line won't fit, so scroll current content above and keep Y same
-        disp->scroll(0, -font->height);
+        m->scroll(0, -font->height);
     } else {
         cursor_y += font->height;
     }
@@ -149,4 +159,11 @@ void Console::set_font(const font_definition_t* f) {
 
 void Console::set_active(bool act) {
     active = act;
+}
+
+void Console::flush() {
+    char * next_line = nullptr;
+    while(xQueuePeek(hQueue, &next_line, 0)) {
+        vTaskDelay(100);
+    }
 }

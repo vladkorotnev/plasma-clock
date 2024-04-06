@@ -35,7 +35,6 @@ void Beeper::start_tone(beeper_channel_t ch, uint freq) {
 
 void Beeper::stop_tone(beeper_channel_t ch) {
     if(active_channel != ch) return;
-    
     ledcWrite(pwm_channel, 0);
     active_channel = -1;
 }

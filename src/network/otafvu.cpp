@@ -64,9 +64,11 @@ void OTAFVUManager::get_ready() {
     ESP_LOGI(LOG_TAG, "Get ready");
     set_suspend_all_drawing(true);
 
-    con->set_cursor(false);
     con->set_active(true);
+    con->clear();
     con->print("OTA FVU RECV\n");
+    con->flush();
+    con->set_cursor(false);
     con->set_font(&one_pixel_bar_font);
     con->write('|');
 

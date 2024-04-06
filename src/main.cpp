@@ -106,9 +106,10 @@ void setup() {
         con->print("H sensor OK");
     }
 
-    clockView = new SimpleClock(fb, beepola);
+    clockView = new SimpleClock(fb->manipulate(), beepola);
 
     // Finish all preparations, clear the screen and disable console
+
     con->set_active(false);
     fb->clear();
     timekeeping_begin();
@@ -117,7 +118,6 @@ void setup() {
 
 void loop() {
     if(drawing_suspended) {
-        fb->wait_next_frame();
         return;
     }
 

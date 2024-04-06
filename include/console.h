@@ -16,6 +16,8 @@ public:
     void set_cursor(bool);
     void set_font(const font_definition_t*);
 
+    void flush();
+
     void task();
 
 private:
@@ -28,5 +30,5 @@ private:
     volatile bool cursor_state;
     bool active;
 
-    void cursor_newline();
+    void cursor_newline(FantaManipulator*);
 };

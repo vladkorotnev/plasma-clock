@@ -1,6 +1,7 @@
 #include <plasma/framebuffer.h>
 #include <string.h>
 #include <Arduino.h>
+#include <freertos/task.h>
 
 static const int DESIRED_FPS = 63;
 
@@ -16,6 +17,8 @@ PlasmaDisplayFramebuffer::PlasmaDisplayFramebuffer(PlasmaDisplayIface * disp) {
     buffer_semaphore = xSemaphoreCreateBinary();
     vsync_group = xEventGroupCreate();
     xSemaphoreGive(buffer_semaphore);
+    is_dirty = false;
+    shared_manipulator = new FantaManipulator(buffer, PDFB_BUFFER_SIZE, width, buffer_semaphore, &is_dirty);
     setup_task();
     clear();
 }
@@ -81,109 +84,24 @@ void PlasmaDisplayFramebuffer::wait_next_frame() {
 }
 
 void PlasmaDisplayFramebuffer::clear() {
-    LOCK_BUFFER_OR_DIE;
-
-    memset(buffer, 0x0, PDFB_BUFFER_SIZE);
-    is_dirty = true;
-
-    UNLOCK_BUFFER;
+    shared_manipulator->clear();
 }
 
 void PlasmaDisplayFramebuffer::write_all() {
     LOCK_BUFFER_OR_DIE;
-
     for(int i = 0; i < PDFB_BUFFER_SIZE; i++) {
         display->write_stride(buffer[i]);
     }
     is_dirty = false;
-    xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);
-
     UNLOCK_BUFFER;
+    xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);
 }
 
 void PlasmaDisplayFramebuffer::write_all_if_needed() {
-    if(!is_dirty) return;
-    write_all();
+    if(is_dirty) write_all();
+    else xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);
 }
 
-void PlasmaDisplayFramebuffer::plot_pixel(int x, int y, bool state) {
-    if(x >= PDFB_BUFFER_SIZE / 2 || y >= 16) {
-        ESP_LOGE(LOG_TAG, "Position (X=%i, Y=%i) is out of bounds of the screen", x, y);
-        return;
-    }
-
-    size_t target_idx = x * 2;
-    if(y >= 8) {
-        target_idx += 1;
-        y -= 8;
-    }
-    uint8_t target_bitmask = 1 << y;
-
-    LOCK_BUFFER_OR_DIE;
-
-    if(state) {
-        buffer[target_idx] |= target_bitmask;
-    } else { 
-        buffer[target_idx] &= ~target_bitmask;
-    }
-
-    is_dirty = true;
-
-    UNLOCK_BUFFER;
-}
-
-void PlasmaDisplayFramebuffer::put_sprite(const sprite_t * sprite, int x, int y) {    
-    LOCK_BUFFER_OR_DIE;
-
-    uint8_t * fanta = sprite_to_fanta(sprite);
-
-    uint16_t fanta_column_mask = 0x0;
-    for(int i = y; i < y + sprite->height; i++) {
-        if(i < 0) continue;
-        if(i > 16) break;
-        fanta_column_mask |= (1 << i);
-    }
-
-    fanta_offset_y(fanta, y, sprite->width);
-
-    size_t target_idx = x * 2;
-    uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
-
-    for(int i = 0; i < sprite->width*2; i++) {
-        if(target_idx + i > PDFB_BUFFER_SIZE - 1) break;
-        uint8_t current_mask = mask_data[i % 2];
-
-        buffer[target_idx + i] = fanta[i] | (buffer[target_idx + i] & ~current_mask);
-    }
-
-    free(fanta);
-
-    is_dirty = true;
-
-    UNLOCK_BUFFER;
-}
-
-void PlasmaDisplayFramebuffer::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y) {
-    sprite_t char_sprite = sprite_from_glyph(font, glyph);
-    put_sprite(&char_sprite, x, y);
-}
-
-void PlasmaDisplayFramebuffer::scroll(int dx, int dy) {
-    LOCK_BUFFER_OR_DIE;
-
-    if(dy != 0) {
-        fanta_offset_y(buffer, dy, width);
-    }
-
-    if(dx > 0) {
-        size_t dst_index = dx * 2;
-        memcpy(&buffer[dst_index], buffer, PDFB_BUFFER_SIZE - dst_index);
-        memset(buffer, 0, dst_index);
-    } else if (dx < 0) {
-        size_t src_index = abs(dx) * 2;
-        memcpy(buffer, &buffer[src_index], PDFB_BUFFER_SIZE - src_index);
-        memset(&buffer[src_index], 0, PDFB_BUFFER_SIZE - src_index);
-    }
-
-    UNLOCK_BUFFER;
+FantaManipulator* PlasmaDisplayFramebuffer::manipulate() {
+    return shared_manipulator;
 }
