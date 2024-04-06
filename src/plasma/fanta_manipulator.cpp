@@ -107,6 +107,16 @@ void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned 
     put_sprite(&char_sprite, x, y);
 }
 
+void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y) {
+    size_t i = 0;
+    int cur_x = x;
+    while(char ch = string[i]) {
+        put_glyph(font, ch, cur_x, y);
+        cur_x += font->width;
+        i++;
+    }
+}
+
 void FantaManipulator::scroll(int dx, int dy) {
     LOCK_BUFFER_OR_DIE;
 

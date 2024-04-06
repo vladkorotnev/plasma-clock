@@ -12,6 +12,7 @@
 #include <network/otafvu.h>
 #include <service/power_management.h>
 #include <service/time.h>
+#include <service/owm/weather.h>
 #include <views/simple_clock.h>
 #include <utils.h>
 
@@ -113,6 +114,7 @@ void setup() {
     con->set_active(false);
     fb->clear();
     timekeeping_begin();
+    weather_start(WEATHER_API_KEY, pdMS_TO_TICKS(60 * 60000), WEATHER_LAT, WEATHER_LON);
     power_mgmt_start(sensors, &plasma, beepola);
 }
 
@@ -122,4 +124,11 @@ void loop() {
     }
 
     clockView->render();
+
+    current_weather_t weather;
+    if(weather_get_current(&weather)) {
+        char buf[12];
+        snprintf(buf, 12, "%.0fºC", kelvin_to(weather.temperature_kelvin, CELSIUS));
+        fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 0);
+    }
 }

@@ -15,7 +15,7 @@ SimpleClock::SimpleClock(FantaManipulator * fb, Beeper * bp) {
 
     int char_count = 8; // XX:XX:XX
     int text_width = char_count * font->width;
-    int left_offset = fb->get_width() / 2 - text_width / 2;
+    int left_offset = fb->get_width() - text_width;// / 2 - text_width / 2;
     framebuffer = fb->slice(left_offset, text_width);
 }
 

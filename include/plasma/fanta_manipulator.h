@@ -15,6 +15,7 @@ public:
     void plot_pixel(int x, int y, bool state);
     void put_sprite(const sprite_t*, int x, int y);
     void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y);
+    void put_string(const font_definition_t *, const char *, int x, int y);
     void scroll(int dx, int dy);
 
     int get_width();
