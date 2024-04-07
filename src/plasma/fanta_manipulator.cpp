@@ -22,6 +22,14 @@ FantaManipulator::~FantaManipulator() {
     ESP_LOGI(LOG_TAG, "Release...");
 }
 
+bool FantaManipulator::lock(TickType_t timeout) {
+    return xSemaphoreTake(buffer_semaphore, timeout);
+}
+
+void FantaManipulator::unlock() {
+    xSemaphoreGive(buffer_semaphore);
+}
+
 FantaManipulator* FantaManipulator::slice(int x, int w) {
     if(x > buffer_size/2) {
         ESP_LOGE(LOG_TAG, "Position (X=%i) is out of bounds of the screen", x);
@@ -36,18 +44,13 @@ FantaManipulator* FantaManipulator::slice(int x, int w) {
 } 
 
 void FantaManipulator::clear() {
-    LOCK_BUFFER_OR_DIE;
-
     ESP_LOGV(LOG_TAG, "Clear");
     memset(buffer, 0x0, buffer_size);
     *dirty = true;
-
-    UNLOCK_BUFFER;
 }
 
 void FantaManipulator::plot_pixel(int x, int y, bool state) {
-    if(x > buffer_size/2 || y > 16) {
-        ESP_LOGE(LOG_TAG, "Position (X=%i, Y=%i) is out of bounds of the screen", x, y);
+    if(x < 0 || y < 0 || x > buffer_size/2 || y > 16) {
         return;
     }
 
@@ -58,8 +61,6 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
     }
     uint8_t target_bitmask = 1 << y;
 
-    LOCK_BUFFER_OR_DIE;
-
     if(state) {
         buffer[target_idx] |= target_bitmask;
     } else { 
@@ -67,8 +68,6 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
     }
 
     *dirty = true;
-
-    UNLOCK_BUFFER;
 }
 
 void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
@@ -87,8 +86,6 @@ void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
     size_t target_idx = x * 2;
     uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
 
-    LOCK_BUFFER_OR_DIE;
-
     for(int i = 0; i < sprite->width*2; i++) {
         if(target_idx + i > buffer_size - 1) break;
         uint8_t current_mask = mask_data[i % 2];
@@ -99,8 +96,6 @@ void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
     free(fanta);
 
     *dirty = true;
-
-    UNLOCK_BUFFER;
 }
 
 void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y) {
@@ -119,8 +114,6 @@ void FantaManipulator::put_string(const font_definition_t * font, const char * s
 }
 
 void FantaManipulator::scroll(int dx, int dy) {
-    LOCK_BUFFER_OR_DIE;
-
     if(dy != 0) {
         fanta_offset_y(buffer, dy, width);
     }
@@ -136,8 +129,6 @@ void FantaManipulator::scroll(int dx, int dy) {
     }
 
     *dirty = true;
-
-    UNLOCK_BUFFER;
 }
 
 int FantaManipulator::get_width() {

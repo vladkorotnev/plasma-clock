@@ -34,6 +34,7 @@ static PlasmaDisplayIface plasma(
 );
 
 static PlasmaDisplayFramebuffer * fb;
+static FantaManipulator * graph;
 static Console * con;
 static SensorPool * sensors;
 static OTAFVUManager * ota;
@@ -109,13 +110,17 @@ void setup() {
         con->print("H sensor OK");
     }
 
-    clockView = new SimpleClock(fb->manipulate(), beepola);
-    rain = new RainOverlay(fb->manipulate());
+    graph = fb->manipulate();
+
+    clockView = new SimpleClock(graph, beepola);
+    rain = new RainOverlay(graph);
 
     // Finish all preparations, clear the screen and disable console
 
     con->set_active(false);
     fb->clear();
+    rain->prepare();
+
     timekeeping_begin();
     weather_start(WEATHER_API_KEY, pdMS_TO_TICKS(60 * 60000), WEATHER_LAT, WEATHER_LON);
     power_mgmt_start(sensors, &plasma, beepola);
@@ -123,30 +128,45 @@ void setup() {
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 }
 
-void loop() {
-    if(drawing_suspended) {
-        return;
-    }
+static bool have_weather;
+static current_weather_t weather;
 
-    bool have_weather;
-    current_weather_t weather;
-
-    fb->wait_next_frame();
-    fb->clear();
-
+void draw_screen_locked() {
+    // The framebuffer is now locked -- do not do any processing here!! Only drawing calls!
+    graph->clear();
     clockView->render();
 
-    if(weather_get_current(&weather)) {
-        have_weather = true;
-    }
-
 #ifdef PDFB_PERF_LOGS
+    // FPS counter
     char buf[4];
     itoa(fb->get_fps(), buf, 10);
     fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
 #endif
 
+    // ---- OVERLAYS 
     // if(have_weather && weather.conditions == RAIN) {
         rain->render();
     // }
+}
+
+void processing() {
+    rain->step();
+    clockView->step();
+    if(weather_get_current(&weather)) {
+        have_weather = true;
+    }
+}
+
+void loop() {
+    if(drawing_suspended) {
+        return;
+    }
+
+    fb->wait_next_frame();
+    if(!graph->lock()) return;
+    draw_screen_locked();
+    graph->unlock();
+
+    // GRAPHICS ARE UNLOCKED --- DO ALL HEAVY LIFTING HERE INSTEAD
+    processing();
 }

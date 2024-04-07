@@ -1,5 +1,4 @@
 #include <views/simple_clock.h>
-#include <service/time.h>
 #include <fonts.h>
 #include <esp32-hal-ledc.h>
 
@@ -13,6 +12,10 @@ SimpleClock::SimpleClock(FantaManipulator * fb, Beeper * b) {
     beeper = b;
     font = &xnu_font;
     tick = false;
+    now = { 0 };
+    next_time = { 0 };
+    phase = 0;
+    separator = CLOCK_SEPARATOR;
 
     int char_count = 8; // XX:XX:XX
     int text_width = char_count * font->width;
@@ -20,16 +23,13 @@ SimpleClock::SimpleClock(FantaManipulator * fb, Beeper * b) {
     framebuffer = fb->slice(left_offset, text_width);
 }
 
-void itoa_padded(int i, char * a) {
-    itoa(i, a, 10);
-    if(i < 10) {
-        a[2] = 0;
-        a[1] = a[0];
-        a[0] = '0';
-    }
+inline void itoa_padded(uint i, char * a) {
+    a[0] = '0' + (i / 10);
+    a[1] = '0' + (i % 10);
+    a[2] = 0;
 }
 
-void SimpleClock::draw_dropping_digit(char current, char next, int phase, int left_offset) {
+inline void SimpleClock::draw_dropping_digit(char current, char next, int phase, int left_offset) {
     if(phase <= 0 || current == next) {
         framebuffer->put_glyph(font, current, left_offset, 0);
     } else if (phase >= 16) {
@@ -40,7 +40,7 @@ void SimpleClock::draw_dropping_digit(char current, char next, int phase, int le
     }
 }
 
-void SimpleClock::draw_dropping_number(int current, int next, int phase, int left_offset) {
+inline void SimpleClock::draw_dropping_number(int current, int next, int phase, int left_offset) {
     char buf[3];
     char buf_next[3];
     
@@ -60,13 +60,9 @@ void SimpleClock::draw_dropping_number(int current, int next, int phase, int lef
     }
 }
 
-
-void SimpleClock::render() {
-    int left_offset = 0;
-
-    tk_time_of_day_t now = get_current_time_precise();
-    
-    tk_time_of_day_t next_time = now;
+void SimpleClock::step() {
+    now = get_current_time_precise();
+    next_time = now;
     next_time.millisecond = 0;
     next_time.second += 1;
     if(next_time.second == 60) {
@@ -84,7 +80,8 @@ void SimpleClock::render() {
     int remain_ms = (1000 - now.millisecond);
     const int ms_per_step = 15;
     const int steps = 32;
-    int phase = 0;
+
+    phase = 0;
     char separator = (remain_ms < 490) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 
     if(remain_ms <= steps * ms_per_step) {
@@ -92,6 +89,10 @@ void SimpleClock::render() {
     }
 
     phase = EASING_CURVE[phase];
+}
+
+void SimpleClock::render() {
+    int left_offset = 0;
 
     if(phase == 0 && !tick) {
         beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);

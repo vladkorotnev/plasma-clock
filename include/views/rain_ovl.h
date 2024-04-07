@@ -1,5 +1,6 @@
 #pragma once
 #include <plasma/fanta_manipulator.h>
+#include "view.h"
 
 typedef struct __attribute__((__packed__)) rain_particle {
     uint8_t x;
@@ -12,10 +13,11 @@ typedef struct __attribute__((__packed__)) rain_particle {
 // - wind=0 g=1 i=10 sd=1: rain
 // - wind=-1 g=1 i=6 sd=3: snow
 
-class RainOverlay {
+class RainOverlay: public Renderable {
 public:
     RainOverlay(FantaManipulator*);
     void render();
+    void step();
 
     void set_windspeed(int8_t);
     void set_gravity(uint8_t);

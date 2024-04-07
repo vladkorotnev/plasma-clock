@@ -57,29 +57,32 @@ void Console::task() {
         if(active) {
             FantaManipulator * m = disp->manipulate();
 
-            if(cursor_enable && cursor_state) {
-                m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
-            }
-            for(int i = 0; i < strlen(next_line); i++) {
-                char ch = next_line[i];
-
-                switch(ch) {
-                    case '\n':
-                        cursor_newline(m);
-                    case '\r':
-                        cursor_x = 0;
-                        break;
-
-                    // TODO: tabs etc
-                    default:
-                        if(cursor_x + font->width > disp->width) {
-                            cursor_newline(m);
-                            cursor_x = 0;
-                        }
-                        m->put_glyph(font, ch, cursor_x, cursor_y);
-                        cursor_x += font->width;
-                        break;
+            if(m->lock()) {
+                if(cursor_enable && cursor_state) {
+                    m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
                 }
+                for(int i = 0; i < strlen(next_line); i++) {
+                    char ch = next_line[i];
+
+                    switch(ch) {
+                        case '\n':
+                            cursor_newline(m);
+                        case '\r':
+                            cursor_x = 0;
+                            break;
+
+                        // TODO: tabs etc
+                        default:
+                            if(cursor_x + font->width > disp->width) {
+                                cursor_newline(m);
+                                cursor_x = 0;
+                            }
+                            m->put_glyph(font, ch, cursor_x, cursor_y);
+                            cursor_x += font->width;
+                            break;
+                    }
+                }
+                m->unlock();
             }
         }
         free(next_line);
@@ -90,7 +93,10 @@ void Console::task() {
     if(cursor_enable && active) {
         cursor_state = !cursor_state;
         FantaManipulator * m = disp->manipulate();
-        m->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
+        if(m->lock()) {
+            m->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
+            m->unlock();
+        }
     }
 }
 
@@ -105,12 +111,18 @@ void Console::set_cursor(bool enable) {
         cursor_state = true;
         if(active) {
             FantaManipulator * m = disp->manipulate();
-            m->put_glyph(font, font->cursor_character, cursor_x, cursor_y);
+            if(m->lock()) {
+                m->put_glyph(font, font->cursor_character, cursor_x, cursor_y);
+                m->unlock();
+            }
         }
     } else if(!enable && cursor_enable) {
         if(active) {
             FantaManipulator * m = disp->manipulate();
-            m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+            if(m->lock()) {
+                m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
+                m->unlock();
+            }
         }
     }
     cursor_enable = enable;

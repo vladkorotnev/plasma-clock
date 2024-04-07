@@ -30,20 +30,19 @@ void RainOverlay::set_speed_divisor(uint8_t d) {
     speed_divisor = d;
 }
 
-void RainOverlay::render() {
+void RainOverlay::step() {
     framecounter++;
-
-    for(int i = 0; i < intensity; i++) {
+    if(framecounter % speed_divisor == 0) {
+        for(int i = 0; i < intensity; i++) {
         rain_particle_t * p = &particles[i];
-
-        if(framecounter % speed_divisor == 0) {
             if(p->x == PARTICLE_INACTIVE) {
                 // (Re-)spawn a droplet on the top, but not right away
                 uint32_t rnd = esp_random();
                 if(rnd % 10 > 5) {
-                    rnd = esp_random();
+                    rnd >>= 4;
                     p->y = 0;
                     p->x = rnd % (framebuffer->get_width() + 1);
+                    rnd >>= 4;
                     int8_t ws_offset = windspeed > 0 ? ((int8_t)rnd) % 2 : 0;
                     p->vx = windspeed + ws_offset;
                     p->vy = gravity;
@@ -59,20 +58,21 @@ void RainOverlay::render() {
                     rnd = esp_random();
                     p->vy += ((int8_t) rnd) % 2;
                     p->vy += gravity;
+                    rnd >>= 4;
                 }
                 if(p->x % 6 == 0 && windspeed > 0) {
-                    rnd = esp_random();
                     p->vx += ((int8_t) rnd) % p->vx;
                 }
             }
         }
+    }
+}
 
-        if(p->x != PARTICLE_INACTIVE) {
-            framebuffer->plot_pixel(p->x, p->y, true);
-            if(p->y > 0 && p->x > 0) {
-                // Motion blur
-                framebuffer->plot_pixel(p->x - (p->vx > 0 ? 1 :  p->vx < 0 ? -1 : 0), p->y - 1, true);
-            } 
-        }
+void RainOverlay::render() {
+    for(int i = 0; i < intensity; i++) {
+        rain_particle_t * p = &particles[i];
+
+        framebuffer->plot_pixel(p->x, p->y, true);
+        framebuffer->plot_pixel(p->x - (p->vx > 0 ? 1 :  p->vx < 0 ? -1 : 0), p->y - 1, true);
     }
 }
