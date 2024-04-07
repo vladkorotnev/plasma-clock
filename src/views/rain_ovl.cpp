@@ -41,7 +41,7 @@ void RainOverlay::step() {
                 if(rnd % 10 > 5) {
                     rnd >>= 4;
                     p->y = 0;
-                    p->x = rnd % (framebuffer->get_width() + 1);
+                    p->x = rnd % (framebuffer->get_width() + (windspeed >= 0 ? 1 : framebuffer->get_width()/2));
                     rnd >>= 4;
                     int8_t ws_offset = windspeed > 0 ? ((int8_t)rnd) % 2 : 0;
                     p->vx = windspeed + ws_offset;

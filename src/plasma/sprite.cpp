@@ -19,7 +19,7 @@ fanta_buffer_t sprite_to_fanta(const sprite_t* sprite) {
     for(int i = 0; i < sprite->width; i++) {
         for(int j = std::min(sprite->height, (uint8_t) 16) - 1; j >= 0; j--) {
             columns[i] <<= 1;
-            columns[i] |= (sprite->data[j + i / 8] >> (7 - (i % 8)) & 1);
+            columns[i] |= (sprite->data[j*(std::max((sprite->width/8), 1)) + i / 8] >> (7 - (i % 8)) & 1);
         }
     }
 

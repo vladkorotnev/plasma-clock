@@ -52,14 +52,14 @@ static const uint8_t one_pixel_bar_data[] = {
     0b00000000,
     0b00000000,
     // bar, filled
-    0b10000000,
-    0b10000000,
-    0b10000000,
-    0b10000000,
-    0b10000000,
-    0b10000000,
-    0b10000000,
-    0b10000000,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
 };
 
 const font_definition_t one_pixel_bar_font = {

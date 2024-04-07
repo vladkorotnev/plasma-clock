@@ -15,6 +15,7 @@
 #include <service/owm/weather.h>
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
+#include <views/indoor_view.h>
 #include <utils.h>
 
 static char LOG_TAG[] = "APL_MAIN";
@@ -42,6 +43,7 @@ static Beeper * beepola;
 static BeepSequencer * bs;
 static SimpleClock * clockView;
 static RainOverlay * rain;
+static IndoorView * indoorView;
 
 void setup() {
     // Set up serial for logs
@@ -113,6 +115,7 @@ void setup() {
     graph = fb->manipulate();
 
     clockView = new SimpleClock(graph, beepola);
+    indoorView = new IndoorView(sensors, graph);
     rain = new RainOverlay(graph);
 
     // Finish all preparations, clear the screen and disable console
@@ -120,6 +123,11 @@ void setup() {
     con->set_active(false);
     fb->clear();
     rain->prepare();
+    indoorView->prepare();
+
+    rain->set_windspeed(-1);
+    rain->set_intensity(6);
+    rain->set_speed_divisor(3);
 
     timekeeping_begin();
     weather_start(WEATHER_API_KEY, pdMS_TO_TICKS(60 * 60000), WEATHER_LAT, WEATHER_LON);
@@ -135,13 +143,13 @@ void draw_screen_locked() {
     // The framebuffer is now locked -- do not do any processing here!! Only drawing calls!
     graph->clear();
     clockView->render();
-
-#ifdef PDFB_PERF_LOGS
-    // FPS counter
-    char buf[4];
-    itoa(fb->get_fps(), buf, 10);
-    fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
-#endif
+    //indoorView->render();
+// #ifdef PDFB_PERF_LOGS
+//     // FPS counter
+//     char buf[4];
+//     itoa(fb->get_fps(), buf, 10);
+//     fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
+// #endif
 
     // ---- OVERLAYS 
     // if(have_weather && weather.conditions == RAIN) {
@@ -152,6 +160,7 @@ void draw_screen_locked() {
 void processing() {
     rain->step();
     clockView->step();
+    indoorView->step();
     if(weather_get_current(&weather)) {
         have_weather = true;
     }
