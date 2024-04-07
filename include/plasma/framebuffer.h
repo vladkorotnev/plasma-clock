@@ -19,6 +19,10 @@ public:
 
     void wait_next_frame();
     void write_all_if_needed();
+    
+#ifdef PDFB_PERF_LOGS
+    unsigned int get_fps();
+#endif
 
     FantaManipulator * manipulate();
     FantaManipulator * manipulate_slice(int x, int width);

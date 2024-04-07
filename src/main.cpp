@@ -14,6 +14,7 @@
 #include <service/time.h>
 #include <service/owm/weather.h>
 #include <views/simple_clock.h>
+#include <views/rain_ovl.h>
 #include <utils.h>
 
 static char LOG_TAG[] = "APL_MAIN";
@@ -39,6 +40,7 @@ static OTAFVUManager * ota;
 static Beeper * beepola;
 static BeepSequencer * bs;
 static SimpleClock * clockView;
+static RainOverlay * rain;
 
 void setup() {
     // Set up serial for logs
@@ -107,7 +109,8 @@ void setup() {
         con->print("H sensor OK");
     }
 
-    clockView = new SimpleClock(fb->manipulate(), beepola);
+    clockView = new SimpleClock(fb->manipulate());
+    rain = new RainOverlay(fb->manipulate());
 
     // Finish all preparations, clear the screen and disable console
 
@@ -122,13 +125,23 @@ void loop() {
     if(drawing_suspended) {
         return;
     }
+    fb->wait_next_frame();
+    fb->clear();
 
     clockView->render();
 
     current_weather_t weather;
     if(weather_get_current(&weather)) {
         char buf[12];
-        snprintf(buf, 12, "%.0fºC", kelvin_to(weather.temperature_kelvin, CELSIUS));
+        snprintf(buf, 12, "%.1f C", kelvin_to(weather.temperature_kelvin, CELSIUS));
         fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 0);
     }
+
+#ifdef PDFB_PERF_LOGS
+    char buf[4];
+    itoa(fb->get_fps(), buf, 10);
+    fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
+#endif
+
+    rain->render();
 }

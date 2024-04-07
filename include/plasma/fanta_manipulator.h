@@ -6,7 +6,7 @@
 
 class FantaManipulator {
 public:
-    FantaManipulator(fanta_buffer_t, size_t, int width, SemaphoreHandle_t, bool* dirtyFlag);
+    FantaManipulator(fanta_buffer_t, size_t, int width, int height, SemaphoreHandle_t, bool* dirtyFlag);
     ~FantaManipulator();
 
     FantaManipulator* slice(int x, int width);
@@ -19,10 +19,12 @@ public:
     void scroll(int dx, int dy);
 
     int get_width();
+    int get_height();
 private:
     fanta_buffer_t buffer;
     size_t buffer_size;
     SemaphoreHandle_t buffer_semaphore;
     bool * dirty;
     int width;
+    int height;
 };

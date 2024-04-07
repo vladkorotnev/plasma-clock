@@ -8,11 +8,12 @@ static char LOG_TAG[] = "FMAN";
 #define LOCK_BUFFER_OR_DIE if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");return;}
 #define UNLOCK_BUFFER xSemaphoreGive(buffer_semaphore)
 
-FantaManipulator::FantaManipulator(fanta_buffer_t buf, size_t size, int w, SemaphoreHandle_t sema, bool* df) {
+FantaManipulator::FantaManipulator(fanta_buffer_t buf, size_t size, int w, int h, SemaphoreHandle_t sema, bool* df) {
     buffer = buf;
     buffer_size = size;
     buffer_semaphore = sema;
     width = w;
+    height = h;
     dirty = df;
     ESP_LOGI(LOG_TAG, "Create...");
 }
@@ -31,7 +32,7 @@ FantaManipulator* FantaManipulator::slice(int x, int w) {
         w = width - x;
     }
 
-    return new FantaManipulator(&buffer[x * 2], w * 2, w, buffer_semaphore, dirty);
+    return new FantaManipulator(&buffer[x * 2], w * 2, w, height, buffer_semaphore, dirty);
 } 
 
 void FantaManipulator::clear() {
@@ -141,4 +142,8 @@ void FantaManipulator::scroll(int dx, int dy) {
 
 int FantaManipulator::get_width() {
     return width;
+}
+
+int FantaManipulator::get_height() {
+    return height;
 }

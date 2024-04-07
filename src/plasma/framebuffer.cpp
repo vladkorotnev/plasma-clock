@@ -18,7 +18,7 @@ PlasmaDisplayFramebuffer::PlasmaDisplayFramebuffer(PlasmaDisplayIface * disp) {
     vsync_group = xEventGroupCreate();
     xSemaphoreGive(buffer_semaphore);
     is_dirty = false;
-    shared_manipulator = new FantaManipulator(buffer, PDFB_BUFFER_SIZE, width, buffer_semaphore, &is_dirty);
+    shared_manipulator = new FantaManipulator(buffer, PDFB_BUFFER_SIZE, width, height, buffer_semaphore, &is_dirty);
     setup_task();
     clear();
 }
@@ -32,15 +32,20 @@ PlasmaDisplayFramebuffer::~PlasmaDisplayFramebuffer() {
 
 extern "C" void FbTaskFunc( void * pvParameter );
 
+#ifdef PDFB_PERF_LOGS
+static TickType_t last_draw_at = 0;
+static TickType_t avg_frametime = 0;
+static uint16_t perf_counter = 0;
+
+unsigned int PlasmaDisplayFramebuffer::get_fps() {
+    return 1000/pdTICKS_TO_MS(avg_frametime);
+}
+#endif
+
 void FbTaskFunc( void * pvParameter )
 {
     ESP_LOGV(LOG_TAG, "Running task");
     PlasmaDisplayFramebuffer * fb = static_cast<PlasmaDisplayFramebuffer*> ( pvParameter );
-#ifdef PDFB_PERF_LOGS
-    static TickType_t last_draw_at = 0;
-    static TickType_t avg_frametime = 0;
-    static uint16_t perf_counter = 0;
-#endif
 
     while(1) {
         fb->write_all_if_needed();
