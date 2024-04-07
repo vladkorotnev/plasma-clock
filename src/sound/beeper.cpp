@@ -1,5 +1,7 @@
 #include <sound/beeper.h>
 
+static portMUX_TYPE _spinlock = portMUX_INITIALIZER_UNLOCKED;
+
 Beeper::Beeper(gpio_num_t pin, uint8_t ch) {
     pwm_channel = ch;
     channel_status = 0xFF;
@@ -40,7 +42,9 @@ void Beeper::stop_tone(beeper_channel_t ch) {
 }
 
 void Beeper::beep_blocking(beeper_channel_t ch, uint freq, uint len) {
+    taskENTER_CRITICAL(&_spinlock);
     start_tone(ch, freq);
-    vTaskDelay(pdMS_TO_TICKS(len));
+    delayMicroseconds(len * 1000);
     stop_tone(ch);
+    taskEXIT_CRITICAL(&_spinlock);
 }

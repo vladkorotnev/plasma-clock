@@ -159,6 +159,9 @@ void Console::set_font(const font_definition_t* f) {
 
 void Console::set_active(bool act) {
     active = act;
+    if(act) {
+        disp->wait_next_frame();
+    }
 }
 
 void Console::flush() {

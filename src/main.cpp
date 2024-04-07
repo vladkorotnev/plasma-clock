@@ -109,7 +109,7 @@ void setup() {
         con->print("H sensor OK");
     }
 
-    clockView = new SimpleClock(fb->manipulate());
+    clockView = new SimpleClock(fb->manipulate(), beepola);
     rain = new RainOverlay(fb->manipulate());
 
     // Finish all preparations, clear the screen and disable console
@@ -119,22 +119,25 @@ void setup() {
     timekeeping_begin();
     weather_start(WEATHER_API_KEY, pdMS_TO_TICKS(60 * 60000), WEATHER_LAT, WEATHER_LON);
     power_mgmt_start(sensors, &plasma, beepola);
+
+    vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 }
 
 void loop() {
     if(drawing_suspended) {
         return;
     }
+
+    bool have_weather;
+    current_weather_t weather;
+
     fb->wait_next_frame();
     fb->clear();
 
     clockView->render();
 
-    current_weather_t weather;
     if(weather_get_current(&weather)) {
-        char buf[12];
-        snprintf(buf, 12, "%.1f C", kelvin_to(weather.temperature_kelvin, CELSIUS));
-        fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 0);
+        have_weather = true;
     }
 
 #ifdef PDFB_PERF_LOGS
@@ -143,5 +146,7 @@ void loop() {
     fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
 #endif
 
-    rain->render();
+    // if(have_weather && weather.conditions == RAIN) {
+        rain->render();
+    // }
 }

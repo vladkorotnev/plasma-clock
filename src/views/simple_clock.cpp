@@ -8,13 +8,15 @@
 
 static const int EASING_CURVE[32] = { 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-SimpleClock::SimpleClock(FantaManipulator * fb) {
+SimpleClock::SimpleClock(FantaManipulator * fb, Beeper * b) {
     framebuffer = fb;
+    beeper = b;
     font = &xnu_font;
+    tick = false;
 
     int char_count = 8; // XX:XX:XX
     int text_width = char_count * font->width;
-    int left_offset = fb->get_width() - text_width;// / 2 - text_width / 2;
+    int left_offset = fb->get_width() / 2 - text_width / 2;
     framebuffer = fb->slice(left_offset, text_width);
 }
 
@@ -90,6 +92,13 @@ void SimpleClock::render() {
     }
 
     phase = EASING_CURVE[phase];
+
+    if(phase == 0 && !tick) {
+        beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
+        tick = true;
+    } else if (phase > 0 && tick) {
+        tick = false;
+    }
 
     draw_dropping_number(now.hour, next_time.hour, phase, left_offset);
     left_offset += 2 * font->width;
