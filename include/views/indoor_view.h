@@ -5,11 +5,10 @@
 
 class IndoorView: public Renderable {
 public:
-    IndoorView(SensorPool*, FantaManipulator*);
-    void render();
+    IndoorView(SensorPool*);
+    void render(FantaManipulator*);
 
 private:
     SensorPool * sensors;
-    FantaManipulator * fb;
     const font_definition_t * value_font;
 };

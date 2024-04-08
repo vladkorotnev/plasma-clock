@@ -16,9 +16,21 @@
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
 #include <views/indoor_view.h>
+#include <views/multiplexor.h>
+#include <views/compositor.h>
 #include <utils.h>
 
 static char LOG_TAG[] = "APL_MAIN";
+
+typedef enum MainViewId: uint16_t {
+    VIEW_CLOCK = 0,
+    VIEW_INDOOR_WEATHER,
+
+    VIEW_MAX
+} MainViewId_t;
+
+static MainViewId_t curScreen = VIEW_CLOCK;
+static TickType_t lastScreenSwitch = 0;
 
 static bool drawing_suspended = false;
 void set_suspend_all_drawing(bool sus) {
@@ -44,6 +56,7 @@ static BeepSequencer * bs;
 static SimpleClock * clockView;
 static RainOverlay * rain;
 static IndoorView * indoorView;
+static ViewMultiplexor * slideShow;
 
 void setup() {
     // Set up serial for logs
@@ -51,7 +64,7 @@ void setup() {
     plasma.reset();
 
     plasma.set_power(true);
-    delay(500);
+    delay(125);
     plasma.set_show(true);
     plasma.set_bright(true);
 
@@ -61,7 +74,7 @@ void setup() {
     
     // Plasma Information System DOS
     con->print("PIS-DOS v1.0\n");
-    delay(1000);
+    delay(500);
  
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
     bs = new BeepSequencer(beepola);
@@ -79,7 +92,6 @@ void setup() {
     }
 
     con->clear();
-    con->print("Network:");
     con->print(NetworkManager::network_name());
     delay(2000);
     con->print(NetworkManager::current_ip().c_str());
@@ -104,7 +116,7 @@ void setup() {
     } else {
         con->print("T sensor OK");
     }
-    delay(3000);
+    delay(1000);
     if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("H sens err");
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
@@ -114,68 +126,81 @@ void setup() {
 
     graph = fb->manipulate();
 
-    clockView = new SimpleClock(graph, beepola);
-    indoorView = new IndoorView(sensors, graph);
-    rain = new RainOverlay(graph);
-
-    // Finish all preparations, clear the screen and disable console
-
-    con->set_active(false);
-    fb->clear();
-    rain->prepare();
-    indoorView->prepare();
-
-    rain->set_windspeed(-1);
-    rain->set_intensity(6);
-    rain->set_speed_divisor(3);
-
     timekeeping_begin();
     weather_start(WEATHER_API_KEY, pdMS_TO_TICKS(60 * 60000), WEATHER_LAT, WEATHER_LON);
     power_mgmt_start(sensors, &plasma, beepola);
 
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
+
+    con->set_active(false);
+    fb->clear();
+
+    clockView = new SimpleClock(beepola);
+    indoorView = new IndoorView(sensors);
+    rain = new RainOverlay(graph->get_width(), graph->get_height());
+
+    slideShow = new ViewMultiplexor();
+
+    ViewCompositor * rainyClock = new ViewCompositor();
+    rainyClock->add_layer(clockView);
+    rainyClock->add_layer(rain);
+
+    slideShow->add_view(rainyClock, VIEW_CLOCK);
+    slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
+
+    rain->prepare();
+    rain->set_intensity(20);
 }
 
 static bool have_weather;
 static current_weather_t weather;
 
+void change_screen_if_needed() {
+    TickType_t now = xTaskGetTickCount();
+    if(now - lastScreenSwitch >= pdMS_TO_TICKS(5000)) {
+        curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
+        if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
+        slideShow->switch_to(curScreen);
+        lastScreenSwitch = now;
+    }
+}
+
 void draw_screen_locked() {
     // The framebuffer is now locked -- do not do any processing here!! Only drawing calls!
     graph->clear();
-    clockView->render();
-    //indoorView->render();
-// #ifdef PDFB_PERF_LOGS
-//     // FPS counter
-//     char buf[4];
-//     itoa(fb->get_fps(), buf, 10);
-//     fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
-// #endif
+    slideShow->render(graph);
+
+    if(sensors->get_info(SENSOR_ID_MOTION)->last_result > 0) {
+        graph->plot_pixel(0, 0, true);
+    }
 
     // ---- OVERLAYS 
     // if(have_weather && weather.conditions == RAIN) {
-        rain->render();
+        // rain->render(graph);
     // }
+
+#if defined(PDFB_PERF_LOGS) && defined(DRAW_FPS_COUNTER)
+    // FPS counter
+    char buf[4];
+    itoa(fb->get_fps(), buf, 10);
+    fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
+#endif
 }
 
 void processing() {
-    rain->step();
-    clockView->step();
-    indoorView->step();
+    slideShow->step();
     if(weather_get_current(&weather)) {
         have_weather = true;
     }
+
+    change_screen_if_needed();
 }
 
 void loop() {
-    if(drawing_suspended) {
-        return;
-    }
-
     fb->wait_next_frame();
-    if(!graph->lock()) return;
-    draw_screen_locked();
-    graph->unlock();
-
-    // GRAPHICS ARE UNLOCKED --- DO ALL HEAVY LIFTING HERE INSTEAD
+    if(!drawing_suspended && graph->lock()) {
+        draw_screen_locked();
+        graph->unlock();
+    }
     processing();
 }

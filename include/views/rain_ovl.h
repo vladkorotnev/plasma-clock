@@ -15,8 +15,8 @@ typedef struct __attribute__((__packed__)) rain_particle {
 
 class RainOverlay: public Renderable {
 public:
-    RainOverlay(FantaManipulator*);
-    void render();
+    RainOverlay(int width, int height);
+    void render(FantaManipulator*);
     void step();
 
     void set_windspeed(int8_t);
@@ -24,7 +24,6 @@ public:
     void set_intensity(uint8_t);
     void set_speed_divisor(uint8_t);
 private:
-    FantaManipulator * framebuffer;
     static const size_t PARTICLE_COUNT = 25;
     rain_particle_t particles[PARTICLE_COUNT];
     int8_t windspeed;
@@ -32,4 +31,6 @@ private:
     uint8_t intensity;
     uint8_t framecounter;
     uint8_t speed_divisor;
+    int width;
+    int height;
 };

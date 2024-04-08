@@ -6,13 +6,12 @@
 
 class SimpleClock: public Renderable {
 public:
-    SimpleClock(FantaManipulator*, Beeper*);
-    void render();
+    SimpleClock(Beeper*);
+    void render(FantaManipulator*);
     void step();
 private:
-    void draw_dropping_digit(char, char, int, int);
-    void draw_dropping_number(int, int, int, int);
-    FantaManipulator * framebuffer;
+    void draw_dropping_digit(FantaManipulator *, char, char, int, int);
+    void draw_dropping_number(FantaManipulator *, int, int, int, int);
     Beeper * beeper;
     const font_definition_t * font;
     bool tick;

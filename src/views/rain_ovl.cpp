@@ -3,12 +3,13 @@
 
 #define PARTICLE_INACTIVE 0xFF
 
-RainOverlay::RainOverlay(FantaManipulator* f) {
-    framebuffer = f;
+RainOverlay::RainOverlay(int w, int h) {
     windspeed = 0;
     gravity = 1;
     intensity = 10;
     speed_divisor = 1;
+    width = w;
+    height = h;
     memset(particles, PARTICLE_INACTIVE, PARTICLE_COUNT*sizeof(rain_particle_t));
 }
 
@@ -41,13 +42,13 @@ void RainOverlay::step() {
                 if(rnd % 10 > 5) {
                     rnd >>= 4;
                     p->y = 0;
-                    p->x = rnd % (framebuffer->get_width() + (windspeed >= 0 ? 1 : framebuffer->get_width()/2));
+                    p->x = rnd % (width + (windspeed >= 0 ? 1 :width/2));
                     rnd >>= 4;
                     int8_t ws_offset = windspeed > 0 ? ((int8_t)rnd) % 2 : 0;
                     p->vx = windspeed + ws_offset;
                     p->vy = gravity;
                 }
-            } else if (p->y > framebuffer->get_height() + 2) {
+            } else if (p->y > height + 2) {
                 p->x = PARTICLE_INACTIVE;
             } else {
                 // Advance the droplet            
@@ -68,7 +69,7 @@ void RainOverlay::step() {
     }
 }
 
-void RainOverlay::render() {
+void RainOverlay::render(FantaManipulator *framebuffer) {
     for(int i = 0; i < intensity; i++) {
         rain_particle_t * p = &particles[i];
 

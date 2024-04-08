@@ -11,13 +11,12 @@ static const sprite_t icon_home_1616 = {
     .data = icon_home_data
 };
 
-IndoorView::IndoorView(SensorPool *s, FantaManipulator *f) {
-    fb = f;
+IndoorView::IndoorView(SensorPool *s) {
     sensors = s;
     value_font = &keyrus0816_font;
 }
 
-void IndoorView::render() {
+void IndoorView::render(FantaManipulator *fb) {
     fb->put_sprite(&icon_home_1616, 0, 0);
 
     uint8_t hum_left_margin = 0;
