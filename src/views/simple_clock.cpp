@@ -7,10 +7,8 @@
 
 static const int EASING_CURVE[32] = { 0, 1, 1, 1, 1, 2, 2, 2, 3, 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 11, 12, 13, 14, 15, 16 };
 
-SimpleClock::SimpleClock(Beeper * b) {
-    beeper = b;
+SimpleClock::SimpleClock() {
     font = &xnu_font;
-    tick = false;
     now = { 0 };
     next_time = { 0 };
     phase = 0;
@@ -54,48 +52,68 @@ inline void SimpleClock::draw_dropping_number(FantaManipulator *fb, int current,
     }
 }
 
+void add_one_second(tk_time_of_day_t * time) {
+    time->millisecond = 0;
+    time->second += 1;
+    if(time->second == 60) {
+        time->second = 0;
+        time->minute += 1;
+    }
+    if(time->minute == 60) {
+        time->hour += 1;
+        time->minute = 0;
+    }
+    if(time->hour == 24) {
+        time->hour = 0;
+    }
+}
+
+void subtract_one_second(tk_time_of_day_t * time) {
+    if(time->second == 0) {
+        time->second = 59;
+        if(time->minute == 0) {
+            time->minute = 59;
+            if(time->hour == 0) {
+                time->hour = 23;
+            } else {
+                time->hour -= 1;
+            }
+        } else {
+            time->minute -= 1;
+        }
+    } else {
+        time->second -= 1;
+    }
+}
+
 void SimpleClock::step() {
     now = get_current_time_precise();
     next_time = now;
-    next_time.millisecond = 0;
-    next_time.second += 1;
-    if(next_time.second == 60) {
-        next_time.second = 0;
-        next_time.minute += 1;
-    }
-    if(next_time.minute == 60) {
-        next_time.hour += 1;
-        next_time.minute = 0;
-    }
-    if(next_time.hour == 24) {
-        next_time.hour = 0;
-    }
 
-    int remain_ms = (1000 - now.millisecond);
     const int ms_per_step = 15;
     const int steps = 32;
+    int remain_ms = (1000 - now.millisecond);
 
     phase = 0;
-    separator = (remain_ms < 490) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 
-    if(remain_ms <= steps * ms_per_step) {
-        phase = 32 - (remain_ms / ms_per_step);
+    // When animating precisely on-the-millisecond, the digit does an annoying blink of the last value sometimes
+    // So animate the first half in the "previous" second, and the second half in the "next" second
+    if(remain_ms < (steps/2) * ms_per_step) {
+        phase = (steps/2) - (remain_ms / ms_per_step);
+        add_one_second(&next_time);
+    } else if (now.millisecond < (steps/2) * ms_per_step) {
+        phase = (steps/2) + (now.millisecond / ms_per_step);
+        subtract_one_second(&now);
     }
-
     phase = EASING_CURVE[phase];
+
+    separator = (phase == 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 }
 
 void SimpleClock::render(FantaManipulator *framebuffer) {
     int char_count = 8; // XX:XX:XX
     int text_width = char_count * font->width;
     int left_offset = framebuffer->get_width() / 2 - text_width / 2;
-
-    if(phase == 0 && !tick) {
-        beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
-        tick = true;
-    } else if (phase > 0 && tick) {
-        tick = false;
-    }
 
     draw_dropping_number(framebuffer, now.hour, next_time.hour, phase, left_offset);
     left_offset += 2 * font->width;

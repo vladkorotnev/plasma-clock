@@ -2,6 +2,7 @@
 #include <sound/melodies.h>
 #include <fonts.h>
 #include <service/power_management.h>
+#include <state.h>
 #include <utils.h>
 #include <fonts.h>
 
@@ -62,7 +63,7 @@ void OTAFVUManager::task() {
 
 void OTAFVUManager::get_ready() {
     ESP_LOGI(LOG_TAG, "Get ready");
-    set_suspend_all_drawing(true);
+    change_state(STATE_OTAFVU);
 
     con->set_active(true);
     con->clear();

@@ -20,6 +20,7 @@ public:
 
     void clear();
     void plot_pixel(int x, int y, bool state);
+    void put_fanta(const fanta_buffer_t, int x, int y, int w, int h);
     void put_sprite(const sprite_t*, int x, int y);
     void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y);
     void put_string(const font_definition_t *, const char *, int x, int y);
@@ -27,6 +28,7 @@ public:
 
     int get_width();
     int get_height();
+    const fanta_buffer_t get_fanta();
 private:
     fanta_buffer_t buffer;
     size_t buffer_size;

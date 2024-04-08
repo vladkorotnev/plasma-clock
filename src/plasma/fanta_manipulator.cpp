@@ -15,11 +15,9 @@ FantaManipulator::FantaManipulator(fanta_buffer_t buf, size_t size, int w, int h
     width = w;
     height = h;
     dirty = df;
-    ESP_LOGI(LOG_TAG, "Create...");
 }
 
 FantaManipulator::~FantaManipulator() {
-    ESP_LOGI(LOG_TAG, "Release...");
 }
 
 bool FantaManipulator::lock(TickType_t timeout) {
@@ -44,7 +42,6 @@ FantaManipulator* FantaManipulator::slice(int x, int w) {
 } 
 
 void FantaManipulator::clear() {
-    ESP_LOGV(LOG_TAG, "Clear");
     memset(buffer, 0x0, buffer_size);
     *dirty = true;
 }
@@ -70,32 +67,36 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
     *dirty = true;
 }
 
-void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
-
-    fanta_buffer_t fanta = sprite_to_fanta(sprite);
-
+void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h) {
+    if(w <= 0 || h <= 0) return;
+    
     uint16_t fanta_column_mask = 0x0;
-    for(int i = y; i < y + sprite->height; i++) {
+    for(int i = y; i < y + h; i++) {
         if(i < 0) continue;
         if(i > 16) break;
         fanta_column_mask |= (1 << i);
     }
 
-    fanta_offset_y(fanta, y, sprite->width);
+    fanta_offset_y(fanta, y, w);
 
-    size_t target_idx = x * 2;
     uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
 
-    for(int i = 0; i < sprite->width*2; i++) {
-        if(target_idx + i > buffer_size - 1) break;
+    size_t target_idx = x * 2;
+    for(int i = 0; i < w*2; i++) {
+        if(target_idx + i > buffer_size - 1) continue;
+        if(target_idx + i < 0) continue;
         uint8_t current_mask = mask_data[i % 2];
 
-        buffer[target_idx + i] = fanta[i] | (buffer[target_idx + i] & ~current_mask);
+        buffer[target_idx + i] = ((uint8_t) fanta[i]) | (buffer[target_idx + i] & ~current_mask);
     }
 
-    free(fanta);
-
     *dirty = true;
+}
+
+void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
+    fanta_buffer_t fanta = sprite_to_fanta(sprite);
+    put_fanta(fanta, x, y, sprite->width, sprite->height);
+    free(fanta);
 }
 
 void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y) {
@@ -137,4 +138,8 @@ int FantaManipulator::get_width() {
 
 int FantaManipulator::get_height() {
     return height;
+}
+
+const fanta_buffer_t FantaManipulator::get_fanta() {
+    return buffer;
 }

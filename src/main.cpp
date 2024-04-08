@@ -11,31 +11,16 @@
 #include <network/netmgr.h>
 #include <network/otafvu.h>
 #include <service/power_management.h>
-#include <service/time.h>
 #include <service/owm/weather.h>
-#include <views/simple_clock.h>
-#include <views/rain_ovl.h>
-#include <views/indoor_view.h>
-#include <views/multiplexor.h>
-#include <views/compositor.h>
+#include <service/time.h>
 #include <utils.h>
+#include <state.h>
+#include <idle.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
-typedef enum MainViewId: uint16_t {
-    VIEW_CLOCK = 0,
-    VIEW_INDOOR_WEATHER,
-
-    VIEW_MAX
-} MainViewId_t;
-
-static MainViewId_t curScreen = VIEW_CLOCK;
-static TickType_t lastScreenSwitch = 0;
-
-static bool drawing_suspended = false;
-void set_suspend_all_drawing(bool sus) {
-    drawing_suspended = sus;
-}
+static device_state_t current_state = STATE_BOOT;
+const device_state_t startup_state = STATE_IDLE;
 
 static PlasmaDisplayIface plasma(
     HWCONF_PLASMA_DATABUS_GPIOS,
@@ -53,10 +38,23 @@ static SensorPool * sensors;
 static OTAFVUManager * ota;
 static Beeper * beepola;
 static BeepSequencer * bs;
-static SimpleClock * clockView;
-static RainOverlay * rain;
-static IndoorView * indoorView;
-static ViewMultiplexor * slideShow;
+
+void change_state(device_state_t to) {
+    if(to == STATE_OTAFVU) {
+        current_state = STATE_OTAFVU;
+        return; // all other things handled in the FVU process
+    }
+
+    switch(to) {
+        case STATE_IDLE:
+            app_idle_prepare(sensors, beepola);
+            break;
+        case STATE_OTAFVU:
+        default:
+            break;
+    }
+    current_state = to;
+}
 
 void setup() {
     // Set up serial for logs
@@ -72,8 +70,8 @@ void setup() {
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     
-    // Plasma Information System DOS
-    con->print("PIS-DOS v1.0\n");
+    // Plasma Information System OS (not DOS, there's no disk in it!)
+    con->print("PIS-OS v1.0\n");
     delay(500);
  
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
@@ -135,50 +133,25 @@ void setup() {
     con->set_active(false);
     fb->clear();
 
-    clockView = new SimpleClock(beepola);
-    indoorView = new IndoorView(sensors);
-    rain = new RainOverlay(graph->get_width(), graph->get_height());
-
-    slideShow = new ViewMultiplexor();
-
-    ViewCompositor * rainyClock = new ViewCompositor();
-    rainyClock->add_layer(clockView);
-    rainyClock->add_layer(rain);
-
-    slideShow->add_view(rainyClock, VIEW_CLOCK);
-    slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
-
-    rain->prepare();
-    rain->set_intensity(20);
+    change_state(startup_state);
 }
 
-static bool have_weather;
-static current_weather_t weather;
+void drawing() {
+    switch(current_state) {
+        case STATE_IDLE:
+            app_idle_draw(graph);
+            break;
 
-void change_screen_if_needed() {
-    TickType_t now = xTaskGetTickCount();
-    if(now - lastScreenSwitch >= pdMS_TO_TICKS(5000)) {
-        curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
-        if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
-        slideShow->switch_to(curScreen);
-        lastScreenSwitch = now;
+        case STATE_OTAFVU:
+            break;
+        default:
+            ESP_LOGE(LOG_TAG, "Unknown state %i", current_state);
+            break;
     }
+
+if(sensors->get_info(SENSOR_ID_MOTION)->last_result > 0) {
+    graph->plot_pixel(0, 0, true);
 }
-
-void draw_screen_locked() {
-    // The framebuffer is now locked -- do not do any processing here!! Only drawing calls!
-    graph->clear();
-    slideShow->render(graph);
-
-    if(sensors->get_info(SENSOR_ID_MOTION)->last_result > 0) {
-        graph->plot_pixel(0, 0, true);
-    }
-
-    // ---- OVERLAYS 
-    // if(have_weather && weather.conditions == RAIN) {
-        // rain->render(graph);
-    // }
-
 #if defined(PDFB_PERF_LOGS) && defined(DRAW_FPS_COUNTER)
     // FPS counter
     char buf[4];
@@ -188,18 +161,23 @@ void draw_screen_locked() {
 }
 
 void processing() {
-    slideShow->step();
-    if(weather_get_current(&weather)) {
-        have_weather = true;
-    }
+    switch(current_state) {
+        case STATE_IDLE:
+            app_idle_process();
+            break;
 
-    change_screen_if_needed();
+        case STATE_OTAFVU:
+            break;
+        default:
+            ESP_LOGE(LOG_TAG, "Unknown state %i", current_state);
+            break;
+    }
 }
 
 void loop() {
     fb->wait_next_frame();
-    if(!drawing_suspended && graph->lock()) {
-        draw_screen_locked();
+    if(graph->lock()) {
+        drawing();
         graph->unlock();
     }
     processing();

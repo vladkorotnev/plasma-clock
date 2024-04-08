@@ -45,33 +45,33 @@ void WeatherTaskFunction( void * pvParameter )
     snprintf(url, 150, currentApi, latitude, longitude, apiKey);
 
     while(1) {
-        http.begin(client, url);
-        ESP_LOGV(LOG_TAG, "Query: %s", url);
-        int response = http.GET();
-        if(response == 200) {
-            JsonDocument response;
+        // http.begin(client, url);
+        // ESP_LOGV(LOG_TAG, "Query: %s", url);
+        // int response = http.GET();
+        // if(response == 200) {
+        //     JsonDocument response;
 
-            DeserializationError error = deserializeJson(response, http.getStream());
+        //     DeserializationError error = deserializeJson(response, http.getStream());
 
-            if (error) {
-                ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
-            } else {
-                if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
-                    ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
-                } else {
-                    cache.conditions = normalized_conditions(response["weather"]["id"]);
-                    cache.temperature_kelvin = response["main"]["temp"];
-                    cache.feels_like_kelvin = response["main"]["feels_like"];
-                    cache.pressure_hpa = response["main"]["pressure"];
-                    cache.humidity_percent = response["main"]["humidity"];
-                    xSemaphoreGive(cacheSemaphore);
-                    ESP_LOGI(LOG_TAG, "Weather refreshed");
-                }
-            }
-        } else {
-            ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
-            ESP_LOGE(LOG_TAG, "%s", http.getString());
-        }
+        //     if (error) {
+        //         ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
+        //     } else {
+        //         if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+        //             ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
+        //         } else {
+        //             cache.conditions = normalized_conditions(response["weather"]["id"]);
+        //             cache.temperature_kelvin = response["main"]["temp"];
+        //             cache.feels_like_kelvin = response["main"]["feels_like"];
+        //             cache.pressure_hpa = response["main"]["pressure"];
+        //             cache.humidity_percent = response["main"]["humidity"];
+        //             xSemaphoreGive(cacheSemaphore);
+        //             ESP_LOGI(LOG_TAG, "Weather refreshed");
+        //         }
+        //     }
+        // } else {
+        //     ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
+        //     ESP_LOGE(LOG_TAG, "%s", http.getString());
+        // }
         vTaskDelay(interval);
     }
 }

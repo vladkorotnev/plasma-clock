@@ -92,7 +92,9 @@ void SensorPool::poll() {
             if(sensor->handler->poll(&value)) {
                 sensor->last_result = value;
                 sensor->last_read = xTaskGetTickCount();
+#ifdef SENSOR_SPAM_LOGS
                 ESP_LOGV(LOG_TAG, "Sensor %i new value: %i", i, value);
+#endif
             } else {
                 ESP_LOGE(LOG_TAG, "Poll of sensor %i failed", i);
             }
