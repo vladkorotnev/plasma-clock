@@ -1,5 +1,6 @@
 #pragma once
 #include "view.h"
+#include "views/transitions.h"
 #include "transition_animator.h"
 #include <map>
 
@@ -21,6 +22,7 @@ public:
 private:
     std::map<view_id_t, Renderable*> views;
     Renderable * active_view;
-    void set_active_view(Renderable*, TransitionAnimator*);
-    TransitionAnimator * active_transition;
+    void set_active_view(Renderable*, transition_type_t);
+    TransitionAnimationCoordinator * transition_coordinator;
+    Renderable* current_renderable();
 };

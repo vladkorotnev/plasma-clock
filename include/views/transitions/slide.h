@@ -2,9 +2,9 @@
 #include "../transition_animator.h"
 #include <plasma/framebuffer.h>
 
-class WipeTransition: public Transition {
+class SlideTransition: public Transition {
 public:
-    WipeTransition();
+    SlideTransition();
     bool render(FantaManipulator*, TransitionAnimationCoordinator*);
     void rewind();
 
