@@ -107,7 +107,7 @@ void SimpleClock::step() {
     }
     phase = EASING_CURVE[phase];
 
-    separator = (phase == 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
+    separator = (phase != 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 }
 
 void SimpleClock::render(FantaManipulator *framebuffer) {

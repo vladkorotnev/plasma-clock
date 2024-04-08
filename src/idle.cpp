@@ -17,8 +17,8 @@ typedef enum MainViewId: uint16_t {
 } MainViewId_t;
 
 static int screen_times_ms[VIEW_MAX] = {
-    30000, // VIEW_CLOCK
-    10000, // VIEW_INDOOR_WEATHER
+    5000, // VIEW_CLOCK
+    5000, // VIEW_INDOOR_WEATHER
 };
 
 static bool did_prepare = false;

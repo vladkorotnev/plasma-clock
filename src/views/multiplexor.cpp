@@ -1,13 +1,13 @@
 #include <views/multiplexor.h>
-#include <views/transitions.h>
 
 ViewMultiplexor::ViewMultiplexor() {
     views = std::map<view_id_t, Renderable*>();
     active_view = nullptr;
-    active_transition = nullptr;
+    transition_coordinator = new TransitionAnimationCoordinator();
 }
 
 ViewMultiplexor::~ViewMultiplexor() {
+    delete transition_coordinator;
     active_view = nullptr;
     for (const auto& kv : views) {
         kv.second->cleanup();
@@ -15,25 +15,27 @@ ViewMultiplexor::~ViewMultiplexor() {
     }
 }
 
-void ViewMultiplexor::set_active_view(Renderable *next, TransitionAnimator * animator) {
-    if(active_transition != nullptr) {
-        active_transition->cleanup();
-        delete active_transition;
-        active_transition = nullptr;
+inline Renderable* ViewMultiplexor::current_renderable() {
+    if(!transition_coordinator->is_completed()) {
+        return transition_coordinator;
+    } else {
+        return active_view;
     }
+}
 
-    if(active_view != nullptr) {
-        active_view->cleanup();
+void ViewMultiplexor::set_active_view(Renderable *next, transition_type_t t) {
+    Renderable *r = current_renderable();
+    if(r != nullptr) r->cleanup();
+
+    if(t != TRANSITION_NONE) {
+        transition_coordinator->set_transition(transition_type_to_transition(t));
+        transition_coordinator->set_views(active_view, next);
     }
 
     active_view = next;
-    active_transition = animator;
     
-    if(active_transition != nullptr) {
-        active_transition->prepare();
-    } else if(active_view != nullptr) {
-        active_view->prepare();
-    }
+    r = current_renderable();
+    r->prepare();
 }
 
 void ViewMultiplexor::add_view(Renderable *view, view_id_t id) {
@@ -41,7 +43,7 @@ void ViewMultiplexor::add_view(Renderable *view, view_id_t id) {
 
     views[id] = view;
     if(active_view == nullptr) {
-        set_active_view(view, nullptr);
+        set_active_view(view, TRANSITION_NONE);
     }
 }
 
@@ -50,9 +52,9 @@ void ViewMultiplexor::switch_to(view_id_t id) {
     if(view == nullptr) return;
 
     if(active_view == nullptr) {
-        set_active_view(view, nullptr);
+        set_active_view(view, TRANSITION_NONE);
     } else {
-        set_active_view(view, new WipeTransition(active_view, view, 101));
+        set_active_view(view, TRANSITION_SLIDE);
     }
 }
 
@@ -61,44 +63,28 @@ void ViewMultiplexor::remove_view(view_id_t id) {
     if(view == nullptr) return;
 
     if(active_view == view) {
-        set_active_view(nullptr, nullptr);
+        set_active_view(nullptr, TRANSITION_NONE);
     }
 
     views.erase(id);
 }
 
 void ViewMultiplexor::prepare() {
-    if(active_transition != nullptr) {
-        active_transition->prepare();
-    } else if(active_view != nullptr) {
-        active_view->prepare();
-    }
+    Renderable *r = current_renderable();
+    if(r != nullptr) r->prepare();
 }
 
 void ViewMultiplexor::render(FantaManipulator * fb) {
-    if(active_transition != nullptr) {
-        active_transition->render(fb);
-        if(active_transition->is_complete()) {
-            delete active_transition;
-            active_transition = nullptr;
-        }
-    } else if(active_view != nullptr) {
-        active_view->render(fb);
-    }
+    Renderable *r = current_renderable();
+    if(r != nullptr) r->render(fb);
 }
 
 void ViewMultiplexor::step() {
-    if(active_transition != nullptr) {
-        active_transition->step();
-    } else if(active_view != nullptr) {
-        active_view->step();
-    }
+    Renderable *r = current_renderable();
+    if(r != nullptr) r->step();
 }
 
 void ViewMultiplexor::cleanup() {
-     if(active_transition != nullptr) {
-        active_transition->cleanup();
-    } else if(active_view != nullptr) {
-        active_view->cleanup();
-    }
+    Renderable *r = current_renderable();
+    if(r != nullptr) r->cleanup();
 }

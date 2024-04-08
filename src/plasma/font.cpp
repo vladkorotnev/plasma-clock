@@ -9,7 +9,7 @@ sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph) {
         ESP_LOGI(LOG_TAG, "Not known character %u in font", glyph);
         glyph = 0;
     }
-    size_t start_idx = (glyph - font->start_character) * font->height * font->width/8;
+    size_t start_idx = (glyph - font->start_character) * font->height * std::max(font->width/8, 1);
 
     sprite_t rslt = {
         .width = font->width,

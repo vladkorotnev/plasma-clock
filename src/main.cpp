@@ -156,7 +156,7 @@ if(sensors->get_info(SENSOR_ID_MOTION)->last_result > 0) {
     // FPS counter
     char buf[4];
     itoa(fb->get_fps(), buf, 10);
-    fb->manipulate()->put_string(&keyrus0808_font, buf, 0, 8);
+    fb->manipulate()->put_string(&fps_counter_font, buf, 0, 0);
 #endif
 }
 

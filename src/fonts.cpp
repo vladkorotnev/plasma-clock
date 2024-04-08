@@ -70,3 +70,75 @@ const font_definition_t one_pixel_bar_font = {
     .height = 8,
     .data = one_pixel_bar_data
 };
+
+static const uint8_t fps_counter_font_data[] = {
+0b01110,
+0b01010,
+0b01010,
+0b01010,
+0b01110,
+
+0b00100,
+0b00100,
+0b00100,
+0b00100,
+0b00100,
+
+0b01110,
+0b00010,
+0b01110,
+0b01000,
+0b01110,
+
+0b01110,
+0b00010,
+0b00110,
+0b00010,
+0b01110,
+
+0b01010,
+0b01010,
+0b01110,
+0b00010,
+0b00010,
+
+0b01110,
+0b01000,
+0b01110,
+0b00010,
+0b01110,
+
+0b01110,
+0b01000,
+0b01110,
+0b01010,
+0b01110,
+
+0b01110,
+0b00010,
+0b00010,
+0b00010,
+0b00010,
+
+0b01110,
+0b01010,
+0b01110,
+0b01010,
+0b01110,
+
+0b01110,
+0b01010,
+0b01110,
+0b00010,
+0b01110,
+
+};
+
+const font_definition_t fps_counter_font = {
+    .start_character = '0',
+    .end_character = '9',
+    .cursor_character = 0x0,
+    .width = 4,
+    .height = 5,
+    .data = fps_counter_font_data
+};
