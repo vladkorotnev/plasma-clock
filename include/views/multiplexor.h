@@ -12,7 +12,7 @@ public:
     ~ViewMultiplexor();
 
     void add_view(Renderable*, view_id_t);
-    void switch_to(view_id_t);
+    void switch_to(view_id_t, transition_type_t);
     void remove_view(view_id_t);
 
     void prepare();

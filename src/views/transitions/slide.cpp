@@ -23,3 +23,27 @@ bool SlideTransition::render(FantaManipulator * screen, TransitionAnimationCoord
 void SlideTransition::rewind() {
     framecount = 0;
 }
+
+VerticalSlideTransition::VerticalSlideTransition() {
+    framecount = 0;
+}
+
+bool VerticalSlideTransition::render(FantaManipulator * screen, TransitionAnimationCoordinator* coord) {
+    framecount += 1;
+    FantaManipulator* backingB = coord->backingB;
+    FantaManipulator* backingA = coord->backingA;
+
+    if(framecount >= screen->get_height()) {
+        screen->put_fanta(backingB->get_fanta(), 0, 0, backingB->get_width(), backingB->get_height());
+        return true;
+    }
+
+    screen->put_fanta(backingA->get_fanta(), 0, -framecount, backingA->get_width(), backingA->get_height());
+    screen->put_fanta(backingB->get_fanta(), 0, screen->get_height() - framecount, backingB->get_width(), backingB->get_height());
+
+    return false;
+}
+
+void VerticalSlideTransition::rewind() {
+    framecount = 0;
+}

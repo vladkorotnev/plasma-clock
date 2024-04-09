@@ -16,20 +16,20 @@ TransitionAnimationCoordinator::~TransitionAnimationCoordinator() {
 }
 
 void TransitionAnimationCoordinator::step() {
-    viewA->step();
-    viewB->step();
+    if(viewA != nullptr) viewA->step();
+    if(viewB != nullptr) viewB->step();
 }
 
 void TransitionAnimationCoordinator::prepare() {
-    viewA->prepare();
-    viewB->prepare();
+    if(viewA != nullptr) viewA->prepare();
+    if(viewB != nullptr) viewB->prepare();
 }
 
 void TransitionAnimationCoordinator::render_backing_views()  {
     backingA->clear();
     backingB->clear();
-    viewA->render(backingA);
-    viewB->render(backingB);
+    if(viewA != nullptr) viewA->render(backingA);
+    if(viewB != nullptr) viewB->render(backingB);
 }
 
 bool TransitionAnimationCoordinator::is_completed() {

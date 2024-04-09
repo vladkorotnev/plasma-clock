@@ -1,6 +1,7 @@
 #include "network/admin_panel.h"
 #include <service/prefs.h>
 #include <service/owm/weather.h>
+#include <views/transitions.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
 #include <Arduino.h>
@@ -32,7 +33,7 @@ static void save_bool(prefs_key_t key) {
     bool temp = false;
     if(ui.clickBool(key, temp)) {
         prefs_set_bool(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 100);
+        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -48,7 +49,7 @@ static void save_int(prefs_key_t key, int min, int max) {
         temp = std::min(temp, max);
         temp = std::max(temp, min);
         prefs_set_int(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 100);
+        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -65,7 +66,7 @@ static void save_string(prefs_key_t key) {
     String temp;
     if(ui.clickString(key, temp)) {
         prefs_set_string(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 100);
+        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -87,6 +88,15 @@ void build() {
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
         render_bool("No sound when screen is off:", PREFS_KEY_NO_SOUND_WHEN_OFF);
+        GP.HR();
+        render_bool("Hourly chime:", PREFS_KEY_HOURLY_CHIME_ON);
+        GP.SELECT(PREFS_KEY_HOURLY_CHIME_MELODY, all_chime_names, prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY));
+        GP.BREAK();
+        render_int("From:", PREFS_KEY_HOURLY_CHIME_START_HOUR);
+        render_int("To:", PREFS_KEY_HOURLY_CHIME_STOP_HOUR);
+        GP.HR();
+        GP.LABEL("Screen transition:");
+        GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide,Vertical Slide,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -167,7 +177,11 @@ void action() {
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
         save_bool(PREFS_KEY_TICKING_SOUND);
+        save_bool(PREFS_KEY_HOURLY_CHIME_ON);
+        save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
+        save_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23);
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
+        save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
@@ -177,6 +191,26 @@ void action() {
         save_string(PREFS_KEY_WEATHER_LON);
         save_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES, 30, 24 * 60);
         save_bool(PREFS_KEY_FPS_COUNTER);
+
+        int temp_chime;
+        if(ui.clickInt(PREFS_KEY_HOURLY_CHIME_MELODY, temp_chime)) {
+            temp_chime = std::min(temp_chime, all_chime_count);
+            temp_chime = std::max(temp_chime, 0);
+
+            ESP_LOGV(LOG_TAG, "Preview chime #%i", temp_chime);
+            
+            prefs_set_int(PREFS_KEY_HOURLY_CHIME_MELODY, temp_chime);
+
+            if(temp_chime == all_chime_count) {
+                temp_chime = esp_random() % all_chime_count;
+            }
+            
+            melody_sequence_t melody = all_chime_list[temp_chime];
+            BeepSequencer * s = new BeepSequencer(beeper);
+            s->play_sequence(melody, CHANNEL_NOTICE, 0);
+            s->wait_end_play();
+            delete s;
+        }
 
         if(ui.click(reboot_btn)) {
             prefs_force_save();

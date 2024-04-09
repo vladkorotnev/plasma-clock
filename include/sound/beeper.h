@@ -4,6 +4,7 @@
 typedef enum beeper_channels {
     CHANNEL_AMBIANCE = 0,
     CHANNEL_NOTICE = 1,
+    CHANNEL_CHIME = 2,
 
     CHANNEL_ALARM = 6,
     CHANNEL_SYSTEM = 7

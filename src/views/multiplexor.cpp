@@ -47,14 +47,14 @@ void ViewMultiplexor::add_view(Renderable *view, view_id_t id) {
     }
 }
 
-void ViewMultiplexor::switch_to(view_id_t id) {
+void ViewMultiplexor::switch_to(view_id_t id, transition_type_t transition) {
     Renderable *view = views[id];
     if(view == nullptr) return;
 
     if(active_view == nullptr) {
-        set_active_view(view, TRANSITION_NONE);
+        set_active_view(view, transition);
     } else {
-        set_active_view(view, TRANSITION_SLIDE);
+        set_active_view(view, transition);
     }
 }
 

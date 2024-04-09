@@ -22,6 +22,16 @@ static constexpr prefs_key_t PREFS_KEY_WEATHER_LON = "w_lon";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_APIKEY = "w_apikey";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_INTERVAL_MINUTES = "w_interval_m";
 
+static constexpr prefs_key_t PREFS_KEY_TRANSITION_TYPE = "s_transition";
+
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
+
+static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_ON = "h_chime_on";
+static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_START_HOUR = "h_chime_start";
+static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_STOP_HOUR = "h_chime_stop";
+static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_MELODY = "h_chime";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t);
