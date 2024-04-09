@@ -82,8 +82,14 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     sequencer = new BeepSequencer(beepola);
     sensors = s;
 
+    tk_time_of_day now = get_current_time_coarse();
+    last_chimed_hour = now.hour;
+
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
+
+    screen_times_ms[VIEW_CLOCK] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000, 1000);
+    screen_times_ms[VIEW_INDOOR_WEATHER] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000, 1000);
 
     clockView = new SimpleClock();
     indoorView = new IndoorView(sensors);

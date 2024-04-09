@@ -100,6 +100,13 @@ void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+    GP.SPOILER_BEGIN("Display", GP_BLUE);
+        render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
+        GP.BREAK();
+        render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);
+    GP.SPOILER_END();
+    GP.BREAK();
+
     GP.SPOILER_BEGIN("Sensors", GP_BLUE);
     GP.JQ_UPDATE_BEGIN(1000);
         sensor_info_t* sens;
@@ -180,6 +187,8 @@ void action() {
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
         save_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23);
+        save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 1, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 1, 120);
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
