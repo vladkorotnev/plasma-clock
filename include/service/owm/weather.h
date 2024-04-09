@@ -27,6 +27,8 @@ typedef struct current_weather {
     int pressure_hpa;
     int humidity_percent;
     weather_condition_t conditions;
+    TickType_t last_updated;
+    char description[64];
 } current_weather_t;
 
 typedef enum temperature_unit {

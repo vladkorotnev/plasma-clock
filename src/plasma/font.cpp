@@ -20,6 +20,6 @@ sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph) {
     return rslt;
 }
 
-extern uint8_t measure_string_width(const font_definition_t* f, const char* s) {
+extern unsigned int measure_string_width(const font_definition_t* f, const char* s) {
     return strlen(s) * f->width;
 }

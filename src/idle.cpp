@@ -9,12 +9,14 @@
 #include <views/rain_ovl.h>
 #include <views/indoor_view.h>
 #include <views/framework.h>
+#include <views/current_weather.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
 typedef enum MainViewId: uint16_t {
     VIEW_CLOCK = 0,
     VIEW_INDOOR_WEATHER,
+    VIEW_OUTDOOR_WEATHER,
 
     VIEW_MAX
 } MainViewId_t;
@@ -22,6 +24,7 @@ typedef enum MainViewId: uint16_t {
 static int screen_times_ms[VIEW_MAX] = {
     30000, // VIEW_CLOCK
     10000, // VIEW_INDOOR_WEATHER
+    25000, // VIEW_OUTDOOR_WEATHER
 };
 
 static bool did_prepare = false;
@@ -34,7 +37,10 @@ static Renderable * mainView;
 
 static SimpleClock * clockView;
 static RainOverlay * rain;
+
 static IndoorView * indoorView;
+static CurrentWeatherView * weatherView;
+
 static ViewMultiplexor * slideShow;
 
 static MainViewId_t curScreen = VIEW_CLOCK;
@@ -94,14 +100,17 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     screen_times_ms[VIEW_CLOCK] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000, 1000);
     screen_times_ms[VIEW_INDOOR_WEATHER] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000, 1000);
+    screen_times_ms[VIEW_OUTDOOR_WEATHER] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000, 1000);
 
     clockView = new SimpleClock();
     indoorView = new IndoorView(sensors);
     rain = new RainOverlay(101, 16);
+    weatherView = new CurrentWeatherView();
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(clockView, VIEW_CLOCK);
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
+    slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
 
     lastScreenSwitch = xTaskGetTickCount();
 

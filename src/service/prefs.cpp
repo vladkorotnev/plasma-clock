@@ -33,7 +33,6 @@ void prefs_set_string(prefs_key_t key, String val) {
 int prefs_get_int(prefs_key_t key) {
     init_store_if_needed();
     int val = store->getInt(key);
-    ESP_LOGV(LOG_TAG, "Get %s = %i", key, val);
     return val;
 }
 void prefs_set_int(prefs_key_t key, int val) {

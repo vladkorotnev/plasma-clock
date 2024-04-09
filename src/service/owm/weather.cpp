@@ -7,7 +7,7 @@
 
 static char LOG_TAG[] = "WEATHER";
 
-static const char * currentApi = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&APPID=%s";
+static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s";
 static String apiKey;
 static TickType_t interval;
 static String latitude; 
@@ -30,6 +30,8 @@ weather_condition_t normalized_conditions(uint conditions) {
     } else if(conditions >= weather_condition_t::CLEAR && conditions <= weather_condition_t::OVERCAST) {
         return (weather_condition_t) conditions;
     }
+
+    ESP_LOGE(LOG_TAG, "Unknown conditions %u", conditions);
 
     return weather_condition_t::UNKNOWN;
 }
@@ -60,11 +62,18 @@ void WeatherTaskFunction( void * pvParameter )
                 if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
                     ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
                 } else {
-                    cache.conditions = normalized_conditions(response["weather"]["id"]);
-                    cache.temperature_kelvin = response["main"]["temp"];
-                    cache.feels_like_kelvin = response["main"]["feels_like"];
-                    cache.pressure_hpa = response["main"]["pressure"];
-                    cache.humidity_percent = response["main"]["humidity"];
+                    cache.conditions = normalized_conditions(response["current"]["weather"][0]["id"]);
+                    cache.temperature_kelvin = response["current"]["temp"];
+                    cache.feels_like_kelvin = response["current"]["feels_like"];
+                    cache.pressure_hpa = response["current"]["pressure"];
+                    cache.humidity_percent = response["current"]["humidity"];
+                    cache.last_updated = xTaskGetTickCount();
+                    String desc = response["current"]["weather"][0]["description"].as<String>();
+                    strncpy(cache.description, desc.c_str(), sizeof(cache.description));
+                    // Capitalize first letter
+                    if(cache.description[0] >= 'a') {
+                        cache.description[0] -= ('a' - 'A');
+                    }
                     xSemaphoreGive(cacheSemaphore);
                     ESP_LOGI(LOG_TAG, "Weather refreshed");
                 }

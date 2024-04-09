@@ -11,4 +11,4 @@ typedef struct font_definition {
 } font_definition_t;
 
 extern sprite_t sprite_from_glyph(const font_definition_t*, char16_t glyph);
-extern uint8_t measure_string_width(const font_definition_t*, const char*);
+extern unsigned int measure_string_width(const font_definition_t*, const char*);
