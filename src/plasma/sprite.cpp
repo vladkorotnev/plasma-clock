@@ -46,23 +46,32 @@ ani_sprite_state_t ani_sprite_prepare(const ani_sprite* as) {
     return ani_sprite_state_t {
         .ani_sprite = as,
         .framecount = 0,
-        .playhead = 0
+        .playhead = 0,
+        .holdoff_counter = as->holdoff_frames * as->screen_frames_per_frame
     };
 }
 
 sprite_t ani_sprite_frame(ani_sprite_state_t* as) {
-    size_t frame_data_idx = as->playhead * std::max(1, as->ani_sprite->width/8) * as->ani_sprite->height;
-    const uint8_t* cur_frame = &as->ani_sprite->data[frame_data_idx];
+    size_t frame_data_idx;
+    
+    if(as->holdoff_counter == 0) {
+        frame_data_idx = as->playhead * std::max(1, as->ani_sprite->width/8) * as->ani_sprite->height;
 
-    as->framecount++;
-    if(as->framecount == as->ani_sprite->screen_frames_per_frame) {
-        as->framecount = 0;
-        as->playhead++;
-        if(as->playhead == as->ani_sprite->frames) {
-            as->playhead = 0;
+        as->framecount++;
+        if(as->framecount == as->ani_sprite->screen_frames_per_frame) {
+            as->framecount = 0;
+            as->playhead++;
+            if(as->playhead == as->ani_sprite->frames) {
+                as->playhead = 0;
+                as->holdoff_counter = as->ani_sprite->holdoff_frames * as->ani_sprite->screen_frames_per_frame;
+            }
         }
+    } else {
+        frame_data_idx = 0;
+        as->holdoff_counter--;
     }
 
+    const uint8_t* cur_frame = &as->ani_sprite->data[frame_data_idx];
     return sprite_t {
         .width = as->ani_sprite->width,
         .height = as->ani_sprite->height,

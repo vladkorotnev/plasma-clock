@@ -11,6 +11,7 @@ typedef struct ani_sprite {
     uint8_t width, height;
     uint8_t frames;
     uint8_t screen_frames_per_frame;
+    uint8_t holdoff_frames;
     const uint8_t* data;
 } ani_sprite_t;
 
@@ -18,6 +19,7 @@ typedef struct ani_sprite_state {
     const ani_sprite_t* ani_sprite;
     uint8_t framecount;
     uint8_t playhead;
+    int holdoff_counter;
 } ani_sprite_state_t;
 
 typedef uint8_t* fanta_buffer_t;

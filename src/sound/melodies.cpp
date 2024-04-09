@@ -34,6 +34,7 @@ static const melody_item_t oelutz_fvu_data[] = {
 };
 const melody_sequence_t oelutz_fvu = MELODY_OF(oelutz_fvu_data);
 
+// A.M. - Arise
 static const melody_item_t arise_data[] = {
     {622, 692}, 
     {932, 1153},
@@ -67,6 +68,7 @@ static const melody_item_t arise_data[] = {
 };
 const melody_sequence_t arise = MELODY_OF(arise_data);
 
+// Caramell - Caramelldansen
 static const melody_item_t caramell_data[] = {
     {880, 181},
     {0, 181}, 
@@ -129,6 +131,7 @@ static const melody_item_t caramell_data[] = {
 };
 const melody_sequence_t caramell = MELODY_OF(caramell_data);
 
+// BoA - Duvet (Serial Experiments Lain OP)
 static const melody_item_t duvet_data[] = {
     {783, 575},
     {0, 69},
@@ -174,6 +177,7 @@ static const melody_item_t duvet_data[] = {
 };
 const melody_sequence_t duvet = MELODY_OF(duvet_data);
 
+// T-Square - Truth
 static const melody_item_t truth_data[] = {
     {932, 371},
     {0, 12},
@@ -271,6 +275,7 @@ static const melody_item_t truth_data[] = {
 };
 const melody_sequence_t truth = MELODY_OF(truth_data);
 
+// Kosaki Satoru - Haruhi no omoi
 static const melody_item_t haruhi_no_omoi_data[] = {
     {466, 681},
     {622, 1363},

@@ -3,7 +3,7 @@
 
 typedef enum weather_condition_code {
     UNKNOWN = 0,
-    // TODO: someday, all the codes, if I ever get to draw enough graphics for them
+    // TODO: someday, all the codes, if I ever get to make enough graphics for them
     THUNDERSTORM = 200,
 
     DRIZZLE = 300,
