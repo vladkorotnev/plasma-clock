@@ -41,3 +41,31 @@ void fanta_offset_y(fanta_buffer_t fanta, int vert_offset, size_t width) {
         }
     }
 }
+
+ani_sprite_state_t ani_sprite_prepare(const ani_sprite* as) {
+    return ani_sprite_state_t {
+        .ani_sprite = as,
+        .framecount = 0,
+        .playhead = 0
+    };
+}
+
+sprite_t ani_sprite_frame(ani_sprite_state_t* as) {
+    size_t frame_data_idx = as->playhead * std::max(1, as->ani_sprite->width/8) * as->ani_sprite->height;
+    const uint8_t* cur_frame = &as->ani_sprite->data[frame_data_idx];
+
+    as->framecount++;
+    if(as->framecount == as->ani_sprite->screen_frames_per_frame) {
+        as->framecount = 0;
+        as->playhead++;
+        if(as->playhead == as->ani_sprite->frames) {
+            as->playhead = 0;
+        }
+    }
+
+    return sprite_t {
+        .width = as->ani_sprite->width,
+        .height = as->ani_sprite->height,
+        .data = cur_frame
+    };
+}

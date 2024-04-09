@@ -1,0 +1,26 @@
+All of the fonts included in this project were taken just because I like them and for personal use only.
+Commercial use is strictly prohibited.
+
+----
+
+keyrus08x08.fnt
+keyrus08x16.fnt
+
+Yanked from the MS-DOS Russian Locale package "keyrus".
+(c) Dmitriy Gurtyak 1989-1994
+
+----
+
+sg8x8.fnt
+
+Yanked from Steins;Gate's 8-bit spinoff. 
+(c) Chiyomaru/MAGES
+
+----
+
+xnu.fnt
+
+Yanked from the Apple XNU kernel.
+https://github.com/apple/darwin-xnu/blob/main/osfmk/console/iso_font.c
+(c) 2000 Apple Computer, Inc.
+(c) 2000 Ka-Ping Yee
