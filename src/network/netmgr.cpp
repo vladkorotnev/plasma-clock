@@ -1,4 +1,5 @@
 #include <network/netmgr.h>
+#include <service/prefs.h>
 #include <utils.h>
 
 static char LOG_TAG[] = "NetM";
@@ -10,16 +11,14 @@ static bool has_ip;
 
 static String ssid;
 static String pass;
-static Preferences * prefs;
 
 bool NetworkManager::has_saved_credentials() {
-    return prefs->getString(PREFS_KEY_SSID).length() > 0;
+    return prefs_get_string(PREFS_KEY_WIFI_SSID).length() > 0;
 }
 
 void NetworkManager::startup() {
     initial_connection_succeeded = false;
-    prefs = new Preferences();
-    prefs->begin(PREFS_DOMAIN);
+
     WiFi.persistent(false);
     WiFi.onEvent(wifi_event);
     
@@ -27,8 +26,8 @@ void NetworkManager::startup() {
         if(has_saved_credentials()) {
             ESP_LOGI(LOG_TAG, "Attempt initial connection to saved network...");
 
-            ssid = prefs->getString(PREFS_KEY_SSID);
-            pass = prefs->getString(PREFS_KEY_PASS);
+            ssid = prefs_get_string(PREFS_KEY_WIFI_SSID);
+            pass = prefs_get_string(PREFS_KEY_WIFI_PASS);
 
             initial_connection_ongoing = true;
             WiFi.mode(WIFI_MODE_STA);
@@ -73,8 +72,8 @@ void NetworkManager::wifi_event(WiFiEvent_t ev) {
 }
 
 void NetworkManager::save_current_network() {
-    prefs->putString(PREFS_KEY_SSID, ssid);
-    prefs->putString(PREFS_KEY_PASS, pass);
+    prefs_set_string(PREFS_KEY_WIFI_SSID, ssid);
+    prefs_set_string(PREFS_KEY_WIFI_PASS, pass);
 }
 
 void NetworkManager::connect(const char * name, const char * pw) {

@@ -1,4 +1,5 @@
 #include <service/power_management.h>
+#include <service/prefs.h>
 #include <Arduino.h>
 
 static char LOG_TAG[] = "PM";
@@ -14,6 +15,12 @@ static Beeper * beeper;
 
 static int lastLightness;
 static bool isBright;
+
+static bool noSoundWhenOff;
+static int motionlessTimeOff;
+static int motionlessTimeHvOff;
+static int lightnessThreshUp;
+static int lightnessThreshDown;
 
 extern "C" void PMTaskFunction( void * pvParameter );
 
@@ -34,12 +41,12 @@ void PMTaskFunction( void * pvParameter )
         sensor_info_t * light_info = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
         if(light_info != nullptr) {
             int current_lightness = light_info->last_result;
-            if(current_lightness > PM_LIGHTNESS_THRESH_UP && current_lightness > lastLightness && !isBright) {
+            if(current_lightness > lightnessThreshUp && current_lightness > lastLightness && !isBright) {
                 ESP_LOGI(LOG_TAG, "Changing to bright mode");
                 isBright = true;
                 display->set_bright(true);
             } 
-            else if(current_lightness < PM_LIGHTNESS_THRESH_DOWN && current_lightness < lastLightness && isBright) {
+            else if(current_lightness < lightnessThreshDown && current_lightness < lastLightness && isBright) {
                 ESP_LOGI(LOG_TAG, "Changing to dim mode");
                 isBright = false;
                 display->set_bright(false);
@@ -72,15 +79,17 @@ void PMTaskFunction( void * pvParameter )
 
                 lastMotionTime = now;
             } else {
-              if(now - lastMotionTime >= pdMS_TO_TICKS(PM_MOTIONLESS_TURN_OFF_DELAY) && !isDisplayOff) {
+              if(now - lastMotionTime >= pdMS_TO_TICKS(motionlessTimeOff) && !isDisplayOff) {
                 // No motion for a while, turn off display, first only logically
                 ESP_LOGI(LOG_TAG, "Stop display");
                 display->set_show(false);
-                beeper->set_channel_state(CHANNEL_AMBIANCE, false);
+                if(noSoundWhenOff) {
+                    beeper->set_channel_state(CHANNEL_AMBIANCE, false);
+                }
                 isDisplayOff = true;
               } 
 
-              if(now - lastMotionTime >= pdMS_TO_TICKS(PM_MOTIONLESS_TURN_OFF_DELAY) && !isHvOff) {
+              if(now - lastMotionTime >= pdMS_TO_TICKS(motionlessTimeHvOff) && !isHvOff) {
                 // No motion for a really long while, shut down the HV power supply
                 ESP_LOGI(LOG_TAG, "Stop HV");
                 display->set_power(false);
@@ -97,6 +106,19 @@ void power_mgmt_start(SensorPool * s, PlasmaDisplayIface * d, Beeper * b) {
     sensors = s;
     display = d;
     beeper = b;
+
+    noSoundWhenOff = prefs_get_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
+    
+    motionlessTimeOff = prefs_get_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS) * 1000;
+    if(motionlessTimeOff == 0) motionlessTimeOff = PM_MOTIONLESS_TURN_OFF_DELAY;
+
+    motionlessTimeHvOff = prefs_get_int(PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS) * 1000;
+    if(motionlessTimeHvOff == 0) motionlessTimeHvOff = PM_MOTIONLESS_HV_SHUTDOWN_DELAY;
+    motionlessTimeHvOff += motionlessTimeOff;
+
+    lightnessThreshDown = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN);
+    lightnessThreshUp = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_UP);
+
     ESP_LOGV(LOG_TAG, "Creating task");
     if(xTaskCreate(
         PMTaskFunction,

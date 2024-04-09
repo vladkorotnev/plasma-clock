@@ -35,7 +35,7 @@ typedef enum temperature_unit {
     FAHRENHEIT
 } temperature_unit_t;
 
-void weather_start(const char* api_key, TickType_t update_interval, const char * lat, const char * lon);
+void weather_start();
 void weather_stop();
 bool weather_get_current(current_weather_t *);
 

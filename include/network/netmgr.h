@@ -1,13 +1,8 @@
 #include <WiFi.h>
-#include <Preferences.h>
 #pragma once
 
 class NetworkManager {
 public:
-    static constexpr char * PREFS_DOMAIN = "clockos-wifi";
-    static constexpr char * PREFS_KEY_SSID = "ssid";
-    static constexpr char * PREFS_KEY_PASS = "pass";
-
     static void startup();
     static bool is_up();
 

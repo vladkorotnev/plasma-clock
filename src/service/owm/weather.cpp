@@ -1,4 +1,5 @@
 #include <service/owm/weather.h>
+#include <service/prefs.h>
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
@@ -7,10 +8,10 @@
 static char LOG_TAG[] = "WEATHER";
 
 static const char * currentApi = "http://api.openweathermap.org/data/2.5/weather?lat=%s&lon=%s&APPID=%s";
-static const char * apiKey;
+static String apiKey;
 static TickType_t interval;
-static const char * latitude; 
-static const char * longitude;
+static String latitude; 
+static String longitude;
 static TaskHandle_t hTask = NULL;
 static SemaphoreHandle_t cacheSemaphore;
 static current_weather_t cache = { 0 };
@@ -41,43 +42,43 @@ void WeatherTaskFunction( void * pvParameter )
     static WiFiClient client;
     static HTTPClient http;
 
-    static char url[150];
-    snprintf(url, 150, currentApi, latitude, longitude, apiKey);
+    static char url[256];
+    snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str());
 
     while(1) {
-        // http.begin(client, url);
-        // ESP_LOGV(LOG_TAG, "Query: %s", url);
-        // int response = http.GET();
-        // if(response == 200) {
-        //     JsonDocument response;
+        http.begin(client, url);
+        ESP_LOGV(LOG_TAG, "Query: %s", url);
+        int response = http.GET();
+        if(response == 200) {
+            JsonDocument response;
 
-        //     DeserializationError error = deserializeJson(response, http.getStream());
+            DeserializationError error = deserializeJson(response, http.getStream());
 
-        //     if (error) {
-        //         ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
-        //     } else {
-        //         if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
-        //             ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
-        //         } else {
-        //             cache.conditions = normalized_conditions(response["weather"]["id"]);
-        //             cache.temperature_kelvin = response["main"]["temp"];
-        //             cache.feels_like_kelvin = response["main"]["feels_like"];
-        //             cache.pressure_hpa = response["main"]["pressure"];
-        //             cache.humidity_percent = response["main"]["humidity"];
-        //             xSemaphoreGive(cacheSemaphore);
-        //             ESP_LOGI(LOG_TAG, "Weather refreshed");
-        //         }
-        //     }
-        // } else {
-        //     ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
-        //     ESP_LOGE(LOG_TAG, "%s", http.getString());
-        // }
+            if (error) {
+                ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
+            } else {
+                if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+                    ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
+                } else {
+                    cache.conditions = normalized_conditions(response["weather"]["id"]);
+                    cache.temperature_kelvin = response["main"]["temp"];
+                    cache.feels_like_kelvin = response["main"]["feels_like"];
+                    cache.pressure_hpa = response["main"]["pressure"];
+                    cache.humidity_percent = response["main"]["humidity"];
+                    xSemaphoreGive(cacheSemaphore);
+                    ESP_LOGI(LOG_TAG, "Weather refreshed");
+                }
+            }
+        } else {
+            ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
+            ESP_LOGE(LOG_TAG, "%s", http.getString());
+        }
         vTaskDelay(interval);
     }
 }
 
 
-void weather_start(const char* api_key, TickType_t update_interval, const char * lat, const char * lon) {
+void weather_start() {
     if(hTask != NULL) {
         weather_stop();
     }
@@ -85,10 +86,48 @@ void weather_start(const char* api_key, TickType_t update_interval, const char *
     cacheSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(cacheSemaphore);
 
-    apiKey = api_key;
-    latitude = lat;
-    longitude = lon;
-    interval = update_interval;
+    String tmp = prefs_get_string(PREFS_KEY_WEATHER_APIKEY);
+    if(tmp.length() == 0) {
+        #ifdef WEATHER_API_KEY
+            tmp = String(WEATHER_API_KEY);
+            prefs_set_string(PREFS_KEY_WEATHER_APIKEY, tmp);
+        #else
+            ESP_LOGE(LOG_TAG, "No API key, cannot start!");
+            return;
+        #endif
+    }
+    apiKey = tmp;
+
+    tmp = prefs_get_string(PREFS_KEY_WEATHER_LAT);
+    if(tmp.length() == 0) {
+        #ifdef WEATHER_LAT
+            tmp = String(WEATHER_LAT);
+            prefs_set_string(PREFS_KEY_WEATHER_LAT, tmp);
+        #else
+            ESP_LOGE(LOG_TAG, "No latitude, cannot start!");
+            return;
+        #endif
+    }
+    latitude = tmp;
+
+    tmp = prefs_get_string(PREFS_KEY_WEATHER_LON);
+    if(tmp.length() == 0) {
+        #ifdef WEATHER_LON
+            tmp = String(WEATHER_LON);
+            prefs_set_string(PREFS_KEY_WEATHER_LON, tmp);
+        #else
+            ESP_LOGE(LOG_TAG, "No longitude, cannot start!");
+            return;
+        #endif
+    }
+    longitude = tmp;
+
+    int interval_minutes = prefs_get_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES);
+    if(interval_minutes == 0) {
+        interval_minutes = 60;
+        prefs_set_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES, interval_minutes);
+    }
+    interval = pdMS_TO_TICKS(interval_minutes * 60 * 1000);
 
     if(xTaskCreate(
         WeatherTaskFunction,

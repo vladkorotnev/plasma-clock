@@ -13,6 +13,8 @@
 #include <service/power_management.h>
 #include <service/owm/weather.h>
 #include <service/time.h>
+#include <service/prefs.h>
+#include <network/admin_panel.h>
 #include <utils.h>
 #include <state.h>
 #include <idle.h>
@@ -38,6 +40,8 @@ static SensorPool * sensors;
 static OTAFVUManager * ota;
 static Beeper * beepola;
 static BeepSequencer * bs;
+
+static bool fps_counter = false;
 
 void change_state(device_state_t to) {
     if(to == STATE_OTAFVU) {
@@ -125,8 +129,10 @@ void setup() {
     graph = fb->manipulate();
 
     timekeeping_begin();
-    weather_start(WEATHER_API_KEY, pdMS_TO_TICKS(60 * 60000), WEATHER_LAT, WEATHER_LON);
+    weather_start();
     power_mgmt_start(sensors, &plasma, beepola);
+    admin_panel_prepare(sensors, beepola);
+    fps_counter = prefs_get_bool(PREFS_KEY_FPS_COUNTER);
 
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 
@@ -149,14 +155,13 @@ void drawing() {
             break;
     }
 
-if(sensors->get_info(SENSOR_ID_MOTION)->last_result > 0) {
-    graph->plot_pixel(0, 0, true);
-}
-#if defined(PDFB_PERF_LOGS) && defined(DRAW_FPS_COUNTER)
-    // FPS counter
-    char buf[4];
-    itoa(fb->get_fps(), buf, 10);
-    fb->manipulate()->put_string(&fps_counter_font, buf, 0, 0);
+#if defined(PDFB_PERF_LOGS)
+    if(fps_counter) {
+        // FPS counter
+        char buf[4];
+        itoa(fb->get_fps(), buf, 10);
+        fb->manipulate()->put_string(&fps_counter_font, buf, 0, 0);
+    }
 #endif
 }
 

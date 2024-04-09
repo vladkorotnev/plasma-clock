@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <service/time.h>
 #include <service/owm/weather.h>
+#include <service/prefs.h>
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
 #include <views/indoor_view.h>
@@ -17,8 +18,8 @@ typedef enum MainViewId: uint16_t {
 } MainViewId_t;
 
 static int screen_times_ms[VIEW_MAX] = {
-    5000, // VIEW_CLOCK
-    5000, // VIEW_INDOOR_WEATHER
+    30000, // VIEW_CLOCK
+    10000, // VIEW_INDOOR_WEATHER
 };
 
 static bool did_prepare = false;
@@ -37,6 +38,7 @@ static TickType_t lastScreenSwitch = 0;
 static bool have_weather;
 static current_weather_t weather;
 
+static bool tick_tock_enable = false;
 static bool tick_tock = false;
 
 void sound_tick_tock() {
@@ -55,6 +57,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     did_prepare = true;
     beepola = b;
     sensors = s;
+    tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     clockView = new SimpleClock();
     indoorView = new IndoorView(sensors);
     rain = new RainOverlay(101, 16);
@@ -90,11 +93,14 @@ void app_idle_draw(FantaManipulator* graph) {
 }
 
 void app_idle_process() {
+    if(tick_tock_enable) {
+        sound_tick_tock();
+    }
+
     slideShow->step();
     if(weather_get_current(&weather)) {
         have_weather = true;
     }
 
     change_screen_if_needed();
-    sound_tick_tock();
 }
