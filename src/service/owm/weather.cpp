@@ -15,6 +15,7 @@ static String longitude;
 static TaskHandle_t hTask = NULL;
 static SemaphoreHandle_t cacheSemaphore;
 static current_weather_t cache = { 0 };
+static volatile bool is_demoing = false;
 
 weather_condition_t normalized_conditions(uint conditions) {
     if(conditions >= weather_condition_t::THUNDERSTORM && conditions < weather_condition_t::DRIZZLE) {
@@ -62,17 +63,19 @@ void WeatherTaskFunction( void * pvParameter )
                 if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
                     ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
                 } else {
-                    cache.conditions = normalized_conditions(response["current"]["weather"][0]["id"]);
-                    cache.temperature_kelvin = response["current"]["temp"];
-                    cache.feels_like_kelvin = response["current"]["feels_like"];
-                    cache.pressure_hpa = response["current"]["pressure"];
-                    cache.humidity_percent = response["current"]["humidity"];
-                    cache.last_updated = xTaskGetTickCount();
-                    String desc = response["current"]["weather"][0]["description"].as<String>();
-                    strncpy(cache.description, desc.c_str(), sizeof(cache.description));
-                    // Capitalize first letter
-                    if(cache.description[0] >= 'a') {
-                        cache.description[0] -= ('a' - 'A');
+                    if(!is_demoing) {
+                        cache.conditions = normalized_conditions(response["current"]["weather"][0]["id"]);
+                        cache.temperature_kelvin = response["current"]["temp"];
+                        cache.feels_like_kelvin = response["current"]["feels_like"];
+                        cache.pressure_hpa = response["current"]["pressure"];
+                        cache.humidity_percent = response["current"]["humidity"];
+                        cache.last_updated = xTaskGetTickCount();
+                        String desc = response["current"]["weather"][0]["description"].as<String>();
+                        strncpy(cache.description, desc.c_str(), sizeof(cache.description));
+                        // Capitalize first letter
+                        if(cache.description[0] >= 'a') {
+                            cache.description[0] -= ('a' - 'A');
+                        }
                     }
                     xSemaphoreGive(cacheSemaphore);
                     ESP_LOGI(LOG_TAG, "Weather refreshed");
@@ -179,4 +182,16 @@ float kelvin_to(float k, temperature_unit_t unit) {
     }
 
     return k;
+}
+
+void weather_set_demo(current_weather_t * demo) {
+    if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+        ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
+        return;
+    }
+
+    is_demoing = true;
+    memcpy(&cache, demo, sizeof(current_weather_t));
+
+    xSemaphoreGive(cacheSemaphore);
 }

@@ -7,6 +7,7 @@
 #include <service/prefs.h>
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
+#include <views/thunder_ovl.h>
 #include <views/indoor_view.h>
 #include <views/framework.h>
 #include <views/current_weather.h>
@@ -36,7 +37,9 @@ static SensorPool * sensors;
 static Renderable * mainView;
 
 static SimpleClock * clockView;
+
 static RainOverlay * rain;
+static ThunderOverlay * thunder;
 
 static IndoorView * indoorView;
 static CurrentWeatherView * weatherView;
@@ -46,8 +49,7 @@ static ViewMultiplexor * slideShow;
 static MainViewId_t curScreen = VIEW_CLOCK;
 static TickType_t lastScreenSwitch = 0;
 
-static bool have_weather;
-static current_weather_t weather;
+static current_weather_t weather = { 0 };
 
 static bool tick_tock_enable = false;
 static bool tick_tock = false;
@@ -84,6 +86,55 @@ void hourly_chime() {
     }
 }
 
+void weather_overlay_update() {
+    ESP_LOGI(LOG_TAG, "Weather overlay: %i", weather.conditions);
+
+    switch(weather.conditions) {
+        case RAIN:
+            rain->set_windspeed(0, false);
+            rain->set_intensity(10);
+            rain->set_speed_divisor(1);
+            thunder->set_active(false);
+            break;
+
+        case DRIZZLE:
+            rain->set_windspeed(0, false);
+            rain->set_gravity(1, true);
+            rain->set_intensity(5);
+            rain->set_speed_divisor(2);
+            thunder->set_active(false);
+            break;
+
+        case THUNDERSTORM:
+            rain->set_windspeed(-1, false);
+            rain->set_gravity(1, false);
+            rain->set_intensity(13);
+            rain->set_speed_divisor(2);
+            thunder->set_active(true);
+            break;
+
+        case SNOW:
+            rain->set_windspeed(-1, true);
+            rain->set_gravity(1, false);
+            rain->set_intensity(6);
+            rain->set_speed_divisor(3);
+            thunder->set_active(false);
+            break;
+
+        case CLEAR:
+        case CLOUDS:
+        case SCATTERED_CLOUDS:
+        case BROKEN_CLOUDS:
+        case OVERCAST:
+        case UNKNOWN:
+        default:
+            // No rain, no snow, nothing
+            rain->set_intensity(0);
+            thunder->set_active(false);
+            break;
+    }
+}
+
 void app_idle_prepare(SensorPool* s, Beeper* b) {
     if(did_prepare) return;
 
@@ -105,10 +156,16 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     clockView = new SimpleClock();
     indoorView = new IndoorView(sensors);
     rain = new RainOverlay(101, 16);
+    thunder = new ThunderOverlay(101, 16);
     weatherView = new CurrentWeatherView();
 
+    // thunder hurts readability on other views, so keep it on clock only
+    ViewCompositor * thunderClock = new ViewCompositor();
+    thunderClock->add_layer(clockView);
+    thunderClock->add_layer(thunder);
+
     slideShow = new ViewMultiplexor();
-    slideShow->add_view(clockView, VIEW_CLOCK);
+    slideShow->add_view(thunderClock, VIEW_CLOCK);
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
 
@@ -120,7 +177,6 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     mainView = rainyClock;
 
     mainView->prepare();
-    rain->set_intensity(20);
 }
 
 void change_screen_if_needed() {
@@ -144,8 +200,11 @@ void app_idle_process() {
     }
 
     mainView->step();
-    if(weather_get_current(&weather)) {
-        have_weather = true;
+
+    current_weather_t w;
+    if(weather_get_current(&w) && w.last_updated != weather.last_updated) {
+        memcpy(&weather, &w, sizeof(current_weather_t));
+        weather_overlay_update();
     }
 
     change_screen_if_needed();

@@ -143,3 +143,12 @@ int FantaManipulator::get_height() {
 const fanta_buffer_t FantaManipulator::get_fanta() {
     return buffer;
 }
+
+void FantaManipulator::invert() {
+    uint16_t* buffer_fast = (uint16_t*)buffer; // can't use uint32 since there is only 202 bytes in the whole screen, not divisible by 4
+    size_t buffer_fast_size = buffer_size / (sizeof(uint16_t) / sizeof(buffer[0]));
+
+    for(int i = 0; i < buffer_fast_size; i++) {
+        buffer_fast[i] = ~buffer_fast[i];
+    }
+}

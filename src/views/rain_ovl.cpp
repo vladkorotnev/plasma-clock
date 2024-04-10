@@ -6,15 +6,17 @@
 RainOverlay::RainOverlay(int w, int h) {
     windspeed = 0;
     gravity = 1;
-    intensity = 10;
+    intensity = 0;
+    windspeed_variative = false;
     speed_divisor = 1;
     width = w;
     height = h;
     memset(particles, PARTICLE_INACTIVE, PARTICLE_COUNT*sizeof(rain_particle_t));
 }
 
-void RainOverlay::set_gravity(uint8_t g) {
+void RainOverlay::set_gravity(uint8_t g, bool variative) {
     gravity = g;
+    gravity_variative = variative;
 }
 
 void RainOverlay::set_intensity(uint8_t i) {
@@ -23,8 +25,9 @@ void RainOverlay::set_intensity(uint8_t i) {
     else for(int i = intensity; i < PARTICLE_COUNT; i++) particles[i].x = PARTICLE_INACTIVE;
 }
 
-void RainOverlay::set_windspeed(int8_t w) {
+void RainOverlay::set_windspeed(int8_t w, bool variative) {
     windspeed = w;
+    windspeed_variative = variative;
 }
 
 void RainOverlay::set_speed_divisor(uint8_t d) {
@@ -44,8 +47,7 @@ void RainOverlay::step() {
                     p->y = 0;
                     p->x = rnd % (width + (windspeed >= 0 ? 1 :width/2));
                     rnd >>= 4;
-                    int8_t ws_offset = windspeed > 0 ? ((int8_t)rnd) % 2 : 0;
-                    p->vx = windspeed + ws_offset;
+                    p->vx = windspeed;
                     p->vy = gravity;
                 }
             } else if (p->y > height + 2) {
@@ -57,11 +59,11 @@ void RainOverlay::step() {
                 uint32_t rnd;
                 if(p->y % 3 == 0) {
                     rnd = esp_random();
-                    p->vy += ((int8_t) rnd) % 2;
-                    p->vy += gravity;
+                    p->vy += (gravity_variative ? ((int8_t) rnd) % 2 : 0);
+                    p->vy += gravity_variative ? gravity : 0;
                     rnd >>= 4;
                 }
-                if(p->x % 6 == 0 && windspeed > 0) {
+                if(p->x % 6 == 0 && windspeed > 0 && windspeed_variative) {
                     p->vx += ((int8_t) rnd) % p->vx;
                 }
             }

@@ -25,6 +25,7 @@ public:
     void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y);
     void put_string(const font_definition_t *, const char *, int x, int y);
     void scroll(int dx, int dy);
+    void invert();
 
     int get_width();
     int get_height();

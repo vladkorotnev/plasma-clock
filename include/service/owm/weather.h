@@ -40,5 +40,6 @@ typedef enum temperature_unit {
 void weather_start();
 void weather_stop();
 bool weather_get_current(current_weather_t *);
+void weather_set_demo(current_weather_t *);
 
 float kelvin_to(float, temperature_unit_t);

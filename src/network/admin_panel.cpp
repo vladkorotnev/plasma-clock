@@ -171,6 +171,10 @@ void build() {
             GP.LABEL(String(weather.humidity_percent) + " %");
             GP.LABEL(String(weather.pressure_hpa) + "hPa");
         }
+#ifdef DEMO_WEATHER_WEBADMIN
+    GP.LABEL("Change weather:");
+    GP.NUMBER("demo_weather", "Demo weather code", 200);
+#endif
     GP.SPOILER_END();
 
     GP.HR();
@@ -203,6 +207,17 @@ void action() {
         save_string(PREFS_KEY_WEATHER_LON);
         save_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES, 30, 24 * 60);
         save_bool(PREFS_KEY_FPS_COUNTER);
+
+#ifdef DEMO_WEATHER_WEBADMIN
+        int temp_wc;
+        if(ui.clickInt("demo_weather", temp_wc)) {
+            current_weather_t w;
+            weather_get_current(&w);
+            w.conditions = (weather_condition_t) temp_wc;
+            w.last_updated = xTaskGetTickCount();
+            weather_set_demo(&w);
+        }
+#endif
 
         int temp_chime;
         if(ui.clickInt(PREFS_KEY_HOURLY_CHIME_MELODY, temp_chime)) {
