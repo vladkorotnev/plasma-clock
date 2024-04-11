@@ -214,7 +214,9 @@ void action() {
             current_weather_t w;
             weather_get_current(&w);
             w.conditions = (weather_condition_t) temp_wc;
+            w.temperature_kelvin = 294.15;
             w.last_updated = xTaskGetTickCount();
+            strncpy(w.description, "Very nice day today. Feels like having a good time.", 64);
             weather_set_demo(&w);
         }
 #endif

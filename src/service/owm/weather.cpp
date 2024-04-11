@@ -192,6 +192,7 @@ void weather_set_demo(current_weather_t * demo) {
 
     is_demoing = true;
     memcpy(&cache, demo, sizeof(current_weather_t));
+    cache.conditions = normalized_conditions(cache.conditions);
 
     xSemaphoreGive(cacheSemaphore);
 }

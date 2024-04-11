@@ -21,7 +21,7 @@ void TransitionAnimationCoordinator::step() {
 }
 
 void TransitionAnimationCoordinator::prepare() {
-    if(viewA != nullptr) viewA->prepare();
+    // viewA is expected to be already prepared from it's previous state
     if(viewB != nullptr) viewB->prepare();
 }
 
