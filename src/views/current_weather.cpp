@@ -54,7 +54,7 @@ void CurrentWeatherView::prepare_for_new_weather() {
         prerender_icon_frame();
     }
 
-    snprintf(bottom_text, sizeof(bottom_text), "%s today. Feels like %.01f\370C. The pressure is %ihPa.", weather.description, kelvin_to(weather.feels_like_kelvin, CELSIUS), weather.pressure_hpa);
+    snprintf(bottom_text, sizeof(bottom_text), "%s today. Feels like %.01f\370C. Wind speed %.01f m/s. Pressure %i hPa.", weather.description, kelvin_to(weather.feels_like_kelvin, CELSIUS), weather.windspeed_mps, weather.pressure_hpa);
     bottom_line->set_string(bottom_text);
 }
 

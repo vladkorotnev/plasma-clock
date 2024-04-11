@@ -24,6 +24,7 @@ typedef enum weather_condition_code {
 typedef struct current_weather {
     float temperature_kelvin;
     float feels_like_kelvin;
+    float windspeed_mps;
     int pressure_hpa;
     int humidity_percent;
     weather_condition_t conditions;

@@ -69,6 +69,7 @@ void WeatherTaskFunction( void * pvParameter )
                         cache.feels_like_kelvin = response["current"]["feels_like"];
                         cache.pressure_hpa = response["current"]["pressure"];
                         cache.humidity_percent = response["current"]["humidity"];
+                        cache.windspeed_mps = response["current"]["wind_speed"];
                         cache.last_updated = xTaskGetTickCount();
                         String desc = response["current"]["weather"][0]["description"].as<String>();
                         strncpy(cache.description, desc.c_str(), sizeof(cache.description));
