@@ -1,4 +1,5 @@
 #include <service/time.h>
+#include <service/prefs.h>
 #include "esp_sntp.h"
 
 void timekeeping_begin() {
@@ -7,12 +8,19 @@ void timekeeping_begin() {
     }
 
     sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, TK_TIMESERVER);
+    sntp_setservername(0, prefs_get_string(PREFS_KEY_TIMESERVER, String(TK_TIMESERVER)).c_str());
     sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
-    sntp_set_sync_interval(TK_SYNC_INTERVAL);
+
+    int sync_interval = prefs_get_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC);
+    if(sync_interval == 0) {
+        sync_interval = TK_SYNC_INTERVAL_SEC;
+        prefs_set_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, sync_interval);
+    }
+    sntp_set_sync_interval(sync_interval * 1000);
     sntp_init();
 
-    setenv("TZ", TK_TIMEZONE, 1);
+    String tz = prefs_get_string(PREFS_KEY_TIMEZONE, String(TK_TIMEZONE));
+    setenv("TZ", tz.c_str(), 1);
     tzset();
 }
 

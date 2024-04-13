@@ -53,7 +53,7 @@ static void save_int(prefs_key_t key, int min, int max) {
     }
 }
 
-static void render_string(const char * title, prefs_key_t key, bool is_pass) {
+static void render_string(const char * title, prefs_key_t key, bool is_pass = false) {
     GP.LABEL(title);
     if(is_pass) {
         GP.PASS_EYE(key, title, prefs_get_string(key));
@@ -70,6 +70,32 @@ static void save_string(prefs_key_t key) {
     }
 }
 
+static void render_melody(const char * title, prefs_key_t key) {
+    GP.LABEL(title);
+    GP.SELECT(key, all_chime_names, prefs_get_int(key));
+}
+
+static void save_melody(prefs_key_t key) {
+    int temp_chime;
+    if(ui.clickInt(key, temp_chime)) {
+        temp_chime = std::min(temp_chime, all_chime_count);
+        temp_chime = std::max(temp_chime, 0);
+
+        ESP_LOGV(LOG_TAG, "Preview chime #%i for %s", temp_chime, key);
+        
+        prefs_set_int(key, temp_chime);
+
+        if(temp_chime == all_chime_count) {
+            temp_chime = esp_random() % all_chime_count;
+        }
+        
+        melody_sequence_t melody = all_chime_list[temp_chime];
+        BeepSequencer * s = new BeepSequencer(beeper);
+        s->play_sequence(melody, CHANNEL_NOTICE, 0);
+        s->wait_end_play();
+        delete s;
+    }
+}
 
 void build() {
     GP.BUILD_BEGIN();
@@ -80,23 +106,29 @@ void build() {
     GP.TITLE("PIS-OS Admin Panel");
 
     GP.SPOILER_BEGIN("WiFi", GP_BLUE);
-        render_string("SSID", PREFS_KEY_WIFI_SSID, false);
+        render_string("SSID", PREFS_KEY_WIFI_SSID);
         render_string("Password", PREFS_KEY_WIFI_PASS, true);
     GP.SPOILER_END();
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
-        render_bool("No sound when screen is off:", PREFS_KEY_NO_SOUND_WHEN_OFF);
+        render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
         GP.HR();
         render_bool("Hourly chime:", PREFS_KEY_HOURLY_CHIME_ON);
-        GP.SELECT(PREFS_KEY_HOURLY_CHIME_MELODY, all_chime_names, prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY));
+        GP.BREAK();
+        render_melody("First of the day:", PREFS_KEY_FIRST_CHIME_MELODY);
+        render_melody("All others:", PREFS_KEY_HOURLY_CHIME_MELODY);
         GP.BREAK();
         render_int("From:", PREFS_KEY_HOURLY_CHIME_START_HOUR);
         render_int("To:", PREFS_KEY_HOURLY_CHIME_STOP_HOUR);
         GP.HR();
-        GP.LABEL("Screen transition:");
-        GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide,Vertical Slide,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
+        render_string("NTP server:", PREFS_KEY_TIMESERVER);
+        GP.BREAK();
+        render_int("Sync interval [s]:", PREFS_KEY_TIME_SYNC_INTERVAL_SEC);
+        GP.BREAK();
+        render_string("Timezone descriptor:", PREFS_KEY_TIMEZONE);
+        GP.LABEL("E.g. JST-9 or AST4ADT,M3.2.0,M11.1.0. See <a href=\"https://www.iana.org/time-zones\">IANA TZ DB</a> for reference.");
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -106,6 +138,9 @@ void build() {
         render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);
         GP.BREAK();
         render_int("Show current weather for [s]:", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS);
+        GP.HR();
+        GP.LABEL("Screen transition:");
+        GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide,Vertical Slide,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -158,10 +193,10 @@ void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("OpenWeatherMap", GP_BLUE);
-        render_string("Latitude", PREFS_KEY_WEATHER_LAT, false);
-        render_string("Longitude", PREFS_KEY_WEATHER_LON, false);
+        render_string("Latitude", PREFS_KEY_WEATHER_LAT);
+        render_string("Longitude", PREFS_KEY_WEATHER_LON);
         render_string("API Key", PREFS_KEY_WEATHER_APIKEY, true);
-        render_int("Update interval, minutes:", PREFS_KEY_WEATHER_INTERVAL_MINUTES);
+        render_int("Update interval [m]:", PREFS_KEY_WEATHER_INTERVAL_MINUTES);
 
         current_weather_t weather;
         if(weather_get_current(&weather)) {
@@ -193,6 +228,11 @@ void action() {
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
         save_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23);
+        save_melody(PREFS_KEY_FIRST_CHIME_MELODY);
+        save_melody(PREFS_KEY_HOURLY_CHIME_MELODY);
+        save_string(PREFS_KEY_TIMESERVER);
+        save_string(PREFS_KEY_TIMEZONE);
+        save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);
         save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 1, 3600);
         save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 1, 3600);
         save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 1, 3600);
@@ -220,26 +260,6 @@ void action() {
             weather_set_demo(&w);
         }
 #endif
-
-        int temp_chime;
-        if(ui.clickInt(PREFS_KEY_HOURLY_CHIME_MELODY, temp_chime)) {
-            temp_chime = std::min(temp_chime, all_chime_count);
-            temp_chime = std::max(temp_chime, 0);
-
-            ESP_LOGV(LOG_TAG, "Preview chime #%i", temp_chime);
-            
-            prefs_set_int(PREFS_KEY_HOURLY_CHIME_MELODY, temp_chime);
-
-            if(temp_chime == all_chime_count) {
-                temp_chime = esp_random() % all_chime_count;
-            }
-            
-            melody_sequence_t melody = all_chime_list[temp_chime];
-            BeepSequencer * s = new BeepSequencer(beeper);
-            s->play_sequence(melody, CHANNEL_NOTICE, 0);
-            s->wait_end_play();
-            delete s;
-        }
 
         if(ui.click(reboot_btn)) {
             prefs_force_save();

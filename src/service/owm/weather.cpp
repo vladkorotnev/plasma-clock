@@ -99,41 +99,9 @@ void weather_start() {
     cacheSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(cacheSemaphore);
 
-    String tmp = prefs_get_string(PREFS_KEY_WEATHER_APIKEY);
-    if(tmp.length() == 0) {
-        #ifdef WEATHER_API_KEY
-            tmp = String(WEATHER_API_KEY);
-            prefs_set_string(PREFS_KEY_WEATHER_APIKEY, tmp);
-        #else
-            ESP_LOGE(LOG_TAG, "No API key, cannot start!");
-            return;
-        #endif
-    }
-    apiKey = tmp;
-
-    tmp = prefs_get_string(PREFS_KEY_WEATHER_LAT);
-    if(tmp.length() == 0) {
-        #ifdef WEATHER_LAT
-            tmp = String(WEATHER_LAT);
-            prefs_set_string(PREFS_KEY_WEATHER_LAT, tmp);
-        #else
-            ESP_LOGE(LOG_TAG, "No latitude, cannot start!");
-            return;
-        #endif
-    }
-    latitude = tmp;
-
-    tmp = prefs_get_string(PREFS_KEY_WEATHER_LON);
-    if(tmp.length() == 0) {
-        #ifdef WEATHER_LON
-            tmp = String(WEATHER_LON);
-            prefs_set_string(PREFS_KEY_WEATHER_LON, tmp);
-        #else
-            ESP_LOGE(LOG_TAG, "No longitude, cannot start!");
-            return;
-        #endif
-    }
-    longitude = tmp;
+    apiKey = prefs_get_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
+    latitude = prefs_get_string(PREFS_KEY_WEATHER_LAT, String(WEATHER_LAT));
+    longitude = prefs_get_string(PREFS_KEY_WEATHER_LON, String(WEATHER_LON));
 
     int interval_minutes = prefs_get_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES);
     if(interval_minutes == 0) {

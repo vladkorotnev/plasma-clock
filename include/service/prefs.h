@@ -32,10 +32,15 @@ static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_ON = "h_chime_on";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_START_HOUR = "h_chime_start";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_STOP_HOUR = "h_chime_stop";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_MELODY = "h_chime";
+static constexpr prefs_key_t PREFS_KEY_FIRST_CHIME_MELODY = "h_1stchime";
+
+static constexpr prefs_key_t PREFS_KEY_TIMEZONE = "tk_tz";
+static constexpr prefs_key_t PREFS_KEY_TIMESERVER = "tk_ntp_serv";
+static constexpr prefs_key_t PREFS_KEY_TIME_SYNC_INTERVAL_SEC = "tk_intv_s";
 
 void prefs_force_save();
 
-String prefs_get_string(prefs_key_t);
+String prefs_get_string(prefs_key_t, String def = String());
 void prefs_set_string(prefs_key_t, String);
 
 int prefs_get_int(prefs_key_t);

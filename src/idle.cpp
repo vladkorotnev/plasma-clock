@@ -70,13 +70,14 @@ void sound_tick_tock() {
 void hourly_chime() {
     static tk_time_of_day now;
     now = get_current_time_coarse();
+    int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) ;
     if(now.hour != last_chimed_hour 
-    && now.hour >= prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) 
+    && now.hour >= first_hour
     && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
     ) {
         last_chimed_hour = now.hour;
         if(!hourly_chime_on) return;
-        int melody_no = prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
+        int melody_no = (now.hour == first_hour) ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
         if(melody_no == all_chime_count) {
             melody_no = esp_random() % all_chime_count;
         }

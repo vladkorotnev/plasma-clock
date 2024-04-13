@@ -20,9 +20,14 @@ void prefs_force_save() {
     }
 }
 
-String prefs_get_string(prefs_key_t key) {
+String prefs_get_string(prefs_key_t key, String def) {
     init_store_if_needed();
-    return store->getString(key);
+    String val = store->getString(key);
+    if(val.length() > 0) {
+        return val;
+    } else {
+        return def;
+    }
 }
 void prefs_set_string(prefs_key_t key, String val) {
     init_store_if_needed();

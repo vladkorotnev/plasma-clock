@@ -2,7 +2,7 @@
 
 #define TK_TIMEZONE "JST-9"
 #define TK_TIMESERVER "pool.ntp.org"
-#define TK_SYNC_INTERVAL 60 * 60 * 1000
+#define TK_SYNC_INTERVAL_SEC 60 * 60
 
 typedef struct tk_time_of_day {
     int hour;
