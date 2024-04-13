@@ -2,7 +2,9 @@
 #include <sound/beeper.h>
 
 typedef struct melody_item {
+    /// @brief Frequency of the note in Hz. 0 for a pause.
     int frequency;
+    /// @brief Length of the note in ms.
     int length;
 } melody_item_t;
 
@@ -18,6 +20,7 @@ public:
 
     void play_sequence(const melody_sequence_t, beeper_channel_t, int repeat);
     void stop_sequence();
+    /// @brief Block the current task until the playback has finished.
     void wait_end_play();
 
     void task();

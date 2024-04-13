@@ -72,7 +72,6 @@ void PlasmaDisplayIface::set_databus(byte data) {
     byte local_sts = ~data;
     for(int i = 0; i < 8; i++) {
         byte cur_state = (local_sts & 1);
-        // Would ESP_ERROR_CHECK here impact perf highly enough?
         gpio_set_level(databus_gpios[i], cur_state);
         local_sts >>= 1;
     }

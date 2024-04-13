@@ -18,8 +18,12 @@ typedef struct tk_date {
     int dayOfWeek;
 } tk_date_t;
 
+/// @brief Start up the timekeeping service
 void timekeeping_begin();
 
+/// @brief Get the current time down to the second
 tk_time_of_day_t get_current_time_coarse();
+/// @brief Get the current time down to the millisecond 
 tk_time_of_day_t get_current_time_precise();
+/// @brief Get the current date
 tk_date_t get_current_date();

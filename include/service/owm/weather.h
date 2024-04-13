@@ -3,7 +3,7 @@
 
 typedef enum weather_condition_code {
     UNKNOWN = 0,
-    // TODO: someday, all the codes, if I ever get to make enough graphics for them
+
     THUNDERSTORM = 200,
 
     DRIZZLE = 300,
@@ -38,9 +38,14 @@ typedef enum temperature_unit {
     FAHRENHEIT
 } temperature_unit_t;
 
+/// @brief Start up the periodic weather update service
 void weather_start();
+/// @brief Stop the weather update service
 void weather_stop();
+/// @brief Get the current weather
+/// @return Whether the passed structure was updated correctly
 bool weather_get_current(current_weather_t *);
+/// @brief Set a dummy weather state for demo purposes
 void weather_set_demo(current_weather_t *);
 
 float kelvin_to(float, temperature_unit_t);

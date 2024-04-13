@@ -13,7 +13,7 @@ public:
     /// @param  coord Transition coordinator
     /// @return True if transition has finished, false otherwise.
     virtual bool render(FantaManipulator * fb, TransitionAnimationCoordinator * coord) { return true; }
-
+    /// @brief Prepare the object to render the transition again
     virtual void rewind() {}
 };
 

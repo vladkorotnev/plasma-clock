@@ -1,6 +1,7 @@
 #pragma once
 #include <views/framework.h>
 
+/// @brief A renderable effect resembling thunderbolts and lightning strikes
 class ThunderOverlay: public Renderable {
 public:
     ThunderOverlay(int width, int height);

@@ -9,6 +9,7 @@ typedef struct __attribute__((__packed__)) rain_particle {
     uint8_t vy;
 } rain_particle_t;
 
+/// @brief A particle system view resembling rainfall or snowfall
 class RainOverlay: public Renderable {
 public:
     RainOverlay(int width, int height);

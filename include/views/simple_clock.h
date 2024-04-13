@@ -4,6 +4,7 @@
 #include <service/time.h>
 #include "view.h"
 
+/// @brief A simple clock view
 class SimpleClock: public Renderable {
 public:
     SimpleClock();

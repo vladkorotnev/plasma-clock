@@ -2,6 +2,7 @@
 #include "view.h"
 #include <list>
 
+/// @brief Combines multiple Renderables in the Z axis
 class ViewCompositor: public Renderable {
 public:
     ViewCompositor();

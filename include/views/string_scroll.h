@@ -1,6 +1,7 @@
 #pragma once
 #include <views/framework.h>
 
+/// @brief Scrolling string view
 class StringScroll: public Renderable {
 public:
     StringScroll(const font_definition_t*);

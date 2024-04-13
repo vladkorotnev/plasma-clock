@@ -4,6 +4,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
+/// @brief A simple low level console that does not utilize the Renderable tooling
 class Console {
 public:
     Console(const font_definition_t*, PlasmaDisplayFramebuffer*);

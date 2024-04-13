@@ -6,6 +6,7 @@
 
 typedef uint16_t view_id_t;
 
+/// @brief Switches across multiple Renderables as desired
 class ViewMultiplexor: public Renderable {
 public: 
     ViewMultiplexor();

@@ -1,8 +1,16 @@
 #pragma once
 #include <hal/gpio_hal.h>
 
+/// @brief Interface to the Morio Denki plasma display controller board
 class PlasmaDisplayIface {
 public:
+    /// @brief Initialize the interface. Configures the GPIO and prepares the outputs for use, also disables the output and high voltage supply.
+    /// @param databus 8 pins connected to the display controller's pixel data bus, LSB to MSB
+    /// @param clock Pin connected to the display controller's CLK pin
+    /// @param reset Pin connected to the display controller's RST pin
+    /// @param bright Pin connected to the display controller's BRIGHT pin
+    /// @param blanking Pin connected to the display controller's SHOW pin
+    /// @param hv_enable Pin connected to the high voltage supply's ENABLE pin
     PlasmaDisplayIface(
         const gpio_num_t databus[8],
         const gpio_num_t clock,
@@ -12,13 +20,19 @@ public:
         const gpio_num_t hv_enable
     );
     
+    /// @brief Reset the display controller
     void reset();
 
+    /// @brief Enable or disable the high voltage supply 
     void set_power(bool on);
+    /// @brief Show or hide the display contents, while keeping the scanning active
     void set_show(bool show);
+    /// @brief Select between half or full brightness
     void set_bright(bool bright);
 
+    /// @brief Send a half-column to the display controller
     void write_stride(uint8_t stride);
+    /// @brief Send a full column to the display controller
     void write_column(uint16_t column);
 
 private:
