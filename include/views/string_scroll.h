@@ -15,6 +15,7 @@ private:
     int y_position;
     int position;
     int frame_divisor;
+    int increment;
     int string_width;
     int frame_counter;
 };

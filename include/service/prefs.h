@@ -23,6 +23,7 @@ static constexpr prefs_key_t PREFS_KEY_WEATHER_APIKEY = "w_apikey";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_INTERVAL_MINUTES = "w_interval_m";
 
 static constexpr prefs_key_t PREFS_KEY_TRANSITION_TYPE = "s_transition";
+static constexpr prefs_key_t PREFS_KEY_DISP_SCROLL_SPEED = "s_scrl_spd";
 
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";

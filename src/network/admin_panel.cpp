@@ -141,6 +141,9 @@ void build() {
         GP.HR();
         GP.LABEL("Screen transition:");
         GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide,Vertical Slide,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
+        GP.HR();
+        GP.LABEL("Scroll speed:");
+        GP.SELECT(PREFS_KEY_DISP_SCROLL_SPEED, "Slow,Medium,Fast,Sonic", prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED));
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -238,6 +241,7 @@ void action() {
         save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 1, 3600);
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
+        save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
