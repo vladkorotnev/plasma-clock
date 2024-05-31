@@ -1,4 +1,5 @@
 #include <views/simple_clock.h>
+#include <service/prefs.h>
 #include <fonts.h>
 #include <esp32-hal-ledc.h>
 
@@ -13,6 +14,7 @@ SimpleClock::SimpleClock() {
     next_time = { 0 };
     phase = 0;
     separator = CLOCK_SEPARATOR;
+    blink_separator = prefs_get_bool(PREFS_KEY_BLINK_SEPARATORS);
 }
 
 inline void itoa_padded(uint i, char * a) {
@@ -107,7 +109,7 @@ void SimpleClock::step() {
     }
     phase = EASING_CURVE[phase];
 
-    separator = (phase != 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
+    separator = (blink_separator && phase != 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 }
 
 void SimpleClock::render(FantaManipulator *framebuffer) {

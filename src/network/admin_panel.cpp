@@ -112,6 +112,7 @@ void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
+        render_bool("Blink separators:", PREFS_KEY_BLINK_SEPARATORS);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
         GP.HR();
@@ -227,6 +228,7 @@ void action() {
     if(ui.click()) {
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
+        save_bool(PREFS_KEY_BLINK_SEPARATORS);
         save_bool(PREFS_KEY_TICKING_SOUND);
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
