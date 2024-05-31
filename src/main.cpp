@@ -75,7 +75,7 @@ void setup() {
     con->set_cursor(true);
     
     // Plasma Information System OS (not DOS, there's no disk in it!)
-    con->print("PIS-OS v1.0.1\n");
+    con->print("PIS-OS v1.1\n");
     delay(500);
  
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
