@@ -5,6 +5,7 @@
 #include <service/time.h>
 #include <service/owm/weather.h>
 #include <service/prefs.h>
+#include <service/foo_client.h>
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
 #include <views/thunder_ovl.h>
@@ -12,6 +13,7 @@
 #include <views/framework.h>
 #include <views/current_weather.h>
 #include <views/word_of_the_day.h>
+#include <views/fb2k.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
@@ -20,6 +22,7 @@ typedef enum MainViewId: uint16_t {
     VIEW_INDOOR_WEATHER,
     VIEW_OUTDOOR_WEATHER,
     VIEW_WORD_OF_THE_DAY,
+    VIEW_FB2K,
 
     VIEW_MAX
 } MainViewId_t;
@@ -29,6 +32,7 @@ static int screen_times_ms[VIEW_MAX] = {
     10000, // VIEW_INDOOR_WEATHER
     25000, // VIEW_OUTDOOR_WEATHER
     25000, // VIEW_WORD_OF_THE_DAY
+    0, // VIEW_FB2K
 };
 
 static bool did_prepare = false;
@@ -46,8 +50,8 @@ static ThunderOverlay * thunder;
 
 static IndoorView * indoorView;
 static CurrentWeatherView * weatherView;
-
 static WordOfTheDayView * wotdView;
+static Fb2kView *fb2kView;
 
 static ViewMultiplexor * slideShow;
 
@@ -159,6 +163,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
+    // VIEW_FB2K gets set dynamically in processing()
 
     bool has_at_least_one_screen = false;
     for(int i = 0; i < VIEW_MAX; i++) {
@@ -177,6 +182,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     thunder = new ThunderOverlay(101, 16);
     weatherView = new CurrentWeatherView();
     wotdView = new WordOfTheDayView();
+    fb2kView = new Fb2kView();
 
     // thunder hurts readability on other views, so keep it on clock only
     ViewCompositor * thunderClock = new ViewCompositor();
@@ -188,6 +194,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
+    slideShow->add_view(fb2kView, VIEW_FB2K);
 
     lastScreenSwitch = xTaskGetTickCount();
 
@@ -237,4 +244,6 @@ void app_idle_process() {
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
+    screen_times_ms[VIEW_FB2K] = 
+        foo_is_playing() ? (prefs_get_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS) * 1000) : 0;
 }

@@ -33,6 +33,7 @@ static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS = "s_outside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS = "s_wotd_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS = "s_foo_s";
 
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_ON = "h_chime_on";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_START_HOUR = "h_chime_start";
@@ -43,6 +44,9 @@ static constexpr prefs_key_t PREFS_KEY_FIRST_CHIME_MELODY = "h_1stchime";
 static constexpr prefs_key_t PREFS_KEY_TIMEZONE = "tk_tz";
 static constexpr prefs_key_t PREFS_KEY_TIMESERVER = "tk_ntp_serv";
 static constexpr prefs_key_t PREFS_KEY_TIME_SYNC_INTERVAL_SEC = "tk_intv_s";
+
+static constexpr prefs_key_t PREFS_KEY_FOOBAR_SERVER = "foo_svr";
+static constexpr prefs_key_t PREFS_KEY_FOOBAR_PORT = "foo_prt";
 
 void prefs_force_save();
 

@@ -12,6 +12,7 @@ public:
 private:
     const font_definition_t * font;
     const char * string;
+    bool scroll_only_if_not_fit;
     int y_position;
     int position;
     int frame_divisor;

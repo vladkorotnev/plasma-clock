@@ -6,6 +6,7 @@ StringScroll::StringScroll(const font_definition_t * f) {
     string = nullptr;
     position = 0;
     string_width = 0;
+    scroll_only_if_not_fit = true;
 
     switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
         case 0:
@@ -50,6 +51,13 @@ void StringScroll::set_y_position(int y) {
 
 void StringScroll::render(FantaManipulator * fb) {
     if(string == nullptr) return;
+
+    if(scroll_only_if_not_fit) {
+        if(string_width <= fb->get_width()) {
+            fb->put_string(font, string, 0, y_position);
+            return;
+        }
+    }
 
     frame_counter++;
     if(frame_counter % frame_divisor == 0) {

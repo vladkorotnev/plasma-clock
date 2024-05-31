@@ -37,7 +37,7 @@ static const ani_sprite_t book_icon = {
 WordOfTheDayView::WordOfTheDayView() {
     font = &keyrus0808_font;
     memset(word_buffer, 0, 32);
-    memset(definition_buffer, 256, 0);
+    memset(definition_buffer, 0, 256);
 
     strncpy(word_buffer, "Loading...", 31);
     strncpy(definition_buffer, "Transfer (a program or data) into memory, or into the central processor from storage.", 255);
@@ -58,10 +58,10 @@ void WordOfTheDayView::prepare() {
         last_update = ts;
         wotd_get_current(word_buffer, 32, definition_buffer, 256);
         ESP_LOGI(LOG_TAG, "New word of the day");
-        bottom_line->set_string(definition_buffer);
     }
 
     icon_state = ani_sprite_prepare(&book_icon);
+    bottom_line->set_string(definition_buffer);
 }
 
 void WordOfTheDayView::step() {
@@ -69,7 +69,8 @@ void WordOfTheDayView::step() {
 }
 
 void WordOfTheDayView::render(FantaManipulator *fb) {
-    fb->put_sprite(&current_icon_frame, 0, 0);
+    if(current_icon_frame.data != nullptr)
+        fb->put_sprite(&current_icon_frame, 0, 0);
     
     FantaManipulator * text_window = fb->slice(17, fb->get_width() - 17);
     text_window->put_string(font, word_buffer, 0, 0);
