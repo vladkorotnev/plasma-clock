@@ -1,6 +1,7 @@
 #include "network/admin_panel.h"
 #include <service/prefs.h>
 #include <service/owm/weather.h>
+#include <service/wordnik.h>
 #include <views/transitions.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
@@ -112,6 +113,7 @@ void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
+        render_bool("Blink separators:", PREFS_KEY_BLINK_SEPARATORS);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
         GP.HR();
@@ -138,9 +140,16 @@ void build() {
         render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);
         GP.BREAK();
         render_int("Show current weather for [s]:", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS);
+        GP.BREAK();
+        render_int("Show word of the day for [s]:", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS);
+        GP.BREAK();
+        render_int("Show Fb2k for [s]:", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS);
         GP.HR();
         GP.LABEL("Screen transition:");
         GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide,Vertical Slide,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
+        GP.HR();
+        GP.LABEL("Scroll speed:");
+        GP.SELECT(PREFS_KEY_DISP_SCROLL_SPEED, "Slow,Medium,Fast,Sonic", prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED));
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -211,6 +220,29 @@ void build() {
     GP.NUMBER("demo_weather", "Demo weather code", 200);
 #endif
     GP.SPOILER_END();
+    GP.BREAK();
+
+    GP.SPOILER_BEGIN("Wordnik", GP_BLUE);
+        render_string("API Key", PREFS_KEY_WORDNIK_APIKEY, true);
+        render_int("Update interval [m]:", PREFS_KEY_WORDNIK_INTERVAL_MINUTES);
+
+        char wotd[32];
+        char definition[256];
+        if(wotd_get_current(wotd, 32, definition, 256)) {
+            GP.HR();
+            GP.LABEL("Today's word:");
+            GP.LABEL(wotd);
+            GP.BREAK();
+            GP.SPAN(definition);
+        }
+    GP.SPOILER_END();
+    GP.BREAK();
+
+    GP.SPOILER_BEGIN("Foobar2000", GP_BLUE);
+        render_string("Control Server IP", PREFS_KEY_FOOBAR_SERVER);
+        render_int("Control Server Port:", PREFS_KEY_FOOBAR_PORT);
+        GP.SPAN("Please set the format in foo_controlserver to: %artist%|%title%, and main delimiter to: |");
+    GP.SPOILER_END();
 
     GP.HR();
 #if defined(PDFB_PERF_LOGS)
@@ -224,6 +256,7 @@ void action() {
     if(ui.click()) {
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
+        save_bool(PREFS_KEY_BLINK_SEPARATORS);
         save_bool(PREFS_KEY_TICKING_SOUND);
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
@@ -233,11 +266,14 @@ void action() {
         save_string(PREFS_KEY_TIMESERVER);
         save_string(PREFS_KEY_TIMEZONE);
         save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);
-        save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 1, 3600);
-        save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 1, 3600);
-        save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 1, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600);
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
+        save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
@@ -246,6 +282,10 @@ void action() {
         save_string(PREFS_KEY_WEATHER_LAT);
         save_string(PREFS_KEY_WEATHER_LON);
         save_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES, 30, 24 * 60);
+        save_string(PREFS_KEY_WORDNIK_APIKEY);
+        save_int(PREFS_KEY_WORDNIK_INTERVAL_MINUTES, 60, 3600);
+        save_string(PREFS_KEY_FOOBAR_SERVER);
+        save_int(PREFS_KEY_FOOBAR_PORT, 1000, 9999);
         save_bool(PREFS_KEY_FPS_COUNTER);
 
 #ifdef DEMO_WEATHER_WEBADMIN

@@ -18,4 +18,5 @@ private:
     tk_time_of_day_t next_time;
     int phase;
     char separator;
+    bool blink_separator;
 };

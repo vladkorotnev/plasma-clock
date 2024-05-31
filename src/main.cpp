@@ -14,6 +14,8 @@
 #include <service/owm/weather.h>
 #include <service/time.h>
 #include <service/prefs.h>
+#include <service/wordnik.h>
+#include <service/foo_client.h>
 #include <network/admin_panel.h>
 #include <utils.h>
 #include <state.h>
@@ -75,7 +77,7 @@ void setup() {
     con->set_cursor(true);
     
     // Plasma Information System OS (not DOS, there's no disk in it!)
-    con->print("PIS-OS v1.0\n");
+    con->print("PIS-OS v1.1\n");
     delay(500);
  
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
@@ -130,6 +132,8 @@ void setup() {
 
     timekeeping_begin();
     weather_start();
+    wotd_start();
+    foo_client_begin();
     power_mgmt_start(sensors, &plasma, beepola);
     admin_panel_prepare(sensors, beepola);
     fps_counter = prefs_get_bool(PREFS_KEY_FPS_COUNTER);
