@@ -23,12 +23,16 @@ static constexpr prefs_key_t PREFS_KEY_WEATHER_LON = "w_lon";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_APIKEY = "w_apikey";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_INTERVAL_MINUTES = "w_interval_m";
 
+static constexpr prefs_key_t PREFS_KEY_WORDNIK_APIKEY = "wd_apikey";
+static constexpr prefs_key_t PREFS_KEY_WORDNIK_INTERVAL_MINUTES = "wd_interval_m";
+
 static constexpr prefs_key_t PREFS_KEY_TRANSITION_TYPE = "s_transition";
 static constexpr prefs_key_t PREFS_KEY_DISP_SCROLL_SPEED = "s_scrl_spd";
 
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS = "s_outside_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS = "s_wotd_s";
 
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_ON = "h_chime_on";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_START_HOUR = "h_chime_start";

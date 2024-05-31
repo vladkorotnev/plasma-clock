@@ -11,6 +11,7 @@
 #include <views/indoor_view.h>
 #include <views/framework.h>
 #include <views/current_weather.h>
+#include <views/word_of_the_day.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
@@ -18,6 +19,7 @@ typedef enum MainViewId: uint16_t {
     VIEW_CLOCK = 0,
     VIEW_INDOOR_WEATHER,
     VIEW_OUTDOOR_WEATHER,
+    VIEW_WORD_OF_THE_DAY,
 
     VIEW_MAX
 } MainViewId_t;
@@ -26,6 +28,7 @@ static int screen_times_ms[VIEW_MAX] = {
     30000, // VIEW_CLOCK
     10000, // VIEW_INDOOR_WEATHER
     25000, // VIEW_OUTDOOR_WEATHER
+    25000, // VIEW_WORD_OF_THE_DAY
 };
 
 static bool did_prepare = false;
@@ -43,6 +46,8 @@ static ThunderOverlay * thunder;
 
 static IndoorView * indoorView;
 static CurrentWeatherView * weatherView;
+
+static WordOfTheDayView * wotdView;
 
 static ViewMultiplexor * slideShow;
 
@@ -150,15 +155,28 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
 
-    screen_times_ms[VIEW_CLOCK] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000, 1000);
-    screen_times_ms[VIEW_INDOOR_WEATHER] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000, 1000);
-    screen_times_ms[VIEW_OUTDOOR_WEATHER] = std::max(prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000, 1000);
+    screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
+    screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
+    screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
+    screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
+
+    bool has_at_least_one_screen = false;
+    for(int i = 0; i < VIEW_MAX; i++) {
+        if(screen_times_ms[i] != 0) {
+            has_at_least_one_screen = true;
+            break;
+        }
+    }
+    if(!has_at_least_one_screen) {
+        screen_times_ms[VIEW_CLOCK] = 3600000;
+    }
 
     clockView = new SimpleClock();
     indoorView = new IndoorView(sensors);
     rain = new RainOverlay(101, 16);
     thunder = new ThunderOverlay(101, 16);
     weatherView = new CurrentWeatherView();
+    wotdView = new WordOfTheDayView();
 
     // thunder hurts readability on other views, so keep it on clock only
     ViewCompositor * thunderClock = new ViewCompositor();
@@ -169,6 +187,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     slideShow->add_view(thunderClock, VIEW_CLOCK);
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
+    slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
 
     lastScreenSwitch = xTaskGetTickCount();
 
@@ -185,6 +204,10 @@ void change_screen_if_needed() {
     if(now - lastScreenSwitch >= pdMS_TO_TICKS(screen_times_ms[curScreen])) {
         curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
         if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
+        while(screen_times_ms[curScreen] == 0) {
+            curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
+            if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
+        }
         slideShow->switch_to(curScreen, (transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
         lastScreenSwitch = now;
     }
