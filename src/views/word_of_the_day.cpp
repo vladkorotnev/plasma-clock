@@ -49,6 +49,8 @@ WordOfTheDayView::WordOfTheDayView() {
     bottom_line->set_y_position(8);
     bottom_line->set_string(definition_buffer);
 
+    current_icon_frame = { 0 };
+
     ESP_LOGV(LOG_TAG, "Init");
 }
 
