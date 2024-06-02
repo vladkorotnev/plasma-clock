@@ -5,7 +5,7 @@
 #include "view.h"
 
 /// @brief A simple clock view
-class SimpleClock: public Renderable {
+class SimpleClock: public Screen {
 public:
     SimpleClock();
     void render(FantaManipulator*);

@@ -3,7 +3,7 @@
 #include <plasma/fanta_manipulator.h>
 #include <views/string_scroll.h>
 
-class WordOfTheDayView: public Renderable {
+class WordOfTheDayView: public Screen {
 public:
     WordOfTheDayView();
     void prepare();

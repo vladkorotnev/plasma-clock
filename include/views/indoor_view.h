@@ -3,7 +3,7 @@
 #include <plasma/fanta_manipulator.h>
 #include <sensor/sensor.h>
 
-class IndoorView: public Renderable {
+class IndoorView: public Screen {
 public:
     IndoorView(SensorPool*);
     void render(FantaManipulator*);

@@ -3,7 +3,7 @@
 #include <views/string_scroll.h>
 #include <service/owm/weather.h>
 
-class CurrentWeatherView: public Renderable {
+class CurrentWeatherView: public Screen {
 public:
     CurrentWeatherView();
     ~CurrentWeatherView();

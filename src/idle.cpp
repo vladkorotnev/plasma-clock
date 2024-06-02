@@ -35,6 +35,8 @@ static int screen_times_ms[VIEW_MAX] = {
     0, // VIEW_FB2K
 };
 
+int current_screen_time_ms = 0;
+
 static bool did_prepare = false;
 
 static Beeper * beepola;
@@ -163,7 +165,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
-    // VIEW_FB2K gets set dynamically in processing()
+    screen_times_ms[VIEW_FB2K] = prefs_get_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS) * 1000;
 
     bool has_at_least_one_screen = false;
     for(int i = 0; i < VIEW_MAX; i++) {
@@ -176,6 +178,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
         screen_times_ms[VIEW_CLOCK] = 3600000;
     }
 
+    current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
+
     clockView = new SimpleClock();
     indoorView = new IndoorView(sensors);
     rain = new RainOverlay(101, 16);
@@ -185,8 +189,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     fb2kView = new Fb2kView();
 
     // thunder hurts readability on other views, so keep it on clock only
-    ViewCompositor * thunderClock = new ViewCompositor();
-    thunderClock->add_layer(clockView);
+    ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
     thunderClock->add_layer(thunder);
 
     slideShow = new ViewMultiplexor();
@@ -208,12 +211,18 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
 void change_screen_if_needed() {
     TickType_t now = xTaskGetTickCount();
-    if(now - lastScreenSwitch >= pdMS_TO_TICKS(screen_times_ms[curScreen])) {
+    if(now - lastScreenSwitch >= pdMS_TO_TICKS(current_screen_time_ms)) {
         curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
         if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
-        while(screen_times_ms[curScreen] == 0) {
+        current_screen_time_ms = screen_times_ms[curScreen];
+        while(current_screen_time_ms == 0) {
             curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
             if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
+
+            int specificTime = slideShow->get_view(curScreen)->desired_display_time();
+            if(specificTime > current_screen_time_ms) {
+                current_screen_time_ms = specificTime;
+            }
         }
         slideShow->switch_to(curScreen, (transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
         lastScreenSwitch = now;
@@ -244,6 +253,4 @@ void app_idle_process() {
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
-    screen_times_ms[VIEW_FB2K] = 
-        foo_is_playing() ? (prefs_get_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS) * 1000) : 0;
 }

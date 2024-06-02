@@ -66,3 +66,11 @@ void Fb2kView::render(FantaManipulator *fb) {
     bottom_line->render(text_window);
     delete text_window;
 }
+
+int Fb2kView::desired_display_time() {
+    if(foo_is_playing()) {
+        return DISP_TIME_NO_OVERRIDE;
+    } else {
+        return DISP_TIME_DONT_SHOW;
+    }
+}
