@@ -101,3 +101,7 @@ void CurrentWeatherView::render(FantaManipulator* fb) {
         delete text_window;
     }
 }
+
+int CurrentWeatherView::desired_display_time() {
+    return std::max((bottom_line->estimated_frame_count() * 1000 / 58) + 2000, 1); // workaround when the bottom string is null 
+}

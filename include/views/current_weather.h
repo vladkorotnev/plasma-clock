@@ -11,6 +11,7 @@ public:
     void step();
     void cleanup();
     void render(FantaManipulator*);
+    int desired_display_time();
 
 private:
     const font_definition_t * big_font;

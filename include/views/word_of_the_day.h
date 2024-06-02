@@ -6,9 +6,11 @@
 class WordOfTheDayView: public Screen {
 public:
     WordOfTheDayView();
+    ~WordOfTheDayView();
     void prepare();
     void step();
     void render(FantaManipulator*);
+    int desired_display_time();
 
 private:
     const font_definition_t * font;

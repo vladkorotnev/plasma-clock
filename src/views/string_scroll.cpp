@@ -49,6 +49,10 @@ void StringScroll::set_y_position(int y) {
     y_position = y;
 }
 
+int StringScroll::estimated_frame_count() {
+    return string_width * frame_divisor / increment;
+}
+
 void StringScroll::render(FantaManipulator * fb) {
     if(string == nullptr) return;
 

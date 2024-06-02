@@ -54,6 +54,10 @@ WordOfTheDayView::WordOfTheDayView() {
     ESP_LOGV(LOG_TAG, "Init");
 }
 
+WordOfTheDayView::~WordOfTheDayView() {
+    delete bottom_line;
+}
+
 void WordOfTheDayView::prepare() {
     TickType_t ts = wotd_get_last_update();
     if(ts != last_update) {
@@ -78,4 +82,8 @@ void WordOfTheDayView::render(FantaManipulator *fb) {
     text_window->put_string(font, word_buffer, 0, 0);
     bottom_line->render(text_window);
     delete text_window;
+}
+
+int WordOfTheDayView::desired_display_time() {
+    return (bottom_line->estimated_frame_count() * 1000 / 58) + 2000; 
 }

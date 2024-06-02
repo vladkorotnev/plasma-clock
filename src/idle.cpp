@@ -209,20 +209,25 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     mainView->prepare();
 }
 
+void update_screen_specific_time() {
+    current_screen_time_ms = screen_times_ms[curScreen];
+    if(current_screen_time_ms == 0) return;  // user disabled this screen, don't care what it thinks about the display time
+
+    int specificTime = slideShow->get_view(curScreen)->desired_display_time();
+    if(specificTime > current_screen_time_ms || specificTime == DISP_TIME_DONT_SHOW) {
+        current_screen_time_ms = specificTime;
+    }
+}
+
 void change_screen_if_needed() {
     TickType_t now = xTaskGetTickCount();
+    update_screen_specific_time();
     if(now - lastScreenSwitch >= pdMS_TO_TICKS(current_screen_time_ms)) {
-        curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
-        if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
-        current_screen_time_ms = screen_times_ms[curScreen];
+        current_screen_time_ms = 0;
         while(current_screen_time_ms == 0) {
             curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
             if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
-
-            int specificTime = slideShow->get_view(curScreen)->desired_display_time();
-            if(specificTime > current_screen_time_ms || specificTime == DISP_TIME_DONT_SHOW) {
-                current_screen_time_ms = specificTime;
-            }
+            update_screen_specific_time();
         }
         slideShow->switch_to(curScreen, (transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
         lastScreenSwitch = now;
