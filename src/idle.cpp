@@ -220,7 +220,7 @@ void change_screen_if_needed() {
             if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
 
             int specificTime = slideShow->get_view(curScreen)->desired_display_time();
-            if(specificTime > current_screen_time_ms) {
+            if(specificTime > current_screen_time_ms || specificTime == DISP_TIME_DONT_SHOW) {
                 current_screen_time_ms = specificTime;
             }
         }
