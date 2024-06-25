@@ -1,8 +1,12 @@
 #pragma once
+#include <device_config.h>
+
+#if HAS(OUTPUT_MD_PLASMA)
 #include <hal/gpio_hal.h>
+#include <graphics/display_driver.h>
 
 /// @brief Interface to the Morio Denki plasma display controller board
-class MorioDenkiPlasmaDriver {
+class MorioDenkiPlasmaDriver: public DisplayDriver {
 public:
     /// @brief Initialize the interface. Configures the GPIO and prepares the outputs for use, also disables the output and high voltage supply.
     /// @param databus 8 pins connected to the display controller's pixel data bus, LSB to MSB
@@ -46,3 +50,5 @@ private:
     inline void set_databus(uint8_t data);
     inline void pulse_clock();
 };
+
+#endif

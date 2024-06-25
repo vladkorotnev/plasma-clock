@@ -1,11 +1,13 @@
 #include <Arduino.h>
 #include <device_config.h>
 
-#if HAS(OUTPUT_PLASMA)
+#if HAS(OUTPUT_MD_PLASMA)
 #include <display/md_plasma.h>
-#include <graphics/framebuffer.h>
+#elif HAS(OUTPUT_WS0010)
+#include <display/ws0010.h>
 #endif
 
+#include <graphics/framebuffer.h>
 #include <fonts.h>
 #include <console.h>
 #include <AM232X.h>
@@ -31,7 +33,7 @@ static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
 
 #if HAS(OUTPUT_MD_PLASMA)
-static MorioDenkiPlasmaDriver plasma(
+static MorioDenkiPlasmaDriver display_driver(
     HWCONF_PLASMA_DATABUS_GPIOS,
     HWCONF_PLASMA_CLK_GPIO,
     HWCONF_PLASMA_RESET_GPIO,
@@ -40,12 +42,16 @@ static MorioDenkiPlasmaDriver plasma(
     HWCONF_PLASMA_HV_EN_GPIO
 );
 #elif HAS(OUTPUT_WS0010)
-#error TODO
+static Ws0010OledDriver display_driver(
+    HWCONF_WS0010_DATABUS_GPIOS,
+    HWCONF_WS0010_RS_GPIO,
+    HWCONF_WS0010_EN_GPIO
+);
 #else
 #error Output type not selected
 #endif
 
-static PlasmaDisplayFramebuffer * fb;
+static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
 static Console * con;
 static SensorPool * sensors;
@@ -75,14 +81,16 @@ void change_state(device_state_t to) {
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
-    plasma.reset();
+    display_driver.reset();
 
-    plasma.set_power(true);
+    display_driver.set_power(true);
     delay(125);
-    plasma.set_show(true);
-    plasma.set_bright(true);
+    display_driver.set_show(true);
+#if HAS(VARYING_BRIGHTNESS)
+    display_driver.set_bright(true);
+#endif
 
-    fb = new PlasmaDisplayFramebuffer(&plasma);
+    fb = new DisplayFramebuffer(&display_driver);
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     
@@ -149,7 +157,7 @@ void setup() {
     weather_start();
     wotd_start();
     foo_client_begin();
-    power_mgmt_start(sensors, &plasma, beepola);
+    power_mgmt_start(sensors, &display_driver, beepola);
     admin_panel_prepare(sensors, beepola);
     fps_counter = prefs_get_bool(PREFS_KEY_FPS_COUNTER);
 

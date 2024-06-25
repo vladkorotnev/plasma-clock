@@ -16,3 +16,17 @@ const uint8_t HWCONF_BEEPER_PWM_CHANNEL = 0;
 // ---- Connection to temperature sensor ----
 const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
 const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
+
+// ---- Connection to display ----
+const gpio_num_t HWCONF_WS0010_DATABUS_GPIOS[] = {
+    GPIO_NUM_15, 
+    GPIO_NUM_2, 
+    GPIO_NUM_0,
+    GPIO_NUM_4, 
+    GPIO_NUM_16, 
+    GPIO_NUM_17, 
+    GPIO_NUM_5, 
+    GPIO_NUM_18
+};
+const gpio_num_t HWCONF_WS0010_RS_GPIO = GPIO_NUM_19;
+const gpio_num_t HWCONF_WS0010_EN_GPIO = GPIO_NUM_21;

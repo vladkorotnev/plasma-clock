@@ -1,7 +1,12 @@
-#include <display/md_plasma.h>
-#include <Arduino.h>
+#include <device_config.h>
 
-static char LOG_TAG[] = "PDIF";
+#if HAS(OUTPUT_MD_PLASMA)
+#include <display/md_plasma.h>
+#include <esp32-hal-log.h>
+#include <esp32-hal-gpio.h>
+#include <esp_err.h>
+
+static char LOG_TAG[] = "MDPlasma";
 
 MorioDenkiPlasmaDriver::MorioDenkiPlasmaDriver(
     const gpio_num_t databus[8],
@@ -68,10 +73,10 @@ void MorioDenkiPlasmaDriver::set_power(bool on) {
     gpio_set_level(hv_en_gpio, on ? 1 : 0);
 }
 
-void MorioDenkiPlasmaDriver::set_databus(byte data) {
-    byte local_sts = ~data;
+void MorioDenkiPlasmaDriver::set_databus(uint8_t data) {
+    uint8_t local_sts = ~data;
     for(int i = 0; i < 8; i++) {
-        byte cur_state = (local_sts & 1);
+        uint8_t cur_state = (local_sts & 1);
         gpio_set_level(databus_gpios[i], cur_state);
         local_sts >>= 1;
     }
@@ -103,3 +108,4 @@ void MorioDenkiPlasmaDriver::write_column(uint16_t column) {
     write_stride(column & 0xFF);
     write_stride((column >> 8) & 0xFF);
 }
+#endif

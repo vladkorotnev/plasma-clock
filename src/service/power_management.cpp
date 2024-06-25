@@ -10,7 +10,7 @@ static bool isHvOff;
 static bool isDisplayOff;
 
 static SensorPool * sensors;
-static MorioDenkiPlasmaDriver * display;
+static DisplayDriver * display;
 static Beeper * beeper;
 
 static int lastLightness;
@@ -107,7 +107,7 @@ void PMTaskFunction( void * pvParameter )
     }
 }
 
-void power_mgmt_start(SensorPool * s, MorioDenkiPlasmaDriver * d, Beeper * b) {
+void power_mgmt_start(SensorPool * s, DisplayDriver * d, Beeper * b) {
     sensors = s;
     display = d;
     beeper = b;
@@ -147,7 +147,9 @@ void power_mgmt_pause() {
     ESP_LOGI(LOG_TAG, "Pause");
     vTaskSuspend(hTask);
     display->set_power(true);
+#if HAS(VARYING_BRIGHTNESS)
     display->set_bright(true);
+#endif
     display->set_show(true);
     beeper->set_channel_state(CHANNEL_AMBIANCE, true);
 }
@@ -157,7 +159,9 @@ void power_mgmt_resume() {
     ESP_LOGI(LOG_TAG, "Resume");
     vTaskResume(hTask);
     display->set_power(!isHvOff);
+#if HAS(VARYING_BRIGHTNESS)
     display->set_bright(!isBright);
+#endif
     display->set_show(!isDisplayOff);
     beeper->set_channel_state(CHANNEL_AMBIANCE, !isDisplayOff);
 }
