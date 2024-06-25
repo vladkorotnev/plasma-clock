@@ -1,5 +1,5 @@
 #pragma once
-#include <plasma/font.h>
+#include <graphics/font.h>
 
 extern const font_definition_t xnu_font;
 extern const font_definition_t keyrus0808_font;

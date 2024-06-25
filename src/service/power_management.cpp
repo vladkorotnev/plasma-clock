@@ -10,7 +10,7 @@ static bool isHvOff;
 static bool isDisplayOff;
 
 static SensorPool * sensors;
-static PlasmaDisplayIface * display;
+static MorioDenkiPlasmaDriver * display;
 static Beeper * beeper;
 
 static int lastLightness;
@@ -37,6 +37,8 @@ void PMTaskFunction( void * pvParameter )
 
     while(1) {
         now = xTaskGetTickCount();
+
+        #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         // Adjust dimmer according to ambient light
         sensor_info_t * light_info = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
         if(light_info != nullptr) {
@@ -54,7 +56,9 @@ void PMTaskFunction( void * pvParameter )
 
             lastLightness = light_info->last_result;
         }
+        #endif
 
+        #if HAS(MOTION_SENSOR)
         // Turn off display when no motion in the room for a while
         sensor_info_t * motion_info = sensors->get_info(SENSOR_ID_MOTION);
         if(motion_info != nullptr) {
@@ -97,12 +101,13 @@ void PMTaskFunction( void * pvParameter )
               } 
             }
         }
+        #endif
 
         vTaskDelay(PM_INTERVAL);
     }
 }
 
-void power_mgmt_start(SensorPool * s, PlasmaDisplayIface * d, Beeper * b) {
+void power_mgmt_start(SensorPool * s, MorioDenkiPlasmaDriver * d, Beeper * b) {
     sensors = s;
     display = d;
     beeper = b;
@@ -118,6 +123,11 @@ void power_mgmt_start(SensorPool * s, PlasmaDisplayIface * d, Beeper * b) {
 
     lightnessThreshDown = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN);
     lightnessThreshUp = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_UP);
+
+#if !HAS(MOTION_SENSOR) && !HAS(LIGHT_SENSOR)
+    ESP_LOGE(LOG_TAG, "Build without light and motion sensor support: cannot start!");
+    return; // useless without a light and motion sensor
+#endif
 
     ESP_LOGV(LOG_TAG, "Creating task");
     if(xTaskCreate(

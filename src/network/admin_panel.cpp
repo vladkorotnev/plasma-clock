@@ -1,4 +1,5 @@
 #include "network/admin_panel.h"
+#include <device_config.h>
 #include <service/prefs.h>
 #include <service/owm/weather.h>
 #include <service/wordnik.h>
@@ -23,7 +24,7 @@ void AdminTaskFunction( void * pvParameter )
     }
 }
 
-GP_BUTTON reboot_btn("reboot", "Save & Restart PIS-OS");
+GP_BUTTON reboot_btn("reboot", "Save & Restart " PRODUCT_NAME);
 
 static void render_bool(const char * title, prefs_key_t key) {
     GP.LABEL(title);
@@ -137,8 +138,10 @@ void build() {
     GP.SPOILER_BEGIN("Display", GP_BLUE);
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
         GP.BREAK();
+        #if HAS(TEMP_SENSOR)
         render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);
         GP.BREAK();
+        #endif
         render_int("Show current weather for [s]:", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS);
         GP.BREAK();
         render_int("Show word of the day for [s]:", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS);
@@ -157,6 +160,7 @@ void build() {
     GP.JQ_UPDATE_BEGIN(1000);
         sensor_info_t* sens;
 
+        #if HAS(LIGHT_SENSOR)
         GP.LABEL("Light sensor: ");
         sens = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
         if(sens != nullptr) {
@@ -164,7 +168,9 @@ void build() {
         } else {
             GP.LABEL("----", "light_val");
         }
+        #endif
 
+        #if HAS(MOTION_SENSOR)
         GP.LABEL("Motion sensor: ");
         sens = sensors->get_info(SENSOR_ID_MOTION);
         if(sens != nullptr) {
@@ -172,7 +178,9 @@ void build() {
         } else {
             GP.LABEL("?", "mot_val");
         }
+        #endif
 
+        #if HAS(TEMP_SENSOR)
         GP.LABEL("Temperature: ");
         sens = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
         if(sens != nullptr) {
@@ -180,6 +188,7 @@ void build() {
         } else {
             GP.LABEL("----", "temp_val");
         }
+        
 
         GP.LABEL("Humidity: ");
         sens = sensors->get_info(SENSOR_ID_AMBIENT_HUMIDITY);
@@ -188,18 +197,23 @@ void build() {
         } else {
             GP.LABEL("----", "hum_val");
         }
+        #endif
     GP.JQ_UPDATE_END();
     GP.SPOILER_END();
     GP.BREAK();
 
+    #if HAS(LIGHT_SENSOR) || HAS(MOTION_SENSOR)
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
+        #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         render_int("Bright screen when over:", PREFS_KEY_LIGHTNESS_THRESH_UP);
         render_int("Dark screen when under:", PREFS_KEY_LIGHTNESS_THRESH_DOWN);
         GP.HR();
-        render_int("Turn off display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
-        render_int("Shut down high voltage after more seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
+        #endif
+        render_int("Blank display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
+        render_int("Shut down display after more seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
     GP.SPOILER_END();
     GP.BREAK();
+    #endif
 
     GP.SPOILER_BEGIN("OpenWeatherMap", GP_BLUE);
         render_string("Latitude", PREFS_KEY_WEATHER_LAT);

@@ -1,6 +1,6 @@
 #pragma once
 #include "../transition_animator.h"
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 
 class SlideTransition: public Transition {
 public:

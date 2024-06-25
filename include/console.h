@@ -1,6 +1,6 @@
 #pragma once
-#include <plasma/font.h>
-#include <plasma/framebuffer.h>
+#include <graphics/font.h>
+#include <graphics/framebuffer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 

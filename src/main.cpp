@@ -1,9 +1,13 @@
 #include <Arduino.h>
-#include <plasma/iface.h>
-#include <plasma/framebuffer.h>
+#include <device_config.h>
+
+#if HAS(OUTPUT_PLASMA)
+#include <display/md_plasma.h>
+#include <graphics/framebuffer.h>
+#endif
+
 #include <fonts.h>
 #include <console.h>
-#include "hw_config.h"
 #include <AM232X.h>
 #include <sensor/sensors.h>
 #include <sound/sequencer.h>
@@ -26,7 +30,8 @@ static char LOG_TAG[] = "APL_MAIN";
 static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
 
-static PlasmaDisplayIface plasma(
+#if HAS(OUTPUT_MD_PLASMA)
+static MorioDenkiPlasmaDriver plasma(
     HWCONF_PLASMA_DATABUS_GPIOS,
     HWCONF_PLASMA_CLK_GPIO,
     HWCONF_PLASMA_RESET_GPIO,
@@ -34,6 +39,11 @@ static PlasmaDisplayIface plasma(
     HWCONF_PLASMA_SHOW_GPIO,
     HWCONF_PLASMA_HV_EN_GPIO
 );
+#elif HAS(OUTPUT_WS0010)
+#error TODO
+#else
+#error Output type not selected
+#endif
 
 static PlasmaDisplayFramebuffer * fb;
 static FantaManipulator * graph;
@@ -76,8 +86,7 @@ void setup() {
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     
-    // Plasma Information System OS (not DOS, there's no disk in it!)
-    con->print("PIS-OS v1.1\n");
+    con->print(PRODUCT_NAME " v" PRODUCT_VERSION "\n");
     delay(500);
  
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
@@ -105,12 +114,17 @@ void setup() {
 
     sensors = new SensorPool();
 
+#if HAS(LIGHT_SENSOR)
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
     con->print("L sensor OK");
+#endif
 
+#if HAS(MOTION_SENSOR)
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
     con->print("M sensor OK");
+#endif
 
+#if HAS(TEMP_SENSOR)
     Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
     AM2322* tempSens = new AM2322(&Wire);
 
@@ -127,6 +141,7 @@ void setup() {
     } else {
         con->print("H sensor OK");
     }
+#endif
 
     graph = fb->manipulate();
 

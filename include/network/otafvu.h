@@ -1,5 +1,5 @@
 #pragma once
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 #include <console.h>
 #include <sound/sequencer.h>
 #include <ArduinoOTA.h>

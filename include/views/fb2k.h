@@ -1,6 +1,6 @@
 #pragma once
 #include "view.h"
-#include <plasma/fanta_manipulator.h>
+#include <graphics/fanta_manipulator.h>
 #include <views/string_scroll.h>
 
 class Fb2kView: public Screen {

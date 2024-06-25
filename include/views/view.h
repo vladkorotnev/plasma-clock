@@ -1,5 +1,5 @@
 #pragma once
-#include <plasma/fanta_manipulator.h>
+#include <graphics/fanta_manipulator.h>
 
 /// @brief A renderable view
 class Renderable {

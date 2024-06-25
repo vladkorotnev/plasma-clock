@@ -2,7 +2,7 @@
 #include <hal/gpio_hal.h>
 
 /// @brief Interface to the Morio Denki plasma display controller board
-class PlasmaDisplayIface {
+class MorioDenkiPlasmaDriver {
 public:
     /// @brief Initialize the interface. Configures the GPIO and prepares the outputs for use, also disables the output and high voltage supply.
     /// @param databus 8 pins connected to the display controller's pixel data bus, LSB to MSB
@@ -11,7 +11,7 @@ public:
     /// @param bright Pin connected to the display controller's BRIGHT pin
     /// @param blanking Pin connected to the display controller's SHOW pin
     /// @param hv_enable Pin connected to the high voltage supply's ENABLE pin
-    PlasmaDisplayIface(
+    MorioDenkiPlasmaDriver(
         const gpio_num_t databus[8],
         const gpio_num_t clock,
         const gpio_num_t reset,

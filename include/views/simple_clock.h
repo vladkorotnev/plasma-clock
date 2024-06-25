@@ -1,5 +1,5 @@
 #pragma once
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 #include <sound/beeper.h>
 #include <service/time.h>
 #include "view.h"

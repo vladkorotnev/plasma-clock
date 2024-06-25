@@ -1,4 +1,5 @@
 #include "idle.h"
+#include <device_config.h>
 #include <stdint.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
@@ -9,7 +10,9 @@
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
 #include <views/thunder_ovl.h>
+#if HAS(TEMP_SENSOR)
 #include <views/indoor_view.h>
+#endif
 #include <views/framework.h>
 #include <views/current_weather.h>
 #include <views/word_of_the_day.h>
@@ -19,7 +22,9 @@ static char LOG_TAG[] = "APL_IDLE";
 
 typedef enum MainViewId: uint16_t {
     VIEW_CLOCK = 0,
+#if HAS(TEMP_SENSOR)
     VIEW_INDOOR_WEATHER,
+#endif
     VIEW_OUTDOOR_WEATHER,
     VIEW_WORD_OF_THE_DAY,
     VIEW_FB2K,
@@ -29,7 +34,9 @@ typedef enum MainViewId: uint16_t {
 
 static int screen_times_ms[VIEW_MAX] = {
     30000, // VIEW_CLOCK
+#if HAS(TEMP_SENSOR)
     10000, // VIEW_INDOOR_WEATHER
+#endif
     25000, // VIEW_OUTDOOR_WEATHER
     25000, // VIEW_WORD_OF_THE_DAY
     0, // VIEW_FB2K
@@ -50,7 +57,10 @@ static SimpleClock * clockView;
 static RainOverlay * rain;
 static ThunderOverlay * thunder;
 
+#if HAS(TEMP_SENSOR)
 static IndoorView * indoorView;
+#endif
+
 static CurrentWeatherView * weatherView;
 static WordOfTheDayView * wotdView;
 static Fb2kView *fb2kView;
@@ -181,7 +191,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
 
     clockView = new SimpleClock();
+#if HAS(TEMP_SENSOR)
     indoorView = new IndoorView(sensors);
+#endif
     rain = new RainOverlay(101, 16);
     thunder = new ThunderOverlay(101, 16);
     weatherView = new CurrentWeatherView();
@@ -194,7 +206,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
+#if HAS(TEMP_SENSOR)
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
+#endif
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
     slideShow->add_view(fb2kView, VIEW_FB2K);

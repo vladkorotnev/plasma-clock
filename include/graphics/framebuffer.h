@@ -13,7 +13,7 @@ public:
     /// @brief Size of the backing buffer in bytes
     static const size_t PDFB_BUFFER_SIZE = width * (height / 8);
 
-    PlasmaDisplayFramebuffer(PlasmaDisplayIface * display);
+    PlasmaDisplayFramebuffer(MorioDenkiPlasmaDriver * display);
     ~PlasmaDisplayFramebuffer();
 
     /// @brief Clears the display
@@ -38,7 +38,7 @@ private:
     SemaphoreHandle_t buffer_semaphore;
     EventGroupHandle_t vsync_group;
     TaskHandle_t hTask;
-    PlasmaDisplayIface * display;
+    MorioDenkiPlasmaDriver * display;
     FantaManipulator * shared_manipulator;
     bool is_dirty;
 

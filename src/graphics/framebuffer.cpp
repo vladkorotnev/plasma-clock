@@ -1,4 +1,4 @@
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 #include <string.h>
 #include <Arduino.h>
 #include <freertos/task.h>
@@ -12,7 +12,7 @@ static char LOG_TAG[] = "PDFB";
 #define LOCK_BUFFER_OR_DIE if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");return;}
 #define UNLOCK_BUFFER xSemaphoreGive(buffer_semaphore)
 
-PlasmaDisplayFramebuffer::PlasmaDisplayFramebuffer(PlasmaDisplayIface * disp) {
+PlasmaDisplayFramebuffer::PlasmaDisplayFramebuffer(MorioDenkiPlasmaDriver * disp) {
     display = disp;
     buffer_semaphore = xSemaphoreCreateBinary();
     vsync_group = xEventGroupCreate();
