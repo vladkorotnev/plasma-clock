@@ -236,6 +236,7 @@ void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+#if HAS(WORDNIK_API)
     GP.SPOILER_BEGIN("Wordnik", GP_BLUE);
         render_string("API Key", PREFS_KEY_WORDNIK_APIKEY, true);
         render_int("Update interval [m]:", PREFS_KEY_WORDNIK_INTERVAL_MINUTES);
@@ -251,6 +252,7 @@ void build() {
         }
     GP.SPOILER_END();
     GP.BREAK();
+#endif
 
     GP.SPOILER_BEGIN("Foobar2000", GP_BLUE);
         render_string("Control Server IP", PREFS_KEY_FOOBAR_SERVER);

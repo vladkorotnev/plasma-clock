@@ -10,7 +10,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "1.1"
+#define PRODUCT_VERSION "1.2"
 
 // ---- Connection to DISP BOARD ----
 

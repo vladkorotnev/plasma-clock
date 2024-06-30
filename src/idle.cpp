@@ -26,7 +26,9 @@ typedef enum MainViewId: uint16_t {
     VIEW_INDOOR_WEATHER,
 #endif
     VIEW_OUTDOOR_WEATHER,
+#if HAS(WORDNIK_API)
     VIEW_WORD_OF_THE_DAY,
+#endif
     VIEW_FB2K,
 
     VIEW_MAX
@@ -38,7 +40,9 @@ static int screen_times_ms[VIEW_MAX] = {
     10000, // VIEW_INDOOR_WEATHER
 #endif
     25000, // VIEW_OUTDOOR_WEATHER
+#if HAS(WORDNIK_API)
     25000, // VIEW_WORD_OF_THE_DAY
+#endif
     0, // VIEW_FB2K
 };
 
@@ -62,7 +66,9 @@ static IndoorView * indoorView;
 #endif
 
 static CurrentWeatherView * weatherView;
+#if HAS(WORDNIK_API)
 static WordOfTheDayView * wotdView;
+#endif
 static Fb2kView *fb2kView;
 
 static ViewMultiplexor * slideShow;
@@ -174,7 +180,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
     screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
+#if HAS(WORDNIK_API)
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
+#endif
     screen_times_ms[VIEW_FB2K] = prefs_get_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS) * 1000;
 
     bool has_at_least_one_screen = false;
@@ -197,7 +205,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     rain = new RainOverlay(101, 16);
     thunder = new ThunderOverlay(101, 16);
     weatherView = new CurrentWeatherView();
+#if HAS(WORDNIK_API)
     wotdView = new WordOfTheDayView();
+#endif
     fb2kView = new Fb2kView();
 
     // thunder hurts readability on other views, so keep it on clock only
@@ -210,7 +220,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
 #endif
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
+#if HAS(WORDNIK_API)
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
+#endif
     slideShow->add_view(fb2kView, VIEW_FB2K);
 
     lastScreenSwitch = xTaskGetTickCount();

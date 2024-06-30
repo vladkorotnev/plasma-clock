@@ -73,6 +73,10 @@ bool SensorPool::add(sensor_id_t id, PoolableSensor * sensor, TickType_t interva
     return true;
 }
 
+bool SensorPool::exists(sensor_id_t id) {
+    return sensors[id] != nullptr;
+}
+
 TickType_t SensorPool::minimum_update_interval() {
     return min_interval;
 }
@@ -93,7 +97,7 @@ void SensorPool::poll() {
                 sensor->last_result = value;
                 sensor->last_read = xTaskGetTickCount();
 #ifdef SENSOR_SPAM_LOGS
-                ESP_LOGV(LOG_TAG, "Sensor %i new value: %i", i, value);
+                ESP_LOGI(LOG_TAG, "Sensor %i new value: %i", i, value);
 #endif
             } else {
                 ESP_LOGE(LOG_TAG, "Poll of sensor %i failed", i);

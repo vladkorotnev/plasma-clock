@@ -1,4 +1,7 @@
 #include <network/otafvu.h>
+#include <device_config.h>
+
+#if HAS(OTAFVU)
 #include <sound/melodies.h>
 #include <fonts.h>
 #include <service/power_management.h>
@@ -120,3 +123,4 @@ void OTAFVUManager::on_progress(unsigned int progress, unsigned int total) {
         lastPercent++;
     }
 }
+#endif

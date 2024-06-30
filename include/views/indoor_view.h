@@ -7,6 +7,7 @@ class IndoorView: public Screen {
 public:
     IndoorView(SensorPool*);
     void render(FantaManipulator*);
+    int desired_display_time();
 
 private:
     SensorPool * sensors;

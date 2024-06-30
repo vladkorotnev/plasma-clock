@@ -27,6 +27,8 @@
 #include <state.h>
 #include <idle.h>
 
+#include <sensor/switchbot/meter.h>
+
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
@@ -102,7 +104,7 @@ void setup() {
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, 0);
 
     con->clear();
-    con->set_font(&sg8bit_font);
+    con->set_font(&keyrus0808_font);
     con->set_cursor(true);
 
     con->print("WiFi init");
@@ -151,6 +153,32 @@ void setup() {
     }
 #endif
 
+#if HAS(BLUETOOTH_LE) && HAS(SWITCHBOT_METER_INTEGRATION)
+    SwitchbotMeterApi *wometer = new SwitchbotMeterApi("F4:C0:4C:EC:68:CF");
+
+    SwitchbotMeterHumidity *remoteHum = new SwitchbotMeterHumidity(wometer);
+    SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
+
+    if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
+        con->print("WoH err");
+    } else {
+        con->print("WoH ok");
+        if(!sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
+            // simulate internal sensor
+            sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000));
+        }
+    }
+
+    if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
+        con->print("WoT err");
+    } else {
+        con->print("WoT ok");
+        if(!sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
+            // simulate internal sensor
+            sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000));
+        }
+    }
+#endif
     graph = fb->manipulate();
 
     timekeeping_begin();

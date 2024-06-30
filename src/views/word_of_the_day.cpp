@@ -1,3 +1,7 @@
+#include <device_config.h>
+
+#if HAS(WORDNIK_API)
+
 #include <views/word_of_the_day.h>
 #include <service/wordnik.h>
 #include <fonts.h>
@@ -87,3 +91,5 @@ void WordOfTheDayView::render(FantaManipulator *fb) {
 int WordOfTheDayView::desired_display_time() {
     return (bottom_line->estimated_frame_count() * 1000 / 58) + 2000; 
 }
+
+#endif

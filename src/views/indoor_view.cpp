@@ -37,7 +37,7 @@ void IndoorView::render(FantaManipulator *fb) {
     sensor_info_t * temperature = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
     if(temperature != nullptr && temperature->last_read != 0) {
         char buf[8];
-        snprintf(buf, 8, "%u.%u\370C", temperature->last_result/100, (temperature->last_result%100)/10);
+        snprintf(buf, 8, "%i.%i\370C", temperature->last_result/100, (temperature->last_result < 0 ? -1 : 1) * (temperature->last_result%100)/10);
         uint8_t t_width = measure_string_width(value_font, buf);
         uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
         fb->put_string(value_font, buf, t_left, 0);
@@ -45,5 +45,13 @@ void IndoorView::render(FantaManipulator *fb) {
         uint8_t t_width = value_font->width*6;
         uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
         fb->put_string(value_font, "--.-\370C", t_left, 0);
+    }
+}
+
+int IndoorView::desired_display_time() {
+    if(sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY) || sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
+        return DISP_TIME_NO_OVERRIDE;
+    } else {
+        return DISP_TIME_DONT_SHOW;
     }
 }

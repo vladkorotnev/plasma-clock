@@ -1,4 +1,8 @@
 #pragma once
+#include <device_config.h>
+
+#if HAS(WORDNIK_API)
+
 #include "view.h"
 #include <graphics/fanta_manipulator.h>
 #include <views/string_scroll.h>
@@ -21,3 +25,5 @@ private:
     sprite_t current_icon_frame;
     StringScroll * bottom_line;
 };
+
+#endif

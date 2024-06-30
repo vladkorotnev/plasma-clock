@@ -17,7 +17,7 @@ static const sprite_t icn_music = {
 };
 
 Fb2kView::Fb2kView() {
-    font = &sg8bit_font;
+    font = &keyrus0808_font;
     memset(artist_buffer, 0, 128);
     memset(title_buffer, 0, 128);
 
