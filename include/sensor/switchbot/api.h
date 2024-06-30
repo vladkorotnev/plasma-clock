@@ -1,7 +1,7 @@
 #include <device_config.h>
 #include "../sensor.h"
 
-#if HAS(BLUETOOTH_LE) && HAS(SWITCHBOT_METER_INTEGRATION)
+#if HAS(SWITCHBOT_METER_INTEGRATION)
 #include <NimBLEDevice.h>
 #include <NimBLEAdvertisedDevice.h>
 

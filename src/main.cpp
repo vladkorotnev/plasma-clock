@@ -153,29 +153,33 @@ void setup() {
     }
 #endif
 
-#if HAS(BLUETOOTH_LE) && HAS(SWITCHBOT_METER_INTEGRATION)
-    SwitchbotMeterApi *wometer = new SwitchbotMeterApi("F4:C0:4C:EC:68:CF");
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    if(prefs_get_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE)) {
+        String woMeterMac = prefs_get_string(PREFS_KEY_SWITCHBOT_METER_MAC);
+        size_t tmpLen = woMeterMac.length();
+        if(tmpLen > 0) {
+            SwitchbotMeterApi *wometer = new SwitchbotMeterApi(woMeterMac.c_str());
 
-    SwitchbotMeterHumidity *remoteHum = new SwitchbotMeterHumidity(wometer);
-    SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
+            SwitchbotMeterHumidity *remoteHum = new SwitchbotMeterHumidity(wometer);
+            SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
 
-    if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
-        con->print("WoH err");
-    } else {
-        con->print("WoH ok");
-        if(!sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
-            // simulate internal sensor
-            sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000));
-        }
-    }
+            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
+                con->print("WoH err");
+            } else {
+                con->print("WoH ok");
+                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
+                    sensors->short_circuit(SENSOR_ID_AMBIENT_HUMIDITY, SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
+                }
+            }
 
-    if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
-        con->print("WoT err");
-    } else {
-        con->print("WoT ok");
-        if(!sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
-            // simulate internal sensor
-            sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000));
+            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
+                con->print("WoT err");
+            } else {
+                con->print("WoT ok");
+                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
+                    sensors->short_circuit(SENSOR_ID_AMBIENT_TEMPERATURE, SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
+                }
+            }
         }
     }
 #endif

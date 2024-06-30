@@ -49,6 +49,10 @@ void SensorPool::remove(sensor_id_t id) {
     }
 }
 
+void SensorPool::short_circuit(sensor_id_t faux, sensor_id_t origin) {
+    add(faux, new LoopSensor(this, origin), get_info(origin)->update_interval);
+}
+
 bool SensorPool::add(sensor_id_t id, PoolableSensor * sensor, TickType_t interval) {
     if(sensors[id] != nullptr) {
         ESP_LOGE(LOG_TAG, "Sensor with id %i already exists!!", id);

@@ -3,7 +3,7 @@
 #include "api.h"
 #include <esp32-hal-log.h>
 
-#if HAS(BLUETOOTH_LE) && HAS(SWITCHBOT_METER_INTEGRATION)
+#if HAS(SWITCHBOT_METER_INTEGRATION)
 
 class SwitchbotMeterHumidity : public PoolableSensor {
 public:
@@ -21,7 +21,6 @@ public:
         bool rslt = api->get_data(&tmp);
         if(rslt) {
             *dst = tmp.humidity_percent * 100;
-            ESP_LOGI("RHum", "New value: %i", tmp.humidity_percent * 100);
         }
         return rslt;
     }
@@ -46,7 +45,6 @@ public:
         bool rslt = api->get_data(&tmp);
         if(rslt) {
             *dst = (tmp.temperature_sign ? 1 : -1) * (tmp.temperature_celsius * 100 + tmp.temperature_decimal * 10);
-            ESP_LOGI("RTemp", "New value: %i", tmp.humidity_percent * 100);
         }
         return rslt;
     }

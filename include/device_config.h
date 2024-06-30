@@ -4,7 +4,7 @@
 #define HAS(x) defined(HAS_##x)
 
 // ---- SOFTWARE FEATURE FLAGS
-// #define HAS_WORDNIK
+#define HAS_WORDNIK_API
 // #define HAS_OTAFVU // <- disabled to expand partition (see partitions.csv), not critical for me for now
 #define HAS_SWITCHBOT_METER_INTEGRATION
 
@@ -20,6 +20,13 @@
 
 #ifdef DEVICE_MICROPISOS
 #include <devices/smol_clock.h>
+#endif
+
+// ---- DEPENDENCY RULES
+#if !HAS(BLUETOOTH_LE)
+    #if HAS(SWITCHBOT_METER_INTEGRATION)
+        #undef HAS_SWITCHBOT_METER_INTEGRATION
+    #endif
 #endif
 
 #endif

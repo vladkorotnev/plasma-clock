@@ -31,6 +31,7 @@ static constexpr prefs_key_t PREFS_KEY_DISP_SCROLL_SPEED = "s_scrl_spd";
 
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS = "s_remote_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS = "s_outside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS = "s_wotd_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS = "s_foo_s";
@@ -47,6 +48,10 @@ static constexpr prefs_key_t PREFS_KEY_TIME_SYNC_INTERVAL_SEC = "tk_intv_s";
 
 static constexpr prefs_key_t PREFS_KEY_FOOBAR_SERVER = "foo_svr";
 static constexpr prefs_key_t PREFS_KEY_FOOBAR_PORT = "foo_prt";
+
+static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_ENABLE = "wos_ena";
+static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_MAC = "wos_mac";
+static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
 
 void prefs_force_save();
 

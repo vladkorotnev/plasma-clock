@@ -51,6 +51,7 @@ public:
     SensorPool();
     ~SensorPool();
     bool add(sensor_id_t, PoolableSensor *, TickType_t update_interval);
+    void short_circuit(sensor_id_t faux, sensor_id_t origin);
     bool exists(sensor_id_t);
     void remove(sensor_id_t);
     sensor_info_t* get_info(sensor_id_t);
@@ -62,4 +63,28 @@ private:
     TaskHandle_t hTask;
     TickType_t min_interval;
     sensor_info_t* sensors[SENSOR_ID_MAX];
+};
+
+class LoopSensor: public PoolableSensor {
+public:
+    LoopSensor(SensorPool* parent, sensor_id_t loop_to) {
+        pool = parent;
+        actual_id = loop_to;
+    }
+
+    // Not overriding teardown here, that will be taken care of by the origin sensor entry
+
+    bool initialize() {
+        return pool->exists(actual_id);
+    }
+
+    bool poll(int * result) {
+        sensor_info_t * info = pool->get_info(actual_id);
+        *result = info->last_result;
+        return true;
+    }
+
+private:
+    SensorPool *pool;
+    sensor_id_t actual_id;
 };

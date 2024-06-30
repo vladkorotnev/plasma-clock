@@ -142,10 +142,16 @@ void build() {
         render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);
         GP.BREAK();
         #endif
+        #if HAS(SWITCHBOT_METER_INTEGRATION)
+        render_int("Show Switchbot temperature for [s]:", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS);
+        GP.BREAK();
+        #endif
         render_int("Show current weather for [s]:", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS);
         GP.BREAK();
+        #if HAS(WORDNIK_API)
         render_int("Show word of the day for [s]:", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS);
         GP.BREAK();
+        #endif
         render_int("Show Fb2k for [s]:", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS);
         GP.HR();
         GP.LABEL("Screen transition:");
@@ -168,6 +174,7 @@ void build() {
         } else {
             GP.LABEL("----", "light_val");
         }
+        GP.BREAK();
         #endif
 
         #if HAS(MOTION_SENSOR)
@@ -178,6 +185,7 @@ void build() {
         } else {
             GP.LABEL("?", "mot_val");
         }
+        GP.BREAK();
         #endif
 
         #if HAS(TEMP_SENSOR)
@@ -188,6 +196,7 @@ void build() {
         } else {
             GP.LABEL("----", "temp_val");
         }
+        GP.BREAK();
         
 
         GP.LABEL("Humidity: ");
@@ -197,6 +206,27 @@ void build() {
         } else {
             GP.LABEL("----", "hum_val");
         }
+        GP.BREAK();
+        #endif
+
+        #if HAS(SWITCHBOT_METER_INTEGRATION)
+        GP.LABEL("Remote temperature: ");
+        sens = sensors->get_info(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
+        if(sens != nullptr) {
+            GP.LABEL(String(sens->last_result / 100.0), "r_temp_val");
+        } else {
+            GP.LABEL("----", "r_temp_val");
+        }
+        GP.BREAK();
+
+        GP.LABEL("Remote humidity: ");
+        sens = sensors->get_info(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
+        if(sens != nullptr) {
+            GP.LABEL(String(sens->last_result / 100.0), "r_hum_val");
+        } else {
+            GP.LABEL("----", "r_hum_val");
+        }
+        GP.BREAK();
         #endif
     GP.JQ_UPDATE_END();
     GP.SPOILER_END();
@@ -254,6 +284,17 @@ void build() {
     GP.BREAK();
 #endif
 
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    GP.SPOILER_BEGIN("Switchbot Meter", GP_BLUE);
+        render_bool("Connect to Meter", PREFS_KEY_SWITCHBOT_METER_ENABLE);
+        render_bool("Emulate local", PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
+        GP.SPAN("When local sensor is not available, forwards the Meter data in place of that.");
+        render_string("Meter MAC address:", PREFS_KEY_SWITCHBOT_METER_MAC);
+        GP.SPAN("Use the Device Info tab in the Switchbot app to find it");
+    GP.SPOILER_END();
+    GP.BREAK();
+#endif
+
     GP.SPOILER_BEGIN("Foobar2000", GP_BLUE);
         render_string("Control Server IP", PREFS_KEY_FOOBAR_SERVER);
         render_int("Control Server Port:", PREFS_KEY_FOOBAR_PORT);
@@ -284,6 +325,7 @@ void action() {
         save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);
         save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600);
@@ -303,6 +345,9 @@ void action() {
         save_string(PREFS_KEY_FOOBAR_SERVER);
         save_int(PREFS_KEY_FOOBAR_PORT, 1000, 9999);
         save_bool(PREFS_KEY_FPS_COUNTER);
+        save_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE);
+        save_string(PREFS_KEY_SWITCHBOT_METER_MAC);
+        save_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;

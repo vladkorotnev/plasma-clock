@@ -10,7 +10,7 @@
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
 #include <views/thunder_ovl.h>
-#if HAS(TEMP_SENSOR)
+#if HAS(TEMP_SENSOR) || HAS(SWITCHBOT_METER_INTEGRATION)
 #include <views/indoor_view.h>
 #endif
 #include <views/framework.h>
@@ -25,6 +25,9 @@ typedef enum MainViewId: uint16_t {
 #if HAS(TEMP_SENSOR)
     VIEW_INDOOR_WEATHER,
 #endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    VIEW_REMOTE_WEATHER,
+#endif
     VIEW_OUTDOOR_WEATHER,
 #if HAS(WORDNIK_API)
     VIEW_WORD_OF_THE_DAY,
@@ -38,6 +41,9 @@ static int screen_times_ms[VIEW_MAX] = {
     30000, // VIEW_CLOCK
 #if HAS(TEMP_SENSOR)
     10000, // VIEW_INDOOR_WEATHER
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    10000, // VIEW_REMOTE_WEATHER,
 #endif
     25000, // VIEW_OUTDOOR_WEATHER
 #if HAS(WORDNIK_API)
@@ -63,6 +69,10 @@ static ThunderOverlay * thunder;
 
 #if HAS(TEMP_SENSOR)
 static IndoorView * indoorView;
+#endif
+
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+static WoSensorView * remoteWeatherView;
 #endif
 
 static CurrentWeatherView * weatherView;
@@ -178,7 +188,12 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
 
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
+#if HAS(TEMP_SENSOR)
     screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    screen_times_ms[VIEW_REMOTE_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS) * 1000;
+#endif
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
 #if HAS(WORDNIK_API)
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
@@ -199,15 +214,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
 
     clockView = new SimpleClock();
-#if HAS(TEMP_SENSOR)
-    indoorView = new IndoorView(sensors);
-#endif
     rain = new RainOverlay(101, 16);
     thunder = new ThunderOverlay(101, 16);
     weatherView = new CurrentWeatherView();
-#if HAS(WORDNIK_API)
-    wotdView = new WordOfTheDayView();
-#endif
     fb2kView = new Fb2kView();
 
     // thunder hurts readability on other views, so keep it on clock only
@@ -217,10 +226,16 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
 #if HAS(TEMP_SENSOR)
+    indoorView = new IndoorView(sensors);
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    remoteWeatherView = new WoSensorView(sensors);
+    slideShow->add_view(remoteWeatherView, VIEW_REMOTE_WEATHER);
 #endif
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
 #if HAS(WORDNIK_API)
+    wotdView = new WordOfTheDayView();
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
 #endif
     slideShow->add_view(fb2kView, VIEW_FB2K);

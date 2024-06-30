@@ -2,7 +2,7 @@
 #include <esp32-hal-log.h>
 #include <cstring>
 
-#if HAS(BLUETOOTH_LE) && HAS(SWITCHBOT_METER_INTEGRATION)
+#if HAS(SWITCHBOT_METER_INTEGRATION)
 
 static char LOG_TAG[] = "WOMeter";
 const BLEUUID serviceId = BLEUUID("CBA20D00-224D-11E6-9FB8-0002A5D5C51B");
