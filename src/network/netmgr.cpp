@@ -106,3 +106,7 @@ void NetworkManager::ap_fallback() {
     ESP_LOGI(LOG_TAG, "Starting AP");
     WiFi.softAP(ssid);
 }
+
+int NetworkManager::rssi() {
+    return WiFi.RSSI();
+}

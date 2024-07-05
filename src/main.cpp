@@ -116,6 +116,7 @@ void setup() {
 
     con->clear();
     con->print(NetworkManager::network_name());
+    con->print("%i dBm", NetworkManager::rssi());
     delay(2000);
     con->print(NetworkManager::current_ip().c_str());
     delay(2000);

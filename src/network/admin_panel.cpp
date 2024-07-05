@@ -1,5 +1,7 @@
 #include "network/admin_panel.h"
 #include <device_config.h>
+#include <network/netmgr.h>
+#include <backup.h>
 #include <service/prefs.h>
 #include <service/owm/weather.h>
 #include <service/wordnik.h>
@@ -162,9 +164,24 @@ void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+    GP.SPOILER_BEGIN("Overlays", GP_BLUE);
+#if defined(PDFB_PERF_LOGS)
+        render_bool("FPS counter", PREFS_KEY_FPS_COUNTER);
+#endif
+        GP.SELECT(PREFS_KEY_WIFI_ICON, "None,Disconnected only,On display power on", prefs_get_int(PREFS_KEY_WIFI_ICON));
+    GP.SPOILER_END();
+    GP.BREAK();
+
     GP.SPOILER_BEGIN("Sensors", GP_BLUE);
     GP.JQ_UPDATE_BEGIN(1000);
         sensor_info_t* sens;
+
+        GP.LABEL("WiFi: ");
+        GP.LABEL(NetworkManager::network_name(), "net_name");
+        char buf[16];
+        snprintf(buf, 15, "(%i dBm)", NetworkManager::rssi());
+        GP.LABEL(buf, "rssi_val");
+        GP.BREAK();
 
         #if HAS(LIGHT_SENSOR)
         GP.LABEL("Light sensor: ");
@@ -300,16 +317,46 @@ void build() {
         render_int("Control Server Port:", PREFS_KEY_FOOBAR_PORT);
         GP.SPAN("Please set the format in foo_controlserver to: %artist%|%title%, and main delimiter to: |");
     GP.SPOILER_END();
+    GP.BREAK();
+
+    GP.SPOILER_BEGIN("Administration", GP_BLUE);
+        GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
+        GP.BUTTON_DOWNLOAD("crashdump.elf", "Last crash dump", GP_BLUE);
+        GP.FILE_UPLOAD_RAW("prefs_restore", "Settings restore", GP_BLUE, "", "", "/prefs_restore");
+    GP.SPOILER_END();
 
     GP.HR();
-#if defined(PDFB_PERF_LOGS)
-    render_bool("FPS counter", PREFS_KEY_FPS_COUNTER);
-#endif
     GP.BUTTON(reboot_btn);
     GP.BUILD_END();
 }
 
+static char binary_mime[] = "application/octet-stream";
+void downloadPartition(const void * partition, size_t size) {
+    ui.server.send_P(200, binary_mime, (const char*) partition, size);
+} 
 void action() {
+    if(ui.download()) {
+        const void * ptrPart;
+        partition_handle_t hPart;
+        size_t szPart;
+
+        if(ui.uri().endsWith("prefs_backup.bin")) {
+            if(mount_settings(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        else if(ui.uri().endsWith("crashdump.elf")) {
+            // MEMO: read with
+            // python %IDF_PATH%\components\espcoredump\espcoredump.py info_corefile --core R:\crashdump.elf .pio\build\bigclock-nodemcu-32s\firmware.elf
+            if(mount_crash(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        return;
+    }
+
     if(ui.click()) {
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
@@ -345,6 +392,7 @@ void action() {
         save_string(PREFS_KEY_FOOBAR_SERVER);
         save_int(PREFS_KEY_FOOBAR_PORT, 1000, 9999);
         save_bool(PREFS_KEY_FPS_COUNTER);
+        save_int(PREFS_KEY_WIFI_ICON, 0, 3);
         save_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE);
         save_string(PREFS_KEY_SWITCHBOT_METER_MAC);
         save_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
@@ -372,14 +420,57 @@ void action() {
     }
 }
 
+bool prefs_uploading = false;
+
 void admin_panel_prepare(SensorPool* s, Beeper* b) {
     sensors = s;
     beeper = b;
     ui.attachBuild(build);
     ui.attach(action);
+    ui.downloadAuto(false);
+    ui.uploadAuto(false);
 #if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
     ui.enableAuth(ADMIN_LOGIN, ADMIN_PASS);
 #endif
+
+    // Due to a bug in GyverPortal, handle uploads on our own
+    ui.server.on("/prefs_restore", HTTP_POST, []() {
+            ui.server.send(200, "text/html", F("<script>setInterval(function(){if(history.length>0)window.history.back();else window.location.href='/';},500);</script>"));
+        }, []() {
+            HTTPUpload& u = ui.server.upload();
+            switch(u.status) {
+                case UPLOAD_FILE_START:
+                    ESP_LOGI(LOG_TAG, "Upload started, expect %i bytes", ui.server.clientContentLength());
+                    if(begin_settings_write()) {
+                        prefs_uploading = true;
+                    }
+                    break;
+
+                case UPLOAD_FILE_WRITE:
+                    ESP_LOGI(LOG_TAG, "Received %i bytes", u.currentSize);
+                    if(prefs_uploading) {
+                        write_settings_chunk((const char*) u.buf, u.currentSize);
+                    }
+                    break;
+
+                case UPLOAD_FILE_ABORTED:
+                    ESP_LOGI(LOG_TAG, "Upload aborted");
+                    if(prefs_uploading) {
+                        end_settings_write();
+                        ESP.restart();
+                    }
+                    break;
+
+                case UPLOAD_FILE_END:
+                    ESP_LOGI(LOG_TAG, "End: Received %i bytes", u.totalSize);
+                    if(prefs_uploading) {
+                        end_settings_write();
+                        ESP.restart();
+                    }
+                    break;
+            }
+        }
+    );
     ui.start();
 
     ESP_LOGV(LOG_TAG, "Creating task");

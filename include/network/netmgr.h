@@ -18,6 +18,9 @@ public:
     /// @brief Connect to a specified network. If connection succeeds, the network credentials are saved into NVRAM.
     static void connect(const char * ssid, const char * pass);
 
+    /// @brief Get the active connection RSSI
+    static int rssi();
+
 private:
     static void wifi_event(WiFiEvent_t);
     static void save_current_network();

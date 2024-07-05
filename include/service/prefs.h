@@ -7,6 +7,7 @@ static constexpr prefs_key_t PREFS_KEY_WIFI_SSID = "ssid";
 static constexpr prefs_key_t PREFS_KEY_WIFI_PASS = "pass";
 
 static constexpr prefs_key_t PREFS_KEY_FPS_COUNTER = "fps_c";
+static constexpr prefs_key_t PREFS_KEY_WIFI_ICON = "net_icon";
 
 static constexpr prefs_key_t PREFS_KEY_BLINK_SEPARATORS = "blink_separator";
 static constexpr prefs_key_t PREFS_KEY_TICKING_SOUND = "ticking_sound";

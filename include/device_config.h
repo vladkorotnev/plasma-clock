@@ -5,8 +5,8 @@
 
 // ---- SOFTWARE FEATURE FLAGS
 #define HAS_WORDNIK_API
-// #define HAS_OTAFVU // <- disabled to expand partition (see partitions.csv), not critical for me for now
-#define HAS_SWITCHBOT_METER_INTEGRATION
+// #define HAS_OTAFVU
+//#define HAS_SWITCHBOT_METER_INTEGRATION // <- low on RAM with the board used in big-clock: wait until they disable HTTPS enforcement, or buy bigger ESP board
 
 // ---- HARDWARE
 
