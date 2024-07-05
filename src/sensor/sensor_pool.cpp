@@ -72,7 +72,7 @@ bool SensorPool::add(sensor_id_t id, PoolableSensor * sensor, TickType_t interva
 
     ESP_LOGV(LOG_TAG, "Adding sensor with id %i", id);
     sensors[id] = info;
-    if(interval/2 < min_interval) min_interval = interval/2;
+    if(interval/2 < min_interval && interval > 0) min_interval = interval/2;
     
     return true;
 }

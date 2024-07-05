@@ -125,6 +125,8 @@ void setup() {
 
     sensors = new SensorPool();
 
+    sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
+
 #if HAS(LIGHT_SENSOR)
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
     con->print("L sensor OK");

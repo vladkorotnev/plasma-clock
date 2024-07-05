@@ -14,13 +14,22 @@ typedef enum sensor_id {
     /// @brief An ambient light intensity sensor
     SENSOR_ID_AMBIENT_LIGHT,
 
-    /// @brief A virtual sensor using Switchbot Meter broadcasts for temperature measurement
+    /// @brief A sensor using Switchbot Meter broadcasts for temperature measurement
     SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE,
-    /// @brief A virtual sensor using Switchbot Meter broadcasts for humidity measurement
+    /// @brief A sensor using Switchbot Meter broadcasts for humidity measurement
     SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY,
+
+    /// @brief A virtual sensor indicating whether the PMU has been startled (brought out of the low power mode) recently
+    VIRTSENSOR_ID_PMU_STARTLED,
+
+    /// @brief A virtual sensor indicating the current wireless signal strength, or a value above 0 if disconnected
+    VIRTSENSOR_ID_WIRELESS_RSSI,
 
     SENSOR_ID_MAX
 } sensor_id_t;
+
+/// @brief Poll the sensor every time along with some other one
+const TickType_t SENSOR_POLLRATE_ASARP = 0;
 
 class PoolableSensor {
 public:
@@ -45,6 +54,41 @@ typedef struct sensor_info {
     /// @brief Last value read from the sensor
     int last_result;
 } sensor_info_t;
+
+/// @brief A sensor providing an arbitrary constant value
+class FauxSensor: public PoolableSensor {
+public:
+    int value = 0;
+    FauxSensor(int initialValue) {
+        value = initialValue;
+    }
+
+    bool poll(int * result) {
+        *result = value;
+        return true;
+    }
+};
+
+/// @brief A sensor providing a 1 when triggered, and a 0 after a certain time
+class TimerSensor: public PoolableSensor {
+public:
+    TickType_t duration;
+    TimerSensor(TickType_t dur) {
+        duration = dur;
+        lastTrigger = xTaskGetTickCount();
+    }
+
+    bool poll(int * result) {
+        *result = (xTaskGetTickCount() - lastTrigger >= duration) ? 0 : 1;
+        return true;
+    }
+
+    void trigger() {
+        lastTrigger = xTaskGetTickCount();
+    }
+private:
+    TickType_t lastTrigger;
+};
 
 class SensorPool {
 public:

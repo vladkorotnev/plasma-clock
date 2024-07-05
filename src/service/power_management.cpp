@@ -13,6 +13,8 @@ static SensorPool * sensors;
 static DisplayDriver * display;
 static Beeper * beeper;
 
+static TimerSensor * startled_sensor;
+
 static int lastLightness;
 static bool isBright;
 
@@ -69,6 +71,7 @@ void PMTaskFunction( void * pvParameter )
                     display->set_show(true);
                     beeper->set_channel_state(CHANNEL_AMBIANCE, true);
                     isDisplayOff = false;
+                    startled_sensor->trigger();
                 }
 
                 if(isHvOff) {
@@ -112,6 +115,9 @@ void power_mgmt_start(SensorPool * s, DisplayDriver * d, Beeper * b) {
     display = d;
     beeper = b;
 
+    startled_sensor = new TimerSensor(pdMS_TO_TICKS(5000));
+    sensors->add(VIRTSENSOR_ID_PMU_STARTLED, startled_sensor, SENSOR_POLLRATE_ASARP);
+
     noSoundWhenOff = prefs_get_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
     
     motionlessTimeOff = prefs_get_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS) * 1000;
@@ -123,6 +129,8 @@ void power_mgmt_start(SensorPool * s, DisplayDriver * d, Beeper * b) {
 
     lightnessThreshDown = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN);
     lightnessThreshUp = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_UP);
+
+    ESP_LOGI(LOG_TAG, "MotionlessTime %i, HvOffTime %i, LightThresh %i %i", motionlessTimeOff, motionlessTimeHvOff, lightnessThreshDown, lightnessThreshUp);
 
 #if !HAS(MOTION_SENSOR) && !HAS(LIGHT_SENSOR)
     ESP_LOGE(LOG_TAG, "Build without light and motion sensor support: cannot start!");

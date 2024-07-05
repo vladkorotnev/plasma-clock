@@ -9,22 +9,22 @@ StringScroll::StringScroll(const font_definition_t * f) {
     scroll_only_if_not_fit = true;
 
     switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
-        case 0:
+        case SCROLL_SPEED_SLOW:
             // Slow
             frame_divisor = 3;
             increment = 1;
             break;
-        case 1:
+        case SCROLL_SPEED_NORMAL:
             // Medium
             frame_divisor = 2;
             increment = 1;
             break;
-        case 2:
+        case SCROLL_SPEED_FAST:
             // Fast
             frame_divisor = 1;
             increment = 1;
             break;
-        case 3:
+        case SCROLL_SPEED_SONIC:
             // Sonic
             frame_divisor = 2;
             increment = 2;

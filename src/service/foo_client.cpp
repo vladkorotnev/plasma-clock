@@ -183,7 +183,9 @@ void foo_task(void * pvParameters) {
         ESP_LOGI(LOG_TAG, "Connect to %s:%i, sockfd = %i", server_address, server_port, sockfd);
 
         if(r = connect(sockfd, (struct sockaddr*) &serv_addr, sizeof(serv_addr)) < 0) {
-            ESP_LOGI(LOG_TAG, "Error (%i, errno = %i) connecting, retry in 5s...", r, errno);
+            if(r != 1 && (errno != ECONNABORTED && errno != EHOSTUNREACH && errno != EHOSTDOWN)) {
+                ESP_LOGI(LOG_TAG, "Error (%i, errno = %i) connecting, retry in 5s...", r, errno);
+            }
             vTaskDelay(pdMS_TO_TICKS(5000));
         } else {
             ESP_LOGI(LOG_TAG, "Connected");
@@ -192,7 +194,6 @@ void foo_task(void * pvParameters) {
             while(connected) {
                 r = recv(sockfd, recv_buf, RECV_BUF_SIZE, 0);
                 if(r < 0) {
-                    ESP_LOGE(LOG_TAG, "Socket failure: %i", r);
                     connected = false;
                     last_recv = xTaskGetTickCount();
                     play_sts = false;

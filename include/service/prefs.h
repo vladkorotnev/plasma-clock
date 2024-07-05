@@ -7,6 +7,13 @@ static constexpr prefs_key_t PREFS_KEY_WIFI_SSID = "ssid";
 static constexpr prefs_key_t PREFS_KEY_WIFI_PASS = "pass";
 
 static constexpr prefs_key_t PREFS_KEY_FPS_COUNTER = "fps_c";
+
+typedef enum prefs_wifi_icon_disp {
+    WIFI_ICON_DISP_NEVER,
+    WIFI_ICON_DISP_DISCONNECTED,
+    WIFI_ICON_DISP_STARTLED,
+    WIFI_ICON_DISP_ALWAYS
+} prefs_wifi_icon_disp_t;
 static constexpr prefs_key_t PREFS_KEY_WIFI_ICON = "net_icon";
 
 static constexpr prefs_key_t PREFS_KEY_BLINK_SEPARATORS = "blink_separator";
@@ -28,6 +35,13 @@ static constexpr prefs_key_t PREFS_KEY_WORDNIK_APIKEY = "wd_apikey";
 static constexpr prefs_key_t PREFS_KEY_WORDNIK_INTERVAL_MINUTES = "wd_interval_m";
 
 static constexpr prefs_key_t PREFS_KEY_TRANSITION_TYPE = "s_transition";
+
+typedef enum prefs_scroll_speed {
+    SCROLL_SPEED_SLOW,
+    SCROLL_SPEED_NORMAL,
+    SCROLL_SPEED_FAST,
+    SCROLL_SPEED_SONIC
+} prefs_scroll_speed_t;
 static constexpr prefs_key_t PREFS_KEY_DISP_SCROLL_SPEED = "s_scrl_spd";
 
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";

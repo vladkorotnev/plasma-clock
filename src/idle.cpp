@@ -17,6 +17,7 @@
 #include <views/current_weather.h>
 #include <views/word_of_the_day.h>
 #include <views/fb2k.h>
+#include <views/signal_icon.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
@@ -66,6 +67,7 @@ static SimpleClock * clockView;
 
 static RainOverlay * rain;
 static ThunderOverlay * thunder;
+static SignalStrengthIcon * signalIndicator;
 
 #if HAS(TEMP_SENSOR)
 static IndoorView * indoorView;
@@ -216,11 +218,13 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     clockView = new SimpleClock();
     rain = new RainOverlay(101, 16);
     thunder = new ThunderOverlay(101, 16);
+    signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
     fb2kView = new Fb2kView();
 
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
+    thunderClock->add_layer(signalIndicator);
     thunderClock->add_layer(thunder);
 
     slideShow = new ViewMultiplexor();
