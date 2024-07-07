@@ -94,9 +94,7 @@ void DisplayFramebuffer::clear() {
 
 void DisplayFramebuffer::write_all() {
     LOCK_BUFFER_OR_DIE;
-    for(int i = 0; i < PDFB_BUFFER_SIZE; i++) {
-        display->write_stride(buffer[i]);
-    }
+    display->write_fanta(buffer, PDFB_BUFFER_SIZE);
     is_dirty = false;
     UNLOCK_BUFFER;
     xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);

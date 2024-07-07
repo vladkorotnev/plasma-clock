@@ -81,13 +81,13 @@ void SignalStrengthIcon::step() {
         else if(currentRssi >= -65) {
             currentIcon.data = icon_data_sig_excellent;
         }
-        else if(currentRssi >= -70) {
+        else if(currentRssi >= -75) {
             currentIcon.data = icon_data_sig_good;
         }
-        else if(currentRssi >= -75) {
+        else if(currentRssi >= -85) {
             currentIcon.data = icon_data_sig_poor;
         }
-        else if(currentRssi >= -80) {
+        else if(currentRssi >= -90) {
             currentIcon.data = icon_data_sig_awful;
         }
         else {

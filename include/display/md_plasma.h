@@ -34,10 +34,8 @@ public:
     /// @brief Select between half or full brightness
     void set_bright(bool bright);
 
-    /// @brief Send a half-column to the display controller
-    void write_stride(uint8_t stride);
-    /// @brief Send a full column to the display controller
-    void write_column(uint16_t column);
+    /// @brief Send an array of half-columns to the display controller
+    void write_fanta(const uint8_t * strides, size_t count);
 
 private:
     gpio_num_t databus_gpios[8];
@@ -49,6 +47,10 @@ private:
     void initialize();
     inline void set_databus(uint8_t data);
     inline void pulse_clock();
+    /// @brief Send a half-column to the display controller
+    void write_stride(uint8_t stride);
+    /// @brief Send a full column to the display controller
+    void write_column(uint16_t column);
 };
 
 #endif

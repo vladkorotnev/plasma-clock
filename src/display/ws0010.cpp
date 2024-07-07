@@ -26,11 +26,12 @@ Ws0010OledDriver::Ws0010OledDriver(
 }
 
 void Ws0010OledDriver::initialize() {
-    ESP_LOGI(LOG_TAG, "Initializing Winstar WS0010 OLED bus with data bus: %i %i %i %i %i %i %i %i, rs=%i, en=%i, bright=%i, show=%i, hv_en=%i", databus_gpios[0], databus_gpios[1], databus_gpios[2], databus_gpios[3], databus_gpios[4], databus_gpios[5], databus_gpios[6], databus_gpios[7], rs_gpio, en_gpio);
+    ESP_LOGI(LOG_TAG, "Initializing Winstar WS0010 OLED bus with data bus: %i %i %i %i %i %i %i %i, rs=%i, en=%i", databus_gpios[0], databus_gpios[1], databus_gpios[2], databus_gpios[3], databus_gpios[4], databus_gpios[5], databus_gpios[6], databus_gpios[7], rs_gpio, en_gpio);
 
     gpio_config_t io_conf = {
         .mode = GPIO_MODE_OUTPUT,
-        .pull_up_en = gpio_pullup_t::GPIO_PULLUP_ENABLE
+        .pull_up_en = gpio_pullup_t::GPIO_PULLUP_ENABLE,
+        //.pull_down_en = gpio_pulldown_t::GPIO_PULLDOWN_ENABLE
     };
 
     for(int i = 0; i < sizeof(databus_gpios) / sizeof(databus_gpios[0]); i++) {
@@ -42,12 +43,14 @@ void Ws0010OledDriver::initialize() {
 
     ESP_ERROR_CHECK(gpio_config(&io_conf));
 
-    delay(500); // as per datasheet
-    reset();
+    gpio_set_level(en_gpio, 0);
+    gpio_set_level(rs_gpio, 1);
+
+    delay(1500); // as per datasheet
 }
 
 void Ws0010OledDriver::set_databus(uint8_t data) {
-    uint8_t local_sts = ~data;
+    uint8_t local_sts = data;
     for(int i = 0; i < 8; i++) {
         uint8_t cur_state = (local_sts & 1);
         gpio_set_level(databus_gpios[i], cur_state);
@@ -57,9 +60,10 @@ void Ws0010OledDriver::set_databus(uint8_t data) {
 
 void Ws0010OledDriver::pulse_clock() {
     gpio_set_level(en_gpio, 0);
-    delayMicroseconds(10);
+    delayMicroseconds(1);
     gpio_set_level(en_gpio, 1);
-    delayMicroseconds(10);
+    delayMicroseconds(1);
+    gpio_set_level(en_gpio, 0);
 }
 
 void Ws0010OledDriver::set_is_command(bool rs) {
@@ -69,7 +73,19 @@ void Ws0010OledDriver::set_is_command(bool rs) {
         is_writing_ddram = false;
         ddram_ptr = 0;
     }
+    // H: DATA, L: Instruction code
     gpio_set_level(rs_gpio, rs ? 0 : 1);
+    delayMicroseconds(1);
+}
+
+void Ws0010OledDriver::write_string(const char * s) {
+    set_is_command(false);
+    int len = strlen(s);
+    for(int i = 0; i < len; i++) {
+        set_databus(s[i]);
+        pulse_clock();
+        delayMicroseconds(100);
+    }
 }
 
 void Ws0010OledDriver::reset() {
@@ -77,15 +93,15 @@ void Ws0010OledDriver::reset() {
 
     // Bringup step 1: Function set
     set_is_command(true);
-    set_databus(0b00111100); // Function Set, DB4=1 (8bit), DB3=1 (Nlines=2), DB2=0 (Font=0), DB1=0 DB0=0 (Font Table = 0)
+    set_databus(0b00111000); // Function Set, DB4=1 (8bit), DB3=0 (Nlines=2), DB2=0 (Font=0), DB1=0 DB0=0 (Font Table = 0)
     pulse_clock();
-    delayMicroseconds(400);
 
     // Step 2: OnOff Control
     set_show(true);
 
     // Step 3: Clear
     clear();
+    delay(500);
 
     // Step 4: Entry mode set
     set_is_command(true);
@@ -93,22 +109,28 @@ void Ws0010OledDriver::reset() {
     pulse_clock();
     delayMicroseconds(400);
 
-    // Step 5: Set graphic mode
-    set_power(true);
+    set_is_command(true);
+    set_databus(0b10); // return home
+    pulse_clock();
+    delayMicroseconds(400);
+    delay(200);
+
+    write_string("uPIS-OS init");
+    delay(500);
 
     taskEXIT_CRITICAL(&_spinlock);
 }
 
 void Ws0010OledDriver::set_show(bool show) {
     set_is_command(true);
-    set_databus(0b00001000 | (show ? 0b100 : 0)); // cursor and blink always off
+    set_databus(0b00001000 | (show ? 0b111 : 0)); // cursor and blink always off
     pulse_clock();
     delayMicroseconds(400);
 }
 
 void Ws0010OledDriver::set_power(bool power) {
     set_is_command(true);
-    set_databus(0b00011000 | (power ? 0b100 : 0)); // G/C always set to GRAPHIC
+    set_databus(0b00011000 | (power ? 0b111 : 0b011)); // G/C always set to GRAPHIC
     pulse_clock();
     delayMicroseconds(400);
 }
@@ -121,29 +143,32 @@ void Ws0010OledDriver::clear() {
 }
 
 void Ws0010OledDriver::write_stride(uint8_t stride) {
-    if(ddram_ptr <= 199) {
-        taskENTER_CRITICAL(&_spinlock);
-        // someday, properly support various screen sizes
-        // for now just don't send the last column
-
-        if(!is_writing_ddram) {
-            // set ddram command to synchronize the pointer
-            set_is_command(true);
-            set_databus(0b10000000 | (ddram_ptr & 0b01111111));
-            pulse_clock();
-            is_writing_ddram = true;
-            set_is_command(false);
-        }
-
-        set_databus(stride);
+    if(!is_writing_ddram) {
+        // set ddram command to synchronize the pointer
+        set_is_command(true);
+        set_databus(0b10000000 | (ddram_ptr & 0b01111111));
         pulse_clock();
+        is_writing_ddram = true;
+        set_is_command(false);
+    }
 
-        taskEXIT_CRITICAL(&_spinlock);
+    set_databus(stride);
+    pulse_clock();
+}
+
+void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
+    taskENTER_CRITICAL(&_spinlock);
+    // First write even (top row), then odd (bottom row)
+
+    for(int i = 0; i < count - 1; i += 2) {
+        if(i >= 200) continue; // TODO: support physical screen resolutions
+        write_stride(strides[i]);
     }
-    ddram_ptr++;
-    if(ddram_ptr == 202) {
-        ddram_ptr = 0;
+    for(int i = 1; i < count; i += 2) {
+        if(i >= 200) continue; // TODO: support physical screen resolutions
+        write_stride(strides[i]);
     }
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 #endif

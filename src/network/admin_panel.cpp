@@ -103,11 +103,11 @@ static void save_melody(prefs_key_t key) {
 
 void build() {
     GP.BUILD_BEGIN();
-    GP.PAGE_TITLE("PIS-OS Admin Panel");
+    GP.PAGE_TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
     GP.THEME(GP_DARK);
     GP.JQ_SUPPORT();
 
-    GP.TITLE("PIS-OS Admin Panel");
+    GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
 
     GP.SPOILER_BEGIN("WiFi", GP_BLUE);
         render_string("SSID", PREFS_KEY_WIFI_SSID);

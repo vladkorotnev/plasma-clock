@@ -5,8 +5,8 @@ class DisplayDriver {
 public:
     /// @brief Reset the display controller
     virtual void reset();
-    /// @brief Send a half-column to the display controller
-    virtual void write_stride(uint8_t stride);
+    /// @brief Send an array of half-columns to the display controller
+    virtual void write_fanta(const uint8_t * strides, size_t count);
 
     /// @brief Enable or disable the display power
     virtual void set_power(bool on);

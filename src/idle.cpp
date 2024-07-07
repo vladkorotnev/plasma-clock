@@ -107,8 +107,7 @@ void sound_tick_tock() {
 }
 
 void hourly_chime() {
-    static tk_time_of_day now;
-    now = get_current_time_coarse();
+    tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) ;
     if(now.hour != last_chimed_hour 
     && now.hour >= first_hour
@@ -224,7 +223,6 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
-    thunderClock->add_layer(signalIndicator);
     thunderClock->add_layer(thunder);
 
     slideShow = new ViewMultiplexor();
@@ -248,6 +246,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     ViewCompositor * rainyClock = new ViewCompositor();
     rainyClock->add_layer(slideShow);
+    rainyClock->add_layer(signalIndicator);
     rainyClock->add_layer(rain);
     mainView = rainyClock;
 

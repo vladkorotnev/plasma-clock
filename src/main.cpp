@@ -95,10 +95,10 @@ void setup() {
     fb = new DisplayFramebuffer(&display_driver);
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
+    con->print("");
     
-    con->print(PRODUCT_NAME " v" PRODUCT_VERSION "\n");
+    con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
     delay(500);
- 
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
     bs = new BeepSequencer(beepola);
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, 0);

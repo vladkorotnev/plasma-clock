@@ -31,8 +31,8 @@ public:
     void set_bright(bool bright) { }
 #endif
 
-    /// @brief Send a half-column to the display controller
-    void write_stride(uint8_t stride);
+    /// @brief Send an array of half-columns to the display controller
+    void write_fanta(const uint8_t * strides, size_t count);
 
 private:
     gpio_num_t databus_gpios[8];
@@ -45,5 +45,7 @@ private:
     inline void set_databus(uint8_t data);
     inline void set_is_command(bool);
     inline void pulse_clock();
+    void write_string(const char *);
+    void write_stride(uint8_t stride);
 };
 #endif
