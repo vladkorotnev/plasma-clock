@@ -109,19 +109,20 @@ void sound_tick_tock() {
 void hourly_chime() {
     tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) ;
-    if(now.hour != last_chimed_hour 
-    && now.hour >= first_hour
-    && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
-    ) {
+    if(now.hour != last_chimed_hour) {
         last_chimed_hour = now.hour;
-        if(!hourly_chime_on) return;
-        int melody_no = (now.hour == first_hour) ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
-        if(melody_no == all_chime_count) {
-            melody_no = esp_random() % all_chime_count;
-        }
-        melody_sequence_t melody = all_chime_list[melody_no];
+        if(  hourly_chime_on
+          && now.hour >= first_hour
+          && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
+        ) {
+            int melody_no = (now.hour == first_hour) ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
+            if(melody_no == all_chime_count) {
+                melody_no = esp_random() % all_chime_count;
+            }
+            melody_sequence_t melody = all_chime_list[melody_no];
 
-        sequencer->play_sequence(melody, CHANNEL_CHIME, 0);
+            sequencer->play_sequence(melody, CHANNEL_CHIME, 0);
+        }
     }
 }
 

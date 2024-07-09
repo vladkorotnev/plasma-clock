@@ -26,7 +26,6 @@
 #include <utils.h>
 #include <state.h>
 #include <idle.h>
-
 #include <sensor/switchbot/meter.h>
 
 static char LOG_TAG[] = "APL_MAIN";
