@@ -2,9 +2,18 @@
 
 #include <hal/gpio_hal.h>
 
+#define HAS_OUTPUT_MD_PLASMA
+#define HAS_VARYING_BRIGHTNESS
+#define HAS_LIGHT_SENSOR
+#define HAS_TEMP_SENSOR
+#define HAS_MOTION_SENSOR
+
+// Plasma Information System OS (not DOS, there's no disk in it!)
+#define PRODUCT_NAME "PIS-OS"
+#define PRODUCT_VERSION "1.2"
+
 // ---- Connection to DISP BOARD ----
 
-// Oh well, I hoped my ESP32 supports Dedicated GPIO but no!
 const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {
     GPIO_NUM_15, 
     GPIO_NUM_2, 

@@ -1,6 +1,6 @@
 #pragma once
 #include "view.h"
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 
 class TransitionAnimationCoordinator;
 

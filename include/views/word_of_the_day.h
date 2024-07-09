@@ -1,14 +1,20 @@
 #pragma once
+#include <device_config.h>
+
+#if HAS(WORDNIK_API)
+
 #include "view.h"
-#include <plasma/fanta_manipulator.h>
+#include <graphics/fanta_manipulator.h>
 #include <views/string_scroll.h>
 
-class WordOfTheDayView: public Renderable {
+class WordOfTheDayView: public Screen {
 public:
     WordOfTheDayView();
+    ~WordOfTheDayView();
     void prepare();
     void step();
     void render(FantaManipulator*);
+    int desired_display_time();
 
 private:
     const font_definition_t * font;
@@ -19,3 +25,5 @@ private:
     sprite_t current_icon_frame;
     StringScroll * bottom_line;
 };
+
+#endif

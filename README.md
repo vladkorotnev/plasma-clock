@@ -1,10 +1,52 @@
-# Plasma Clock
+# PIS-OS
 
-Wall clock/weather info/etc, based around the weird plasma display I've picked up at an auction. 
+Personal Information System OS (formerly Plasma Information Screen OS).
+(Not DOS, there is no disk in it! yet.)
 
-**This project has high voltage, which could be lethal!!**
+A somewhat portable relatively-stylish pixel-art clock/weather station.
 
-## Display Info
+## Predefined target devices
+
+* `DEVICE_PLASMA_CLOCK`: a [clock](https://youtu.be/D4MiHmhhjeQ) that I built around a plasma screen from an old Japanese bus/train.
+* `DEVICE_MICROPISOS`: a portable devkit for PIS-OS, using a 100x16 OLED from WinStar.
+
+## Supported hardware and feature-flags
+
+### Display (at least one required)
+
+* Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display//md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
+* Winstar WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`)
+
+### Speaker (at least one required)
+
+* Piezo speaker ([driver](src/sound/beeper.cpp), [music](src/sound/melodies.cpp))
+
+### Haptics (WIP)
+
+* Taptic Engine via 2N3904 transistor as an amp (WIP: wired in parallel with the speaker)
+
+### Software flags
+
+* `HAS_WORDNIK_API`: compile with the Word Of The Day service using [Wordnik API](https://developer.wordnik.com/). This requires SSL, so bloats the firmware size significantly.
+* `HAS_BLUETOOTH_LE`: automatically set on ESP32. Required for Switchbot-over-BLE. Uses [NimBLE](https://github.com/apache/mynewt-nimble), but still increases firmware size significantly.
+* `HAS_OTAFVU`: OTA updates via ArduinoOTA. Currently disabled due to partition size constraints from the above.
+
+### Thermal sensors
+
+* AM2322 over IIC ([driver](src/sensor/am2322.cpp), feature flag `HAS_TEMP_SENSOR`)
+* Switchbot Meter over BLE (unstable, [driver](src/sensor/switchbot/api.cpp), feature flag `SWITCHBOT_METER_INTEGRATION`)
+
+### Motion sensors
+
+* Any which provides logic H when motion found, logic L when not found ([driver](src/sensor/motion.cpp), feature flag `HAS_MOTION_SENSOR`)
+
+### Light sensors
+
+* Opto-resistor in voltage divider mode ([driver](src/sensor/light.cpp), feature flag `HAS_LIGHT_SENSOR`)
+
+## Morio Denki Plasma Display Info
+
+**This display uses high voltage, which could be lethal!!**
 
 The display comes from a bus or a train, supposedly. 
 
@@ -20,5 +62,6 @@ More detailed info is available in the following articles:
 
 * На русском: https://habr.com/ru/companies/timeweb/articles/808805/
 * 日本語で: https://elchika.com/article/b9f39c29-64aa-42ab-8f73-e6e27a72bd0e/
+* Demo video: https://youtu.be/D4MiHmhhjeQ
 
 You can also read the quest I went through trying to get it to run "in real time" at [EEVBlog Forums](https://www.eevblog.com/forum/repair/trying-to-figure-out-if-a-vfd-displaydriver-is-broken-(74-series-logic)/).

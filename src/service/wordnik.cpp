@@ -1,4 +1,7 @@
+#include <device_config.h>
 #include <service/wordnik.h>
+
+#if HAS(WORDNIK_API)
 #include <service/prefs.h>
 #include <Arduino.h>
 #include <WiFi.h>
@@ -112,3 +115,9 @@ void wotd_start() {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
     }
 }
+
+#else
+void wotd_start() { }
+bool wotd_get_current(char * word, size_t word_sz, char * definition, size_t def_sz) { return false; }
+TickType_t wotd_get_last_update() { return 0; }
+#endif

@@ -49,6 +49,10 @@ void SensorPool::remove(sensor_id_t id) {
     }
 }
 
+void SensorPool::short_circuit(sensor_id_t faux, sensor_id_t origin) {
+    add(faux, new LoopSensor(this, origin), get_info(origin)->update_interval);
+}
+
 bool SensorPool::add(sensor_id_t id, PoolableSensor * sensor, TickType_t interval) {
     if(sensors[id] != nullptr) {
         ESP_LOGE(LOG_TAG, "Sensor with id %i already exists!!", id);
@@ -68,9 +72,13 @@ bool SensorPool::add(sensor_id_t id, PoolableSensor * sensor, TickType_t interva
 
     ESP_LOGV(LOG_TAG, "Adding sensor with id %i", id);
     sensors[id] = info;
-    if(interval/2 < min_interval) min_interval = interval/2;
+    if(interval/2 < min_interval && interval > 0) min_interval = interval/2;
     
     return true;
+}
+
+bool SensorPool::exists(sensor_id_t id) {
+    return sensors[id] != nullptr;
 }
 
 TickType_t SensorPool::minimum_update_interval() {
@@ -93,7 +101,7 @@ void SensorPool::poll() {
                 sensor->last_result = value;
                 sensor->last_read = xTaskGetTickCount();
 #ifdef SENSOR_SPAM_LOGS
-                ESP_LOGV(LOG_TAG, "Sensor %i new value: %i", i, value);
+                ESP_LOGI(LOG_TAG, "Sensor %i new value: %i", i, value);
 #endif
             } else {
                 ESP_LOGE(LOG_TAG, "Poll of sensor %i failed", i);

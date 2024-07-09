@@ -21,7 +21,7 @@ void timekeeping_begin() {
     size_t tmpLen = timeServer.length();
     ntp_server = (char*) malloc(tmpLen + 1);
     memcpy(ntp_server, timeServer.c_str(), tmpLen);
-    ntp_server[tmpLen + 1] = 0x0;
+    ntp_server[tmpLen] = 0x0;
 
     ESP_LOGI(LOG_TAG, "Starting NTP service: %s", ntp_server);
 

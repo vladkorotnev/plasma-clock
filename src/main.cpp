@@ -1,9 +1,15 @@
 #include <Arduino.h>
-#include <plasma/iface.h>
-#include <plasma/framebuffer.h>
+#include <device_config.h>
+
+#if HAS(OUTPUT_MD_PLASMA)
+#include <display/md_plasma.h>
+#elif HAS(OUTPUT_WS0010)
+#include <display/ws0010.h>
+#endif
+
+#include <graphics/framebuffer.h>
 #include <fonts.h>
 #include <console.h>
-#include "hw_config.h"
 #include <AM232X.h>
 #include <sensor/sensors.h>
 #include <sound/sequencer.h>
@@ -21,12 +27,15 @@
 #include <state.h>
 #include <idle.h>
 
+#include <sensor/switchbot/meter.h>
+
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
 
-static PlasmaDisplayIface plasma(
+#if HAS(OUTPUT_MD_PLASMA)
+static MorioDenkiPlasmaDriver display_driver(
     HWCONF_PLASMA_DATABUS_GPIOS,
     HWCONF_PLASMA_CLK_GPIO,
     HWCONF_PLASMA_RESET_GPIO,
@@ -34,8 +43,17 @@ static PlasmaDisplayIface plasma(
     HWCONF_PLASMA_SHOW_GPIO,
     HWCONF_PLASMA_HV_EN_GPIO
 );
+#elif HAS(OUTPUT_WS0010)
+static Ws0010OledDriver display_driver(
+    HWCONF_WS0010_DATABUS_GPIOS,
+    HWCONF_WS0010_RS_GPIO,
+    HWCONF_WS0010_EN_GPIO
+);
+#else
+#error Output type not selected
+#endif
 
-static PlasmaDisplayFramebuffer * fb;
+static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
 static Console * con;
 static SensorPool * sensors;
@@ -65,27 +83,28 @@ void change_state(device_state_t to) {
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
-    plasma.reset();
+    display_driver.reset();
 
-    plasma.set_power(true);
+    display_driver.set_power(true);
     delay(125);
-    plasma.set_show(true);
-    plasma.set_bright(true);
+    display_driver.set_show(true);
+#if HAS(VARYING_BRIGHTNESS)
+    display_driver.set_bright(true);
+#endif
 
-    fb = new PlasmaDisplayFramebuffer(&plasma);
+    fb = new DisplayFramebuffer(&display_driver);
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
+    con->print("");
     
-    // Plasma Information System OS (not DOS, there's no disk in it!)
-    con->print("PIS-OS v1.1\n");
+    con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
     delay(500);
- 
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
     bs = new BeepSequencer(beepola);
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, 0);
 
     con->clear();
-    con->set_font(&sg8bit_font);
+    con->set_font(&keyrus0808_font);
     con->set_cursor(true);
 
     con->print("WiFi init");
@@ -97,6 +116,7 @@ void setup() {
 
     con->clear();
     con->print(NetworkManager::network_name());
+    con->print("%i dBm", NetworkManager::rssi());
     delay(2000);
     con->print(NetworkManager::current_ip().c_str());
     delay(2000);
@@ -105,12 +125,19 @@ void setup() {
 
     sensors = new SensorPool();
 
+    sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
+
+#if HAS(LIGHT_SENSOR)
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
     con->print("L sensor OK");
+#endif
 
+#if HAS(MOTION_SENSOR)
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
     con->print("M sensor OK");
+#endif
 
+#if HAS(TEMP_SENSOR)
     Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
     AM2322* tempSens = new AM2322(&Wire);
 
@@ -127,14 +154,45 @@ void setup() {
     } else {
         con->print("H sensor OK");
     }
+#endif
 
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    if(prefs_get_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE)) {
+        String woMeterMac = prefs_get_string(PREFS_KEY_SWITCHBOT_METER_MAC);
+        size_t tmpLen = woMeterMac.length();
+        if(tmpLen > 0) {
+            SwitchbotMeterApi *wometer = new SwitchbotMeterApi(woMeterMac.c_str());
+
+            SwitchbotMeterHumidity *remoteHum = new SwitchbotMeterHumidity(wometer);
+            SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
+
+            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
+                con->print("WoH err");
+            } else {
+                con->print("WoH ok");
+                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
+                    sensors->short_circuit(SENSOR_ID_AMBIENT_HUMIDITY, SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
+                }
+            }
+
+            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
+                con->print("WoT err");
+            } else {
+                con->print("WoT ok");
+                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
+                    sensors->short_circuit(SENSOR_ID_AMBIENT_TEMPERATURE, SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
+                }
+            }
+        }
+    }
+#endif
     graph = fb->manipulate();
 
     timekeeping_begin();
     weather_start();
     wotd_start();
     foo_client_begin();
-    power_mgmt_start(sensors, &plasma, beepola);
+    power_mgmt_start(sensors, &display_driver, beepola);
     admin_panel_prepare(sensors, beepola);
     fps_counter = prefs_get_bool(PREFS_KEY_FPS_COUNTER);
 

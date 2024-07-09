@@ -1,11 +1,11 @@
 #pragma once
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 #include <sound/beeper.h>
 #include <service/time.h>
 #include "view.h"
 
 /// @brief A simple clock view
-class SimpleClock: public Renderable {
+class SimpleClock: public Screen {
 public:
     SimpleClock();
     void render(FantaManipulator*);

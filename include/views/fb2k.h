@@ -1,14 +1,15 @@
 #pragma once
 #include "view.h"
-#include <plasma/fanta_manipulator.h>
+#include <graphics/fanta_manipulator.h>
 #include <views/string_scroll.h>
 
-class Fb2kView: public Renderable {
+class Fb2kView: public Screen {
 public:
     Fb2kView();
     void prepare();
     void step();
     void render(FantaManipulator*);
+    int desired_display_time();
 
 private:
     void update_if_needed();

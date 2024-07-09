@@ -1,4 +1,4 @@
-#include <plasma/fanta_manipulator.h>
+#include <graphics/fanta_manipulator.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <Arduino.h>

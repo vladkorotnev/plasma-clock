@@ -1,6 +1,6 @@
 #pragma once
 #include <sensor/sensors.h>
-#include <plasma/iface.h>
+#include <graphics/display_driver.h>
 #include <sound/beeper.h>
 
 #define PM_INTERVAL 500
@@ -11,7 +11,7 @@
 #define PM_MOTIONLESS_HV_SHUTDOWN_DELAY 10 * 60 * 1000
 
 /// @brief Start the power management service
-void power_mgmt_start(SensorPool*, PlasmaDisplayIface*, Beeper*);
+void power_mgmt_start(SensorPool*, DisplayDriver*, Beeper*);
 /// @brief Suspend the power management service and enter the full power mode
 void power_mgmt_pause();
 /// @brief Resume the power management service after it was paused

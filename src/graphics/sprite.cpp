@@ -1,4 +1,4 @@
-#include "plasma/sprite.h"
+#include "graphics/sprite.h"
 #include <string.h>
 #include <algorithm>
 #include <Arduino.h>

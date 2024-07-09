@@ -7,6 +7,7 @@ public:
     StringScroll(const font_definition_t*);
     void set_string(const char*);
     void set_y_position(int);
+    int estimated_frame_count();
     void render(FantaManipulator *);
 
 private:

@@ -1,13 +1,13 @@
 #pragma once
-#include <plasma/font.h>
-#include <plasma/framebuffer.h>
+#include <graphics/font.h>
+#include <graphics/framebuffer.h>
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
 /// @brief A simple low level console that does not utilize the Renderable tooling
 class Console {
 public:
-    Console(const font_definition_t*, PlasmaDisplayFramebuffer*);
+    Console(const font_definition_t*, DisplayFramebuffer*);
     ~Console();
 
     void set_active(bool);
@@ -22,7 +22,7 @@ public:
     void task();
 
 private:
-    PlasmaDisplayFramebuffer * disp;
+    DisplayFramebuffer * disp;
     const font_definition_t * font;
     QueueHandle_t hQueue;
     TaskHandle_t hTask;

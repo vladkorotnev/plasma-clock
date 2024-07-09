@@ -1,20 +1,20 @@
 #pragma once
-#include "iface.h"
+#include <graphics/display_driver.h>
 #include "fanta_manipulator.h"
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/event_groups.h>
 
 /// @brief A framebuffer for driving the plasma display
-class PlasmaDisplayFramebuffer {
+class DisplayFramebuffer {
 public:
     static const int width = 101;
     static const int height = 16;
     /// @brief Size of the backing buffer in bytes
     static const size_t PDFB_BUFFER_SIZE = width * (height / 8);
 
-    PlasmaDisplayFramebuffer(PlasmaDisplayIface * display);
-    ~PlasmaDisplayFramebuffer();
+    DisplayFramebuffer(DisplayDriver * display);
+    ~DisplayFramebuffer();
 
     /// @brief Clears the display
     void clear();
@@ -38,7 +38,7 @@ private:
     SemaphoreHandle_t buffer_semaphore;
     EventGroupHandle_t vsync_group;
     TaskHandle_t hTask;
-    PlasmaDisplayIface * display;
+    DisplayDriver * display;
     FantaManipulator * shared_manipulator;
     bool is_dirty;
 

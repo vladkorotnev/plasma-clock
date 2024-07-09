@@ -17,7 +17,7 @@ static const sprite_t icn_music = {
 };
 
 Fb2kView::Fb2kView() {
-    font = &sg8bit_font;
+    font = &keyrus0808_font;
     memset(artist_buffer, 0, 128);
     memset(title_buffer, 0, 128);
 
@@ -65,4 +65,12 @@ void Fb2kView::render(FantaManipulator *fb) {
     top_line->render(text_window);
     bottom_line->render(text_window);
     delete text_window;
+}
+
+int Fb2kView::desired_display_time() {
+    if(foo_is_playing()) {
+        return DISP_TIME_NO_OVERRIDE;
+    } else {
+        return DISP_TIME_DONT_SHOW;
+    }
 }

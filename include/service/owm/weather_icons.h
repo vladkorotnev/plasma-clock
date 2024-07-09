@@ -1,5 +1,5 @@
 #pragma once
-#include <plasma/sprite.h>
+#include <graphics/sprite.h>
 
 extern const ani_sprite_t thunderstorm_icon;
 extern const ani_sprite_t drizzle_icon;

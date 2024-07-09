@@ -1,6 +1,52 @@
 #include <views/indoor_view.h>
 #include <fonts.h>
 
+AirSensorView::AirSensorView(SensorPool *s, sensor_id_t t, sensor_id_t h, const sprite_t * ic) {
+    sensors = s;
+    value_font = &keyrus0816_font;
+    temperature_id = t;
+    humidity_id = h;
+    icon = ic;
+}
+
+void AirSensorView::render(FantaManipulator *fb) {
+    fb->put_sprite(icon, 0, 0);
+
+    uint8_t hum_left_margin = 0;
+    sensor_info_t * humidity = sensors->get_info(humidity_id);
+    if(humidity != nullptr && humidity->last_read != 0) {
+        char buf[8];
+        snprintf(buf, 8, "%u%%", humidity->last_result/100);
+        hum_left_margin = measure_string_width(value_font, buf) + value_font->width/2;
+        fb->put_string(value_font, buf, fb->get_width() - hum_left_margin, 0);
+    } else {
+        hum_left_margin = 3*value_font->width + value_font->width/2;
+        fb->put_string(value_font, "--%", fb->get_width() - hum_left_margin, 0);
+    }
+
+    sensor_info_t * temperature = sensors->get_info(temperature_id);
+    if(temperature != nullptr && temperature->last_read != 0) {
+        char buf[8];
+        snprintf(buf, 8, "%i.%i\370C", temperature->last_result/100, (temperature->last_result < 0 ? -1 : 1) * (temperature->last_result%100)/10);
+        uint8_t t_width = measure_string_width(value_font, buf);
+        uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
+        fb->put_string(value_font, buf, t_left, 0);
+    } else {
+        uint8_t t_width = value_font->width*6;
+        uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
+        fb->put_string(value_font, "--.-\370C", t_left, 0);
+    }
+}
+
+int AirSensorView::desired_display_time() {
+    if(sensors->exists(humidity_id) || sensors->exists(temperature_id)) {
+        return DISP_TIME_NO_OVERRIDE;
+    } else {
+        return DISP_TIME_DONT_SHOW;
+    }
+}
+
+#if HAS(TEMP_SENSOR)
 static const uint8_t icon_home_data[] = {
     // By PiiXL
     // https://piiixl.itch.io/mega-1-bit-icons-bundle
@@ -14,36 +60,34 @@ static const sprite_t icon_home_1616 = {
     .data = icon_home_data
 };
 
-IndoorView::IndoorView(SensorPool *s) {
-    sensors = s;
-    value_font = &keyrus0816_font;
+IndoorView::IndoorView(SensorPool *s) : AirSensorView(
+    s,
+    SENSOR_ID_AMBIENT_TEMPERATURE,
+    SENSOR_ID_AMBIENT_HUMIDITY,
+    &icon_home_1616
+) {
 }
+#endif
 
-void IndoorView::render(FantaManipulator *fb) {
-    fb->put_sprite(&icon_home_1616, 0, 0);
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+static const uint8_t icon_thermo_data[] = {
+    // By PiiXL
+    // https://piiixl.itch.io/mega-1-bit-icons-bundle
+    0x10, 0x00, 0x38, 0x00, 0x74, 0x00, 0xfe, 0x00, 0x7d, 0x00, 0x38, 0x80, 0x11, 0x40, 0x08, 0x20, 
+    0x04, 0x5c, 0x02, 0x02, 0x01, 0x0d, 0x00, 0x8d, 0x00, 0x81, 0x00, 0x81, 0x00, 0x42, 0x00, 0x3c
+};
 
-    uint8_t hum_left_margin = 0;
-    sensor_info_t * humidity = sensors->get_info(SENSOR_ID_AMBIENT_HUMIDITY);
-    if(humidity != nullptr && humidity->last_read != 0) {
-        char buf[8];
-        snprintf(buf, 8, "%u%%", humidity->last_result/100);
-        hum_left_margin = measure_string_width(value_font, buf) + value_font->width/2;
-        fb->put_string(value_font, buf, fb->get_width() - hum_left_margin, 0);
-    } else {
-        hum_left_margin = 3*value_font->width + value_font->width/2;
-        fb->put_string(value_font, "--%", fb->get_width() - hum_left_margin, 0);
-    }
+static const sprite_t icon_thermo_1616 = {
+    .width = 16,
+    .height = 16,
+    .data = icon_thermo_data
+};
 
-    sensor_info_t * temperature = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
-    if(temperature != nullptr && temperature->last_read != 0) {
-        char buf[8];
-        snprintf(buf, 8, "%u.%u\370C", temperature->last_result/100, (temperature->last_result%100)/10);
-        uint8_t t_width = measure_string_width(value_font, buf);
-        uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
-        fb->put_string(value_font, buf, t_left, 0);
-    } else {
-        uint8_t t_width = value_font->width*6;
-        uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
-        fb->put_string(value_font, "--.-\370C", t_left, 0);
-    }
+WoSensorView::WoSensorView(SensorPool *s) : AirSensorView(
+    s,
+    SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE,
+    SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY,
+    &icon_thermo_1616
+) {
 }
+#endif

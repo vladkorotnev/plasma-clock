@@ -1,9 +1,14 @@
-#include <plasma/iface.h>
-#include <Arduino.h>
+#include <device_config.h>
 
-static char LOG_TAG[] = "PDIF";
+#if HAS(OUTPUT_MD_PLASMA)
+#include <display/md_plasma.h>
+#include <esp32-hal-log.h>
+#include <esp32-hal-gpio.h>
+#include <esp_err.h>
 
-PlasmaDisplayIface::PlasmaDisplayIface(
+static char LOG_TAG[] = "MDPlasma";
+
+MorioDenkiPlasmaDriver::MorioDenkiPlasmaDriver(
     const gpio_num_t databus[8],
     const gpio_num_t clock,
     const gpio_num_t reset,
@@ -24,7 +29,7 @@ PlasmaDisplayIface::PlasmaDisplayIface(
     initialize();
 }
 
-void PlasmaDisplayIface::initialize() {
+void MorioDenkiPlasmaDriver::initialize() {
     ESP_LOGI(LOG_TAG, "Initializing MD16101DS bus with data bus: %i %i %i %i %i %i %i %i, clock=%i, reset=%i, bright=%i, show=%i, hv_en=%i", databus_gpios[0], databus_gpios[1], databus_gpios[2], databus_gpios[3], databus_gpios[4], databus_gpios[5], databus_gpios[6], databus_gpios[7], clk_gpio, reset_gpio, bright_gpio, show_gpio, hv_en_gpio);
 
     gpio_config_t io_conf = {
@@ -54,7 +59,7 @@ void PlasmaDisplayIface::initialize() {
     reset();
 }
 
-void PlasmaDisplayIface::reset() {
+void MorioDenkiPlasmaDriver::reset() {
     ESP_LOGV(LOG_TAG, "Reset");
     gpio_set_level(reset_gpio, 0);
     delayMicroseconds(100);
@@ -63,43 +68,51 @@ void PlasmaDisplayIface::reset() {
     delay(100);
 }
 
-void PlasmaDisplayIface::set_power(bool on) {
+void MorioDenkiPlasmaDriver::set_power(bool on) {
     ESP_LOGV(LOG_TAG, "HIGH VOLTAGE is now %s", (on ? "ON" : "off"));
     gpio_set_level(hv_en_gpio, on ? 1 : 0);
 }
 
-void PlasmaDisplayIface::set_databus(byte data) {
-    byte local_sts = ~data;
+void MorioDenkiPlasmaDriver::set_databus(uint8_t data) {
+    uint8_t local_sts = ~data;
     for(int i = 0; i < 8; i++) {
-        byte cur_state = (local_sts & 1);
+        uint8_t cur_state = (local_sts & 1);
         gpio_set_level(databus_gpios[i], cur_state);
         local_sts >>= 1;
     }
 }
 
-void PlasmaDisplayIface::pulse_clock() {
+void MorioDenkiPlasmaDriver::pulse_clock() {
     gpio_set_level(clk_gpio, 0);
     delayMicroseconds(5);
     gpio_set_level(clk_gpio, 1);
     delayMicroseconds(5);
 }
 
-void PlasmaDisplayIface::set_show(bool show) {
+void MorioDenkiPlasmaDriver::set_show(bool show) {
     ESP_LOGI(LOG_TAG, "Set SHOW = %i", show);
     gpio_set_level(show_gpio, show ? 1 : 0);
 }
 
-void PlasmaDisplayIface::set_bright(bool bright) {
+void MorioDenkiPlasmaDriver::set_bright(bool bright) {
     ESP_LOGI(LOG_TAG, "Set BRIGHT = %i", bright);
     gpio_set_level(bright_gpio, bright ? 1 : 0);
 }
 
-void PlasmaDisplayIface::write_stride(uint8_t stride) {
+void MorioDenkiPlasmaDriver::write_stride(uint8_t stride) {
     set_databus(stride);
     pulse_clock();
 }
 
-void PlasmaDisplayIface::write_column(uint16_t column) {
+void MorioDenkiPlasmaDriver::write_column(uint16_t column) {
     write_stride(column & 0xFF);
     write_stride((column >> 8) & 0xFF);
 }
+
+void MorioDenkiPlasmaDriver::write_fanta(const uint8_t * strides, size_t count) {
+    // Native pixel format, so just write as is
+    for(int i = 0; i < count; i++) {
+        write_stride(strides[i]);
+    }
+}
+#endif

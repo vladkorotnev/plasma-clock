@@ -1,4 +1,5 @@
 #pragma once
+#include <device_config.h>
 #include <freertos/FreeRTOS.h>
 
 void wotd_start();

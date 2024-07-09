@@ -1,4 +1,4 @@
-#include <plasma/fanta_manipulator.h>
+#include <graphics/fanta_manipulator.h>
 #include "view.h"
 #include "compositor.h"
 #include "multiplexor.h"

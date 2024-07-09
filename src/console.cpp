@@ -19,7 +19,7 @@ void ConsoleTaskFunction( void * pvParameter )
 }
 
 
-Console::Console(const font_definition_t * f, PlasmaDisplayFramebuffer * fb) {
+Console::Console(const font_definition_t * f, DisplayFramebuffer * fb) {
     disp = fb;
     font = f;
     cursor_x = 0;

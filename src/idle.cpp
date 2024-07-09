@@ -1,4 +1,5 @@
 #include "idle.h"
+#include <device_config.h>
 #include <stdint.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
@@ -9,19 +10,29 @@
 #include <views/simple_clock.h>
 #include <views/rain_ovl.h>
 #include <views/thunder_ovl.h>
+#if HAS(TEMP_SENSOR) || HAS(SWITCHBOT_METER_INTEGRATION)
 #include <views/indoor_view.h>
+#endif
 #include <views/framework.h>
 #include <views/current_weather.h>
 #include <views/word_of_the_day.h>
 #include <views/fb2k.h>
+#include <views/signal_icon.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
 typedef enum MainViewId: uint16_t {
     VIEW_CLOCK = 0,
+#if HAS(TEMP_SENSOR)
     VIEW_INDOOR_WEATHER,
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    VIEW_REMOTE_WEATHER,
+#endif
     VIEW_OUTDOOR_WEATHER,
+#if HAS(WORDNIK_API)
     VIEW_WORD_OF_THE_DAY,
+#endif
     VIEW_FB2K,
 
     VIEW_MAX
@@ -29,11 +40,20 @@ typedef enum MainViewId: uint16_t {
 
 static int screen_times_ms[VIEW_MAX] = {
     30000, // VIEW_CLOCK
+#if HAS(TEMP_SENSOR)
     10000, // VIEW_INDOOR_WEATHER
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    10000, // VIEW_REMOTE_WEATHER,
+#endif
     25000, // VIEW_OUTDOOR_WEATHER
+#if HAS(WORDNIK_API)
     25000, // VIEW_WORD_OF_THE_DAY
+#endif
     0, // VIEW_FB2K
 };
+
+int current_screen_time_ms = 0;
 
 static bool did_prepare = false;
 
@@ -47,10 +67,20 @@ static SimpleClock * clockView;
 
 static RainOverlay * rain;
 static ThunderOverlay * thunder;
+static SignalStrengthIcon * signalIndicator;
 
+#if HAS(TEMP_SENSOR)
 static IndoorView * indoorView;
+#endif
+
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+static WoSensorView * remoteWeatherView;
+#endif
+
 static CurrentWeatherView * weatherView;
+#if HAS(WORDNIK_API)
 static WordOfTheDayView * wotdView;
+#endif
 static Fb2kView *fb2kView;
 
 static ViewMultiplexor * slideShow;
@@ -77,8 +107,7 @@ void sound_tick_tock() {
 }
 
 void hourly_chime() {
-    static tk_time_of_day now;
-    now = get_current_time_coarse();
+    tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) ;
     if(now.hour != last_chimed_hour 
     && now.hour >= first_hour
@@ -160,10 +189,17 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
 
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
+#if HAS(TEMP_SENSOR)
     screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    screen_times_ms[VIEW_REMOTE_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS) * 1000;
+#endif
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
+#if HAS(WORDNIK_API)
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
-    // VIEW_FB2K gets set dynamically in processing()
+#endif
+    screen_times_ms[VIEW_FB2K] = prefs_get_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS) * 1000;
 
     bool has_at_least_one_screen = false;
     for(int i = 0; i < VIEW_MAX; i++) {
@@ -176,44 +212,66 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
         screen_times_ms[VIEW_CLOCK] = 3600000;
     }
 
+    current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
+
     clockView = new SimpleClock();
-    indoorView = new IndoorView(sensors);
     rain = new RainOverlay(101, 16);
     thunder = new ThunderOverlay(101, 16);
+    signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
-    wotdView = new WordOfTheDayView();
     fb2kView = new Fb2kView();
 
     // thunder hurts readability on other views, so keep it on clock only
-    ViewCompositor * thunderClock = new ViewCompositor();
-    thunderClock->add_layer(clockView);
+    ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
     thunderClock->add_layer(thunder);
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
+#if HAS(TEMP_SENSOR)
+    indoorView = new IndoorView(sensors);
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);
+#endif
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    remoteWeatherView = new WoSensorView(sensors);
+    slideShow->add_view(remoteWeatherView, VIEW_REMOTE_WEATHER);
+#endif
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
+#if HAS(WORDNIK_API)
+    wotdView = new WordOfTheDayView();
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
+#endif
     slideShow->add_view(fb2kView, VIEW_FB2K);
 
     lastScreenSwitch = xTaskGetTickCount();
 
     ViewCompositor * rainyClock = new ViewCompositor();
     rainyClock->add_layer(slideShow);
+    rainyClock->add_layer(signalIndicator);
     rainyClock->add_layer(rain);
     mainView = rainyClock;
 
     mainView->prepare();
 }
 
+void update_screen_specific_time() {
+    current_screen_time_ms = screen_times_ms[curScreen];
+    if(current_screen_time_ms == 0) return;  // user disabled this screen, don't care what it thinks about the display time
+
+    int specificTime = slideShow->get_view(curScreen)->desired_display_time();
+    if(specificTime > current_screen_time_ms || specificTime == DISP_TIME_DONT_SHOW) {
+        current_screen_time_ms = specificTime;
+    }
+}
+
 void change_screen_if_needed() {
     TickType_t now = xTaskGetTickCount();
-    if(now - lastScreenSwitch >= pdMS_TO_TICKS(screen_times_ms[curScreen])) {
-        curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
-        if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
-        while(screen_times_ms[curScreen] == 0) {
+    update_screen_specific_time();
+    if(now - lastScreenSwitch >= pdMS_TO_TICKS(current_screen_time_ms)) {
+        current_screen_time_ms = 0;
+        while(current_screen_time_ms == 0) {
             curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
             if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
+            update_screen_specific_time();
         }
         slideShow->switch_to(curScreen, (transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
         lastScreenSwitch = now;
@@ -244,6 +302,4 @@ void app_idle_process() {
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
-    screen_times_ms[VIEW_FB2K] = 
-        foo_is_playing() ? (prefs_get_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS) * 1000) : 0;
 }

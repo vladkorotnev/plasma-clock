@@ -1,4 +1,7 @@
 #include "network/admin_panel.h"
+#include <device_config.h>
+#include <network/netmgr.h>
+#include <backup.h>
 #include <service/prefs.h>
 #include <service/owm/weather.h>
 #include <service/wordnik.h>
@@ -23,7 +26,7 @@ void AdminTaskFunction( void * pvParameter )
     }
 }
 
-GP_BUTTON reboot_btn("reboot", "Save & Restart PIS-OS");
+GP_BUTTON reboot_btn("reboot", "Save & Restart " PRODUCT_NAME);
 
 static void render_bool(const char * title, prefs_key_t key) {
     GP.LABEL(title);
@@ -100,11 +103,11 @@ static void save_melody(prefs_key_t key) {
 
 void build() {
     GP.BUILD_BEGIN();
-    GP.PAGE_TITLE("PIS-OS Admin Panel");
+    GP.PAGE_TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
     GP.THEME(GP_DARK);
     GP.JQ_SUPPORT();
 
-    GP.TITLE("PIS-OS Admin Panel");
+    GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
 
     GP.SPOILER_BEGIN("WiFi", GP_BLUE);
         render_string("SSID", PREFS_KEY_WIFI_SSID);
@@ -137,12 +140,20 @@ void build() {
     GP.SPOILER_BEGIN("Display", GP_BLUE);
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
         GP.BREAK();
+        #if HAS(TEMP_SENSOR)
         render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);
         GP.BREAK();
+        #endif
+        #if HAS(SWITCHBOT_METER_INTEGRATION)
+        render_int("Show Switchbot temperature for [s]:", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS);
+        GP.BREAK();
+        #endif
         render_int("Show current weather for [s]:", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS);
         GP.BREAK();
+        #if HAS(WORDNIK_API)
         render_int("Show word of the day for [s]:", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS);
         GP.BREAK();
+        #endif
         render_int("Show Fb2k for [s]:", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS);
         GP.HR();
         GP.LABEL("Screen transition:");
@@ -153,10 +164,36 @@ void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+#if HAS(TEMP_SENSOR)
+    GP.SPOILER_BEGIN("Calibration", GP_BLUE);
+        render_int("Temperature offset:", PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET);
+        GP.BREAK();
+        render_int("Humidity offset:", PREFS_KEY_TEMP_SENSOR_HUM_OFFSET);
+    GP.SPOILER_END();
+    GP.BREAK();
+#endif
+
+    GP.SPOILER_BEGIN("Overlays", GP_BLUE);
+#if defined(PDFB_PERF_LOGS)
+        render_bool("FPS counter", PREFS_KEY_FPS_COUNTER);
+#endif
+        GP.LABEL("WiFi status:");
+        GP.SELECT(PREFS_KEY_WIFI_ICON, "None,Disconnected only,On display power on,Always", prefs_get_int(PREFS_KEY_WIFI_ICON));
+    GP.SPOILER_END();
+    GP.BREAK();
+
     GP.SPOILER_BEGIN("Sensors", GP_BLUE);
     GP.JQ_UPDATE_BEGIN(1000);
         sensor_info_t* sens;
 
+        GP.LABEL("WiFi: ");
+        GP.LABEL(NetworkManager::network_name(), "net_name");
+        char buf[16];
+        snprintf(buf, 15, "(%i dBm)", NetworkManager::rssi());
+        GP.LABEL(buf, "rssi_val");
+        GP.BREAK();
+
+        #if HAS(LIGHT_SENSOR)
         GP.LABEL("Light sensor: ");
         sens = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
         if(sens != nullptr) {
@@ -164,7 +201,10 @@ void build() {
         } else {
             GP.LABEL("----", "light_val");
         }
+        GP.BREAK();
+        #endif
 
+        #if HAS(MOTION_SENSOR)
         GP.LABEL("Motion sensor: ");
         sens = sensors->get_info(SENSOR_ID_MOTION);
         if(sens != nullptr) {
@@ -172,7 +212,10 @@ void build() {
         } else {
             GP.LABEL("?", "mot_val");
         }
+        GP.BREAK();
+        #endif
 
+        #if HAS(TEMP_SENSOR)
         GP.LABEL("Temperature: ");
         sens = sensors->get_info(SENSOR_ID_AMBIENT_TEMPERATURE);
         if(sens != nullptr) {
@@ -180,6 +223,8 @@ void build() {
         } else {
             GP.LABEL("----", "temp_val");
         }
+        GP.BREAK();
+        
 
         GP.LABEL("Humidity: ");
         sens = sensors->get_info(SENSOR_ID_AMBIENT_HUMIDITY);
@@ -188,18 +233,44 @@ void build() {
         } else {
             GP.LABEL("----", "hum_val");
         }
+        GP.BREAK();
+        #endif
+
+        #if HAS(SWITCHBOT_METER_INTEGRATION)
+        GP.LABEL("Remote temperature: ");
+        sens = sensors->get_info(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
+        if(sens != nullptr) {
+            GP.LABEL(String(sens->last_result / 100.0), "r_temp_val");
+        } else {
+            GP.LABEL("----", "r_temp_val");
+        }
+        GP.BREAK();
+
+        GP.LABEL("Remote humidity: ");
+        sens = sensors->get_info(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
+        if(sens != nullptr) {
+            GP.LABEL(String(sens->last_result / 100.0), "r_hum_val");
+        } else {
+            GP.LABEL("----", "r_hum_val");
+        }
+        GP.BREAK();
+        #endif
     GP.JQ_UPDATE_END();
     GP.SPOILER_END();
     GP.BREAK();
 
+    #if HAS(LIGHT_SENSOR) || HAS(MOTION_SENSOR)
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
+        #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         render_int("Bright screen when over:", PREFS_KEY_LIGHTNESS_THRESH_UP);
         render_int("Dark screen when under:", PREFS_KEY_LIGHTNESS_THRESH_DOWN);
         GP.HR();
-        render_int("Turn off display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
-        render_int("Shut down high voltage after more seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
+        #endif
+        render_int("Blank display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
+        render_int("Shut down display after more seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
     GP.SPOILER_END();
     GP.BREAK();
+    #endif
 
     GP.SPOILER_BEGIN("OpenWeatherMap", GP_BLUE);
         render_string("Latitude", PREFS_KEY_WEATHER_LAT);
@@ -222,6 +293,7 @@ void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+#if HAS(WORDNIK_API)
     GP.SPOILER_BEGIN("Wordnik", GP_BLUE);
         render_string("API Key", PREFS_KEY_WORDNIK_APIKEY, true);
         render_int("Update interval [m]:", PREFS_KEY_WORDNIK_INTERVAL_MINUTES);
@@ -237,22 +309,64 @@ void build() {
         }
     GP.SPOILER_END();
     GP.BREAK();
+#endif
+
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    GP.SPOILER_BEGIN("Switchbot Meter", GP_BLUE);
+        render_bool("Connect to Meter", PREFS_KEY_SWITCHBOT_METER_ENABLE);
+        render_bool("Emulate local", PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
+        GP.SPAN("When local sensor is not available, forwards the Meter data in place of that.");
+        render_string("Meter MAC address:", PREFS_KEY_SWITCHBOT_METER_MAC);
+        GP.SPAN("Use the Device Info tab in the Switchbot app to find it");
+    GP.SPOILER_END();
+    GP.BREAK();
+#endif
 
     GP.SPOILER_BEGIN("Foobar2000", GP_BLUE);
         render_string("Control Server IP", PREFS_KEY_FOOBAR_SERVER);
         render_int("Control Server Port:", PREFS_KEY_FOOBAR_PORT);
         GP.SPAN("Please set the format in foo_controlserver to: %artist%|%title%, and main delimiter to: |");
     GP.SPOILER_END();
+    GP.BREAK();
+
+    GP.SPOILER_BEGIN("Administration", GP_BLUE);
+        GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
+        GP.BUTTON_DOWNLOAD("crashdump.elf", "Last crash dump", GP_BLUE);
+        GP.FILE_UPLOAD_RAW("prefs_restore", "Settings restore", GP_BLUE, "", "", "/prefs_restore");
+    GP.SPOILER_END();
 
     GP.HR();
-#if defined(PDFB_PERF_LOGS)
-    render_bool("FPS counter", PREFS_KEY_FPS_COUNTER);
-#endif
     GP.BUTTON(reboot_btn);
     GP.BUILD_END();
 }
 
+static char binary_mime[] = "application/octet-stream";
+void downloadPartition(const void * partition, size_t size) {
+    ui.server.send_P(200, binary_mime, (const char*) partition, size);
+} 
 void action() {
+    if(ui.download()) {
+        const void * ptrPart;
+        partition_handle_t hPart;
+        size_t szPart;
+
+        if(ui.uri().endsWith("prefs_backup.bin")) {
+            if(mount_settings(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        else if(ui.uri().endsWith("crashdump.elf")) {
+            // MEMO: read with
+            // python %IDF_PATH%\components\espcoredump\espcoredump.py info_corefile --core R:\crashdump.elf .pio\build\bigclock-nodemcu-32s\firmware.elf
+            if(mount_crash(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        return;
+    }
+
     if(ui.click()) {
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
@@ -268,12 +382,15 @@ void action() {
         save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);
         save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600);
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
+        save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
+        save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
@@ -287,6 +404,10 @@ void action() {
         save_string(PREFS_KEY_FOOBAR_SERVER);
         save_int(PREFS_KEY_FOOBAR_PORT, 1000, 9999);
         save_bool(PREFS_KEY_FPS_COUNTER);
+        save_int(PREFS_KEY_WIFI_ICON, 0, 3);
+        save_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE);
+        save_string(PREFS_KEY_SWITCHBOT_METER_MAC);
+        save_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;
@@ -311,14 +432,57 @@ void action() {
     }
 }
 
+bool prefs_uploading = false;
+
 void admin_panel_prepare(SensorPool* s, Beeper* b) {
     sensors = s;
     beeper = b;
     ui.attachBuild(build);
     ui.attach(action);
+    ui.downloadAuto(false);
+    ui.uploadAuto(false);
 #if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
     ui.enableAuth(ADMIN_LOGIN, ADMIN_PASS);
 #endif
+
+    // Due to a bug in GyverPortal, handle uploads on our own
+    ui.server.on("/prefs_restore", HTTP_POST, []() {
+            ui.server.send(200, "text/html", F("<script>setInterval(function(){if(history.length>0)window.history.back();else window.location.href='/';},500);</script>"));
+        }, []() {
+            HTTPUpload& u = ui.server.upload();
+            switch(u.status) {
+                case UPLOAD_FILE_START:
+                    ESP_LOGI(LOG_TAG, "Upload started, expect %i bytes", ui.server.clientContentLength());
+                    if(begin_settings_write()) {
+                        prefs_uploading = true;
+                    }
+                    break;
+
+                case UPLOAD_FILE_WRITE:
+                    ESP_LOGI(LOG_TAG, "Received %i bytes", u.currentSize);
+                    if(prefs_uploading) {
+                        write_settings_chunk((const char*) u.buf, u.currentSize);
+                    }
+                    break;
+
+                case UPLOAD_FILE_ABORTED:
+                    ESP_LOGI(LOG_TAG, "Upload aborted");
+                    if(prefs_uploading) {
+                        end_settings_write();
+                        ESP.restart();
+                    }
+                    break;
+
+                case UPLOAD_FILE_END:
+                    ESP_LOGI(LOG_TAG, "End: Received %i bytes", u.totalSize);
+                    if(prefs_uploading) {
+                        end_settings_write();
+                        ESP.restart();
+                    }
+                    break;
+            }
+        }
+    );
     ui.start();
 
     ESP_LOGV(LOG_TAG, "Creating task");

@@ -1,9 +1,10 @@
 #pragma once
-#include <plasma/framebuffer.h>
+#include <graphics/framebuffer.h>
 #include <console.h>
 #include <sound/sequencer.h>
 #include <ArduinoOTA.h>
 
+#if HAS(OTAFVU)
 /// @brief Manages the ArduinoOTA update service
 class OTAFVUManager {
 public:
@@ -24,3 +25,10 @@ private:
     void on_progress(unsigned int, unsigned int);
     TaskHandle_t hTask;
 };
+#else
+class OTAFVUManager {
+public:
+    OTAFVUManager(Console*, BeepSequencer*) {}
+    ~OTAFVUManager() {}
+};
+#endif
