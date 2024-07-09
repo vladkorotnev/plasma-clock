@@ -164,6 +164,15 @@ void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+#if HAS(TEMP_SENSOR)
+    GP.SPOILER_BEGIN("Calibration", GP_BLUE);
+        render_int("Temperature offset:", PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET);
+        GP.BREAK();
+        render_int("Humidity offset:", PREFS_KEY_TEMP_SENSOR_HUM_OFFSET);
+    GP.SPOILER_END();
+    GP.BREAK();
+#endif
+
     GP.SPOILER_BEGIN("Overlays", GP_BLUE);
 #if defined(PDFB_PERF_LOGS)
         render_bool("FPS counter", PREFS_KEY_FPS_COUNTER);
@@ -380,6 +389,8 @@ void action() {
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
+        save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
+        save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
