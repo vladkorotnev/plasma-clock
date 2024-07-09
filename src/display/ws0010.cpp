@@ -59,8 +59,6 @@ void Ws0010OledDriver::set_databus(uint8_t data) {
 }
 
 void Ws0010OledDriver::pulse_clock() {
-    gpio_set_level(en_gpio, 0);
-    delayMicroseconds(1);
     gpio_set_level(en_gpio, 1);
     delayMicroseconds(1);
     gpio_set_level(en_gpio, 0);
@@ -122,24 +120,30 @@ void Ws0010OledDriver::reset() {
 }
 
 void Ws0010OledDriver::set_show(bool show) {
+    taskENTER_CRITICAL(&_spinlock);
     set_is_command(true);
     set_databus(0b00001000 | (show ? 0b111 : 0)); // cursor and blink always off
     pulse_clock();
     delayMicroseconds(400);
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void Ws0010OledDriver::set_power(bool power) {
+    taskENTER_CRITICAL(&_spinlock);
     set_is_command(true);
     set_databus(0b00011000 | (power ? 0b111 : 0b011)); // G/C always set to GRAPHIC
     pulse_clock();
     delayMicroseconds(400);
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void Ws0010OledDriver::clear() {
+    taskENTER_CRITICAL(&_spinlock);
     set_is_command(true);
     set_databus(0b00000001);
     pulse_clock();
     delayMicroseconds(400);
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void Ws0010OledDriver::write_stride(uint8_t stride) {
