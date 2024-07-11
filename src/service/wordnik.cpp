@@ -49,8 +49,10 @@ void WordnikTaskFunction( void * pvParameter )
 
     static char url[128];
     snprintf(url, 150, currentApi, apiKey.c_str());
+    bool isFailure = false;
 
     while(1) {
+        isFailure = false;
         http.begin(client, url);
         client.setInsecure();
         ESP_LOGV(LOG_TAG, "Query: %s", url);
@@ -62,6 +64,7 @@ void WordnikTaskFunction( void * pvParameter )
 
             if (error) {
                 ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
+                isFailure = true;
             } else {
                 if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
                     ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
@@ -85,8 +88,9 @@ void WordnikTaskFunction( void * pvParameter )
         } else {
             ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
             ESP_LOGE(LOG_TAG, "%s", http.getString());
+            isFailure = true;
         }
-        vTaskDelay(interval);
+        vTaskDelay(isFailure ? pdMS_TO_TICKS(10000) : interval);
     }
 }
 

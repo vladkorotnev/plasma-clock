@@ -1,12 +1,6 @@
 #include <Arduino.h>
 #include <device_config.h>
-
-#if HAS(OUTPUT_MD_PLASMA)
-#include <display/md_plasma.h>
-#elif HAS(OUTPUT_WS0010)
-#include <display/ws0010.h>
-#endif
-
+#include <display/display.h>
 #include <graphics/framebuffer.h>
 #include <fonts.h>
 #include <console.h>
@@ -33,25 +27,6 @@ static char LOG_TAG[] = "APL_MAIN";
 static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
 
-#if HAS(OUTPUT_MD_PLASMA)
-static MorioDenkiPlasmaDriver display_driver(
-    HWCONF_PLASMA_DATABUS_GPIOS,
-    HWCONF_PLASMA_CLK_GPIO,
-    HWCONF_PLASMA_RESET_GPIO,
-    HWCONF_PLASMA_BRIGHT_GPIO,
-    HWCONF_PLASMA_SHOW_GPIO,
-    HWCONF_PLASMA_HV_EN_GPIO
-);
-#elif HAS(OUTPUT_WS0010)
-static Ws0010OledDriver display_driver(
-    HWCONF_WS0010_DATABUS_GPIOS,
-    HWCONF_WS0010_RS_GPIO,
-    HWCONF_WS0010_EN_GPIO
-);
-#else
-#error Output type not selected
-#endif
-
 static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
 static Console * con;
@@ -77,6 +52,74 @@ void change_state(device_state_t to) {
             break;
     }
     current_state = to;
+}
+
+void bringup_light_sensor() {
+#if HAS(LIGHT_SENSOR)
+    sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
+    con->print("L sensor OK");
+#endif
+}
+
+void bringup_motion_sensor() {
+#if HAS(MOTION_SENSOR)
+    sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
+    con->print("M sensor OK");
+#endif
+}
+
+void bringup_temp_sensor() {
+#if HAS(TEMP_SENSOR)
+    Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
+    AM2322* tempSens = new AM2322(&Wire);
+
+    if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
+        con->print("T sens err");
+        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+    } else {
+        con->print("T sensor OK");
+    }
+    delay(1000);
+    if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
+        con->print("H sens err");
+        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+    } else {
+        con->print("H sensor OK");
+    }
+#endif
+}
+
+void bringup_switchbot_sensor() {
+#if HAS(SWITCHBOT_METER_INTEGRATION)
+    if(prefs_get_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE)) {
+        String woMeterMac = prefs_get_string(PREFS_KEY_SWITCHBOT_METER_MAC);
+        size_t tmpLen = woMeterMac.length();
+        if(tmpLen > 0) {
+            SwitchbotMeterApi *wometer = new SwitchbotMeterApi(woMeterMac.c_str());
+
+            SwitchbotMeterHumidity *remoteHum = new SwitchbotMeterHumidity(wometer);
+            SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
+
+            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
+                con->print("WoH err");
+            } else {
+                con->print("WoH ok");
+                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
+                    sensors->short_circuit(SENSOR_ID_AMBIENT_HUMIDITY, SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
+                }
+            }
+
+            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
+                con->print("WoT err");
+            } else {
+                con->print("WoT ok");
+                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
+                    sensors->short_circuit(SENSOR_ID_AMBIENT_TEMPERATURE, SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
+                }
+            }
+        }
+    }
+#endif
 }
 
 void setup() {
@@ -125,66 +168,11 @@ void setup() {
     sensors = new SensorPool();
 
     sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
+    bringup_light_sensor();
+    bringup_motion_sensor();
+    bringup_temp_sensor();
+    bringup_switchbot_sensor();
 
-#if HAS(LIGHT_SENSOR)
-    sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
-    con->print("L sensor OK");
-#endif
-
-#if HAS(MOTION_SENSOR)
-    sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
-    con->print("M sensor OK");
-#endif
-
-#if HAS(TEMP_SENSOR)
-    Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
-    AM2322* tempSens = new AM2322(&Wire);
-
-    if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
-        con->print("T sens err");
-        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
-    } else {
-        con->print("T sensor OK");
-    }
-    delay(1000);
-    if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
-        con->print("H sens err");
-        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
-    } else {
-        con->print("H sensor OK");
-    }
-#endif
-
-#if HAS(SWITCHBOT_METER_INTEGRATION)
-    if(prefs_get_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE)) {
-        String woMeterMac = prefs_get_string(PREFS_KEY_SWITCHBOT_METER_MAC);
-        size_t tmpLen = woMeterMac.length();
-        if(tmpLen > 0) {
-            SwitchbotMeterApi *wometer = new SwitchbotMeterApi(woMeterMac.c_str());
-
-            SwitchbotMeterHumidity *remoteHum = new SwitchbotMeterHumidity(wometer);
-            SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
-
-            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
-                con->print("WoH err");
-            } else {
-                con->print("WoH ok");
-                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
-                    sensors->short_circuit(SENSOR_ID_AMBIENT_HUMIDITY, SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
-                }
-            }
-
-            if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
-                con->print("WoT err");
-            } else {
-                con->print("WoT ok");
-                if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
-                    sensors->short_circuit(SENSOR_ID_AMBIENT_TEMPERATURE, SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
-                }
-            }
-        }
-    }
-#endif
     graph = fb->manipulate();
 
     timekeeping_begin();
