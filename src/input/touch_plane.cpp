@@ -94,7 +94,7 @@ static void poll_touch_controller() {
 static void touch_task(void* pvParams) {
     while(1) {
         poll_touch_controller();
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(10));
     }
 }
 

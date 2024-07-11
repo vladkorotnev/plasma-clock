@@ -18,6 +18,7 @@
 #include <views/word_of_the_day.h>
 #include <views/fb2k.h>
 #include <views/signal_icon.h>
+#include <input/keys.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
@@ -264,18 +265,33 @@ void update_screen_specific_time() {
     }
 }
 
+void go_to_next_screen(transition_type_t transition) {
+    current_screen_time_ms = 0;
+    while(current_screen_time_ms == 0) {
+        curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
+        if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
+        update_screen_specific_time();
+    }
+    slideShow->switch_to(curScreen, transition);
+    lastScreenSwitch = xTaskGetTickCount();
+}
+
+void go_to_prev_screen(transition_type_t transition) {
+    current_screen_time_ms = 0;
+    while(current_screen_time_ms == 0) {
+        if(curScreen == VIEW_CLOCK) curScreen = (MainViewId_t) (VIEW_MAX - 1);
+        else curScreen = (MainViewId_t) (((uint16_t) curScreen) - 1);
+        update_screen_specific_time();
+    }
+    slideShow->switch_to(curScreen, transition);
+    lastScreenSwitch = xTaskGetTickCount();
+}
+
 void change_screen_if_needed() {
     TickType_t now = xTaskGetTickCount();
     update_screen_specific_time();
     if(now - lastScreenSwitch >= pdMS_TO_TICKS(current_screen_time_ms)) {
-        current_screen_time_ms = 0;
-        while(current_screen_time_ms == 0) {
-            curScreen = (MainViewId_t) (((uint16_t) curScreen) + 1);
-            if(curScreen == VIEW_MAX) curScreen = VIEW_CLOCK;
-            update_screen_specific_time();
-        }
-        slideShow->switch_to(curScreen, (transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
-        lastScreenSwitch = now;
+        go_to_next_screen((transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
     }
 }
 
@@ -283,6 +299,8 @@ void app_idle_draw(FantaManipulator* graph) {
     graph->clear();
     mainView->render(graph);
 }
+
+bool ignoring_keys = false;
 
 void app_idle_process() {
     if(tick_tock_enable) {
@@ -297,7 +315,23 @@ void app_idle_process() {
         weather_overlay_update();
     }
 
-    change_screen_if_needed();
+    if(!ignoring_keys) {
+        if(hid_test_key_state(KEY_DOWN)) {
+            go_to_next_screen(TRANSITION_SLIDE_VERTICAL);
+            beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+            ignoring_keys = true;
+        }
+        else if(hid_test_key_state(KEY_UP)) {
+            go_to_prev_screen(TRANSITION_SLIDE_VERTICAL_REVERSE);
+            beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+            ignoring_keys = true;
+        }
+        else {
+            change_screen_if_needed();
+        }
+    } else {
+        ignoring_keys = (hid_test_key_any(KEY_ID_TO_BIT(KEY_UP) | KEY_ID_TO_BIT(KEY_DOWN)) != KEYSTATE_RELEASED);
+    }
 
     hourly_chime();
 

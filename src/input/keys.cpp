@@ -2,30 +2,32 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
-const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(100);
+const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(50);
 const TickType_t KEYHOLD_THRESHOLD_TIME = pdMS_TO_TICKS(1000);
 
 static key_bitmask_t active_keys = 0;
 static TickType_t keypress_started_at[KEY_MAX_INVALID] = { 0 };
 
 inline key_state_t time_to_state(TickType_t time) {
-    if(time < KEYPRESS_THRESHOLD_TIME) return KEYSTATE_RELEASED;
-    if(time < KEYHOLD_THRESHOLD_TIME) return KEYSTATE_PRESSED;
+    TickType_t now = xTaskGetTickCount();
+
+    if((now - time) < KEYPRESS_THRESHOLD_TIME) return KEYSTATE_RELEASED;
+    if((now - time) < KEYHOLD_THRESHOLD_TIME) return KEYSTATE_PRESSED;
     
     return KEYSTATE_HOLDING;
 }
 
 static key_state_t min_state_of_mask(key_bitmask_t keys) {
-    TickType_t min = portMAX_DELAY;
+    TickType_t maxTimeStamp = 0;
     for(key_id_t i = (key_id_t)0; i < KEY_MAX_INVALID; i = (key_id_t) (i + 1)) {
         if((keys & KEY_ID_TO_BIT(i)) == 0) continue;
 
-        if(min > keypress_started_at[i]) {
-            min = keypress_started_at[i];
+        if(maxTimeStamp < keypress_started_at[i]) {
+            maxTimeStamp = keypress_started_at[i];
         }
     }
 
-    return time_to_state(min);
+    return time_to_state(maxTimeStamp);
 }
 
 void hid_set_key_state(key_id_t key, bool state) {

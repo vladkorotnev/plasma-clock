@@ -14,7 +14,8 @@ private:
 
 class VerticalSlideTransition: public Transition {
 public:
-    VerticalSlideTransition();
+    bool is_reverse = false;
+    VerticalSlideTransition(bool reverse = false);
     bool render(FantaManipulator*, TransitionAnimationCoordinator*);
     void rewind();
 
