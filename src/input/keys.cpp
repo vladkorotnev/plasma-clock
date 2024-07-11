@@ -2,7 +2,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 
-const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(16);
+const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(100);
 const TickType_t KEYHOLD_THRESHOLD_TIME = pdMS_TO_TICKS(1000);
 
 static key_bitmask_t active_keys = 0;

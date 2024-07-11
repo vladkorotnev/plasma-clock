@@ -125,7 +125,7 @@ void bringup_switchbot_sensor() {
 void bringup_touch() {
 #if HAS(TOUCH_PLANE)
     con->print("Touch init");
-    if(start_touchplane_scan() != ESP_OK) {
+    if(touchplane_start() != ESP_OK) {
         con->print("TP init err");
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     }
