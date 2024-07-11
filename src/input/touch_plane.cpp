@@ -16,7 +16,6 @@
 
 static TaskHandle_t hTask;
 static char LOG_TAG[] = "TOUCH";
-static std::map<const touch_pad_t, uint16_t> currentReads = {};
 static std::map<const touch_pad_t, uint16_t> lastReads = {};
 static std::map<const touch_pad_t, int> lastDeltas = {};
 
@@ -73,21 +72,17 @@ static void poll_touch_controller() {
             ESP_LOGE(LOG_TAG, "touch_pad_read_filtered: %s (%i)", esp_err_to_name(rslt), rslt);
             return;
         } else {
-            currentReads[i.first] = tmp;
+            int delta = lastReads[i.first] - tmp;
+            //lastDeltas[i.first] = delta;
+            if(delta < STATE_CHG_THRESHOLD_RELEASE) {
+                // Untouch
+                hid_set_key_state(i.second, false);
+            } else if(delta > STATE_CHG_THRESHOLD_PRESS) {
+                // Touch
+                hid_set_key_state(i.second, true);
+            }
+            lastReads[i.first] = tmp;
         }
-    }
-
-    for(auto &i: HWCONF_TOUCH_PLANE) {
-        int delta = lastReads[i.first] - currentReads[i.first];
-        lastDeltas[i.first] = delta;
-        if(delta < STATE_CHG_THRESHOLD_RELEASE) {
-            // Untouch
-            hid_set_key_state(i.second, false);
-        } else if(delta > STATE_CHG_THRESHOLD_PRESS) {
-            // Touch
-            hid_set_key_state(i.second, true);
-        }
-        lastReads[i.first] = currentReads[i.first];
     }
 }
 
@@ -127,9 +122,9 @@ esp_err_t touchplane_start() {
         xTaskCreate(
             touch_task,
             "TOUCH",
-            4096,
+            1024,
             nullptr,
-            configMAX_PRIORITIES - 1,
+            configMAX_PRIORITIES - 3,
             &hTask
         );
     }
