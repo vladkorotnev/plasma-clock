@@ -76,7 +76,7 @@ void DisplayFramebuffer::setup_task() {
         "FBuf",
         4096,
         this,
-        configMAX_PRIORITIES - 2,
+        configMAX_PRIORITIES - 1,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

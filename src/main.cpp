@@ -4,8 +4,8 @@
 #include <graphics/framebuffer.h>
 #include <fonts.h>
 #include <console.h>
-#include <AM232X.h>
 #include <sensor/sensors.h>
+#include <input/touch_plane.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -122,6 +122,18 @@ void bringup_switchbot_sensor() {
 #endif
 }
 
+void bringup_touch() {
+#if HAS(TOUCH_PLANE)
+    con->print("Touch init");
+    if(start_touchplane_scan() != ESP_OK) {
+        con->print("TP init err");
+        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+    }
+#endif
+}
+
+extern void touchplane_debug(Console *);
+
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
@@ -149,6 +161,11 @@ void setup() {
     con->set_font(&keyrus0808_font);
     con->set_cursor(true);
 
+    // bringup_touch();
+    // touchplane_debug(con);
+    // vTaskDelay(portMAX_DELAY);
+    // return;
+
     con->print("WiFi init");
     NetworkManager::startup();
     while(!NetworkManager::is_up()) {
@@ -172,6 +189,7 @@ void setup() {
     bringup_motion_sensor();
     bringup_temp_sensor();
     bringup_switchbot_sensor();
+    bringup_touch();
 
     graph = fb->manipulate();
 
