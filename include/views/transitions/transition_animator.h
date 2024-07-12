@@ -1,5 +1,5 @@
 #pragma once
-#include "view.h"
+#include <views/common/view.h>
 #include <graphics/framebuffer.h>
 
 class TransitionAnimationCoordinator;

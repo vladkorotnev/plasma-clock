@@ -1,4 +1,4 @@
-#include <views/transition_animator.h>
+#include <views/transitions/transition_animator.h>
 
 TransitionAnimationCoordinator::TransitionAnimationCoordinator() { 
     backingBufferA = (fanta_buffer_t) malloc(DisplayFramebuffer::PDFB_BUFFER_SIZE);

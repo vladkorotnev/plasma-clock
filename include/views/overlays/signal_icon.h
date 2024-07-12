@@ -1,5 +1,5 @@
 #pragma once
-#include "view.h"
+#include <views/common/view.h>
 #include <sensor/sensor.h>
 
 class SignalStrengthIcon: public Renderable {

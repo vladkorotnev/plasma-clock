@@ -1,4 +1,4 @@
-#include <views/indoor_view.h>
+#include <views/idle_screens/indoor_view.h>
 #include <fonts.h>
 
 AirSensorView::AirSensorView(SensorPool *s, sensor_id_t t, sensor_id_t h, const sprite_t * ic) {

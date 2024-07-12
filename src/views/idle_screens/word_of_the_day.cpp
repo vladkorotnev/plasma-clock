@@ -2,7 +2,7 @@
 
 #if HAS(WORDNIK_API)
 
-#include <views/word_of_the_day.h>
+#include <views/idle_screens/word_of_the_day.h>
 #include <service/wordnik.h>
 #include <fonts.h>
 #include <esp32-hal-log.h>

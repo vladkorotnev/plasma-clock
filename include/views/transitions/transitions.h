@@ -1,6 +1,6 @@
 #pragma once
-#include "transitions/wipe.h"
-#include "transitions/slide.h"
+#include "wipe.h"
+#include "slide.h"
 
 typedef enum transition_type: uint8_t {
     TRANSITION_NONE = 0,

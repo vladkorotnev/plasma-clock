@@ -1,4 +1,4 @@
-#include "views/string_scroll.h"
+#include "views/common/string_scroll.h"
 #include <service/prefs.h>
 
 StringScroll::StringScroll(const font_definition_t * f) {

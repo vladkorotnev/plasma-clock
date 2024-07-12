@@ -1,4 +1,4 @@
-#include "views/thunder_ovl.h"
+#include <views/overlays/thunder_ovl.h>
 
 ThunderOverlay::ThunderOverlay(int w, int h) {
     width = w;

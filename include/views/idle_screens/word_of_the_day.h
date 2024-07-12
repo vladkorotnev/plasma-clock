@@ -3,9 +3,9 @@
 
 #if HAS(WORDNIK_API)
 
-#include "view.h"
+#include <views/common/view.h>
 #include <graphics/fanta_manipulator.h>
-#include <views/string_scroll.h>
+#include <views/common/string_scroll.h>
 
 class WordOfTheDayView: public Screen {
 public:

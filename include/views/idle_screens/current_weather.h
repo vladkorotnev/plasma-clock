@@ -1,6 +1,6 @@
 #pragma once
 #include <views/framework.h>
-#include <views/string_scroll.h>
+#include <views/common/string_scroll.h>
 #include <service/owm/weather.h>
 
 class CurrentWeatherView: public Screen {

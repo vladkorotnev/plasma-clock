@@ -1,4 +1,4 @@
-#include <views/compositor.h>
+#include <views/common/compositor.h>
 
 ViewCompositor::ViewCompositor() {
     views = std::list<Renderable*>();

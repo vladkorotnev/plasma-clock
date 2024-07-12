@@ -1,7 +1,7 @@
 #pragma once
-#include "view.h"
-#include "views/transitions.h"
-#include "transition_animator.h"
+#include <views/common/view.h>
+#include <views/transitions/transitions.h>
+#include <views/transitions/transition_animator.h>
 #include <map>
 
 typedef uint16_t view_id_t;

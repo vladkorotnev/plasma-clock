@@ -1,4 +1,4 @@
-#include "views/signal_icon.h"
+#include "views/overlays/signal_icon.h"
 #include <service/prefs.h>
 #include <network/netmgr.h>
 

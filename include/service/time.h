@@ -15,6 +15,7 @@ typedef struct tk_date {
     int year;
     int month;
     int day;
+    /// @brief 0 is Sunday, 1 is Monday and so on...
     int dayOfWeek;
 } tk_date_t;
 

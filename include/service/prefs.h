@@ -71,6 +71,8 @@ static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_ENABLE = "wos_ena";
 static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_MAC = "wos_mac";
 static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
 
+static constexpr prefs_key_t PREFS_KEY_ALARM_LIST = "alarms";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());
@@ -81,3 +83,6 @@ void prefs_set_int(prefs_key_t, int);
 
 bool prefs_get_bool(prefs_key_t);
 void prefs_set_bool(prefs_key_t, bool);
+
+void prefs_set_data(prefs_key_t key, const void * data, size_t size);
+bool prefs_get_data(prefs_key_t key, void * destination, size_t capacity, size_t * fetchedSize);

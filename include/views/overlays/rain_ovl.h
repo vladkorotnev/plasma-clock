@@ -1,6 +1,6 @@
 #pragma once
 #include <graphics/fanta_manipulator.h>
-#include "view.h"
+#include <views/common/view.h>
 
 typedef struct __attribute__((__packed__)) rain_particle {
     uint8_t x;

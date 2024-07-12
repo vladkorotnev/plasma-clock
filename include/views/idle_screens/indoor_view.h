@@ -1,6 +1,6 @@
 #pragma once
 #include <device_config.h>
-#include "view.h"
+#include <views/common/view.h>
 #include <graphics/fanta_manipulator.h>
 #include <sensor/sensor.h>
 

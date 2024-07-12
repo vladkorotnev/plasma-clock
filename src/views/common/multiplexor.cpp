@@ -1,4 +1,4 @@
-#include <views/multiplexor.h>
+#include <views/common/multiplexor.h>
 
 ViewMultiplexor::ViewMultiplexor() {
     views = std::map<view_id_t, Screen*>();

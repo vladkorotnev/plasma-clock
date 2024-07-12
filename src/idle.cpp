@@ -7,18 +7,18 @@
 #include <service/owm/weather.h>
 #include <service/prefs.h>
 #include <service/foo_client.h>
-#include <views/simple_clock.h>
-#include <views/rain_ovl.h>
-#include <views/thunder_ovl.h>
+#include <views/idle_screens/simple_clock.h>
+#include <views/overlays/rain_ovl.h>
+#include <views/overlays/thunder_ovl.h>
 #if HAS(TEMP_SENSOR) || HAS(SWITCHBOT_METER_INTEGRATION)
-#include <views/indoor_view.h>
+#include <views/idle_screens/indoor_view.h>
 #endif
 #include <views/framework.h>
-#include <views/current_weather.h>
-#include <views/word_of_the_day.h>
-#include <views/fb2k.h>
-#include <views/signal_icon.h>
-#include <views/touch_arrows_ovl.h>
+#include <views/idle_screens/current_weather.h>
+#include <views/idle_screens/word_of_the_day.h>
+#include <views/idle_screens/fb2k.h>
+#include <views/overlays/signal_icon.h>
+#include <views/overlays/touch_arrows_ovl.h>
 #include <input/keys.h>
 
 static char LOG_TAG[] = "APL_IDLE";

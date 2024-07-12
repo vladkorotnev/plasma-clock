@@ -1,4 +1,4 @@
-#include <views/rain_ovl.h>
+#include <views/overlays/rain_ovl.h>
 #include <esp_random.h>
 
 #define PARTICLE_INACTIVE 0xFF

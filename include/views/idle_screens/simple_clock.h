@@ -2,7 +2,7 @@
 #include <graphics/framebuffer.h>
 #include <sound/beeper.h>
 #include <service/time.h>
-#include "view.h"
+#include <views/common/view.h>
 
 /// @brief A simple clock view
 class SimpleClock: public Screen {

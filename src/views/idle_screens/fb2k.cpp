@@ -1,4 +1,4 @@
-#include <views/fb2k.h>
+#include <views/idle_screens/fb2k.h>
 #include <service/foo_client.h>
 #include <fonts.h>
 #include <esp32-hal-log.h>

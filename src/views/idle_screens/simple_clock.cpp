@@ -1,4 +1,4 @@
-#include <views/simple_clock.h>
+#include <views/idle_screens/simple_clock.h>
 #include <service/prefs.h>
 #include <fonts.h>
 #include <esp32-hal-ledc.h>

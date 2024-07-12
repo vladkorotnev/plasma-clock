@@ -11,7 +11,7 @@
 // I don't know how this works
 // But seems like it works with my janky tinfoil touch screen thingamajiggie
 
-#define STATE_CHG_THRESHOLD_PRESS 5
+#define STATE_CHG_THRESHOLD_PRESS 7
 #define STATE_CHG_THRESHOLD_RELEASE -2
 
 static TaskHandle_t hTask;

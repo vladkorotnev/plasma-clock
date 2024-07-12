@@ -5,7 +5,7 @@
 #include <service/prefs.h>
 #include <service/owm/weather.h>
 #include <service/wordnik.h>
-#include <views/transitions.h>
+#include <views/transitions/transitions.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
 #include <Arduino.h>
