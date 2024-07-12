@@ -11,9 +11,6 @@
 // I don't know how this works
 // But seems like it works with my janky tinfoil touch screen thingamajiggie
 
-#define STATE_CHG_THRESHOLD_PRESS 7
-#define STATE_CHG_THRESHOLD_RELEASE -2
-
 static TaskHandle_t hTask;
 static char LOG_TAG[] = "TOUCH";
 static std::map<const touch_pad_t, uint16_t> lastReads = {};
@@ -74,12 +71,12 @@ static void poll_touch_controller() {
         } else {
             int delta = lastReads[i.first] - tmp;
             //lastDeltas[i.first] = delta;
-            if(delta < STATE_CHG_THRESHOLD_RELEASE) {
+            if(delta < i.second.release_threshold) {
                 // Untouch
-                hid_set_key_state(i.second, false);
-            } else if(delta > STATE_CHG_THRESHOLD_PRESS) {
+                hid_set_key_state(i.second.key, false);
+            } else if(delta > i.second.press_threshold) {
                 // Touch
-                hid_set_key_state(i.second, true);
+                hid_set_key_state(i.second.key, true);
             }
             lastReads[i.first] = tmp;
         }

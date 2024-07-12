@@ -1,5 +1,17 @@
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
+#include <bits/stl_algobase.h>
+
+melody_sequence_t melody_from_no(int melody_no) {
+    int no = std::min(melody_no, all_chime_count);
+    no  = std::max(no, 0);
+    if(no == all_chime_count) {
+        no = esp_random() % all_chime_count;
+    }
+    
+    melody_sequence_t melody = all_chime_list[no];
+    return melody;
+}
 
 #define MELODY_OF(x) {\
     .array = x,\

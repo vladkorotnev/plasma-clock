@@ -5,6 +5,7 @@
 #include <service/prefs.h>
 #include <service/owm/weather.h>
 #include <service/wordnik.h>
+#include <service/alarm.h>
 #include <views/transitions/transitions.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
@@ -89,16 +90,94 @@ static void save_melody(prefs_key_t key) {
         
         prefs_set_int(key, temp_chime);
 
-        if(temp_chime == all_chime_count) {
-            temp_chime = esp_random() % all_chime_count;
-        }
-        
-        melody_sequence_t melody = all_chime_list[temp_chime];
+        melody_sequence_t melody = melody_from_no(temp_chime);
         BeepSequencer * s = new BeepSequencer(beeper);
-        s->play_sequence(melody, CHANNEL_NOTICE, 0);
+        s->play_sequence(melody, CHANNEL_NOTICE, SEQUENCER_NO_REPEAT);
         s->wait_end_play();
         delete s;
     }
+}
+
+const char * days[] = {"Sun","Mon","Tue","Wed","Thu","Fri","Sat"};
+
+static void render_alarms() {
+    GP.FORM_BEGIN("/alarms");
+    GP.SPAN("Don't forget to save after editing! If no day is selected and alarm is enabled, it will only trigger once.");
+    GP.BREAK();
+    const alarm_settings_list_t * alarms = get_alarm_list();
+    for(int i = 0; i < ALARM_LIST_SIZE; i++) {
+        if(i > 0) GP.HR();
+
+        const alarm_setting_t a = *alarms[i];
+        String tmp = String("Alarm ");
+        tmp += (i + 1);
+        GP.LABEL(tmp);
+        GP.BREAK();
+        
+        tmp = String("alm_") + i + "_";
+        
+        GP.LABEL("Enabled: ");
+        GP.CHECK(tmp + "enable", ALARM_IS_ENABLED(a));
+        GP.BREAK();
+
+        GP.TABLE_BEGIN();
+        GP.TR();
+        for(int d = 0; d < 7; d++) {
+                GP.TD();
+                GP.LABEL(days[d]);
+        }
+        GP.TR();
+         for(int d = 0; d < 7; d++) {
+                GP.TD();
+                GP.CHECK(tmp + days[d], ALARM_ON_DAY(a, 0));
+        }
+        GP.TABLE_END();
+        GP.BREAK();
+
+        GP.TABLE_BEGIN();
+        GP.TR();
+        GP.TD();
+        GP.NUMBER(tmp + "h", "8", a.hour);
+        GP.TD();
+        GP.LABEL(":");
+        GP.TD();
+        GP.NUMBER(tmp + "m", "30", a.minute);
+        GP.TABLE_END();
+        GP.BREAK();
+
+        GP.SELECT(tmp + "melo", all_chime_names, a.melody_no);
+    }
+
+    GP.FORM_SEND("Save Alarms");
+    GP.FORM_END();
+}
+
+static void save_alarms() {
+    if(!ui.form("/alarms")) return;
+    ESP_LOGI(LOG_TAG, "Save alarms");
+    for(int i = 0; i < ALARM_LIST_SIZE; i++) {
+        alarm_setting_t a = {0};
+        String tmp = String("alm_") + i + "_";
+
+        if(ui.getBool(tmp + "enable")) {
+            a.days |= ALARM_DAY_GLOBAL_ENABLE;
+        }
+
+        for(int d = 0; d < 7; d++) {
+            if(ui.getBool(tmp + days[d])) {
+                a.days |= ALARM_DAY_OF_WEEK(d);
+            } else {
+                a.days &= ~ALARM_DAY_OF_WEEK(d);
+            }
+        }
+        a.hour = ui.getInt(tmp + "h");
+        a.minute = ui.getInt(tmp + "m");
+        a.melody_no = ui.getInt(tmp + "melo");
+
+        set_alarm(i, a);
+    }
+    beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+
 }
 
 void build() {
@@ -134,6 +213,12 @@ void build() {
         GP.BREAK();
         render_string("Timezone descriptor:", PREFS_KEY_TIMEZONE);
         GP.LABEL("E.g. JST-9 or AST4ADT,M3.2.0,M11.1.0. See <a href=\"https://www.iana.org/time-zones\">IANA TZ DB</a> for reference.");
+    GP.SPOILER_END();
+    GP.BREAK();
+
+    GP.SPOILER_BEGIN("Alarms", GP_BLUE);
+        render_int("Snooze minutes:", PREFS_KEY_ALARM_SNOOZE_MINUTES);
+        render_alarms();
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -367,7 +452,9 @@ void action() {
         return;
     }
 
+    save_alarms();
     if(ui.click()) {
+        save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 1, 30);
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);
@@ -425,7 +512,7 @@ void action() {
         if(ui.click(reboot_btn)) {
             prefs_force_save();
             BeepSequencer * s = new BeepSequencer(beeper);
-            s->play_sequence(tulula_fvu, CHANNEL_NOTICE, 0);
+            s->play_sequence(tulula_fvu, CHANNEL_NOTICE, SEQUENCER_NO_REPEAT);
             s->wait_end_play();
             ESP.restart();
         }

@@ -17,10 +17,12 @@
 #include <service/prefs.h>
 #include <service/wordnik.h>
 #include <service/foo_client.h>
+#include <service/alarm.h>
 #include <network/admin_panel.h>
 #include <utils.h>
 #include <state.h>
-#include <idle.h>
+#include <app/idle.h>
+#include <app/alarming.h>
 #include <sensor/switchbot/meter.h>
 
 static char LOG_TAG[] = "APL_MAIN";
@@ -44,9 +46,14 @@ void change_state(device_state_t to) {
         return; // all other things handled in the FVU process
     }
 
+    if(to == current_state) return;
+
     switch(to) {
         case STATE_IDLE:
             app_idle_prepare(sensors, beepola);
+            break;
+        case STATE_ALARMING:
+            app_alarming_prepare(beepola);
             break;
         case STATE_OTAFVU:
         default:
@@ -156,7 +163,7 @@ void setup() {
     delay(500);
     beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
     bs = new BeepSequencer(beepola);
-    bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, 0);
+    bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
 
     con->clear();
     con->set_font(&keyrus0808_font);
@@ -209,12 +216,17 @@ void setup() {
     fb->clear();
 
     change_state(startup_state);
+    alarm_init();
 }
 
 void drawing() {
     switch(current_state) {
         case STATE_IDLE:
             app_idle_draw(graph);
+            break;
+
+        case STATE_ALARMING:
+            app_alarming_draw(graph);
             break;
 
         case STATE_OTAFVU:
@@ -238,6 +250,10 @@ void processing() {
     switch(current_state) {
         case STATE_IDLE:
             app_idle_process();
+            break;
+
+        case STATE_ALARMING:
+            app_alarming_process();
             break;
 
         case STATE_OTAFVU:

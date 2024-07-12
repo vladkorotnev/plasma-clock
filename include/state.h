@@ -1,6 +1,7 @@
 typedef enum device_state {
     STATE_BOOT,
     STATE_IDLE,
+    STATE_ALARMING,
 
     STATE_OTAFVU,
 } device_state_t;

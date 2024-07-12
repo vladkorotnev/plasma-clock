@@ -36,10 +36,10 @@ const gpio_num_t HWCONF_WS0010_EN_GPIO = GPIO_NUM_18;
 // ---- Connection to touch plane ----
 const touch_plane_definition_t HWCONF_TOUCH_PLANE = {
     // Screen panel
-    {/*GPIO_NUM_32*/ TOUCH_PAD_NUM9, KEY_RIGHT},
-    {/*GPIO_NUM_33*/ TOUCH_PAD_NUM8, KEY_UP},
-    {/*GPIO_NUM_27*/ TOUCH_PAD_NUM7, KEY_DOWN},
-    {/*GPIO_NUM_14*/ TOUCH_PAD_NUM6, KEY_LEFT},
+    {/*GPIO_NUM_32*/ TOUCH_PAD_NUM9, {.key = KEY_RIGHT, .press_threshold = 7, .release_threshold = -3}},
+    {/*GPIO_NUM_33*/ TOUCH_PAD_NUM8, {.key = KEY_UP, .press_threshold = 7, .release_threshold = -2}},
+    {/*GPIO_NUM_27*/ TOUCH_PAD_NUM7, {.key = KEY_DOWN, .press_threshold = 7, .release_threshold = -2}},
+    {/*GPIO_NUM_14*/ TOUCH_PAD_NUM6, {.key = KEY_LEFT, .press_threshold = 7, .release_threshold = -2}},
     // Top of case
     // {/*GPIO_NUM_13*/ TOUCH_PAD_NUM4, KEY_HEADPAT},
 };

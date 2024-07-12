@@ -5,6 +5,7 @@
 /// @brief A renderable that shows touch arrow hints
 class TouchArrowOverlay: public Renderable {
 public:
+    bool active;
     bool top;
     bool bottom;
     bool left;
@@ -160,19 +161,20 @@ public:
     }
 
     void step() {
-        sensor_info_t * sense = sensors->get_info(VIRTSENSOR_ID_HID_STARTLED);
-        if(sense) {
-            active = sense->last_result;
-            if(!active) {
-                phase = 0;
-                framecount = -6;
-                dir = true;
+        if(sensors != nullptr) {
+            sensor_info_t * sense = sensors->get_info(VIRTSENSOR_ID_HID_STARTLED);
+            if(sense) {
+                active = sense->last_result;
+                if(!active) {
+                    phase = 0;
+                    framecount = -6;
+                    dir = true;
+                }
             }
         }
     }
 
 private:
-    bool active;
     uint8_t phase;
     int framecount;
     bool dir;

@@ -1,4 +1,4 @@
-#include "idle.h"
+#include "app/idle.h"
 #include <device_config.h>
 #include <stdint.h>
 #include <sound/sequencer.h>
@@ -119,12 +119,9 @@ void hourly_chime() {
           && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
         ) {
             int melody_no = (now.hour == first_hour) ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
-            if(melody_no == all_chime_count) {
-                melody_no = esp_random() % all_chime_count;
-            }
-            melody_sequence_t melody = all_chime_list[melody_no];
+            melody_sequence_t melody = melody_from_no(melody_no);
 
-            sequencer->play_sequence(melody, CHANNEL_CHIME, 0);
+            sequencer->play_sequence(melody, CHANNEL_CHIME, SEQUENCER_NO_REPEAT);
         }
     }
 }

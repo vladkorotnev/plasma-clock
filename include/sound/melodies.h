@@ -40,3 +40,5 @@ static const melody_sequence_t all_chime_list[] = {
     the_way,
 };
 static const int all_chime_count = sizeof(all_chime_list)/sizeof(melody_sequence_t);
+
+melody_sequence_t melody_from_no(int melody_no);

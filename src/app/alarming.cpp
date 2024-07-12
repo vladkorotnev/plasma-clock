@@ -1,0 +1,286 @@
+#include "app/alarming.h"
+#include <service/alarm.h>
+#include <stdint.h>
+#include <sound/sequencer.h>
+#include <sound/melodies.h>
+#include <service/time.h>
+#include <service/owm/weather.h>
+#include <service/prefs.h>
+#include <views/framework.h>
+#include <views/overlays/touch_arrows_ovl.h>
+#include <views/idle_screens/simple_clock.h>
+#include <input/keys.h>
+#include <fonts.h>
+#include <state.h>
+
+static char LOG_TAG[] = "APL_ALM";
+
+typedef enum alarming_state {
+    BLINKERING,
+    HINTING_SNOOZE,
+    HINTING_STOP,
+    CLOCK,
+
+    SNOOZE_HOLD_COUNTDOWN,
+    SNOOZING,
+    STOP_HOLD_COUNTDOWN,
+} alarming_state_t;
+
+static SimpleClock *clockView = nullptr;
+static BeepSequencer *seq = nullptr;
+static TouchArrowOverlay *arrows = nullptr;
+static TickType_t snoozeUntil;
+static alarming_state_t state;
+static uint8_t framecount = 0;
+static bool clock_inverting = false;
+static uint8_t snooze_hold_remain = 0;
+static int snooze_minutes = 0;
+static bool is_snoozing = false;
+static melody_sequence_t melody;
+
+static const uint8_t alarm_spr_data[] = {
+    // 'alarm', 16x16px
+0x39, 0xce, 0x70, 0x87, 0x67, 0xf3, 0x48, 0x09, 0x13, 0x64, 0x27, 0xf2, 0x2f, 0xda, 0x2f, 0xba, 
+0x24, 0x72, 0x2f, 0xfa, 0x2f, 0xfa, 0x27, 0xf2, 0x13, 0x64, 0x08, 0x08, 0x17, 0xf4, 0x20, 0x02
+};
+
+static const sprite_t alarm_spr = {
+    .width = 16,
+    .height = 16,
+    .data = alarm_spr_data,
+    .mask = nullptr
+};
+
+void app_alarming_prepare(Beeper* beeper) {
+    if(seq) {
+        seq->stop_sequence();
+        free(seq);
+    }
+    seq = new BeepSequencer(beeper);
+
+    if(!arrows) arrows = new TouchArrowOverlay(nullptr);
+    if(!clockView) clockView = new SimpleClock();
+    arrows->prepare();
+    arrows->active = true;
+    clockView->prepare();
+
+    state = CLOCK;
+    framecount = 0;
+    snooze_minutes = prefs_get_int(PREFS_KEY_ALARM_SNOOZE_MINUTES);
+    if(snooze_minutes == 0) snooze_minutes = 5;
+
+    const alarm_setting_t * alarm = get_triggered_alarm();
+    if(alarm) {
+        melody = melody_from_no(alarm->melody_no);
+        seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
+    }
+}
+
+void app_alarming_draw(FantaManipulator* fb) {
+    framecount++;
+    fb->clear();
+
+    switch(state) {
+        case BLINKERING:
+            snooze_hold_remain = fb->get_width();
+            // Draw the animation of a buzzing alarm clock
+            if(framecount < 120) {
+                // Roughly 2 seconds idle time
+                fb->put_sprite(&alarm_spr, fb->get_width() / 2 - alarm_spr.width / 2, 0);
+            } else {
+                int offset = (framecount % 10) - 5;
+                fb->put_sprite(&alarm_spr, fb->get_width() / 2 - alarm_spr.width / 2 + offset, 0);
+                if(framecount % 10 == 0) {
+                    clock_inverting = !clock_inverting;
+                }
+                if(clock_inverting) {
+                    fb->invert();
+                }
+
+                if(framecount == 255) {
+                    #if HAS(TOUCH_PLANE)
+                    arrows->left = true;
+                    arrows->top = false;
+                    arrows->bottom = false;
+                    arrows->right = false;
+                    framecount = 0;
+                    state = HINTING_SNOOZE;
+                    #else
+                    framecount = 0;
+                    state = CLOCK;
+                    #endif
+                }
+            } 
+            break;
+
+        case HINTING_SNOOZE:
+            {
+                snooze_hold_remain = fb->get_width();
+                static const char snooze_str[] = "SNOOZE";
+                fb->put_string(&keyrus0816_font, snooze_str, 12, 0);
+                arrows->render(fb);
+                if(framecount >= 180) {
+                    arrows->left = false;
+                    arrows->right = true;
+                    arrows->top = false;
+                    arrows->bottom = false;
+                    framecount = 0;
+                    state = HINTING_STOP;
+                }
+            }
+            break;
+
+        case HINTING_STOP:
+            {
+                snooze_hold_remain = fb->get_width();
+                static const char stop_str[] = "STOP";
+                fb->put_string(&keyrus0816_font, stop_str, fb->get_width() - 12 - measure_string_width(&keyrus0816_font, stop_str), 0);
+                arrows->render(fb);
+                if(framecount >= 180) {
+                    framecount = 0;
+                    state = CLOCK;
+                }
+            }
+            break;
+
+        case CLOCK:
+            snooze_hold_remain = fb->get_width();
+            clockView->render(fb);
+            if(framecount % 30 == 0) {
+                clock_inverting = !clock_inverting;
+            }
+            if(clock_inverting) {
+                fb->invert();
+            }
+            if(framecount >= 240) {
+                framecount = 0;
+                state = BLINKERING;
+            }
+            break;
+
+        case SNOOZE_HOLD_COUNTDOWN:
+            {
+                static const char hold_str[] = "HOLD";
+                fb->put_string(&keyrus0816_font, hold_str, 12, 0);
+                arrows->render(fb);
+                if(snooze_hold_remain > 0) snooze_hold_remain -= 1;
+                FantaManipulator *holdProgress = fb->slice(snooze_hold_remain, fb->get_width() - snooze_hold_remain);
+                holdProgress->invert();
+                delete holdProgress;
+            }
+            break;
+
+        case STOP_HOLD_COUNTDOWN:
+            {
+                static const char hold_str[] = "HOLD";
+                fb->put_string(&keyrus0816_font, hold_str, fb->get_width() - 12 - measure_string_width(&keyrus0816_font, hold_str), 0);
+                arrows->render(fb);
+                if(snooze_hold_remain > 0 && framecount % 2 == 0) snooze_hold_remain -= 1;
+                FantaManipulator *holdProgress = fb->slice(0,  fb->get_width() - snooze_hold_remain);
+                holdProgress->invert();
+                delete holdProgress;
+            }
+            break;
+
+        case SNOOZING:
+            {
+                snooze_hold_remain = fb->get_width();
+                clockView->render(fb);
+                arrows->render(fb);
+            }
+            break;
+
+        default: break;
+    }
+}
+
+void begin_snoozing() {
+    state = SNOOZING;
+    is_snoozing = true;
+    snoozeUntil = xTaskGetTickCount() + pdMS_TO_TICKS(snooze_minutes * 60 * 1000);
+    arrows->right = true;
+    arrows->top = false;
+    arrows->bottom = false;
+    arrows->left = false;
+    seq->stop_sequence();
+}
+
+void stop_alarm() {
+    clear_triggered_alarm();
+    seq->stop_sequence();
+    change_state(STATE_IDLE);
+}
+
+void app_alarming_process() {
+    if(state == CLOCK || state == SNOOZING) clockView->step();
+
+    switch(state) {
+        case BLINKERING:
+        case HINTING_SNOOZE:
+        case HINTING_STOP:
+        case CLOCK:
+            {
+                if(hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN)) {
+                    arrows->left = true;
+                    arrows->top = true;
+                    arrows->bottom = true;
+                    arrows->right = false;
+                    state = SNOOZE_HOLD_COUNTDOWN;
+                    return;
+                }
+                else if(hid_test_key_state(KEY_RIGHT)) {
+                    arrows->left = false;
+                    arrows->top = false;
+                    arrows->bottom = false;
+                    arrows->right = true;
+                    state = STOP_HOLD_COUNTDOWN;
+                    return;
+                }
+                else if(hid_test_key_state(KEY_HEADPAT)) {
+                    // Headpat on touchscreen devices snoozes right away
+                    #if HAS(TOUCH_PLANE)
+                        begin_snoozing();
+                    #else
+                    // Headpat on other devices turns off
+                    arrows->left = false;
+                    arrows->top = false;
+                    arrows->bottom = false;
+                    arrows->right = false;
+                    state = STOP_HOLD_COUNTDOWN;
+                    #endif
+                }
+            }
+        break;
+
+        case SNOOZE_HOLD_COUNTDOWN:
+            if(!hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN) && snooze_hold_remain > 0) {
+                state = HINTING_SNOOZE; // fail to hold
+                framecount = 0;
+            } else if(snooze_hold_remain == 0) {
+                begin_snoozing();
+            }
+        break;
+
+        case STOP_HOLD_COUNTDOWN:
+            if(!hid_test_key_any(KEY_RIGHT | KEY_HEADPAT) && snooze_hold_remain > 0) {
+                state = is_snoozing ? SNOOZING : HINTING_STOP; // fail to hold
+                framecount = 0;
+            } else if(snooze_hold_remain == 0) {
+                stop_alarm();
+            }
+        break;
+
+        case SNOOZING:
+            if(hid_test_key_state(KEY_RIGHT)) {
+                state = STOP_HOLD_COUNTDOWN;
+                return;
+            } else if(xTaskGetTickCount() >= snoozeUntil) {
+                is_snoozing = false;
+                state = BLINKERING;
+                seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
+            }
+        break;
+
+        default: break;
+    }
+}

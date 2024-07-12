@@ -13,6 +13,9 @@ typedef struct melody_sequence {
     size_t count;
 } melody_sequence_t;
 
+#define SEQUENCER_REPEAT_INDEFINITELY -1
+#define SEQUENCER_NO_REPEAT 0
+
 class BeepSequencer {
 public:
     BeepSequencer(Beeper*);

@@ -2,13 +2,13 @@
 #include <stdint.h>
 
 typedef enum key_id {
-    KEY_UP,
-    KEY_DOWN,
-    KEY_LEFT,
-    KEY_RIGHT,
-    KEY_HEADPAT,
+    KEY_UP = (1<< 1),
+    KEY_DOWN = (1 << 2),
+    KEY_LEFT = (1 << 3),
+    KEY_RIGHT = (1 << 4),
+    KEY_HEADPAT = (1 << 5),
 
-    KEY_MAX_INVALID
+    KEY_MAX_INVALID = 0xFF
 } key_id_t;
 
 typedef enum key_state {
@@ -17,7 +17,7 @@ typedef enum key_state {
     KEYSTATE_HOLDING
 } key_state_t;
 
-#define KEY_ID_TO_BIT(k) (1 << k)
+#define KEY_ID_TO_BIT(k) (k)
 
 typedef uint8_t key_bitmask_t;
 

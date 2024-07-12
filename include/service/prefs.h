@@ -72,6 +72,7 @@ static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_MAC = "wos_mac";
 static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
 
 static constexpr prefs_key_t PREFS_KEY_ALARM_LIST = "alarms";
+static constexpr prefs_key_t PREFS_KEY_ALARM_SNOOZE_MINUTES = "snz_minutes";
 
 void prefs_force_save();
 
