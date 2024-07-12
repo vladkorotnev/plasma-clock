@@ -37,7 +37,8 @@ public:
     /// @param y Y position of the graphic to be placed
     /// @param w Width of the graphic to be placed
     /// @param h Height of the graphic to be placed
-    void put_fanta(const fanta_buffer_t, int x, int y, int w, int h);
+    /// @param mask Mask for the graphic (can be null)
+    void put_fanta(const fanta_buffer_t, int x, int y, int w, int h, const fanta_buffer_t mask = nullptr);
     /// @brief Place a sprite at a specified position of the Fanta buffer
     void put_sprite(const sprite_t*, int x, int y);
     /// @brief Place a glyph from a font at a specified position of the Fanta buffer

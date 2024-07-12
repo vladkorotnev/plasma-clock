@@ -14,7 +14,8 @@ sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph) {
     sprite_t rslt = {
         .width = font->width,
         .height = font->height,
-        .data = &font->data[start_idx]
+        .data = &font->data[start_idx],
+        .mask = nullptr
     };
 
     return rslt;

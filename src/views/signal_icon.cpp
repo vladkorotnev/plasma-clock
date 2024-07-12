@@ -33,7 +33,8 @@ SignalStrengthIcon::SignalStrengthIcon(SensorPool *s) {
     currentIcon  = {
         .width = 16, // TODO: support sprites less than a byte in width but more than 1 byte
         .height = 8,
-        .data = icon_data_sig_outofrange
+        .data = icon_data_sig_outofrange,
+        .mask = icon_data_sig_outofrange
     };
 }
 
@@ -93,6 +94,7 @@ void SignalStrengthIcon::step() {
         else {
             currentIcon.data = icon_data_sig_outofrange;
         }
+        currentIcon.mask = currentIcon.data;
     }
 }
 

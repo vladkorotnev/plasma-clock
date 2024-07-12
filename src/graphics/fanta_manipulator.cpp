@@ -67,7 +67,7 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
     *dirty = true;
 }
 
-void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h) {
+void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h, fanta_buffer_t mask) {
     if(w <= 0 || h <= 0) return;
     
     uint16_t fanta_column_mask = 0x0;
@@ -78,6 +78,9 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
     }
 
     fanta_offset_y(fanta, y, w);
+    if(mask) {
+        fanta_offset_y(mask, y, w);
+    }
 
     uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
 
@@ -85,9 +88,12 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
     for(int i = 0; i < w*2; i++) {
         if(target_idx + i > buffer_size - 1) continue;
         if(target_idx + i < 0) continue;
-        uint8_t current_mask = mask_data[i % 2];
+        uint8_t current_column_mask = mask_data[i % 2];
+        if(mask) {
+            current_column_mask &= mask[i];
+        }
 
-        buffer[target_idx + i] = ((uint8_t) fanta[i]) | (buffer[target_idx + i] & ~current_mask);
+        buffer[target_idx + i] = ((uint8_t) fanta[i] & current_column_mask) | (buffer[target_idx + i] & ~current_column_mask);
     }
 
     *dirty = true;
@@ -95,8 +101,15 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
 
 void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
     fanta_buffer_t fanta = sprite_to_fanta(sprite);
-    put_fanta(fanta, x, y, sprite->width, sprite->height);
+    fanta_buffer_t mask = nullptr;
+    if(sprite->mask) {
+        mask = mask_to_fanta(sprite);
+    }
+    put_fanta(fanta, x, y, sprite->width, sprite->height, mask);
     free(fanta);
+    if(mask) {
+        free(mask);
+    }
 }
 
 void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y) {

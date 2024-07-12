@@ -57,7 +57,8 @@ static const uint8_t icon_home_data[] = {
 static const sprite_t icon_home_1616 = {
     .width = 16,
     .height = 16,
-    .data = icon_home_data
+    .data = icon_home_data,
+    .mask = nullptr
 };
 
 IndoorView::IndoorView(SensorPool *s) : AirSensorView(
@@ -80,7 +81,8 @@ static const uint8_t icon_thermo_data[] = {
 static const sprite_t icon_thermo_1616 = {
     .width = 16,
     .height = 16,
-    .data = icon_thermo_data
+    .data = icon_thermo_data,
+    .mask = nullptr
 };
 
 WoSensorView::WoSensorView(SensorPool *s) : AirSensorView(
