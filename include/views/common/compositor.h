@@ -17,7 +17,7 @@ private:
     std::list<Renderable*> views;
 };
 
-class ScreenCompositor: public Screen, public ViewCompositor {
+class ScreenCompositor: public DisplayTimeable, public ViewCompositor {
 public:
     ScreenCompositor(Screen* root): ViewCompositor() {
         _root = root;

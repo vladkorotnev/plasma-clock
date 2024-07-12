@@ -1,12 +1,14 @@
 #include "views/common/string_scroll.h"
 #include <service/prefs.h>
 
-StringScroll::StringScroll(const font_definition_t * f) {
+StringScroll::StringScroll(const font_definition_t * f, const char * s) {
     font = f;
-    string = nullptr;
+    string = s;
     position = 0;
     string_width = 0;
     scroll_only_if_not_fit = true;
+    start_at_visible = false;
+    y_position = 0;
 
     switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
         case SCROLL_SPEED_SLOW:
@@ -43,6 +45,19 @@ void StringScroll::set_string(const char * s) {
     frame_counter = 0;
     if(string == nullptr) return;
     string_width = measure_string_width(font, string);
+    if(start_at_visible) {
+        position = string_width;
+    }
+}
+
+void StringScroll::prepare() {
+    position = 0;
+    frame_counter = 0;
+    if(string == nullptr) return;
+    string_width = measure_string_width(font, string);
+    if(start_at_visible) {
+        position = string_width;
+    }
 }
 
 void StringScroll::set_y_position(int y) {

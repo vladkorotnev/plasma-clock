@@ -20,6 +20,7 @@
 #include <views/overlays/signal_icon.h>
 #include <views/overlays/touch_arrows_ovl.h>
 #include <input/keys.h>
+#include <state.h>
 
 static char LOG_TAG[] = "APL_IDLE";
 
@@ -222,9 +223,10 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     weatherView = new CurrentWeatherView();
     fb2kView = new Fb2kView();
 
-    touchArrows = new TouchArrowOverlay(sensors);
+    touchArrows = new TouchArrowOverlay();
     touchArrows->bottom = true;
     touchArrows->top = true;
+    touchArrows->left = true;
 
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
@@ -263,7 +265,7 @@ void update_screen_specific_time() {
     current_screen_time_ms = screen_times_ms[curScreen];
     if(current_screen_time_ms == 0) return;  // user disabled this screen, don't care what it thinks about the display time
 
-    int specificTime = slideShow->get_view(curScreen)->desired_display_time();
+    int specificTime = ((Screen*)slideShow->get_view(curScreen))->desired_display_time();
     if(specificTime > current_screen_time_ms || specificTime == DISP_TIME_DONT_SHOW) {
         current_screen_time_ms = specificTime;
     }
@@ -306,6 +308,16 @@ void app_idle_draw(FantaManipulator* graph) {
 
 bool ignoring_keys = false;
 
+void scroll_down() {
+    go_to_next_screen(TRANSITION_SLIDE_VERTICAL_UP);
+    beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+}
+
+void scroll_up() {
+    go_to_prev_screen(TRANSITION_SLIDE_VERTICAL_DOWN);
+    beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+}
+
 void app_idle_process() {
     if(tick_tock_enable) {
         sound_tick_tock();
@@ -321,20 +333,26 @@ void app_idle_process() {
 
     if(!ignoring_keys) {
         if(hid_test_key_state(KEY_DOWN)) {
-            go_to_next_screen(TRANSITION_SLIDE_VERTICAL);
-            beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+            scroll_down();
             ignoring_keys = true;
         }
         else if(hid_test_key_state(KEY_UP)) {
-            go_to_prev_screen(TRANSITION_SLIDE_VERTICAL_REVERSE);
+            scroll_up();
+            ignoring_keys = true;
+        }
+        else if(hid_test_key_state(KEY_LEFT)) {
+            //change_state(STATE_MENU);
             beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
             ignoring_keys = true;
         }
         else {
             change_screen_if_needed();
+            touchArrows->active = hid_test_key_any(KEYMASK_ALL) != KEYSTATE_RELEASED;
         }
     } else {
-        ignoring_keys = (hid_test_key_any(KEY_ID_TO_BIT(KEY_UP) | KEY_ID_TO_BIT(KEY_DOWN)) != KEYSTATE_RELEASED);
+        ignoring_keys = (hid_test_key_any(KEY_UP | KEY_DOWN | KEY_LEFT) != KEYSTATE_RELEASED);
+        if(hid_test_key_state_repetition(KEY_DOWN)) scroll_down();
+        else if(hid_test_key_state_repetition(KEY_UP)) scroll_up();
     }
 
     hourly_chime();

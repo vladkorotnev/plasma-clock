@@ -6,8 +6,8 @@ typedef enum transition_type: uint8_t {
     TRANSITION_NONE = 0,
     TRANSITION_WIPE,
     TRANSITION_SLIDE_HORIZONTAL,
-    TRANSITION_SLIDE_VERTICAL,
-    TRANSITION_SLIDE_VERTICAL_REVERSE,
+    TRANSITION_SLIDE_VERTICAL_UP,
+    TRANSITION_SLIDE_VERTICAL_DOWN,
 
     TRANSITION_RANDOM,
 } transition_type_t;
@@ -22,8 +22,8 @@ static Transition* transition_type_to_transition(transition_type_t type) {
     switch(type) {
         case TRANSITION_WIPE: return &wipe_transition;
         case TRANSITION_SLIDE_HORIZONTAL:  return &h_slide_transition;
-        case TRANSITION_SLIDE_VERTICAL: return &v_slide_transition;
-        case TRANSITION_SLIDE_VERTICAL_REVERSE: return &rev_v_slide_transition;
+        case TRANSITION_SLIDE_VERTICAL_UP: return &v_slide_transition;
+        case TRANSITION_SLIDE_VERTICAL_DOWN: return &rev_v_slide_transition;
         case TRANSITION_RANDOM: return transition_type_to_transition( (transition_type_t) ((esp_random() % (TRANSITION_RANDOM - 1)) + 1));
 
         case TRANSITION_NONE:

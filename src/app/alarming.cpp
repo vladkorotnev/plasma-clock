@@ -58,13 +58,13 @@ void app_alarming_prepare(Beeper* beeper) {
     }
     seq = new BeepSequencer(beeper);
 
-    if(!arrows) arrows = new TouchArrowOverlay(nullptr);
+    if(!arrows) arrows = new TouchArrowOverlay();
     if(!clockView) clockView = new SimpleClock();
     arrows->prepare();
     arrows->active = true;
     clockView->prepare();
 
-    state = CLOCK;
+    state = BLINKERING;
     framecount = 0;
     snooze_minutes = prefs_get_int(PREFS_KEY_ALARM_SNOOZE_MINUTES);
     if(snooze_minutes == 0) snooze_minutes = 5;

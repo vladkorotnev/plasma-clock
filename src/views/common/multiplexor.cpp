@@ -1,7 +1,8 @@
 #include <views/common/multiplexor.h>
+#include <esp32-hal-log.h>
 
 ViewMultiplexor::ViewMultiplexor() {
-    views = std::map<view_id_t, Screen*>();
+    views = std::map<view_id_t, Renderable*>();
     active_screen = nullptr;
     transition_coordinator = new TransitionAnimationCoordinator();
 }
@@ -23,7 +24,7 @@ inline Renderable* ViewMultiplexor::current_renderable() {
     }
 }
 
-void ViewMultiplexor::set_active_screen(Screen *next, transition_type_t t) {
+void ViewMultiplexor::set_active_screen(Renderable *next, transition_type_t t) {
     Renderable *r = current_renderable();
     if(r != nullptr) r->cleanup();
 
@@ -38,13 +39,12 @@ void ViewMultiplexor::set_active_screen(Screen *next, transition_type_t t) {
     r->prepare();
 }
 
-Screen * ViewMultiplexor::get_view(view_id_t id) {
+Renderable * ViewMultiplexor::get_view(view_id_t id) {
     return views[id];
 }
 
-void ViewMultiplexor::add_view(Screen *view, view_id_t id) {
+void ViewMultiplexor::add_view(Renderable *view, view_id_t id) {
     if(views.count(id) > 0) return;
-
     views[id] = view;
     if(active_screen == nullptr) {
         set_active_screen(view, TRANSITION_NONE);
@@ -52,18 +52,18 @@ void ViewMultiplexor::add_view(Screen *view, view_id_t id) {
 }
 
 void ViewMultiplexor::switch_to(view_id_t id, transition_type_t transition) {
-    Screen *view = views[id];
-    if(view == nullptr) return;
+    Renderable *view = views[id];
+    if(view == nullptr || view == active_screen) return;
 
     if(active_screen == nullptr) {
-        set_active_screen(view, transition);
+        set_active_screen(view, TRANSITION_NONE);
     } else {
         set_active_screen(view, transition);
     }
 }
 
 void ViewMultiplexor::remove_view(view_id_t id) {
-    Screen *view = views[id];
+    Renderable *view = views[id];
     if(view == nullptr) return;
 
     if(active_screen == view) {

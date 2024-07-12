@@ -27,3 +27,4 @@ void hid_set_key_state(key_id_t key, bool state);
 key_state_t hid_test_key_state(key_id_t key);
 key_state_t hid_test_key_all(key_bitmask_t keys);
 key_state_t hid_test_key_any(key_bitmask_t keys = KEYMASK_ALL);
+key_state_t hid_test_key_state_repetition(key_id_t key);

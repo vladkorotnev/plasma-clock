@@ -24,11 +24,18 @@
 #include <app/idle.h>
 #include <app/alarming.h>
 #include <sensor/switchbot/meter.h>
+#include <views/overlays/fps_counter.h>
+#include <views/common/list_view.h>
+#include <views/common/string_scroll.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
+
+static ViewCompositor * desktop;
+static ViewMultiplexor * appHost;
+static FpsCounter * fpsCounter;
 
 static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
@@ -47,19 +54,8 @@ void change_state(device_state_t to) {
     }
 
     if(to == current_state) return;
-
-    switch(to) {
-        case STATE_IDLE:
-            app_idle_prepare(sensors, beepola);
-            break;
-        case STATE_ALARMING:
-            app_alarming_prepare(beepola);
-            break;
-        case STATE_OTAFVU:
-        default:
-            break;
-    }
     current_state = to;
+    appHost->switch_to(current_state, TRANSITION_WIPE);
 }
 
 void bringup_light_sensor() {
@@ -166,13 +162,6 @@ void setup() {
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
 
     con->clear();
-    con->set_font(&keyrus0808_font);
-    con->set_cursor(true);
-
-    // bringup_touch();
-    // touchplane_debug(con);
-    // vTaskDelay(portMAX_DELAY);
-    // return;
 
     con->print("WiFi init");
     NetworkManager::startup();
@@ -215,60 +204,30 @@ void setup() {
     con->set_active(false);
     fb->clear();
 
+    desktop = new ViewCompositor();
+    appHost = new ViewMultiplexor();
+    desktop->add_layer(appHost);
+    desktop->add_layer(new FpsCounter(fb));
+
+    appHost->add_view(new AppShimIdle(sensors, beepola), STATE_IDLE);
+    appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
+
+    ListView * test = new ListView();
+    test->add_view(new StringScroll(&keyrus0816_font, "Menu 1"), 0);
+    test->add_view(new StringScroll(&keyrus0816_font, "Menu 2"), 1);
+    test->add_view(new StringScroll(&keyrus0816_font, "Menu 3"), 2);
+    test->add_view(new StringScroll(&keyrus0816_font, "Menu 4 Is Bloody Long For Sure"), 3);
+    appHost->add_view(test, STATE_MENU);
+
     change_state(startup_state);
     alarm_init();
-}
-
-void drawing() {
-    switch(current_state) {
-        case STATE_IDLE:
-            app_idle_draw(graph);
-            break;
-
-        case STATE_ALARMING:
-            app_alarming_draw(graph);
-            break;
-
-        case STATE_OTAFVU:
-            break;
-        default:
-            ESP_LOGE(LOG_TAG, "Unknown state %i", current_state);
-            break;
-    }
-
-#if defined(PDFB_PERF_LOGS)
-    if(fps_counter) {
-        // FPS counter
-        char buf[4];
-        itoa(fb->get_fps(), buf, 10);
-        fb->manipulate()->put_string(&fps_counter_font, buf, 0, 0);
-    }
-#endif
-}
-
-void processing() {
-    switch(current_state) {
-        case STATE_IDLE:
-            app_idle_process();
-            break;
-
-        case STATE_ALARMING:
-            app_alarming_process();
-            break;
-
-        case STATE_OTAFVU:
-            break;
-        default:
-            ESP_LOGE(LOG_TAG, "Unknown state %i", current_state);
-            break;
-    }
 }
 
 void loop() {
     fb->wait_next_frame();
     if(graph->lock()) {
-        drawing();
+        desktop->render(graph);
         graph->unlock();
     }
-    processing();
+    desktop->step();
 }

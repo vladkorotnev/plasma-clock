@@ -11,13 +11,12 @@ public:
     bool left;
     bool right;
 
-    TouchArrowOverlay(SensorPool* s) {
+    TouchArrowOverlay() {
         active = false;
         top = false;
         bottom = false;
         left = false;
         right = false;
-        sensors = s;
         phase = 0;
         framecount = 0;
         dir = true;
@@ -161,22 +160,10 @@ public:
     }
 
     void step() {
-        if(sensors != nullptr) {
-            sensor_info_t * sense = sensors->get_info(VIRTSENSOR_ID_HID_STARTLED);
-            if(sense) {
-                active = sense->last_result;
-                if(!active) {
-                    phase = 0;
-                    framecount = -6;
-                    dir = true;
-                }
-            }
-        }
     }
 
 private:
     uint8_t phase;
     int framecount;
     bool dir;
-    SensorPool * sensors;
 };

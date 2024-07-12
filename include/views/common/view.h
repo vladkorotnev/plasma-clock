@@ -19,9 +19,11 @@ const int DISP_TIME_NO_OVERRIDE = -1;
 /// @brief Skip this screen if possible.
 const int DISP_TIME_DONT_SHOW = 0;
 
-class Screen: public Renderable {
+class DisplayTimeable {
 public:
     /// @brief Return the desired display time to stay on-screen for longer than the user-specified setting.
     /// Return DISP_TIME_NO_OVERRIDE to not override anything. Return DISP_TIME_DONT_SHOW to avoid display if possible (but still be prepared to render!).
     virtual int desired_display_time() { return DISP_TIME_NO_OVERRIDE; }
 };
+
+class Screen: public DisplayTimeable, public Renderable {};
