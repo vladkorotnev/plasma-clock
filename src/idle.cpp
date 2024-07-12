@@ -18,6 +18,7 @@
 #include <views/word_of_the_day.h>
 #include <views/fb2k.h>
 #include <views/signal_icon.h>
+#include <views/touch_arrows_ovl.h>
 #include <input/keys.h>
 
 static char LOG_TAG[] = "APL_IDLE";
@@ -69,6 +70,7 @@ static SimpleClock * clockView;
 static RainOverlay * rain;
 static ThunderOverlay * thunder;
 static SignalStrengthIcon * signalIndicator;
+static TouchArrowOverlay * touchArrows;
 
 #if HAS(TEMP_SENSOR)
 static IndoorView * indoorView;
@@ -223,6 +225,10 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     weatherView = new CurrentWeatherView();
     fb2kView = new Fb2kView();
 
+    touchArrows = new TouchArrowOverlay(sensors);
+    touchArrows->bottom = true;
+    touchArrows->top = true;
+
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
     thunderClock->add_layer(thunder);
@@ -250,6 +256,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     rainyClock->add_layer(slideShow);
     rainyClock->add_layer(signalIndicator);
     rainyClock->add_layer(rain);
+    rainyClock->add_layer(touchArrows);
     mainView = rainyClock;
 
     mainView->prepare();

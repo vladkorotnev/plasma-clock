@@ -6,6 +6,7 @@
 #include <console.h>
 #include <sensor/sensors.h>
 #include <input/touch_plane.h>
+#include <input/hid_sensor.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -185,6 +186,7 @@ void setup() {
     sensors = new SensorPool();
 
     sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
+    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(250));
     bringup_light_sensor();
     bringup_motion_sensor();
     bringup_temp_sensor();
