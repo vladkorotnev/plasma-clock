@@ -1,10 +1,10 @@
 #include <views/transitions/transition_animator.h>
 
 TransitionAnimationCoordinator::TransitionAnimationCoordinator() { 
-    backingBufferA = (fanta_buffer_t) malloc(DisplayFramebuffer::PDFB_BUFFER_SIZE);
-    backingBufferB = (fanta_buffer_t) malloc(DisplayFramebuffer::PDFB_BUFFER_SIZE);
-    backingA = new FantaManipulator(backingBufferA, DisplayFramebuffer::PDFB_BUFFER_SIZE, DisplayFramebuffer::width, DisplayFramebuffer::height, semaA, &dirtyA);
-    backingB = new FantaManipulator(backingBufferB, DisplayFramebuffer::PDFB_BUFFER_SIZE, DisplayFramebuffer::width, DisplayFramebuffer::height, semaB, &dirtyB);
+    backingBufferA = (fanta_buffer_t) malloc(DisplayFramebuffer::BUFFER_SIZE);
+    backingBufferB = (fanta_buffer_t) malloc(DisplayFramebuffer::BUFFER_SIZE);
+    backingA = new FantaManipulator(backingBufferA, DisplayFramebuffer::BUFFER_SIZE, DisplayFramebuffer::width, DisplayFramebuffer::height, semaA, &dirtyA);
+    backingB = new FantaManipulator(backingBufferB, DisplayFramebuffer::BUFFER_SIZE, DisplayFramebuffer::width, DisplayFramebuffer::height, semaB, &dirtyB);
     backingA->clear();
     backingB->clear();
     transition = nullptr;

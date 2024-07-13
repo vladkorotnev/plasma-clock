@@ -1,4 +1,5 @@
 #pragma once
+#include <device_config.h>
 #include <graphics/display_driver.h>
 #include "fanta_manipulator.h"
 #include <freertos/FreeRTOS.h>
@@ -8,10 +9,10 @@
 /// @brief A framebuffer for driving the plasma display
 class DisplayFramebuffer {
 public:
-    static const int width = 101;
-    static const int height = 16;
+    static const int width = HWCONF_DISPLAY_WIDTH_PX;
+    static const int height = HWCONF_DISPLAY_HEIGHT_PX;
     /// @brief Size of the backing buffer in bytes
-    static const size_t PDFB_BUFFER_SIZE = width * (height / 8);
+    static const size_t BUFFER_SIZE = width * ceil(height / 8.0);
 
     DisplayFramebuffer(DisplayDriver * display);
     ~DisplayFramebuffer();
@@ -34,7 +35,7 @@ public:
     FantaManipulator * manipulate();
 
 private:
-    uint8_t buffer[PDFB_BUFFER_SIZE];
+    uint8_t buffer[BUFFER_SIZE];
     SemaphoreHandle_t buffer_semaphore;
     EventGroupHandle_t vsync_group;
     TaskHandle_t hTask;

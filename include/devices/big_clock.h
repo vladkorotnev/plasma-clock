@@ -13,7 +13,6 @@
 #define PRODUCT_VERSION "1.2"
 
 // ---- Connection to DISP BOARD ----
-
 const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {
     GPIO_NUM_15, 
     GPIO_NUM_2, 
@@ -28,6 +27,9 @@ const gpio_num_t HWCONF_PLASMA_CLK_GPIO = GPIO_NUM_19;
 const gpio_num_t HWCONF_PLASMA_RESET_GPIO = GPIO_NUM_21;
 const gpio_num_t HWCONF_PLASMA_BRIGHT_GPIO = GPIO_NUM_22;
 const gpio_num_t HWCONF_PLASMA_SHOW_GPIO = GPIO_NUM_23;
+
+#define HWCONF_DISPLAY_WIDTH_PX 101
+#define HWCONF_DISPLAY_HEIGHT_PX 16
 
 // ---- Connection to HV Board ----
 const gpio_num_t HWCONF_PLASMA_HV_EN_GPIO = GPIO_NUM_13;

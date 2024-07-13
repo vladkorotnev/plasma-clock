@@ -33,6 +33,9 @@ const gpio_num_t HWCONF_WS0010_DATABUS_GPIOS[] = {
 const gpio_num_t HWCONF_WS0010_RS_GPIO = GPIO_NUM_19; 
 const gpio_num_t HWCONF_WS0010_EN_GPIO = GPIO_NUM_18;
 
+#define HWCONF_DISPLAY_WIDTH_PX 100
+#define HWCONF_DISPLAY_HEIGHT_PX 16
+
 // ---- Connection to touch plane ----
 const touch_plane_definition_t HWCONF_TOUCH_PLANE = {
     // Screen panel

@@ -15,7 +15,7 @@ private:
     int width;
     int height;
     int current_spawnpoint;
-    int8_t current_path[16];
+    int8_t current_path[HWCONF_DISPLAY_HEIGHT_PX];
     int current_length;
     int max_delay_ms;
     int min_delay_ms;

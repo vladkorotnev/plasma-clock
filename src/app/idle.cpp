@@ -217,8 +217,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
 
     clockView = new SimpleClock();
-    rain = new RainOverlay(101, 16);
-    thunder = new ThunderOverlay(101, 16);
+    rain = new RainOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
+    thunder = new ThunderOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
     signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
     fb2kView = new Fb2kView();

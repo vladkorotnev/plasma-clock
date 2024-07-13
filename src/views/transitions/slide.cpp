@@ -5,7 +5,7 @@ SlideTransition::SlideTransition() {
 }
 
 bool SlideTransition::render(FantaManipulator * screen, TransitionAnimationCoordinator* coord) {
-    framecount += screen->get_width() / 16;
+    framecount += screen->get_width() / screen->get_height();
     FantaManipulator* backingB = coord->backingB;
     FantaManipulator* backingA = coord->backingA;
 
