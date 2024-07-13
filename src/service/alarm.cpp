@@ -81,7 +81,7 @@ static void alarm_task(void*) {
                             set_alarm(i, alarm);
                         }
 
-                        change_state(STATE_ALARMING);
+                        push_state(STATE_ALARMING);
                         break;
                     }
                 }

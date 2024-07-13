@@ -2,12 +2,14 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/queue.h>
 #include <esp32-hal-log.h>
+#include <unordered_set>
 
 const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(50);
 const TickType_t KEYHOLD_THRESHOLD_TIME = pdMS_TO_TICKS(1000);
 const TickType_t KEYHOLD_REPETITION_TIME = pdMS_TO_TICKS(500);
 
 static key_bitmask_t active_keys = 0;
+static std::unordered_set<key_bitmask_t> pressed_keycombos = {};
 static TickType_t keypress_started_at[KEY_MAX_INVALID] = { 0 };
 static TickType_t keypress_repeated_at[KEY_MAX_INVALID] = { 0 };
 
@@ -30,7 +32,23 @@ static key_state_t min_state_of_mask(key_bitmask_t keys) {
         }
     }
 
-    return time_to_state(maxTimeStamp);
+    key_state_t preliminary_state = time_to_state(maxTimeStamp);
+
+    switch(preliminary_state) {
+        case KEYSTATE_RELEASED:
+            pressed_keycombos.erase(keys);
+            return KEYSTATE_RELEASED;
+
+        case KEYSTATE_PRESSED:
+            if(pressed_keycombos.count(keys) == 0) {
+                pressed_keycombos.insert(keys);
+                return KEYSTATE_HIT;
+            } else {
+                return KEYSTATE_PRESSED;
+            }
+
+        default: return preliminary_state;
+    }
 }
 
 void hid_set_key_state(key_id_t key, bool state) {
@@ -62,12 +80,14 @@ key_state_t hid_test_key_state_repetition(key_id_t key) {
         case KEYSTATE_RELEASED:
         case KEYSTATE_PRESSED: 
             return KEYSTATE_RELEASED;
+        case KEYSTATE_HIT:
+            return KEYSTATE_HIT;
         case KEYSTATE_HOLDING:
             {
                 TickType_t now = xTaskGetTickCount();
                 if(now - keypress_repeated_at[key] >= KEYHOLD_REPETITION_TIME) {
                     keypress_repeated_at[key] = now;
-                    return KEYSTATE_PRESSED;
+                    return KEYSTATE_HIT;
                 } else {
                     return KEYSTATE_RELEASED;
                 }

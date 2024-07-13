@@ -8,3 +8,5 @@ typedef enum device_state {
 } device_state_t;
 
 void change_state(device_state_t);
+void push_state(device_state_t next);
+void pop_state(device_state_t expected);

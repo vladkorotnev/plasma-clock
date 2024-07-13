@@ -306,8 +306,6 @@ void app_idle_draw(FantaManipulator* graph) {
     mainView->render(graph);
 }
 
-bool ignoring_keys = false;
-
 void scroll_down() {
     go_to_next_screen(TRANSITION_SLIDE_VERTICAL_UP);
     beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
@@ -331,28 +329,19 @@ void app_idle_process() {
         weather_overlay_update();
     }
 
-    if(!ignoring_keys) {
-        if(hid_test_key_state(KEY_DOWN)) {
-            scroll_down();
-            ignoring_keys = true;
-        }
-        else if(hid_test_key_state(KEY_UP)) {
-            scroll_up();
-            ignoring_keys = true;
-        }
-        else if(hid_test_key_state(KEY_LEFT)) {
-            //change_state(STATE_MENU);
-            beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
-            ignoring_keys = true;
-        }
-        else {
-            change_screen_if_needed();
-            touchArrows->active = hid_test_key_any(KEYMASK_ALL) != KEYSTATE_RELEASED;
-        }
-    } else {
-        ignoring_keys = (hid_test_key_any(KEY_UP | KEY_DOWN | KEY_LEFT) != KEYSTATE_RELEASED);
-        if(hid_test_key_state_repetition(KEY_DOWN)) scroll_down();
-        else if(hid_test_key_state_repetition(KEY_UP)) scroll_up();
+    if(hid_test_key_state_repetition(KEY_DOWN)) {
+        scroll_down();
+    }
+    else if(hid_test_key_state_repetition(KEY_UP)) {
+        scroll_up();
+    }
+    else if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) {
+        //change_state(STATE_MENU);
+        beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+    }
+    else {
+        change_screen_if_needed();
+        touchArrows->active = hid_test_key_any(KEYMASK_ALL) != KEYSTATE_RELEASED;
     }
 
     hourly_chime();

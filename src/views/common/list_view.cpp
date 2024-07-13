@@ -36,17 +36,10 @@ void ListView::step() {
     ViewMultiplexor::step();
     scroll_guidance->right = selectable;
 
-    if(!ignoring_touches) {
-        if(hid_test_key_state(KEY_DOWN)) scroll_down();
-        else if(hid_test_key_state(KEY_UP)) scroll_up();
-        else if(selectable && hid_test_key_state(KEY_RIGHT)) {
-            select_flag = true;
-        }
-        ignoring_touches = true;
-    } else {
-        ignoring_touches = hid_test_key_any(KEY_UP | KEY_DOWN | KEY_RIGHT) != KEYSTATE_RELEASED;
-        if(hid_test_key_state_repetition(KEY_DOWN)) scroll_down();
-        else if(hid_test_key_state_repetition(KEY_UP)) scroll_up();
+    if(hid_test_key_state_repetition(KEY_DOWN)) scroll_down();
+    else if(hid_test_key_state_repetition(KEY_UP)) scroll_up();
+    else if(selectable && hid_test_key_state(KEY_RIGHT)) {
+        select_flag = true;
     }
 }
 

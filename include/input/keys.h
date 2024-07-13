@@ -13,6 +13,7 @@ typedef enum key_id {
 
 typedef enum key_state {
     KEYSTATE_RELEASED,
+    KEYSTATE_HIT,
     KEYSTATE_PRESSED,
     KEYSTATE_HOLDING
 } key_state_t;

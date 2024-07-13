@@ -27,11 +27,13 @@
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
 #include <views/common/string_scroll.h>
+#include <stack>
 
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
+static std::stack<device_state_t> state_stack = {};
 
 static ViewCompositor * desktop;
 static ViewMultiplexor * appHost;
@@ -56,6 +58,21 @@ void change_state(device_state_t to) {
     if(to == current_state) return;
     current_state = to;
     appHost->switch_to(current_state, TRANSITION_WIPE);
+}
+
+void push_state(device_state_t next) {
+    if(next == current_state) return;
+
+    state_stack.push(current_state);
+    change_state(next);
+}
+
+void pop_state(device_state_t expected) {
+    if(!state_stack.empty()) {
+        device_state_t old = state_stack.top();
+        state_stack.pop();
+        change_state(old);
+    }
 }
 
 void bringup_light_sensor() {

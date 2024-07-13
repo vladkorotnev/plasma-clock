@@ -29,7 +29,6 @@ protected:
     std::vector<view_id_t> view_ids;
 
 private:
-    bool ignoring_touches;
     bool select_flag;
     int current_idx;
 };
