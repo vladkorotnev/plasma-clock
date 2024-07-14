@@ -5,7 +5,10 @@
 #include <network/netmgr.h>
 #include <rsrc/common_icons.h>
 
-AppShimMenu::AppShimMenu() {
+AppShimMenu::AppShimMenu(Beeper *b) {
+    beeper = b;
+    transition_coordinator = new TransitionAnimationCoordinator();
+
     scroll_guidance = new TouchArrowOverlay();
     scroll_guidance->top = true;
     scroll_guidance->bottom = true;
@@ -31,8 +34,9 @@ AppShimMenu::AppShimMenu() {
     system_info->add_view(new MenuInfoItemView("OS Type", PRODUCT_NAME));
     system_info->add_view(new MenuInfoItemView("OS Version", PRODUCT_VERSION));
     system_info->add_view(new MenuInfoItemView("WiFi Name", NetworkManager::network_name()));
-    char buf_ip[17] = { 0 };
-    strncpy(buf_ip, NetworkManager::current_ip().c_str(), 16);
+    static char buf_ip[17] = { 0 };
+    String tmp = NetworkManager::current_ip();
+    strncpy(buf_ip, tmp.c_str(), 16);
     system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
 
     static const uint8_t status_icns_data[] = {
@@ -67,37 +71,43 @@ AppShimMenu::AppShimMenu() {
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ }, &hourglass_icns));
     main_menu->add_view(new MenuActionItemView("Alarm", [this](){ }, &alarm_icns));
     main_menu->add_view(new MenuActionItemView("Settings", [this](){ push_submenu(settings_menu); }, &wrench_icns));
-    main_menu->add_view(new MenuActionItemView("Done", []() { change_state(STATE_IDLE); }, &good_icns));
 
-    current_renderable = main_menu;
+    _current_renderable = main_menu;
 }   
 
 void AppShimMenu::prepare() {
     scroll_guidance->prepare();
     back_stack.empty();
-    current_renderable = main_menu;
+    _current_renderable = main_menu;
     main_menu->switch_to(0, TRANSITION_NONE);
-    current_renderable->prepare();
+    _current_renderable->prepare();
+    last_touch_time = xTaskGetTickCount();
 }
 
 void AppShimMenu::render(FantaManipulator*fb) {
     fb->clear();
-    current_renderable->render(fb);
+    current_renderable()->render(fb);
     scroll_guidance->render(fb);
 }
 
 void AppShimMenu::step() {
-    current_renderable->step();
+    current_renderable()->step();
     scroll_guidance->left = !back_stack.empty();
     if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) pop_renderable();
+    if(hid_test_key_any() == KEYSTATE_HIT) beeper->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+    if(hid_test_key_any()) {
+        last_touch_time = xTaskGetTickCount();
+    } else if (xTaskGetTickCount() - last_touch_time >= pdMS_TO_TICKS(back_stack.size() == 0 ? 5000 : 30000)) {
+        pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+    }
     scroll_guidance->active = hid_test_key_any();
 }
 
 void AppShimMenu::push_renderable(Renderable *next) {
-    back_stack.push(current_renderable);
-    current_renderable->cleanup();
-    current_renderable = next;
-    current_renderable->prepare();
+    back_stack.push(_current_renderable);
+    _current_renderable->cleanup();
+    next->prepare();
+    set_active_renderable(next, TRANSITION_SLIDE_HORIZONTAL_LEFT);
     scroll_guidance->right = false;
     scroll_guidance->top = false;
     scroll_guidance->bottom = false;
@@ -111,9 +121,32 @@ void AppShimMenu::push_submenu(ListView *submenu) {
 }
 
 void AppShimMenu::pop_renderable() {
-    if(back_stack.size() == 0) return;
-    current_renderable->cleanup();
-    current_renderable = back_stack.top();
+    if(back_stack.size() == 0) {
+        // back button goes back, who would have guessed
+        pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+        return;
+    }
+
+    _current_renderable->cleanup();
+    Renderable* next = back_stack.top();
     back_stack.pop();
-    current_renderable->prepare();
+    next->prepare();
+    set_active_renderable(next, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
+}
+
+inline Renderable* AppShimMenu::current_renderable() {
+    if(!transition_coordinator->is_completed()) {
+        return transition_coordinator;
+    } else {
+        return _current_renderable;
+    }
+}
+
+void AppShimMenu::set_active_renderable(Renderable *next, transition_type_t t) {
+    if(t != TRANSITION_NONE) {
+        transition_coordinator->set_transition(transition_type_to_transition(t));
+        transition_coordinator->set_views(_current_renderable, next);
+    }
+
+    _current_renderable = next;
 }

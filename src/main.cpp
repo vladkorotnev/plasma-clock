@@ -49,7 +49,7 @@ static BeepSequencer * bs;
 
 static bool fps_counter = false;
 
-void change_state(device_state_t to) {
+void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
         current_state = STATE_OTAFVU;
         return; // all other things handled in the FVU process
@@ -57,21 +57,21 @@ void change_state(device_state_t to) {
 
     if(to == current_state) return;
     current_state = to;
-    appHost->switch_to(current_state, TRANSITION_WIPE);
+    appHost->switch_to(current_state, transition);
 }
 
-void push_state(device_state_t next) {
+void push_state(device_state_t next, transition_type_t transition) {
     if(next == current_state) return;
 
     state_stack.push(current_state);
-    change_state(next);
+    change_state(next, transition);
 }
 
-void pop_state(device_state_t expected) {
+void pop_state(device_state_t expected, transition_type_t transition) {
     if(!state_stack.empty()) {
         device_state_t old = state_stack.top();
         state_stack.pop();
-        change_state(old);
+        change_state(old, transition);
     }
 }
 
@@ -226,7 +226,7 @@ void setup() {
 
     appHost->add_view(new AppShimIdle(sensors, beepola), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(), STATE_MENU);
+    appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
 
     change_state(startup_state);
     alarm_init();

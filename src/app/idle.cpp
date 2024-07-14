@@ -336,7 +336,7 @@ void app_idle_process() {
         scroll_up();
     }
     else if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) {
-        change_state(STATE_MENU);
+        push_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
         beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
     }
     else {

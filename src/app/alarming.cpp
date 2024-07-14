@@ -196,7 +196,7 @@ void begin_snoozing() {
 void stop_alarm() {
     clear_triggered_alarm();
     seq->stop_sequence();
-    pop_state(STATE_ALARMING);
+    pop_state(STATE_ALARMING, TRANSITION_WIPE);
 }
 
 void app_alarming_process() {

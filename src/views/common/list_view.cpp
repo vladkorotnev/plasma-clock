@@ -54,6 +54,15 @@ void ListView::scroll_down() {
     switch_to(view_ids[current_idx], TRANSITION_SLIDE_VERTICAL_UP);
 }
 
+void ListView::switch_to(view_id_t id, transition_type_t transition) {
+    ViewMultiplexor::switch_to(id, transition);
+    auto idx = std::find(view_ids.begin(), view_ids.end(), id);
+    if(idx != view_ids.end()) {
+        current_idx = distance(view_ids.begin(), idx);
+        scrollbar->selected = current_idx;
+    }
+}
+
 void ListView::cleanup() {
     scrollbar->cleanup();
     ViewMultiplexor::cleanup();

@@ -4,7 +4,8 @@
 
 class SlideTransition: public Transition {
 public:
-    SlideTransition();
+    bool is_reverse = false;
+    SlideTransition(bool reverse = false);
     bool render(FantaManipulator*, TransitionAnimationCoordinator*);
     void rewind();
 

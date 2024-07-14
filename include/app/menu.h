@@ -7,7 +7,7 @@
 
 class AppShimMenu: public Renderable {
 public:
-    AppShimMenu();
+    AppShimMenu(Beeper*);
 
     void prepare();
     void render(FantaManipulator*fb);
@@ -18,8 +18,13 @@ public:
     void pop_renderable();
 
 private:
+    TransitionAnimationCoordinator * transition_coordinator;
     TouchArrowOverlay * scroll_guidance;
-    Renderable* current_renderable;
+    Renderable* _current_renderable;
+    void set_active_renderable(Renderable*, transition_type_t);
+    Renderable* current_renderable();
     ListView* main_menu;
     std::stack<Renderable*> back_stack;
+    Beeper * beeper;
+    TickType_t last_touch_time;
 };

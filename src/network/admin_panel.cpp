@@ -242,7 +242,7 @@ void build() {
         render_int("Show Fb2k for [s]:", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS);
         GP.HR();
         GP.LABEL("Screen transition:");
-        GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide,Vertical Slide,Vertical Slide Reverse,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
+        GP.SELECT(PREFS_KEY_TRANSITION_TYPE, "Off,Wipe,Horizontal Slide To Left,Horizontal Slide To Right,Vertical Slide Up,Vertical Slide Down,Random", prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
         GP.HR();
         GP.LABEL("Scroll speed:");
         GP.SELECT(PREFS_KEY_DISP_SCROLL_SPEED, "Slow,Medium,Fast,Sonic", prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED));

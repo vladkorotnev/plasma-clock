@@ -1,7 +1,8 @@
 #include "views/transitions/slide.h"
 
-SlideTransition::SlideTransition() {
+SlideTransition::SlideTransition(bool reverse) {
     framecount = 0;
+    is_reverse = reverse;
 }
 
 bool SlideTransition::render(FantaManipulator * screen, TransitionAnimationCoordinator* coord) {
@@ -14,8 +15,13 @@ bool SlideTransition::render(FantaManipulator * screen, TransitionAnimationCoord
         return true;
     }
 
-    screen->put_fanta(backingA->get_fanta(), -framecount, 0, backingA->get_width(), backingA->get_height());
-    screen->put_fanta(backingB->get_fanta(), screen->get_width() - framecount, 0, backingB->get_width(), backingB->get_height());
+    if(is_reverse) {
+        screen->put_fanta(backingA->get_fanta(), framecount, 0, backingA->get_width(), backingA->get_height());
+        screen->put_fanta(backingB->get_fanta(),  -framecount, 0, backingB->get_width(), backingB->get_height());
+    } else {
+        screen->put_fanta(backingA->get_fanta(), -framecount, 0, backingA->get_width(), backingA->get_height());
+        screen->put_fanta(backingB->get_fanta(), screen->get_width() - framecount, 0, backingB->get_width(), backingB->get_height());
+    }
 
     return false;
 }
