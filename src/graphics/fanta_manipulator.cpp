@@ -67,7 +67,7 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
     *dirty = true;
 }
 
-void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h, fanta_buffer_t mask) {
+void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h, fanta_buffer_t mask, bool invert) {
     if(w <= 0 || h <= 0) return;
     
     uint16_t fanta_column_mask = 0x0;
@@ -93,35 +93,35 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
             current_column_mask &= mask[i];
         }
 
-        buffer[target_idx + i] = ((uint8_t) fanta[i] & current_column_mask) | (buffer[target_idx + i] & ~current_column_mask);
+        buffer[target_idx + i] = ((uint8_t) (invert ? ~fanta[i] : fanta[i]) & current_column_mask) | (buffer[target_idx + i] & ~current_column_mask);
     }
 
     *dirty = true;
 }
 
-void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y) {
+void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool invert) {
     fanta_buffer_t fanta = sprite_to_fanta(sprite);
     fanta_buffer_t mask = nullptr;
     if(sprite->mask) {
         mask = mask_to_fanta(sprite);
     }
-    put_fanta(fanta, x, y, sprite->width, sprite->height, mask);
+    put_fanta(fanta, x, y, sprite->width, sprite->height, mask, invert);
     free(fanta);
     if(mask) {
         free(mask);
     }
 }
 
-void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y) {
+void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, bool invert) {
     sprite_t char_sprite = sprite_from_glyph(font, glyph);
-    put_sprite(&char_sprite, x, y);
+    put_sprite(&char_sprite, x, y, invert);
 }
 
-void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y) {
+void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y, bool invert) {
     size_t i = 0;
     int cur_x = x;
     while(char ch = string[i]) {
-        put_glyph(font, ch, cur_x, y);
+        put_glyph(font, ch, cur_x, y, invert);
         cur_x += font->width;
         i++;
     }

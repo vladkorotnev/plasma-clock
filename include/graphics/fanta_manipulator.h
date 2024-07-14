@@ -38,17 +38,17 @@ public:
     /// @param w Width of the graphic to be placed
     /// @param h Height of the graphic to be placed
     /// @param mask Mask for the graphic (can be null)
-    void put_fanta(const fanta_buffer_t, int x, int y, int w, int h, const fanta_buffer_t mask = nullptr);
+    void put_fanta(const fanta_buffer_t, int x, int y, int w, int h, const fanta_buffer_t mask = nullptr, bool invert = false);
     /// @brief Place a sprite at a specified position of the Fanta buffer
-    void put_sprite(const sprite_t*, int x, int y);
+    void put_sprite(const sprite_t*, int x, int y, bool invert = false);
     /// @brief Place a glyph from a font at a specified position of the Fanta buffer
     /// @param font Font to look up the glyph in
     /// @param glyph Glyph code to place
     /// @param x X position for the glyph
     /// @param y Y position for the glyph
-    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y);
+    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, bool invert = false);
     /// @brief Draw a string with the specified font at the specified position in the Fanta buffer. Does not do any line wrapping.
-    void put_string(const font_definition_t *, const char *, int x, int y);
+    void put_string(const font_definition_t *, const char *, int x, int y, bool invert = false);
     /// @brief Offset the contents of the buffer
     /// @param dx Horizontal offset. Negative is to the left.
     /// @param dy Vertical offset. Negative is to the top.

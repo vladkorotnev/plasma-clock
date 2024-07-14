@@ -1,4 +1,5 @@
 #include "app/alarming.h"
+#include <rsrc/common_icons.h>
 #include <service/alarm.h>
 #include <stdint.h>
 #include <sound/sequencer.h>
@@ -38,19 +39,6 @@ static int snooze_minutes = 0;
 static bool is_snoozing = false;
 static melody_sequence_t melody;
 
-static const uint8_t alarm_spr_data[] = {
-    // 'alarm', 16x16px
-0x39, 0xce, 0x70, 0x87, 0x67, 0xf3, 0x48, 0x09, 0x13, 0x64, 0x27, 0xf2, 0x2f, 0xda, 0x2f, 0xba, 
-0x24, 0x72, 0x2f, 0xfa, 0x2f, 0xfa, 0x27, 0xf2, 0x13, 0x64, 0x08, 0x08, 0x17, 0xf4, 0x20, 0x02
-};
-
-static const sprite_t alarm_spr = {
-    .width = 16,
-    .height = 16,
-    .data = alarm_spr_data,
-    .mask = nullptr
-};
-
 void app_alarming_prepare(Beeper* beeper) {
     if(seq) {
         seq->stop_sequence();
@@ -86,10 +74,10 @@ void app_alarming_draw(FantaManipulator* fb) {
             // Draw the animation of a buzzing alarm clock
             if(framecount < 120) {
                 // Roughly 2 seconds idle time
-                fb->put_sprite(&alarm_spr, fb->get_width() / 2 - alarm_spr.width / 2, 0);
+                fb->put_sprite(&alarm_icns, fb->get_width() / 2 - alarm_icns.width / 2, 0);
             } else {
                 int offset = (framecount % 10) - 5;
-                fb->put_sprite(&alarm_spr, fb->get_width() / 2 - alarm_spr.width / 2 + offset, 0);
+                fb->put_sprite(&alarm_icns, fb->get_width() / 2 - alarm_icns.width / 2 + offset, 0);
                 if(framecount % 10 == 0) {
                     clock_inverting = !clock_inverting;
                 }

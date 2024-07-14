@@ -23,10 +23,10 @@
 #include <state.h>
 #include <app/idle.h>
 #include <app/alarming.h>
+#include <app/menu.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
-#include <views/common/string_scroll.h>
 #include <stack>
 
 static char LOG_TAG[] = "APL_MAIN";
@@ -153,8 +153,6 @@ void bringup_touch() {
 #endif
 }
 
-extern void touchplane_debug(Console *);
-
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
@@ -228,13 +226,7 @@ void setup() {
 
     appHost->add_view(new AppShimIdle(sensors, beepola), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
-
-    ListView * test = new ListView();
-    test->add_view(new StringScroll(&keyrus0816_font, "Menu 1"), 0);
-    test->add_view(new StringScroll(&keyrus0816_font, "Menu 2"), 1);
-    test->add_view(new StringScroll(&keyrus0816_font, "Menu 3"), 2);
-    test->add_view(new StringScroll(&keyrus0816_font, "Menu 4 Is Bloody Long For Sure"), 3);
-    appHost->add_view(test, STATE_MENU);
+    appHost->add_view(new AppShimMenu(), STATE_MENU);
 
     change_state(startup_state);
     alarm_init();

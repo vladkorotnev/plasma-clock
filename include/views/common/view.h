@@ -1,5 +1,6 @@
 #pragma once
 #include <graphics/fanta_manipulator.h>
+#include <vector>
 
 /// @brief A renderable view
 class Renderable {
@@ -14,6 +15,25 @@ public:
     virtual void cleanup() { }
 };
 
+class Composite: public Renderable {
+public:
+    void add_subrenderable(Renderable * r) { subrenderables.push_back(r); }
+    void prepare() {
+        for(Renderable *r: subrenderables) r->prepare();
+    }
+    void render(FantaManipulator*fb) {
+        for(Renderable *r: subrenderables) r->render(fb);
+    }
+    void step() {
+        for(Renderable *r: subrenderables) r->step();
+    }
+    void cleanup() {
+        for(Renderable *r: subrenderables) r->cleanup();
+    }
+protected:
+    std::vector<Renderable*> subrenderables = {};
+};
+
 /// @brief Do not override the user-specified display time
 const int DISP_TIME_NO_OVERRIDE = -1;
 /// @brief Skip this screen if possible.
@@ -26,4 +46,4 @@ public:
     virtual int desired_display_time() { return DISP_TIME_NO_OVERRIDE; }
 };
 
-class Screen: public DisplayTimeable, public Renderable {};
+class Screen: public DisplayTimeable, public Composite {};

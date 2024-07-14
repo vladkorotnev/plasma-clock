@@ -6,11 +6,12 @@
 
 class ListView: public ViewMultiplexor {
 public:
+    static const view_id_t VIEW_ID_AUTOMATIC = 0xFFFF;
     bool selectable = true;
     ListView();
     ~ListView();
 
-    void add_view(Renderable*, view_id_t);
+    void add_view(Renderable*, view_id_t = VIEW_ID_AUTOMATIC);
     void remove_view(view_id_t);
 
     void prepare();
@@ -24,7 +25,6 @@ public:
     view_id_t get_selection();
 
 protected:
-    TouchArrowOverlay * scroll_guidance;
     ScrollbarOverlay * scrollbar;
     std::vector<view_id_t> view_ids;
 
