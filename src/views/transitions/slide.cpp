@@ -6,7 +6,7 @@ SlideTransition::SlideTransition(bool reverse) {
 }
 
 bool SlideTransition::render(FantaManipulator * screen, TransitionAnimationCoordinator* coord) {
-    framecount += screen->get_width() / screen->get_height();
+    framecount += screen->get_width() / screen->get_height(); // <- to keep same speed as vertical, which is 1px per frame
     FantaManipulator* backingB = coord->backingB;
     FantaManipulator* backingA = coord->backingA;
 
@@ -17,10 +17,10 @@ bool SlideTransition::render(FantaManipulator * screen, TransitionAnimationCoord
 
     if(is_reverse) {
         screen->put_fanta(backingA->get_fanta(), framecount, 0, backingA->get_width(), backingA->get_height());
-        screen->put_fanta(backingB->get_fanta(),  -framecount, 0, backingB->get_width(), backingB->get_height());
+        screen->put_fanta(backingB->get_fanta(),  -backingB->get_width() + framecount, 0, backingB->get_width(), backingB->get_height());
     } else {
         screen->put_fanta(backingA->get_fanta(), -framecount, 0, backingA->get_width(), backingA->get_height());
-        screen->put_fanta(backingB->get_fanta(), screen->get_width() - framecount, 0, backingB->get_width(), backingB->get_height());
+        screen->put_fanta(backingB->get_fanta(), backingB->get_width() - framecount, 0, backingB->get_width(), backingB->get_height());
     }
 
     return false;
@@ -47,10 +47,10 @@ bool VerticalSlideTransition::render(FantaManipulator * screen, TransitionAnimat
 
     if(is_reverse) {
         screen->put_fanta(backingA->get_fanta(), 0, framecount, backingA->get_width(), backingA->get_height());
-        screen->put_fanta(backingB->get_fanta(), 0, -screen->get_height() + framecount, backingB->get_width(), backingB->get_height());
+        screen->put_fanta(backingB->get_fanta(), 0, -backingB->get_height() + framecount, backingB->get_width(), backingB->get_height());
     } else {
         screen->put_fanta(backingA->get_fanta(), 0, -framecount, backingA->get_width(), backingA->get_height());
-        screen->put_fanta(backingB->get_fanta(), 0, screen->get_height() - framecount, backingB->get_width(), backingB->get_height());
+        screen->put_fanta(backingB->get_fanta(), 0, backingB->get_height() - framecount, backingB->get_width(), backingB->get_height());
     }
 
     return false;
