@@ -10,5 +10,10 @@ public:
     void pop_renderable(transition_type_t = TRANSITION_SLIDE_HORIZONTAL_RIGHT);
 
 private:
+    class AlarmEditorView;
     Beeper * beeper;
+
+    int current_editing_idx;
+    alarm_setting_t current_editing_setting;
+    AlarmEditorView * current_editor;
 };

@@ -4,11 +4,12 @@
 
 class AlarmItemView: public Renderable {
 public:
-    AlarmItemView(int index):
+    AlarmItemView(int index, std::function<void(int)> onSelect):
         index(index),
         index_str {0},
         time_buf {0},
-        setting {0}
+        setting {0},
+        _action(onSelect)
     {
         itoa(index + 1, index_str, 10);
     }
@@ -43,9 +44,14 @@ public:
 
     void step() {
         snprintf(time_buf, 6, "%02d:%02d", setting.hour, setting.minute);
+
+        if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
+            _action(index);
+        }
     }
 
 private:
+    std::function<void(int)> _action;
     alarm_setting_t setting;
     int index;
     char index_str[4];
@@ -61,15 +67,45 @@ private:
     };
 };
 
+class AppShimAlarmEditor::AlarmEditorView: public ListView {
+public:
+    AlarmEditorView(alarm_setting_t *alm, Beeper *b, std::function<void(bool, Renderable*)> activation): ListView::ListView() {
+        add_view(new MenuBooleanSelectorView("Enabled", ALARM_IS_ENABLED(*alm), [alm](bool newEnabled) {
+            if(newEnabled) {
+                alm->days |= ALARM_DAY_GLOBAL_ENABLE;
+            } else {
+                alm->days &= ~ALARM_DAY_GLOBAL_ENABLE;
+            }
+        }));
+
+        add_view(new MenuInfoItemView("Days", "TODO"));
+        add_view(new MenuInfoItemView("Time", "TODO"));
+        add_view(new MenuMelodySelectorView(b, "Melody", alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
+    }
+};
+
 AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
+    current_editor = nullptr;
+    current_editing_idx = 0;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
         if(isActive) push_renderable(instance, TRANSITION_NONE);
         else pop_renderable(TRANSITION_NONE);
     };
 
+    std::function<void(int)> beginEditing = [this, normalActivationFunction](int editIdx) {
+        if(current_editor != nullptr) {
+            delete current_editor;
+        }
+        current_editing_idx = editIdx;
+        const alarm_setting_t * settings = get_alarm_list();
+        current_editing_setting = settings[editIdx];
+        current_editor = new AlarmEditorView(&current_editing_setting, beeper, normalActivationFunction);
+        push_renderable(current_editor, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+    };
+
     for(int i = 0; i < ALARM_LIST_SIZE; i++) {
-        main_menu->add_view(new AlarmItemView(i));
+        main_menu->add_view(new AlarmItemView(i, beginEditing));
     }
     main_menu->add_view(new MenuNumberSelectorPreferenceView("Snooze time", PREFS_KEY_ALARM_SNOOZE_MINUTES, 1, 30, 1, normalActivationFunction));
 }
@@ -80,5 +116,12 @@ void AppShimAlarmEditor::pop_renderable(transition_type_t transition) {
         return;
     }
 
+    if(back_stack.size() == 1) {
+        // returning to alarm list, likely from editing screen
+        if(current_editor != nullptr) {
+            set_alarm(current_editing_idx, current_editing_setting);
+            main_menu->get_view(current_editing_idx)->prepare();
+        }
+    }
     ProtoShimNavMenu::pop_renderable(transition);
 }
