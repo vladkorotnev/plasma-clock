@@ -15,19 +15,28 @@ public:
     void render(FantaManipulator *fb) override;
     void cleanup() override;
 
+protected:
+    bool _currentValue;
 private:
     const char * on_str = "Yes";
     const char * off_str = "No";
     key_id_t _button;
     StringScroll * label;
-    bool _currentValue;
     std::function<void(bool)> _onChange;
 };
 
 class MenuBooleanSettingView: public MenuBooleanSelectorView {
 public:
-    MenuBooleanSettingView(const char * title, prefs_key_t key, key_id_t button = KEY_RIGHT) :
-        MenuBooleanSelectorView(title, prefs_get_bool(key), [key](bool value) { prefs_set_bool(key, value); }, button)
+    MenuBooleanSettingView(const char * title, prefs_key_t prefs_key, key_id_t button = KEY_RIGHT) :
+        key(prefs_key),
+        MenuBooleanSelectorView(title, prefs_get_bool(prefs_key), [this](bool value) { prefs_set_bool(key, value); }, button)
     {
     }
+
+    void step() {
+        _currentValue = prefs_get_bool(key);
+        MenuBooleanSelectorView::step();
+    }
+private:
+    prefs_key_t key;
 };

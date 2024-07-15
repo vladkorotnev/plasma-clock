@@ -5,19 +5,12 @@
 #include <network/netmgr.h>
 #include <rsrc/common_icons.h>
 
-AppShimMenu::AppShimMenu(Beeper *b) {
+AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
-    transition_coordinator = new TransitionAnimationCoordinator();
-
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
-        if(isActive) push_renderable(instance);
-        else pop_renderable();
+        if(isActive) push_renderable(instance, TRANSITION_NONE);
+        else pop_renderable(TRANSITION_NONE);
     };
-
-    scroll_guidance = new TouchArrowOverlay();
-    scroll_guidance->top = true;
-    scroll_guidance->bottom = true;
-    scroll_guidance->right = true;
 
     // NB: This leaks a lot of objects on purpose.
     // This object is not supposed to be instantiated more than once in the firmware.
@@ -37,18 +30,18 @@ AppShimMenu::AppShimMenu(Beeper *b) {
     static ListView * display_menu = new ListView();
     static ListView * screen_times = new ListView();
     display_menu->add_view(new MenuActionItemView("Screen Times", [this](){ push_submenu(screen_times); }));
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Clock", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600, 5, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Clock", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(TEMP_SENSOR)
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Thermometer", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600, 5, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Thermometer", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
 #if HAS(SWITCHBOT_METER_INTEGRATION)
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Switchbot Meter", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600, 5, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Switchbot Meter", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 5, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(WORDNIK_API)
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Wordnik", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 5, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Wordnik", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Foobar2000", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 5, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Foobar2000", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 1, normalActivationFunction));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         "Transition", 
         {"(Off)", "Wipe", "Slide Left", "Slide Right", "Slide Up", "Slide Down", "(Randomize)"},
@@ -128,85 +121,32 @@ AppShimMenu::AppShimMenu(Beeper *b) {
         ESP.restart();
     }, &good_icns));
 
-    main_menu = new ListView();
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ }, &hourglass_icns));
-    main_menu->add_view(new MenuActionItemView("Alarm", [this](){ }, &alarm_icns));
+    main_menu->add_view(new MenuActionItemView("Alarm", [this](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
     main_menu->add_view(new MenuActionItemView("Settings", [this](){ push_submenu(settings_menu); }, &wrench_icns));
-
-    _current_renderable = main_menu;
 }   
 
 void AppShimMenu::prepare() {
-    scroll_guidance->prepare();
-    back_stack.empty();
-    _current_renderable = main_menu;
-    main_menu->switch_to(0, TRANSITION_NONE);
-    _current_renderable->prepare();
+    ProtoShimNavMenu::prepare();
     last_touch_time = xTaskGetTickCount();
 }
 
-void AppShimMenu::render(FantaManipulator*fb) {
-    fb->clear();
-    current_renderable()->render(fb);
-    scroll_guidance->render(fb);
-}
 
 void AppShimMenu::step() {
-    current_renderable()->step();
-    scroll_guidance->left = !back_stack.empty();
-    if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) pop_renderable();
+    ProtoShimNavMenu::step();
     if(hid_test_key_any()) {
         last_touch_time = xTaskGetTickCount();
     } else if (xTaskGetTickCount() - last_touch_time >= pdMS_TO_TICKS(back_stack.size() == 0 ? 5000 : 30000)) {
         pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT);
     }
-    scroll_guidance->active = hid_test_key_any();
 }
 
-void AppShimMenu::push_renderable(Renderable *next) {
-    back_stack.push(_current_renderable);
-    _current_renderable->cleanup();
-    next->prepare();
-    set_active_renderable(next, TRANSITION_SLIDE_HORIZONTAL_LEFT);
-    scroll_guidance->right = false;
-    scroll_guidance->top = false;
-    scroll_guidance->bottom = false;
-}
-
-void AppShimMenu::push_submenu(ListView *submenu) {
-    push_renderable(submenu);
-    scroll_guidance->right = true;
-    scroll_guidance->top = true;
-    scroll_guidance->bottom = true;
-}
-
-void AppShimMenu::pop_renderable() {
+void AppShimMenu::pop_renderable(transition_type_t transition) {
     if(back_stack.size() == 0) {
         // back button goes back, who would have guessed
         pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT);
         return;
     }
 
-    _current_renderable->cleanup();
-    Renderable* next = back_stack.top();
-    back_stack.pop();
-    next->prepare();
-    set_active_renderable(next, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
-}
-
-inline Renderable* AppShimMenu::current_renderable() {
-    if(!transition_coordinator->is_completed()) {
-        return transition_coordinator;
-    } else {
-        return _current_renderable;
-    }
-}
-
-void AppShimMenu::set_active_renderable(Renderable *next, transition_type_t t) {
-    if(t != TRANSITION_NONE) {
-        transition_coordinator->set_transition(transition_type_to_transition(t));
-        transition_coordinator->set_views(_current_renderable, next);
-    }
-
-    _current_renderable = next;
+    ProtoShimNavMenu::pop_renderable(transition);
 }

@@ -37,5 +37,14 @@ private:
 class MenuMelodySelectorPreferenceView: public MenuMelodySelectorView {
 public:
     MenuMelodySelectorPreferenceView(Beeper * preview, const char * title, prefs_key_t prefs_key, std::function<void(bool, Renderable*)> onActivated):
-        MenuMelodySelectorView(preview, title, prefs_get_int(prefs_key), onActivated, [prefs_key](int newVal) { prefs_set_int(prefs_key, newVal); }) {}
+        key(prefs_key),
+        MenuMelodySelectorView(preview, title, prefs_get_int(prefs_key), onActivated, [this](int newVal) { prefs_set_int(key, newVal); }) {}
+
+    void step() {
+        currentValue = prefs_get_int(key);
+        MenuMelodySelectorView::step();
+    }
+
+private:
+    prefs_key_t key;
 };

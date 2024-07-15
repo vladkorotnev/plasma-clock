@@ -5,6 +5,8 @@
 
 static char LOG_TAG[] = "ALM";
 
+typedef alarm_setting_t alarm_settings_list_t[ALARM_LIST_SIZE];
+
 static TaskHandle_t hTask;
 static alarm_settings_list_t alarms = { 0 };
 static bool alarm_list_loaded = false;
@@ -29,8 +31,8 @@ void _save_alarm_list() {
     prefs_set_data(PREFS_KEY_ALARM_LIST, &alarms, sizeof(alarm_settings_list_t));
 }
 
-const alarm_settings_list_t * get_alarm_list() {
-    return &alarms;
+const alarm_setting_t * get_alarm_list() {
+    return &alarms[0];
 }
 
 void set_alarm(uint8_t idx, alarm_setting_t setting) {

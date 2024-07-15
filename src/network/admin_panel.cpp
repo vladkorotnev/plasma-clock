@@ -104,11 +104,11 @@ static void render_alarms() {
     GP.FORM_BEGIN("/alarms");
     GP.SPAN("Don't forget to save after editing! If no day is selected and alarm is enabled, it will only trigger once.");
     GP.BREAK();
-    const alarm_settings_list_t * alarms = get_alarm_list();
+    const alarm_setting_t * alarms = get_alarm_list();
     for(int i = 0; i < ALARM_LIST_SIZE; i++) {
         if(i > 0) GP.HR();
 
-        const alarm_setting_t a = *alarms[i];
+        const alarm_setting_t a = alarms[i];
         String tmp = String("Alarm ");
         tmp += (i + 1);
         GP.LABEL(tmp);

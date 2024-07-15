@@ -24,6 +24,7 @@
 #include <app/idle.h>
 #include <app/alarming.h>
 #include <app/menu.h>
+#include <app/alarm_editor.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -232,6 +233,7 @@ void setup() {
     appHost->add_view(new AppShimIdle(sensors, beepola), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
     appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
+    appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
 
     change_state(startup_state);
     alarm_init();

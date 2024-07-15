@@ -29,16 +29,14 @@ void MenuNumberSelectorView::step() {
     Composite::step();
 
     if(isActive) {
-        if(hid_test_key_state(KEY_UP) == KEYSTATE_HIT) {
+        if(hid_test_key_state_repetition(KEY_UP) == KEYSTATE_HIT) {
             currentValue += increment;
             if(currentValue > max) currentValue = min;
             onChange(currentValue);
-            itoa(currentValue, currentValueStr, 10);
         } else if(hid_test_key_state_repetition(KEY_DOWN) == KEYSTATE_HIT) {
             currentValue -= increment;
             if(currentValue < min) currentValue = max;
             onChange(currentValue);
-            itoa(currentValue, currentValueStr, 10);
         } else if(hid_test_key_state(KEY_LEFT)) {
             onActivated(false, this);
             isActive = false;
@@ -49,6 +47,9 @@ void MenuNumberSelectorView::step() {
             isActive = true;
         }
     }
+
+    itoa(currentValue, currentValueStr, 10);
+    value->set_string(currentValueStr);
 }
 
 void MenuNumberSelectorView::render(FantaManipulator *fb) {

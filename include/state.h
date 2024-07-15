@@ -3,6 +3,7 @@
 typedef enum device_state {
     STATE_BOOT,
     STATE_MENU,
+    STATE_ALARM_EDITOR,
     STATE_IDLE,
     STATE_ALARMING,
 

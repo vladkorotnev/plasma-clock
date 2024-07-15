@@ -7,6 +7,7 @@
 const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(50);
 const TickType_t KEYHOLD_THRESHOLD_TIME = pdMS_TO_TICKS(1000);
 const TickType_t KEYHOLD_REPETITION_TIME = pdMS_TO_TICKS(500);
+const TickType_t KEYHOLD_REPETITION_SPEEDUP_TIME = pdMS_TO_TICKS(3000);
 
 static key_bitmask_t active_keys = 0;
 static std::unordered_set<key_bitmask_t> pressed_keycombos = {};
@@ -91,7 +92,8 @@ key_state_t hid_test_key_state_repetition(key_id_t key) {
         case KEYSTATE_HOLDING:
             {
                 TickType_t now = xTaskGetTickCount();
-                if(now - keypress_repeated_at[key] >= KEYHOLD_REPETITION_TIME) {
+                TickType_t repeat_delay = (now - keypress_started_at[key] >= KEYHOLD_REPETITION_SPEEDUP_TIME) ? (KEYHOLD_REPETITION_TIME / 2) : KEYHOLD_REPETITION_TIME;
+                if(now - keypress_repeated_at[key] >= repeat_delay) {
                     keypress_repeated_at[key] = now;
                     return KEYSTATE_HIT;
                 } else {

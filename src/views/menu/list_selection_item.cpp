@@ -25,7 +25,7 @@ void MenuListSelectorView::step() {
     Composite::step();
 
     if(isActive) {
-        if(hid_test_key_state(KEY_DOWN) == KEYSTATE_HIT) {
+        if(hid_test_key_state_repetition(KEY_DOWN) == KEYSTATE_HIT) {
             currentValue++;
             if(currentValue == items.size()) currentValue = 0;
             onChange(currentValue);
