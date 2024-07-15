@@ -77,7 +77,7 @@ static void save_string(prefs_key_t key) {
 
 static void render_melody(const char * title, prefs_key_t key) {
     GP.LABEL(title);
-    GP.SELECT(key, all_chime_names, prefs_get_int(key));
+    GP.SELECT(key, all_chime_names_csv, prefs_get_int(key));
 }
 
 static void save_melody(prefs_key_t key) {
@@ -145,7 +145,7 @@ static void render_alarms() {
         GP.TABLE_END();
         GP.BREAK();
 
-        GP.SELECT(tmp + "melo", all_chime_names, a.melody_no);
+        GP.SELECT(tmp + "melo", all_chime_names_csv, a.melody_no);
     }
 
     GP.FORM_SEND("Save Alarms");

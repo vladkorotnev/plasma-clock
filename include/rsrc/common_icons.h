@@ -34,3 +34,17 @@ static const uint8_t hourglass_icns_data[] = {
 };
 
 static const sprite_t hourglass_icns = { .width = 16, .height = 16, .data = hourglass_icns_data, .mask = nullptr };
+
+static const uint8_t icon_thermo_data[] = {
+    // By PiiXL
+    // https://piiixl.itch.io/mega-1-bit-icons-bundle
+    0x10, 0x00, 0x38, 0x00, 0x74, 0x00, 0xfe, 0x00, 0x7d, 0x00, 0x38, 0x80, 0x11, 0x40, 0x08, 0x20, 
+    0x04, 0x5c, 0x02, 0x02, 0x01, 0x0d, 0x00, 0x8d, 0x00, 0x81, 0x00, 0x81, 0x00, 0x42, 0x00, 0x3c
+};
+
+static const sprite_t icon_thermo_1616 = {
+    .width = 16,
+    .height = 16,
+    .data = icon_thermo_data,
+    .mask = nullptr
+};

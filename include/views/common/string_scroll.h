@@ -6,6 +6,8 @@ class StringScroll: public Renderable {
 public:
     StringScroll(const font_definition_t*, const char* string = nullptr);
     int string_width;
+    bool scroll_only_if_not_fit;
+    bool align_to_right;
     void set_string(const char*);
     void set_y_position(int);
     int estimated_frame_count();
@@ -15,7 +17,6 @@ public:
 private:
     const font_definition_t * font;
     const char * string;
-    bool scroll_only_if_not_fit;
     bool start_at_visible;
     int y_position;
     int position;

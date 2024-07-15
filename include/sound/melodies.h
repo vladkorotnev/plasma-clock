@@ -1,5 +1,6 @@
 #pragma once
 #include <sound/sequencer.h>
+#include <vector>
 
 extern const melody_sequence_t just_beep;
 extern const melody_sequence_t pc98_pipo;
@@ -19,7 +20,27 @@ extern const melody_sequence_t like_the_wind;
 extern const melody_sequence_t waiting_freqs;
 extern const melody_sequence_t the_way;
 
-static constexpr const char * all_chime_names = "Just Beep,PC-98 Boot Chime,Russ28 Notification Sound,Shtrikh-M POS Boot Chime,A.M. - Arise,Caramelldansen,BoA - Duvet,T-Square - Truth,Haruhi no Omoi,When Present Is Past,Hishoku no Sora,Bouken Desho Desho,Gentle Jena,Gammapolisz,Like The Wind (TMMS),NightRadio - Waiting Freqs,NightRadio - The Way,Random";
+static constexpr const char * all_chime_names_csv = "Just Beep,PC-98 Boot,Русь 28,Штрих-М,A.M. - Arise,Caramelldansen,BoA - Duvet,T-Square - Truth,Haruhi no Omoi,When Present Is Past,Hishoku no Sora,Bouken Desho Desho,Gentle Jena,Gammapolisz,Like The Wind (TMMS),NightRadio - Waiting Freqs,NightRadio - The Way,Random";
+static const std::vector<const char *> all_chime_names = {
+    "Beep",
+    "PC-98 Boot",
+    "\x90\xE3\xE1\xEC 28",
+    "\x98\xE2\xE0\xA8\xE5-M",
+    "A.M. - Arise",
+    "Caramelldansen",
+    "BoA - Duvet",
+    "T-Square - Truth",
+    "Haruhi no Omoi",
+    "When Present Is Past",
+    "Hishoku no Sora",
+    "Bouken Desho Desho",
+    "Gentle Jena",
+    "Gammapolisz",
+    "Like The Wind (TMMS)",
+    "Waiting Freqs",
+    "The Way",
+    "(Randomize)"
+};
 static const melody_sequence_t all_chime_list[] = {
     just_beep,
     pc98_pipo,

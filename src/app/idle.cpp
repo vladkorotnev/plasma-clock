@@ -306,16 +306,6 @@ void app_idle_draw(FantaManipulator* graph) {
     mainView->render(graph);
 }
 
-void scroll_down() {
-    go_to_next_screen(TRANSITION_SLIDE_VERTICAL_UP);
-    beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
-}
-
-void scroll_up() {
-    go_to_prev_screen(TRANSITION_SLIDE_VERTICAL_DOWN);
-    beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
-}
-
 void app_idle_process() {
     if(tick_tock_enable) {
         sound_tick_tock();
@@ -330,14 +320,13 @@ void app_idle_process() {
     }
 
     if(hid_test_key_state_repetition(KEY_DOWN)) {
-        scroll_down();
+        go_to_next_screen(TRANSITION_SLIDE_VERTICAL_UP);
     }
     else if(hid_test_key_state_repetition(KEY_UP)) {
-        scroll_up();
+        go_to_prev_screen(TRANSITION_SLIDE_VERTICAL_DOWN);
     }
     else if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) {
         push_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
-        beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
     }
     else {
         change_screen_if_needed();

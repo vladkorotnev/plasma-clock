@@ -176,6 +176,11 @@ void setup() {
     bs = new BeepSequencer(beepola);
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
 
+#if HAS(TOUCH_PLANE)
+// No beeper on non-touch because it will be annoying with physical buttons
+    hid_set_key_beeper(beepola);
+#endif
+
     con->clear();
 
     con->print("WiFi init");

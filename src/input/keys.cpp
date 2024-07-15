@@ -12,6 +12,11 @@ static key_bitmask_t active_keys = 0;
 static std::unordered_set<key_bitmask_t> pressed_keycombos = {};
 static TickType_t keypress_started_at[KEY_MAX_INVALID] = { 0 };
 static TickType_t keypress_repeated_at[KEY_MAX_INVALID] = { 0 };
+static Beeper * beepola = nullptr;
+
+void hid_set_key_beeper(Beeper* b) {
+    beepola = b;
+}
 
 inline key_state_t time_to_state(TickType_t time) {
     TickType_t now = xTaskGetTickCount();
@@ -42,6 +47,7 @@ static key_state_t min_state_of_mask(key_bitmask_t keys) {
         case KEYSTATE_PRESSED:
             if(pressed_keycombos.count(keys) == 0) {
                 pressed_keycombos.insert(keys);
+                if(beepola != nullptr) beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
                 return KEYSTATE_HIT;
             } else {
                 return KEYSTATE_PRESSED;
