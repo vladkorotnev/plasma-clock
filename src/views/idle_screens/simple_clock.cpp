@@ -109,6 +109,7 @@ void SimpleClock::step() {
     }
     phase = EASING_CURVE[phase];
 
+    blink_separator = prefs_get_bool(PREFS_KEY_BLINK_SEPARATORS);
     separator = (blink_separator && phase != 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 }
 

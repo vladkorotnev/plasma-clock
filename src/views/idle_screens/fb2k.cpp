@@ -47,6 +47,10 @@ void Fb2kView::update_if_needed() {
         ESP_LOGI(LOG_TAG, "New now playing info: %s - %s", artist_buffer, title_buffer);
         top_line->set_string(artist_buffer);
         bottom_line->set_string(title_buffer);
+
+        int width = std::max(top_line->string_width, bottom_line->string_width);
+        top_line->string_width = width;
+        bottom_line->string_width = width;
     }
 }
 

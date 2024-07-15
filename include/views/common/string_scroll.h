@@ -5,6 +5,7 @@
 class StringScroll: public Renderable {
 public:
     StringScroll(const font_definition_t*, const char* string = nullptr);
+    int string_width;
     void set_string(const char*);
     void set_y_position(int);
     int estimated_frame_count();
@@ -20,6 +21,5 @@ private:
     int position;
     int frame_divisor;
     int increment;
-    int string_width;
     int frame_counter;
 };
