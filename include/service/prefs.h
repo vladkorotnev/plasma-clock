@@ -61,6 +61,7 @@ static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_MELODY = "h_chime";
 static constexpr prefs_key_t PREFS_KEY_FIRST_CHIME_MELODY = "h_1stchime";
 
 static constexpr prefs_key_t PREFS_KEY_TIMEZONE = "tk_tz";
+static constexpr prefs_key_t PREFS_KEY_TIMESERVER_ENABLE = "tk_ntp_use";
 static constexpr prefs_key_t PREFS_KEY_TIMESERVER = "tk_ntp_serv";
 static constexpr prefs_key_t PREFS_KEY_TIME_SYNC_INTERVAL_SEC = "tk_intv_s";
 
@@ -70,6 +71,12 @@ static constexpr prefs_key_t PREFS_KEY_FOOBAR_PORT = "foo_prt";
 static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_ENABLE = "wos_ena";
 static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_METER_MAC = "wos_mac";
 static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
+
+static constexpr prefs_key_t PREFS_KEY_ALARM_LIST = "alarms";
+static constexpr prefs_key_t PREFS_KEY_ALARM_SNOOZE_MINUTES = "snz_minutes";
+
+static constexpr prefs_key_t PREFS_KEY_TIMER_TIME_SECONDS = "timer_time";
+static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
 
 void prefs_force_save();
 
@@ -81,3 +88,6 @@ void prefs_set_int(prefs_key_t, int);
 
 bool prefs_get_bool(prefs_key_t);
 void prefs_set_bool(prefs_key_t, bool);
+
+void prefs_set_data(prefs_key_t key, const void * data, size_t size);
+bool prefs_get_data(prefs_key_t key, void * destination, size_t capacity, size_t * fetchedSize);

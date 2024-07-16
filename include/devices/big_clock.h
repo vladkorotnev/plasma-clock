@@ -10,10 +10,9 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "1.2"
+#define PRODUCT_VERSION "2.0"
 
 // ---- Connection to DISP BOARD ----
-
 const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {
     GPIO_NUM_15, 
     GPIO_NUM_2, 
@@ -29,6 +28,9 @@ const gpio_num_t HWCONF_PLASMA_RESET_GPIO = GPIO_NUM_21;
 const gpio_num_t HWCONF_PLASMA_BRIGHT_GPIO = GPIO_NUM_22;
 const gpio_num_t HWCONF_PLASMA_SHOW_GPIO = GPIO_NUM_23;
 
+#define HWCONF_DISPLAY_WIDTH_PX 101
+#define HWCONF_DISPLAY_HEIGHT_PX 16
+
 // ---- Connection to HV Board ----
 const gpio_num_t HWCONF_PLASMA_HV_EN_GPIO = GPIO_NUM_13;
 
@@ -43,3 +45,6 @@ const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_35;
 // ---- Connection of NOSE BOARD ----
 const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
 const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
+
+// ---- TBD: Connection of buttons ----
+// Free GPIOS: 36, 39, 34, 27

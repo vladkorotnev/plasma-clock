@@ -21,6 +21,8 @@ typedef enum sensor_id {
 
     /// @brief A virtual sensor indicating whether the PMU has been startled (brought out of the low power mode) recently
     VIRTSENSOR_ID_PMU_STARTLED,
+    /// @brief A virtual sensor indicating whether the HID has been startled recently
+    VIRTSENSOR_ID_HID_STARTLED,
 
     /// @brief A virtual sensor indicating the current wireless signal strength, or a value above 0 if disconnected
     VIRTSENSOR_ID_WIRELESS_RSSI,

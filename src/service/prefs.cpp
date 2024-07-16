@@ -55,3 +55,23 @@ void prefs_set_bool(prefs_key_t key, bool val) {
     ESP_LOGV(LOG_TAG, "Set %s = %s", key, val ? "TRUE" : "FALSE");
     store->putBool(key, val);
 }
+
+void prefs_set_data(prefs_key_t key, const void * data, size_t size) {
+    init_store_if_needed();
+    ESP_LOGV(LOG_TAG, "Set %s = (%i bytes)", key, size);
+    store->putBytes(key, data, size);
+}
+
+bool prefs_get_data(prefs_key_t key, void * destination, size_t capacity, size_t * fetchedSize) {
+    init_store_if_needed();
+    size_t expected = store->getBytesLength(key);
+    if(capacity < expected) {
+        ESP_LOGE(LOG_TAG, "Get %s: wanted %i bytes, had only %i", key, expected, capacity);
+        if(fetchedSize) *fetchedSize = 0;
+        return false;
+    }
+
+    size_t real = store->getBytes(key, destination, capacity);
+    if(fetchedSize) *fetchedSize = real;
+    return (real == expected);
+}

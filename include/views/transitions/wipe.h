@@ -1,5 +1,5 @@
 #pragma once
-#include "../transition_animator.h"
+#include "transition_animator.h"
 #include <graphics/framebuffer.h>
 
 class WipeTransition: public Transition {

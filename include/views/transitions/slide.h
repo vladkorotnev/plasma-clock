@@ -1,10 +1,11 @@
 #pragma once
-#include "../transition_animator.h"
+#include "transition_animator.h"
 #include <graphics/framebuffer.h>
 
 class SlideTransition: public Transition {
 public:
-    SlideTransition();
+    bool is_reverse = false;
+    SlideTransition(bool reverse = false);
     bool render(FantaManipulator*, TransitionAnimationCoordinator*);
     void rewind();
 
@@ -14,7 +15,8 @@ private:
 
 class VerticalSlideTransition: public Transition {
 public:
-    VerticalSlideTransition();
+    bool is_reverse = false;
+    VerticalSlideTransition(bool reverse = false);
     bool render(FantaManipulator*, TransitionAnimationCoordinator*);
     void rewind();
 

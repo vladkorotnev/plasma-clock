@@ -7,35 +7,39 @@ static char LOG_TAG[] = "TIME";
 static char * ntp_server = nullptr;
 
 void timekeeping_begin() {
-    if(sntp_enabled()){
-        sntp_stop();
+    if(prefs_get_bool(PREFS_KEY_TIMESERVER_ENABLE)) {
+        if(sntp_enabled()){
+            sntp_stop();
+        }
+
+        sntp_setoperatingmode(SNTP_OPMODE_POLL);
+
+        String timeServer = prefs_get_string(PREFS_KEY_TIMESERVER, String(TK_TIMESERVER));
+        // Looks like the SNTP API expects the server name to be by reference, so if the String gets released by the end of this function,
+        // the sync will not work. Let's copy it to our own static memory.
+        if(ntp_server != nullptr) free(ntp_server);
+
+        size_t tmpLen = timeServer.length();
+        ntp_server = (char*) malloc(tmpLen + 1);
+        memcpy(ntp_server, timeServer.c_str(), tmpLen);
+        ntp_server[tmpLen] = 0x0;
+
+        ESP_LOGI(LOG_TAG, "Starting NTP service: %s", ntp_server);
+
+        sntp_setservername(0, ntp_server);
+        sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
+
+        int sync_interval = prefs_get_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC);
+        if(sync_interval == 0) {
+            sync_interval = TK_SYNC_INTERVAL_SEC;
+            prefs_set_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, sync_interval);
+        }
+        ESP_LOGI(LOG_TAG, "Sync interval: %i", sync_interval);
+        sntp_set_sync_interval(sync_interval * 1000);
+        sntp_init();
+    } else {
+        ESP_LOGW(LOG_TAG, "NTP is disabled!");
     }
-
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-
-    String timeServer = prefs_get_string(PREFS_KEY_TIMESERVER, String(TK_TIMESERVER));
-    // Looks like the SNTP API expects the server name to be by reference, so if the String gets released by the end of this function,
-    // the sync will not work. Let's copy it to our own static memory.
-    if(ntp_server != nullptr) free(ntp_server);
-
-    size_t tmpLen = timeServer.length();
-    ntp_server = (char*) malloc(tmpLen + 1);
-    memcpy(ntp_server, timeServer.c_str(), tmpLen);
-    ntp_server[tmpLen] = 0x0;
-
-    ESP_LOGI(LOG_TAG, "Starting NTP service: %s", ntp_server);
-
-    sntp_setservername(0, ntp_server);
-    sntp_set_sync_mode(SNTP_SYNC_MODE_IMMED);
-
-    int sync_interval = prefs_get_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC);
-    if(sync_interval == 0) {
-        sync_interval = TK_SYNC_INTERVAL_SEC;
-        prefs_set_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, sync_interval);
-    }
-    ESP_LOGI(LOG_TAG, "Sync interval: %i", sync_interval);
-    sntp_set_sync_interval(sync_interval * 1000);
-    sntp_init();
 
     String tz = prefs_get_string(PREFS_KEY_TIMEZONE, String(TK_TIMEZONE));
     ESP_LOGI(LOG_TAG, "Timezone: %s", tz.c_str());
@@ -72,9 +76,51 @@ tk_date_t get_current_date() {
     time(&now);
     localtime_r(&now, &timeinfo);
     return tk_date_t {
-        .year = timeinfo.tm_year,
-        .month = timeinfo.tm_mon,
+        .year = timeinfo.tm_year + 1900,
+        .month = timeinfo.tm_mon + 1,
         .day = timeinfo.tm_mday,
         .dayOfWeek = timeinfo.tm_wday
     };
+}
+
+void set_current_time(tk_time_of_day_t new_time) {
+    tk_date_t date = get_current_date();
+    struct tm t = {0, 0, 0, 0, 0, 0, 0, 0, 0}; 
+    t.tm_year = date.year - 1900;
+    t.tm_mon = date.month - 1;
+    t.tm_mday = date.day;
+    t.tm_hour = new_time.hour;
+    t.tm_min = new_time.minute;
+    t.tm_sec = new_time.second;
+    time_t timeSinceEpoch = mktime(&t);
+
+    struct timeval new_time_tv;
+    new_time_tv.tv_sec = timeSinceEpoch;
+    new_time_tv.tv_usec = new_time.millisecond * 1000;
+    settimeofday(&new_time_tv, NULL); // NULL for timezone
+
+    date = get_current_date();
+    tk_time_of_day_t time = get_current_time_coarse();
+    ESP_LOGI(LOG_TAG, "Changed time, current: %04d/%02d/%02d %02d:%02d:%02d", date.year, date.month, date.day, time.hour, time.minute, time.second);
+}
+
+void set_current_date(tk_date_t date) {
+    tk_time_of_day_t time = get_current_time_precise();
+    struct tm t = {0, 0, 0, 0, 0, 0, 0, 0, 0}; 
+    t.tm_year = date.year - 1900;
+    t.tm_mon = date.month - 1;
+    t.tm_mday = date.day;
+    t.tm_hour = time.hour;
+    t.tm_min = time.minute;
+    t.tm_sec = time.second;
+    time_t timeSinceEpoch = mktime(&t);
+
+    struct timeval new_time_tv;
+    new_time_tv.tv_sec = timeSinceEpoch;
+    new_time_tv.tv_usec = time.millisecond * 1000;
+    settimeofday(&new_time_tv, NULL); // NULL for timezone
+
+    date = get_current_date();
+    time = get_current_time_coarse();
+    ESP_LOGI(LOG_TAG, "Changed date, current: %04d/%02d/%02d %02d:%02d:%02d", date.year, date.month, date.day, time.hour, time.minute, time.second);
 }

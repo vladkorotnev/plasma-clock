@@ -5,7 +5,7 @@ WipeTransition::WipeTransition() {
 }
 
 bool WipeTransition::render(FantaManipulator * screen, TransitionAnimationCoordinator* coord) {
-    framecount += 1;
+    framecount += screen->get_width() / screen->get_height();
     FantaManipulator* backingB = coord->backingB;
     FantaManipulator* backingA = coord->backingA;
 

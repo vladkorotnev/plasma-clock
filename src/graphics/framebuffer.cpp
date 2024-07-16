@@ -18,7 +18,7 @@ DisplayFramebuffer::DisplayFramebuffer(DisplayDriver * disp) {
     vsync_group = xEventGroupCreate();
     xSemaphoreGive(buffer_semaphore);
     is_dirty = false;
-    shared_manipulator = new FantaManipulator(buffer, PDFB_BUFFER_SIZE, width, height, buffer_semaphore, &is_dirty);
+    shared_manipulator = new FantaManipulator(buffer, BUFFER_SIZE, width, height, buffer_semaphore, &is_dirty);
     setup_task();
     clear();
 }
@@ -35,6 +35,7 @@ extern "C" void FbTaskFunc( void * pvParameter );
 #ifdef PDFB_PERF_LOGS
 static TickType_t last_draw_at = 0;
 static TickType_t avg_frametime = 0;
+static TickType_t max_frametime = 0;
 static uint16_t perf_counter = 0;
 
 unsigned int DisplayFramebuffer::get_fps() {
@@ -56,11 +57,14 @@ void FbTaskFunc( void * pvParameter )
         perf_counter++;
         if(perf_counter >= PDFB_PERF_LOG_INTERVAL) {
             perf_counter = 0;
-            ESP_LOGV(LOG_TAG, "Avg frametime=%lu, FPS=%lu", pdTICKS_TO_MS(avg_frametime), 1000/pdTICKS_TO_MS(avg_frametime));
+            ESP_LOGI(LOG_TAG, "Avg frametime=%lu, FPS=%lu; MAX frametime=%lu, FPS=%lu", pdTICKS_TO_MS(avg_frametime), 1000/pdTICKS_TO_MS(avg_frametime), pdTICKS_TO_MS(max_frametime), 1000/pdTICKS_TO_MS(max_frametime));
+            max_frametime = 0;
         }
 
         TickType_t now = xTaskGetTickCount();
-        avg_frametime += (now - last_draw_at);
+        TickType_t frametime = now - last_draw_at;
+        if(frametime > max_frametime) max_frametime = frametime;
+        avg_frametime += frametime;
         avg_frametime /= 2;
         last_draw_at = now;
 #endif
@@ -76,7 +80,7 @@ void DisplayFramebuffer::setup_task() {
         "FBuf",
         4096,
         this,
-        configMAX_PRIORITIES - 2,
+        configMAX_PRIORITIES - 1,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
@@ -94,7 +98,7 @@ void DisplayFramebuffer::clear() {
 
 void DisplayFramebuffer::write_all() {
     LOCK_BUFFER_OR_DIE;
-    display->write_fanta(buffer, PDFB_BUFFER_SIZE);
+    display->write_fanta(buffer, BUFFER_SIZE);
     is_dirty = false;
     UNLOCK_BUFFER;
     xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);

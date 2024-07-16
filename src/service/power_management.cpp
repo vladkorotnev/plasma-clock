@@ -1,13 +1,14 @@
 #include <service/power_management.h>
 #include <service/prefs.h>
+#include <input/keys.h>
 #include <Arduino.h>
 
 static char LOG_TAG[] = "PM";
 static TaskHandle_t hTask = NULL;
 
 static TickType_t lastMotionTime;
-static bool isHvOff;
-static bool isDisplayOff;
+static bool isHvOff = false;
+static bool isDisplayOff = false;
 
 static SensorPool * sensors;
 static DisplayDriver * display;
@@ -16,7 +17,7 @@ static Beeper * beeper;
 static TimerSensor * startled_sensor;
 
 static int lastLightness;
-static bool isBright;
+static bool isBright = true;
 
 static bool noSoundWhenOff;
 static int motionlessTimeOff;
@@ -25,6 +26,33 @@ static int lightnessThreshUp;
 static int lightnessThreshDown;
 
 extern "C" void PMTaskFunction( void * pvParameter );
+
+static void wake_up() {
+    // There was some motion, reenable the display
+    if(isDisplayOff) {
+        ESP_LOGI(LOG_TAG, "Start display");
+        display->set_show(true);
+        beeper->set_channel_state(CHANNEL_AMBIANCE, true);
+        isDisplayOff = false;
+        startled_sensor->trigger();
+    }
+
+    if(isHvOff) {
+        // Sometimes dim mode voltage is not enough, so enable bright mode when turning HV back on for a bit
+        ESP_LOGV(LOG_TAG, "Reenable HV");
+    #if HAS(VARYING_BRIGHTNESS)
+        display->set_bright(true);
+    #endif
+        display->set_power(true);
+        isHvOff = false;
+        vTaskDelay(pdMS_TO_TICKS(500));
+    #if HAS(VARYING_BRIGHTNESS)
+        display->set_bright(isBright);
+    #endif
+    }
+
+    lastMotionTime = xTaskGetTickCount();
+}
 
 void PMTaskFunction( void * pvParameter )
 {
@@ -60,31 +88,21 @@ void PMTaskFunction( void * pvParameter )
         }
         #endif
 
+        sensor_info_t * hid_info = sensors->get_info(VIRTSENSOR_ID_HID_STARTLED);
+        if(hid_info) {
+            // wake up on keypress
+            if(hid_info->last_result > 0) {
+                wake_up();
+            }
+        }
+
         #if HAS(MOTION_SENSOR)
         // Turn off display when no motion in the room for a while
         sensor_info_t * motion_info = sensors->get_info(SENSOR_ID_MOTION);
         if(motion_info != nullptr) {
             if(motion_info->last_result > 0) {
                 // There was some motion, reenable the display
-                if(isDisplayOff) {
-                    ESP_LOGI(LOG_TAG, "Start display");
-                    display->set_show(true);
-                    beeper->set_channel_state(CHANNEL_AMBIANCE, true);
-                    isDisplayOff = false;
-                    startled_sensor->trigger();
-                }
-
-                if(isHvOff) {
-                    // Sometimes dim mode voltage is not enough, so enable bright mode when turning HV back on for a bit
-                    ESP_LOGV(LOG_TAG, "Reenable HV");
-                    display->set_bright(true);
-                    display->set_power(true);
-                    isHvOff = false;
-                    vTaskDelay(pdMS_TO_TICKS(500));
-                    display->set_bright(isBright);
-                }
-
-                lastMotionTime = now;
+                wake_up();
             } else {
               if(now - lastMotionTime >= pdMS_TO_TICKS(motionlessTimeOff) && !isDisplayOff) {
                 // No motion for a while, turn off display, first only logically
@@ -168,7 +186,7 @@ void power_mgmt_resume() {
     vTaskResume(hTask);
     display->set_power(!isHvOff);
 #if HAS(VARYING_BRIGHTNESS)
-    display->set_bright(!isBright);
+    display->set_bright(isBright);
 #endif
     display->set_show(!isDisplayOff);
     beeper->set_channel_state(CHANNEL_AMBIANCE, !isDisplayOff);

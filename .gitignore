@@ -1,5 +1,5 @@
 .pio
 captures/
-.vscode/c_cpp_properties.json
 .env
-/src/weather_icons/src
+/src/weather_icons
+.vscode/

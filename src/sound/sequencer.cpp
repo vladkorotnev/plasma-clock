@@ -61,8 +61,10 @@ void BeepSequencer::end_task() {
 }
 
 void BeepSequencer::stop_sequence() {
+    if(!is_running) return;
     is_running = false;
     end_task();
+    beeper->stop_tone(current_channel);
 }
 
 void BeepSequencer::task() {
@@ -80,6 +82,8 @@ void BeepSequencer::task() {
         if(pointer >= current_sequence.count) {
             if(repetitions > 0) {
                 repetitions--;
+                pointer = 0;
+            } else if(repetitions < 0) {
                 pointer = 0;
             } else {
                 beeper->stop_tone(current_channel);

@@ -8,6 +8,7 @@
 typedef struct sprite {
     uint8_t width, height;
     const uint8_t* data;
+    const uint8_t* mask;
 } sprite_t;
 
 /// @brief An animated sprite. 
@@ -40,6 +41,7 @@ typedef uint8_t* fanta_buffer_t;
 /// @brief Convert a horizontally laid out, LSB aligned sprite bitmap of an arbitrary size, to a vertically aligned 16-bit-per-column Fanta buffer. 
 /// @note Unused pixels are filled with 0's. Transparency et al. should be handled by the drawing code.
 extern fanta_buffer_t sprite_to_fanta(const sprite_t*);
+extern fanta_buffer_t mask_to_fanta(const sprite_t*);
 /// @brief Offset a raw Fanta buffer vertically. Negative is towards the top.
 extern void fanta_offset_y(fanta_buffer_t,int,size_t);
 

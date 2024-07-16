@@ -1,17 +1,12 @@
 #include <Arduino.h>
 #include <device_config.h>
-
-#if HAS(OUTPUT_MD_PLASMA)
-#include <display/md_plasma.h>
-#elif HAS(OUTPUT_WS0010)
-#include <display/ws0010.h>
-#endif
-
+#include <display/display.h>
 #include <graphics/framebuffer.h>
 #include <fonts.h>
 #include <console.h>
-#include <AM232X.h>
 #include <sensor/sensors.h>
+#include <input/touch_plane.h>
+#include <input/hid_sensor.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -22,36 +17,29 @@
 #include <service/prefs.h>
 #include <service/wordnik.h>
 #include <service/foo_client.h>
+#include <service/alarm.h>
 #include <network/admin_panel.h>
 #include <utils.h>
 #include <state.h>
-#include <idle.h>
-
+#include <app/idle.h>
+#include <app/alarming.h>
+#include <app/menu.h>
+#include <app/alarm_editor.h>
+#include <app/timer_editor.h>
 #include <sensor/switchbot/meter.h>
+#include <views/overlays/fps_counter.h>
+#include <views/common/list_view.h>
+#include <stack>
 
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
 const device_state_t startup_state = STATE_IDLE;
+static std::stack<device_state_t> state_stack = {};
 
-#if HAS(OUTPUT_MD_PLASMA)
-static MorioDenkiPlasmaDriver display_driver(
-    HWCONF_PLASMA_DATABUS_GPIOS,
-    HWCONF_PLASMA_CLK_GPIO,
-    HWCONF_PLASMA_RESET_GPIO,
-    HWCONF_PLASMA_BRIGHT_GPIO,
-    HWCONF_PLASMA_SHOW_GPIO,
-    HWCONF_PLASMA_HV_EN_GPIO
-);
-#elif HAS(OUTPUT_WS0010)
-static Ws0010OledDriver display_driver(
-    HWCONF_WS0010_DATABUS_GPIOS,
-    HWCONF_WS0010_RS_GPIO,
-    HWCONF_WS0010_EN_GPIO
-);
-#else
-#error Output type not selected
-#endif
+static ViewCompositor * desktop;
+static ViewMultiplexor * appHost;
+static FpsCounter * fpsCounter;
 
 static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
@@ -63,80 +51,47 @@ static BeepSequencer * bs;
 
 static bool fps_counter = false;
 
-void change_state(device_state_t to) {
+void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
         current_state = STATE_OTAFVU;
         return; // all other things handled in the FVU process
     }
 
-    switch(to) {
-        case STATE_IDLE:
-            app_idle_prepare(sensors, beepola);
-            break;
-        case STATE_OTAFVU:
-        default:
-            break;
-    }
+    if(to == current_state) return;
     current_state = to;
+    appHost->switch_to(current_state, transition);
 }
 
-void setup() {
-    // Set up serial for logs
-    Serial.begin(115200);
-    display_driver.reset();
+void push_state(device_state_t next, transition_type_t transition) {
+    if(next == current_state) return;
 
-    display_driver.set_power(true);
-    delay(125);
-    display_driver.set_show(true);
-#if HAS(VARYING_BRIGHTNESS)
-    display_driver.set_bright(true);
-#endif
+    state_stack.push(current_state);
+    change_state(next, transition);
+}
 
-    fb = new DisplayFramebuffer(&display_driver);
-    con = new Console(&keyrus0808_font, fb);
-    con->set_cursor(true);
-    con->print("");
-    
-    con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
-    delay(500);
-    beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
-    bs = new BeepSequencer(beepola);
-    bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, 0);
-
-    con->clear();
-    con->set_font(&keyrus0808_font);
-    con->set_cursor(true);
-
-    con->print("WiFi init");
-    NetworkManager::startup();
-    while(!NetworkManager::is_up()) {
-        delay(1000);
-        con->write('.');
+void pop_state(device_state_t expected, transition_type_t transition) {
+    if(!state_stack.empty()) {
+        device_state_t old = state_stack.top();
+        state_stack.pop();
+        change_state(old, transition);
     }
+}
 
-    con->clear();
-    con->print(NetworkManager::network_name());
-    con->print("%i dBm", NetworkManager::rssi());
-    delay(2000);
-    con->print(NetworkManager::current_ip().c_str());
-    delay(2000);
-
-    ota = new OTAFVUManager(con, bs);
-
-    sensors = new SensorPool();
-
-    sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
-
+void bringup_light_sensor() {
 #if HAS(LIGHT_SENSOR)
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
     con->print("L sensor OK");
 #endif
+}
 
+void bringup_motion_sensor() {
 #if HAS(MOTION_SENSOR)
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
     con->print("M sensor OK");
 #endif
+}
 
+void bringup_temp_sensor() {
 #if HAS(TEMP_SENSOR)
     Wire.begin(HWCONF_I2C_SDA_GPIO, HWCONF_I2C_SCL_GPIO);
     AM2322* tempSens = new AM2322(&Wire);
@@ -155,7 +110,9 @@ void setup() {
         con->print("H sensor OK");
     }
 #endif
+}
 
+void bringup_switchbot_sensor() {
 #if HAS(SWITCHBOT_METER_INTEGRATION)
     if(prefs_get_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE)) {
         String woMeterMac = prefs_get_string(PREFS_KEY_SWITCHBOT_METER_MAC);
@@ -186,6 +143,74 @@ void setup() {
         }
     }
 #endif
+}
+
+void bringup_hid() {
+#if HAS(TOUCH_PLANE)
+    con->print("Touch init");
+    if(touchplane_start() != ESP_OK) {
+        con->print("TP init err");
+        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+    }
+#endif
+}
+
+void setup() {
+    // Set up serial for logs
+    Serial.begin(115200);
+    display_driver.reset();
+
+    display_driver.set_power(true);
+    delay(125);
+    display_driver.set_show(true);
+#if HAS(VARYING_BRIGHTNESS)
+    display_driver.set_bright(true);
+#endif
+
+    fb = new DisplayFramebuffer(&display_driver);
+    con = new Console(&keyrus0808_font, fb);
+    con->set_cursor(true);
+    con->print("");
+    
+    con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
+    delay(500);
+    beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
+    bs = new BeepSequencer(beepola);
+    bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
+
+#if HAS(TOUCH_PLANE)
+// No beeper on non-touch because it will be annoying with physical buttons
+    hid_set_key_beeper(beepola);
+#endif
+
+    con->clear();
+
+    con->print("WiFi init");
+    NetworkManager::startup();
+    while(!NetworkManager::is_up()) {
+        delay(1000);
+        con->write('.');
+    }
+
+    con->clear();
+    con->print(NetworkManager::network_name());
+    con->print("%i dBm", NetworkManager::rssi());
+    delay(2000);
+    con->print(NetworkManager::current_ip().c_str());
+    delay(2000);
+
+    ota = new OTAFVUManager(con, bs);
+
+    sensors = new SensorPool();
+
+    sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
+    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(250));
+    bringup_light_sensor();
+    bringup_motion_sensor();
+    bringup_temp_sensor();
+    bringup_switchbot_sensor();
+    bringup_hid();
+
     graph = fb->manipulate();
 
     timekeeping_begin();
@@ -201,51 +226,26 @@ void setup() {
     con->set_active(false);
     fb->clear();
 
+    desktop = new ViewCompositor();
+    appHost = new ViewMultiplexor();
+    desktop->add_layer(appHost);
+    desktop->add_layer(new FpsCounter(fb));
+
+    appHost->add_view(new AppShimIdle(sensors, beepola), STATE_IDLE);
+    appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
+    appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
+    appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
+    appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
+
     change_state(startup_state);
-}
-
-void drawing() {
-    switch(current_state) {
-        case STATE_IDLE:
-            app_idle_draw(graph);
-            break;
-
-        case STATE_OTAFVU:
-            break;
-        default:
-            ESP_LOGE(LOG_TAG, "Unknown state %i", current_state);
-            break;
-    }
-
-#if defined(PDFB_PERF_LOGS)
-    if(fps_counter) {
-        // FPS counter
-        char buf[4];
-        itoa(fb->get_fps(), buf, 10);
-        fb->manipulate()->put_string(&fps_counter_font, buf, 0, 0);
-    }
-#endif
-}
-
-void processing() {
-    switch(current_state) {
-        case STATE_IDLE:
-            app_idle_process();
-            break;
-
-        case STATE_OTAFVU:
-            break;
-        default:
-            ESP_LOGE(LOG_TAG, "Unknown state %i", current_state);
-            break;
-    }
+    alarm_init();
 }
 
 void loop() {
     fb->wait_next_frame();
     if(graph->lock()) {
-        drawing();
+        desktop->render(graph);
         graph->unlock();
     }
-    processing();
+    desktop->step();
 }

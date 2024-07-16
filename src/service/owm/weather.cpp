@@ -48,7 +48,10 @@ void WeatherTaskFunction( void * pvParameter )
     static char url[256];
     snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str());
 
+    bool isFailure = false;
+
     while(1) {
+        isFailure = false;
         http.begin(client, url);
         ESP_LOGV(LOG_TAG, "Query: %s", url);
         int response = http.GET();
@@ -59,6 +62,7 @@ void WeatherTaskFunction( void * pvParameter )
 
             if (error) {
                 ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
+                isFailure = true;
             } else {
                 if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
                     ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
@@ -85,8 +89,9 @@ void WeatherTaskFunction( void * pvParameter )
         } else {
             ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
             ESP_LOGE(LOG_TAG, "%s", http.getString());
+            isFailure = true;
         }
-        vTaskDelay(interval);
+        vTaskDelay(isFailure ? pdMS_TO_TICKS(5000) : interval);
     }
 }
 
