@@ -3,17 +3,15 @@
 #include <sound/beeper.h>
 #include <service/time.h>
 #include <views/common/view.h>
+#include <views/common/dropping_digits.h>
 
 /// @brief A simple clock view
-class SimpleClock: public Screen {
+class SimpleClock: public Screen, DroppingDigits {
 public:
     SimpleClock();
     void render(FantaManipulator*);
     void step();
 private:
-    void draw_dropping_digit(FantaManipulator *, char, char, int, int);
-    void draw_dropping_number(FantaManipulator *, int, int, int, int);
-    const font_definition_t * font;
     tk_time_of_day_t now;
     tk_time_of_day_t next_time;
     int phase;

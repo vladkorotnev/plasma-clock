@@ -28,7 +28,7 @@ inline key_state_t time_to_state(TickType_t time) {
     return KEYSTATE_HOLDING;
 }
 
-static key_state_t min_state_of_mask(key_bitmask_t keys) {
+static key_state_t min_state_of_mask(key_bitmask_t keys, bool peek = false) {
     TickType_t maxTimeStamp = 0;
     for(key_id_t i = (key_id_t)0; i < KEY_MAX_INVALID; i = (key_id_t) (i + 1)) {
         if((keys & KEY_ID_TO_BIT(i)) == 0) continue;
@@ -47,8 +47,10 @@ static key_state_t min_state_of_mask(key_bitmask_t keys) {
 
         case KEYSTATE_PRESSED:
             if(pressed_keycombos.count(keys) == 0) {
-                pressed_keycombos.insert(keys);
-                if(beepola != nullptr) beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+                if(!peek) {
+                    pressed_keycombos.insert(keys);
+                    if(beepola != nullptr) beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+                }
                 return KEYSTATE_HIT;
             } else {
                 return KEYSTATE_PRESSED;
@@ -80,6 +82,11 @@ key_state_t hid_test_key_all(key_bitmask_t keys) {
 key_state_t hid_test_key_any(key_bitmask_t keys) {
     if((active_keys & keys) == 0) return KEYSTATE_RELEASED;
     return min_state_of_mask((active_keys & keys));
+}
+
+key_state_t hid_peek_key_any(key_bitmask_t keys) {
+    if((active_keys & keys) == 0) return KEYSTATE_RELEASED;
+    return min_state_of_mask((active_keys & keys), true);
 }
 
 key_state_t hid_test_key_state_repetition(key_id_t key) {

@@ -1,9 +1,10 @@
 #include <views/framework.h>
+#include <views/common/dropping_digits.h>
 #include <sound/beeper.h>
 #include <fonts.h>
 #include <functional>
 
-class MenuDateSettingView: public Renderable {
+class MenuDateSettingView: public Renderable, DroppingDigits {
 public:
     int year;
     int month;
@@ -20,9 +21,9 @@ public:
         cursorTimer { 0 },
         cursorPosition { YEAR },
         isShowingCursor { false },
-        font { &xnu_font },
         onFinish(onFinish),
-        beeper(b) {}
+        beeper(b),
+        DroppingDigits() {}
 
     void step();
     void render(FantaManipulator *fb);
@@ -42,9 +43,6 @@ private:
     uint8_t cursorTimer;
     DateCursorPosition cursorPosition;
     bool isShowingCursor;
-    const font_definition_t * font;
-    void draw_dropping_digit(FantaManipulator *, char, char, int, int);
-    void draw_dropping_number(FantaManipulator *, int, int, int, int);
     void add_year(bool);
     void add_month(bool);
     void add_day(bool);

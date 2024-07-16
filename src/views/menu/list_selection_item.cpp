@@ -14,6 +14,7 @@ MenuListSelectorView::MenuListSelectorView(const char * title, std::vector<const
         value->align_to_right = true;
         value->start_at_visible = true;
         value->holdoff = 100;
+        value->left_margin = 10;
         label->start_at_visible = true;
         label->holdoff = 100;
         add_subrenderable(label);

@@ -1,43 +1,6 @@
 #include <views/menu/time_setting.h>
 #include <input/keys.h>
 
-inline void itoa_padded(uint i, char * a) {
-    a[0] = '0' + (i / 10);
-    a[1] = '0' + (i % 10);
-    a[2] = 0;
-}
-
-inline void MenuTimeSettingView::draw_dropping_digit(FantaManipulator *framebuffer, char current, char next, int phase, int left_offset) {
-    if(phase <= 0 || current == next) {
-        framebuffer->put_glyph(font, current, left_offset, 0);
-    } else if (phase >= 16) {
-        framebuffer->put_glyph(font, next, left_offset, 0);
-    } else {
-        framebuffer->put_glyph(font, current, left_offset, phase);
-        framebuffer->put_glyph(font, next, left_offset, phase - 16);
-    }
-}
-
-inline void MenuTimeSettingView::draw_dropping_number(FantaManipulator *fb, int current, int next, int phase, int left_offset) {
-    char buf[3];
-    char buf_next[3];
-    
-    if(phase <= 0) {
-        itoa_padded(current, buf);
-        draw_dropping_digit(fb, buf[0], buf[0], 0, left_offset);
-        draw_dropping_digit(fb, buf[1], buf[1], 0, left_offset + font->width);
-    } else if (phase >= 16) {
-        itoa_padded(next, buf);
-        draw_dropping_digit(fb, buf[0], buf[0], 0, left_offset);
-        draw_dropping_digit(fb, buf[1], buf[1], 0, left_offset + font->width);
-    } else {
-        itoa_padded(current, buf);
-        itoa_padded(next, buf_next);
-        draw_dropping_digit(fb, buf[0], buf_next[0], phase, left_offset);
-        draw_dropping_digit(fb, buf[1], buf_next[1], phase, left_offset + font->width);
-    }
-}
-
 void MenuTimeSettingView::render(FantaManipulator *fb) {
     if(animationPhase > -1) {
         animationPhase++;

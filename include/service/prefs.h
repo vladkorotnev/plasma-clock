@@ -75,6 +75,9 @@ static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
 static constexpr prefs_key_t PREFS_KEY_ALARM_LIST = "alarms";
 static constexpr prefs_key_t PREFS_KEY_ALARM_SNOOZE_MINUTES = "snz_minutes";
 
+static constexpr prefs_key_t PREFS_KEY_TIMER_TIME_SECONDS = "timer_time";
+static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());

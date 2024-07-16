@@ -7,6 +7,7 @@
 #include <service/time.h>
 #include <service/owm/weather.h>
 #include <service/prefs.h>
+#include <service/power_management.h>
 #include <views/framework.h>
 #include <views/overlays/touch_arrows_ovl.h>
 #include <views/idle_screens/simple_clock.h>
@@ -61,6 +62,7 @@ void app_alarming_prepare(Beeper* beeper) {
         melody = melody_from_no(alarm->melody_no);
         seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
     }
+    power_mgmt_pause();
 }
 
 void app_alarming_draw(FantaManipulator* fb) {
@@ -195,6 +197,7 @@ void begin_snoozing() {
 void stop_alarm() {
     clear_triggered_alarm();
     seq->stop_sequence();
+    power_mgmt_resume();
     pop_state(STATE_ALARMING, TRANSITION_WIPE);
 }
 

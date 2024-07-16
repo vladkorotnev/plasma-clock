@@ -6,6 +6,7 @@
 
 class MenuListSelectorView: public Composite {
 public:
+    bool isActive;
     MenuListSelectorView(const char * title, std::vector<const char*> items, int initialValueIndex, std::function<void(bool, Renderable*)> onActivated, std::function<void(int)> onChange);
     ~MenuListSelectorView();
 
@@ -15,7 +16,6 @@ public:
 protected:
     int currentValue;
 private:
-    bool isActive;
     StringScroll * label;
     StringScroll * value;
     std::function<void(int)> onChange;

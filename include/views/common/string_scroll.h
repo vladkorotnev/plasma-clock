@@ -10,6 +10,7 @@ public:
     bool align_to_right;
     bool start_at_visible;
     int holdoff;
+    int left_margin;
     void set_string(const char*);
     void set_y_position(int);
     int estimated_frame_count();

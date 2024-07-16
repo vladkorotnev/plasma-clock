@@ -61,6 +61,7 @@ void BeepSequencer::end_task() {
 }
 
 void BeepSequencer::stop_sequence() {
+    if(!is_running) return;
     is_running = false;
     end_task();
     beeper->stop_tone(current_channel);

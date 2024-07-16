@@ -45,3 +45,6 @@ const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_35;
 // ---- Connection of NOSE BOARD ----
 const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
 const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
+
+// ---- TBD: Connection of buttons ----
+// Free GPIOS: 36, 39, 34, 27

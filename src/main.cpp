@@ -25,6 +25,7 @@
 #include <app/alarming.h>
 #include <app/menu.h>
 #include <app/alarm_editor.h>
+#include <app/timer_editor.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -144,7 +145,7 @@ void bringup_switchbot_sensor() {
 #endif
 }
 
-void bringup_touch() {
+void bringup_hid() {
 #if HAS(TOUCH_PLANE)
     con->print("Touch init");
     if(touchplane_start() != ESP_OK) {
@@ -208,7 +209,7 @@ void setup() {
     bringup_motion_sensor();
     bringup_temp_sensor();
     bringup_switchbot_sensor();
-    bringup_touch();
+    bringup_hid();
 
     graph = fb->manipulate();
 
@@ -234,6 +235,7 @@ void setup() {
     appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
     appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
+    appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
 
     change_state(startup_state);
     alarm_init();
