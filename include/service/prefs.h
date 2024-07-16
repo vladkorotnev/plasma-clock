@@ -61,6 +61,7 @@ static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_MELODY = "h_chime";
 static constexpr prefs_key_t PREFS_KEY_FIRST_CHIME_MELODY = "h_1stchime";
 
 static constexpr prefs_key_t PREFS_KEY_TIMEZONE = "tk_tz";
+static constexpr prefs_key_t PREFS_KEY_TIMESERVER_ENABLE = "tk_ntp_use";
 static constexpr prefs_key_t PREFS_KEY_TIMESERVER = "tk_ntp_serv";
 static constexpr prefs_key_t PREFS_KEY_TIME_SYNC_INTERVAL_SEC = "tk_intv_s";
 

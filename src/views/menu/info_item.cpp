@@ -11,6 +11,7 @@ MenuInfoItemView::MenuInfoItemView(const char * title, const char * subtitle) {
     top_label->holdoff = 100;
     bottom_label->start_at_visible = true;
     bottom_label->holdoff = 100;
+    bottom_label->align_to_right = true;
 
     add_subrenderable(top_label);
     add_subrenderable(bottom_label);

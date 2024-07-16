@@ -28,3 +28,7 @@ tk_time_of_day_t get_current_time_coarse();
 tk_time_of_day_t get_current_time_precise();
 /// @brief Get the current date
 tk_date_t get_current_date();
+/// @brief Set the current time without changing the timezone et al
+void set_current_time(tk_time_of_day_t);
+/// @brief Set the current date without changing the timezone et al
+void set_current_date(tk_date_t);

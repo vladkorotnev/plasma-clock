@@ -6,3 +6,4 @@
 #include "melody_selection_item.h"
 #include "number_selection_item.h"
 #include "time_setting.h"
+#include "date_setting.h"

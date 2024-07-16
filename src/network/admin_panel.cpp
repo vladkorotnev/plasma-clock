@@ -207,6 +207,8 @@ void build() {
         render_int("From:", PREFS_KEY_HOURLY_CHIME_START_HOUR);
         render_int("To:", PREFS_KEY_HOURLY_CHIME_STOP_HOUR);
         GP.HR();
+        render_bool("Use NTP:", PREFS_KEY_TIMESERVER_ENABLE);
+        GP.BREAK();
         render_string("NTP server:", PREFS_KEY_TIMESERVER);
         GP.BREAK();
         render_int("Sync interval [s]:", PREFS_KEY_TIME_SYNC_INTERVAL_SEC);
@@ -464,6 +466,7 @@ void action() {
         save_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23);
         save_melody(PREFS_KEY_FIRST_CHIME_MELODY);
         save_melody(PREFS_KEY_HOURLY_CHIME_MELODY);
+        save_bool(PREFS_KEY_TIMESERVER_ENABLE);
         save_string(PREFS_KEY_TIMESERVER);
         save_string(PREFS_KEY_TIMEZONE);
         save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);

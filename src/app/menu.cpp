@@ -4,6 +4,7 @@
 #include <views/menu/menu.h>
 #include <network/netmgr.h>
 #include <rsrc/common_icons.h>
+#include <service/time.h>
 
 AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
@@ -15,6 +16,8 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     // NB: This leaks a lot of objects on purpose.
     // This object is not supposed to be instantiated more than once in the firmware.
 
+    static MenuTimeSettingView * ts_view = nullptr;
+    static MenuDateSettingView * ds_view = nullptr;
     static ListView * clock_menu = new ListView();
     clock_menu->add_view(new MenuBooleanSettingView("Blink dots", PREFS_KEY_BLINK_SEPARATORS));
     clock_menu->add_view(new MenuBooleanSettingView("Tick sound", PREFS_KEY_TICKING_SOUND));
@@ -24,7 +27,32 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(beeper, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime from", PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime until", PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
-    // TODO: Time Set
+    clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
+        tk_time_of_day_t now = get_current_time_coarse();
+        if(ts_view != nullptr) delete ts_view;
+        ts_view = new MenuTimeSettingView(beeper, now.hour, now.minute, [this](int h, int m) {
+            tk_time_of_day_t updated_time = {
+                .hour = h, .minute = m, .second = 0, .millisecond = 0
+            };
+            set_current_time(updated_time);
+            pop_renderable(TRANSITION_SLIDE_HORIZONTAL_RIGHT);
+        });
+        push_renderable(ts_view, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+    }));
+    clock_menu->add_view(new MenuActionItemView("Set date", [this]() {
+        tk_date_t today = get_current_date();
+        if(ds_view != nullptr) delete ds_view;
+        ds_view = new MenuDateSettingView(beeper, today.year, today.month, today.day, [this](int y, int m, int d) {
+            // todo: set date
+            tk_date_t new_date = {
+                .year = y, .month = m, .day = d
+            };
+            set_current_date(new_date);
+            pop_renderable(TRANSITION_SLIDE_HORIZONTAL_RIGHT);
+        });
+        push_renderable(ds_view, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+    }));
+    clock_menu->add_view(new MenuBooleanSettingView("Use internet time", PREFS_KEY_TIMESERVER_ENABLE));
     clock_menu->add_view(new MenuInfoItemView("NTP/Timezone", "Please use the Web UI to configure."));
 
     static ListView * display_menu = new ListView();
