@@ -54,6 +54,7 @@ void CurrentWeatherView::prepare_for_new_weather() {
         prerender_icon_frame();
     }
 
+    snprintf(top_text, sizeof(top_text), "%.01f\370C %i%%", kelvin_to(weather.temperature_kelvin, CELSIUS), weather.humidity_percent);
     snprintf(bottom_text, sizeof(bottom_text), "%s. Feels like %.01f\370C. Wind %.01f m/s. Pressure %i hPa.", weather.description, kelvin_to(weather.feels_like_kelvin, CELSIUS), weather.windspeed_mps, weather.pressure_hpa);
     bottom_line->set_string(bottom_text);
 }
@@ -91,10 +92,7 @@ void CurrentWeatherView::render(FantaManipulator* fb) {
         }
         
         FantaManipulator * text_window = fb->slice(17, fb->get_width() - 17);
-
-        char buf[32];
-        snprintf(buf, sizeof(buf), "%.01f\370C %i%%", kelvin_to(weather.temperature_kelvin, CELSIUS), weather.humidity_percent);
-        text_window->put_string(small_font, buf, 0, 0);
+        text_window->put_string(small_font, top_text, 0, 0);
 
         bottom_line->render(text_window);
 

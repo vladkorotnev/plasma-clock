@@ -18,6 +18,7 @@ private:
     const font_definition_t * small_font;
     StringScroll * bottom_line;
     char bottom_text[128];
+    char top_text[32];
     current_weather_t weather;
     ani_sprite icon;
     ani_sprite_state_t icon_state;

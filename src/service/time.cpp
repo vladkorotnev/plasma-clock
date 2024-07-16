@@ -77,7 +77,7 @@ tk_date_t get_current_date() {
     localtime_r(&now, &timeinfo);
     return tk_date_t {
         .year = timeinfo.tm_year + 1900,
-        .month = timeinfo.tm_mon,
+        .month = timeinfo.tm_mon + 1,
         .day = timeinfo.tm_mday,
         .dayOfWeek = timeinfo.tm_wday
     };
@@ -87,7 +87,7 @@ void set_current_time(tk_time_of_day_t new_time) {
     tk_date_t date = get_current_date();
     struct tm t = {0, 0, 0, 0, 0, 0, 0, 0, 0}; 
     t.tm_year = date.year - 1900;
-    t.tm_mon = date.month;
+    t.tm_mon = date.month - 1;
     t.tm_mday = date.day;
     t.tm_hour = new_time.hour;
     t.tm_min = new_time.minute;
@@ -108,7 +108,7 @@ void set_current_date(tk_date_t date) {
     tk_time_of_day_t time = get_current_time_precise();
     struct tm t = {0, 0, 0, 0, 0, 0, 0, 0, 0}; 
     t.tm_year = date.year - 1900;
-    t.tm_mon = date.month;
+    t.tm_mon = date.month - 1;
     t.tm_mday = date.day;
     t.tm_hour = time.hour;
     t.tm_min = time.minute;

@@ -30,7 +30,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
         tk_time_of_day_t now = get_current_time_coarse();
         if(ts_view != nullptr) delete ts_view;
-        ts_view = new MenuTimeSettingView(beeper, now.hour, now.minute, [this](int h, int m) {
+        ts_view = new MenuTimeSettingView(beeper, now.hour, now.minute, [this](int h, int m, int s) {
             tk_time_of_day_t updated_time = {
                 .hour = h, .minute = m, .second = 0, .millisecond = 0
             };

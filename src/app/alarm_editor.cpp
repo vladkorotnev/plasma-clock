@@ -142,7 +142,7 @@ class AppShimAlarmEditor::AlarmEditorView: public ListView {
 public:
     AlarmEditorView(alarm_setting_t *alm, Beeper *b, std::function<void(bool, Renderable*)> activation, std::function<void(bool, Renderable*)> pushPop): ListView::ListView() {
         setting = alm;
-        ts_view = new MenuTimeSettingView(b, setting->hour, setting->minute, [this, pushPop](int h, int m) {
+        ts_view = new MenuTimeSettingView(b, setting->hour, setting->minute, [this, pushPop](int h, int m, int s) {
             setting->hour = h;
             setting->minute = m;
             pushPop(false, ts_view);

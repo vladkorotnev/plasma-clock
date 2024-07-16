@@ -30,7 +30,7 @@ public:
         MenuListSelectorView(title, items, prefs_get_int(prefs_key), onActivated, [this](int newVal) { prefs_set_int(key, newVal); }) {}
 
     void step() {
-        currentValue = prefs_get_bool(key);
+        currentValue = prefs_get_int(key);
         MenuListSelectorView::step();
     }
 private:
