@@ -55,7 +55,6 @@ void app_alarming_prepare(Beeper* beeper) {
     state = BLINKERING;
     framecount = 0;
     snooze_minutes = prefs_get_int(PREFS_KEY_ALARM_SNOOZE_MINUTES);
-    if(snooze_minutes == 0) snooze_minutes = 5;
 
     const alarm_setting_t * alarm = get_triggered_alarm();
     if(alarm) {
@@ -92,7 +91,7 @@ void app_alarming_draw(FantaManipulator* fb) {
                     arrows->bottom = false;
                     arrows->right = false;
                     framecount = 0;
-                    state = HINTING_SNOOZE;
+                    state = (snooze_minutes > 0) ? HINTING_SNOOZE : HINTING_STOP;
                     #else
                     framecount = 0;
                     state = CLOCK;
@@ -208,7 +207,7 @@ void app_alarming_process() {
         case HINTING_STOP:
         case CLOCK:
             {
-                if(hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN)) {
+                if(hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN) && snooze_minutes > 0) {
                     arrows->left = true;
                     arrows->top = true;
                     arrows->bottom = true;

@@ -4,12 +4,14 @@
 StringScroll::StringScroll(const font_definition_t * f, const char * s) {
     font = f;
     string = s;
-    position = 0;
+    position = INT_MAX;
     string_width = 0;
     scroll_only_if_not_fit = true;
     start_at_visible = false;
     align_to_right = false;
     y_position = 0;
+    wait_frames = 0;
+    holdoff = 0;
 
     switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
         case SCROLL_SPEED_SLOW:
@@ -46,13 +48,10 @@ void StringScroll::set_string(const char * s) {
 }
 
 void StringScroll::prepare() {
-    position = 0;
+    position = INT_MAX;
     frame_counter = 0;
     if(string == nullptr) return;
     string_width = measure_string_width(font, string);
-    if(start_at_visible) {
-        position = string_width;
-    }
 }
 
 void StringScroll::set_y_position(int y) {
@@ -73,11 +72,26 @@ void StringScroll::render(FantaManipulator * fb) {
         }
     }
 
+    if(position == INT_MAX) {
+        if(start_at_visible) {
+            position = fb->get_width();
+            wait_frames = holdoff;
+        } else {
+            position = 0;
+        }
+    }
+
     frame_counter++;
     if(frame_counter % frame_divisor == 0) {
-        position += increment;
-        if(position >= fb->get_width() + string_width) {
-            position = 0;
+        if(wait_frames == 0) {
+            position += increment;
+            if(position >= fb->get_width() + string_width) {
+                position = 0;
+            } else if(position == fb->get_width()) {
+                wait_frames = holdoff;
+            }
+        } else {
+            wait_frames--;
         }
     }
 

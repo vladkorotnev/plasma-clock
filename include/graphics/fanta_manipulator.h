@@ -55,6 +55,10 @@ public:
     void scroll(int dx, int dy);
     /// @brief Invert all pixels of the buffer
     void invert();
+    /// @brief Draws a line using Bresenham's algorithm
+    void line(int x1, int y1, int x2, int y2);
+    /// @brief Draws a rectangle
+    void rect(int x1, int y1, int x2, int y2, bool fill);
 
     /// @brief Get the width of the buffer in pixels
     int get_width();

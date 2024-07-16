@@ -165,3 +165,46 @@ void FantaManipulator::invert() {
         buffer_fast[i] = ~buffer_fast[i];
     }
 }
+
+void FantaManipulator::line(int x1, int y1, int x2, int y2) {
+  int dx = abs(x2 - x1);
+  int dy = abs(y2 - y1);
+  int sx = x1 < x2 ? 1 : -1;
+  int sy = y1 < y2 ? 1 : -1;
+  int err = (dx > dy ? dx : -dy) / 2;
+
+  while (true) {
+    plot_pixel(x1, y1, true);
+
+    if (x1 == x2 && y1 == y2) {
+      break;
+    }
+
+    int e2 = err;
+
+    if (e2 > -dx) {
+      err -= dy;
+      x1 += sx;
+    }
+
+    if (e2 < dy) {
+      err += dx;
+      y1 += sy;
+    }
+  }
+}
+
+void FantaManipulator::rect(int x1, int y1, int x2, int y2, bool fill) {
+    if (fill) {
+        for (int i = x1; i < x2; i++) {
+            for (int j = y1; j < y2+1; j++) {
+                plot_pixel(i, j, true);
+            }
+        }
+    } else {
+        line(x1, y1, x2, y1);
+        line(x2, y1, x2, y2);
+        line(x2, y2, x1, y2);
+        line(x1, y2, x1, y1);
+    }
+}

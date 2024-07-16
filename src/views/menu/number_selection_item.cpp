@@ -15,6 +15,10 @@ MenuNumberSelectorView::MenuNumberSelectorView(const char * title, int min_, int
     currentValueStr {0} {
         value->set_y_position(keyrus0808_font.height);
         value->align_to_right = true;
+        value->start_at_visible = true;
+        value->holdoff = 100;
+        label->start_at_visible = true;
+        label->holdoff = 100;
         add_subrenderable(label);
         add_subrenderable(value);
         itoa(currentValue, currentValueStr, 10);

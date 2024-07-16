@@ -454,7 +454,7 @@ void action() {
 
     save_alarms();
     if(ui.click()) {
-        save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 1, 30);
+        save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30);
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);

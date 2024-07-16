@@ -6,6 +6,8 @@ MenuBooleanSelectorView::MenuBooleanSelectorView(const char * title, bool initia
     _currentValue(initialValue),
     _onChange(onChange)
 {
+    label->start_at_visible = true;
+    label->holdoff = 100;
 }
 
 MenuBooleanSelectorView::~MenuBooleanSelectorView() {

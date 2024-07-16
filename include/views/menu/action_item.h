@@ -4,19 +4,17 @@
 #include <input/keys.h>
 #include <fonts.h>
 
-class MenuActionItemView: public Renderable {
+class MenuActionItemView: public Composite {
 public:
-    MenuActionItemView(const char * title, std::function<void()> action, const sprite_t * icon = nullptr, key_id_t button = KEY_RIGHT);
+    MenuActionItemView(const char * title, std::function<void()> action, const sprite_t * icon = nullptr, const char * subtitle = nullptr);
     ~MenuActionItemView();
 
-    void prepare();
     void step();
     void render(FantaManipulator *fb);
-    void cleanup();
 
 private:
-    key_id_t _button;
     const sprite_t * _icon;
     StringScroll * label;
+    StringScroll * sublabel;
     std::function<void()> _action;
 };

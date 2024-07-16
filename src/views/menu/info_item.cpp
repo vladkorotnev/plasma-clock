@@ -7,6 +7,11 @@ MenuInfoItemView::MenuInfoItemView(const char * title, const char * subtitle) {
     bottom_label = new StringScroll(&keyrus0808_font, subtitle);
     bottom_label->set_y_position(keyrus0808_font.height);
 
+    top_label->start_at_visible = true;
+    top_label->holdoff = 100;
+    bottom_label->start_at_visible = true;
+    bottom_label->holdoff = 100;
+
     add_subrenderable(top_label);
     add_subrenderable(bottom_label);
 }

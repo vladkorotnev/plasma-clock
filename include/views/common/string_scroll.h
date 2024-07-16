@@ -8,6 +8,8 @@ public:
     int string_width;
     bool scroll_only_if_not_fit;
     bool align_to_right;
+    bool start_at_visible;
+    int holdoff;
     void set_string(const char*);
     void set_y_position(int);
     int estimated_frame_count();
@@ -17,10 +19,10 @@ public:
 private:
     const font_definition_t * font;
     const char * string;
-    bool start_at_visible;
     int y_position;
     int position;
     int frame_divisor;
     int increment;
     int frame_counter;
+    int wait_frames;
 };

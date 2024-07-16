@@ -31,6 +31,9 @@ Fb2kView::Fb2kView() {
     top_line->set_y_position(0);
     top_line->set_string(artist_buffer);
 
+    top_line->holdoff = 50;
+    bottom_line->holdoff = 50;
+
     ESP_LOGV(LOG_TAG, "Init");
 }
 
