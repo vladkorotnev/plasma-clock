@@ -26,6 +26,8 @@ typedef enum alarming_state {
     SNOOZE_HOLD_COUNTDOWN,
     SNOOZING,
     STOP_HOLD_COUNTDOWN,
+
+    STOPPED
 } alarming_state_t;
 
 static SimpleClock *clockView = nullptr;
@@ -195,6 +197,7 @@ void begin_snoozing() {
 }
 
 void stop_alarm() {
+    state = STOPPED;
     clear_triggered_alarm();
     seq->stop_sequence();
     power_mgmt_resume();
