@@ -6,6 +6,7 @@
 #include <console.h>
 #include <sensor/sensors.h>
 #include <input/touch_plane.h>
+#include <input/keypad.h>
 #include <input/hid_sensor.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
@@ -152,6 +153,9 @@ void bringup_hid() {
         con->print("TP init err");
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     }
+#endif
+#if HAS(KEYPAD)
+    keypad_start();
 #endif
 }
 

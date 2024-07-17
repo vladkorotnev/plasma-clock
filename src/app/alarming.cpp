@@ -87,7 +87,7 @@ void app_alarming_draw(FantaManipulator* fb) {
                 }
 
                 if(framecount == 255) {
-                    #if HAS(TOUCH_PLANE)
+                    #if HAS(TOUCH_PLANE) || HAS(KEYPAD)
                     arrows->left = true;
                     arrows->top = false;
                     arrows->bottom = false;

@@ -1,12 +1,14 @@
 #pragma once
 
 #include <hal/gpio_hal.h>
+#include <input/keypad.h>
 
 #define HAS_OUTPUT_MD_PLASMA
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_LIGHT_SENSOR
 #define HAS_TEMP_SENSOR
 #define HAS_MOTION_SENSOR
+#define HAS_KEYPAD
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
@@ -48,3 +50,10 @@ const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
 
 // ---- TBD: Connection of buttons ----
 // Free GPIOS: 36, 39, 34, 27
+
+const keypad_definition_t HWCONF_KEYPAD = {
+    {GPIO_NUM_27, KEY_LEFT},
+    {GPIO_NUM_39, KEY_RIGHT},
+    {GPIO_NUM_34, KEY_UP},
+    {GPIO_NUM_36, KEY_DOWN},
+};
