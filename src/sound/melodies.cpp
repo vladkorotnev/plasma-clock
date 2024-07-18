@@ -82,6 +82,7 @@ const melody_sequence_t arise = MELODY_OF(arise_data);
 
 // Caramell - Caramelldansen
 static const melody_item_t caramell_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {880, 181},
     {0, 181}, 
     {1479, 181},
@@ -191,6 +192,7 @@ const melody_sequence_t duvet = MELODY_OF(duvet_data);
 
 // T-Square - Truth
 static const melody_item_t truth_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {932, 371},
     {0, 12},
     {698, 182},
@@ -394,16 +396,19 @@ static const melody_item_t hishoku_data[] = {
 const melody_sequence_t hishoku = MELODY_OF(hishoku_data);
 
 static const melody_item_t bouken_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {880, 392},
     {987, 196},
     {1046, 196},
     {1174, 196},
+    {0x1FF, SEQ_LEN_FLAG_TIMBRE_SET},
     {1318, 294},
     {0, 98},
     {880, 294},
     {0, 98},
     {1318, 392},
     {880, 196},
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {1318, 392},
     {1174, 196},
     {1318, 196},
@@ -452,6 +457,7 @@ static const melody_item_t bouken_data[] = {
 const melody_sequence_t bouken = MELODY_OF(bouken_data);
 
 static const melody_item_t gentle_jena_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {932, 775},
     {0, 66},
     {1479, 845},
@@ -535,6 +541,7 @@ static const melody_item_t gentle_jena_data[] = {
 const melody_sequence_t gentle_jena = MELODY_OF(gentle_jena_data);
 
 static const melody_item_t gammapolisz_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {880, 1299},
     {0, 293},
     {1046, 779},
@@ -589,18 +596,21 @@ static const melody_item_t gammapolisz_data[] = {
 const melody_sequence_t gammapolisz = MELODY_OF(gammapolisz_data);
 
 static const melody_item_t like_the_wind_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {783, 199},
     {0, 30},
     {783, 199},
     {0, 30},
     {783, 315},
     {0, 146},
+    {0x2FF, SEQ_LEN_FLAG_TIMBRE_SET},
     {523, 199},
     {0, 30},
     {523, 199},
     {0, 30},
     {523, 315},
     {0, 146},
+    {0x1FF, SEQ_LEN_FLAG_TIMBRE_SET},
     {391, 199},
     {0, 30},
     {523, 199},
@@ -618,18 +628,21 @@ static const melody_item_t like_the_wind_data[] = {
     {587, 115},
     {523, 892},
     {0, 261},
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {783, 199},
     {0, 30},
     {783, 199},
     {0, 30},
     {783, 315},
     {0, 146},
+    {0x2FF, SEQ_LEN_FLAG_TIMBRE_SET},
     {523, 199},
     {0, 30},
     {523, 199},
     {0, 30},
     {523, 315},
     {0, 146},
+    {0x1FF, SEQ_LEN_FLAG_TIMBRE_SET},
     {391, 199},
     {0, 30},
     {523, 199},
@@ -642,6 +655,7 @@ static const melody_item_t like_the_wind_data[] = {
     {0, 30},
     {622, 430},
     {0, 30},
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
     {587, 1123},
 };
 const melody_sequence_t like_the_wind = MELODY_OF(like_the_wind_data);
@@ -676,6 +690,8 @@ static const melody_item_t waiting_freqs_data[] = {
 const melody_sequence_t waiting_freqs = MELODY_OF(waiting_freqs_data);
 
 static const melody_item_t the_way_data[] = {
+    {0xFF, SEQ_LEN_FLAG_TIMBRE_SET},
+
     {932, 100},
     {0, 20},
     {1244, 108},
