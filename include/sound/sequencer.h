@@ -1,6 +1,8 @@
 #pragma once
 #include <sound/beeper.h>
 
+#define SEQ_LEN_FLAG_TIMBRE_SET (INT_MAX - 1)
+
 typedef struct melody_item {
     /// @brief Frequency of the note in Hz. 0 for a pause.
     int frequency;
@@ -28,6 +30,7 @@ public:
 
     void task();
 private:
+    uint32_t timbre;
     Beeper * beeper;
     melody_sequence_t current_sequence;
     beeper_channel_t current_channel;

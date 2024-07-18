@@ -227,6 +227,7 @@ void build() {
 
     GP.SPOILER_BEGIN("Alarms", GP_BLUE);
         render_int("Snooze minutes:", PREFS_KEY_ALARM_SNOOZE_MINUTES);
+        render_int("Max duration [m]:", PREFS_KEY_ALARM_MAX_DURATION_MINUTES);
         render_alarms();
     GP.SPOILER_END();
     GP.BREAK();
@@ -466,6 +467,7 @@ void action() {
     save_alarms();
     if(ui.click()) {
         save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30);
+        save_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120);
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);

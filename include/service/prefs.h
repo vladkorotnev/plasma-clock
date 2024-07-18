@@ -75,6 +75,7 @@ static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
 
 static constexpr prefs_key_t PREFS_KEY_ALARM_LIST = "alarms";
 static constexpr prefs_key_t PREFS_KEY_ALARM_SNOOZE_MINUTES = "snz_minutes";
+static constexpr prefs_key_t PREFS_KEY_ALARM_MAX_DURATION_MINUTES = "alm_dur";
 
 static constexpr prefs_key_t PREFS_KEY_TIMER_TIME_SECONDS = "timer_time";
 static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";

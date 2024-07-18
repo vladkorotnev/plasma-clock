@@ -48,7 +48,10 @@ public:
         if(!setting.smart || setting.smart_margin_minutes == 0) {
             snprintf(time_buf, 16, "%02d:%02d", setting.hour, setting.minute);
         } else {
-            snprintf(time_buf, 16, "%02d:%02d (-%02d)", setting.hour, setting.minute, setting.smart_margin_minutes);
+            tk_time_of_day_t alarm_time = { .hour = setting.hour, .minute = setting.minute, .second = 0, .millisecond = 0 };
+            tk_time_of_day_t margin = { .hour = 0, .minute = setting.smart_margin_minutes, .second = 0, .millisecond = 0 };
+            tk_time_of_day_t early_time = alarm_time - margin;
+            snprintf(time_buf, 16, "%02d:%02d-%02d:%02d", early_time.hour, early_time.minute, setting.hour, setting.minute);
         }
 
         if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
@@ -211,6 +214,7 @@ AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b): ProtoShimNavMenu::ProtoShimNa
         main_menu->add_view(new AlarmItemView(i, beginEditing));
     }
     main_menu->add_view(new MenuNumberSelectorPreferenceView("Snooze time", PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30, 1, normalActivationFunction));
+    main_menu->add_view(new MenuNumberSelectorPreferenceView("Max beeping time, minutes", PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120, 1, normalActivationFunction));
 }
 
 void AppShimAlarmEditor::pop_renderable(transition_type_t transition) {
