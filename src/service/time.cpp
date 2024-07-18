@@ -124,3 +124,52 @@ void set_current_date(tk_date_t date) {
     time = get_current_time_coarse();
     ESP_LOGI(LOG_TAG, "Changed date, current: %04d/%02d/%02d %02d:%02d:%02d", date.year, date.month, date.day, time.hour, time.minute, time.second);
 }
+
+tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
+    tk_time_of_day result = { 0 };
+
+    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
+    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+
+    int64_t diff_ms = a_ms - b_ms;
+
+    if (diff_ms < 0) {
+        // wrap around so that e.g 00:05 - 0h10min returns 23:55
+        diff_ms += 24 * 60 * 60 * 1000;
+    }
+
+    result.hour = diff_ms / (60 * 60 * 1000);
+    diff_ms %= (60 * 60 * 1000);
+    result.minute = diff_ms / (60 * 1000);
+    diff_ms %= (60 * 1000);
+    result.second = diff_ms / 1000;
+    result.millisecond = diff_ms % 1000;
+
+    return result;
+}
+
+
+bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
+    return a.hour == b.hour && a.minute == b.minute && a.second == b.second && a.millisecond == b.millisecond;
+}
+
+bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
+    if (a.hour < b.hour) {
+        return true;
+    } else if (a.hour == b.hour) {
+        if (a.minute < b.minute) {
+            return true;
+        } else if (a.minute == b.minute) {
+            if (a.second < b.second) {
+                return true;
+            } else if (a.second == b.second) {
+                return a.millisecond < b.millisecond;
+            }
+        }
+    }
+    return false;
+}
+
+bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
+    return !(a < b || a == b);
+}

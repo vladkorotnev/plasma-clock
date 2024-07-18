@@ -59,6 +59,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     static ListView * screen_times = new ListView();
     display_menu->add_view(new MenuActionItemView("Screen Times", [this](){ push_submenu(screen_times); }));
         screen_times->add_view(new MenuNumberSelectorPreferenceView("Clock", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Alarm countdown", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(TEMP_SENSOR)
         screen_times->add_view(new MenuNumberSelectorPreferenceView("Thermometer", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif

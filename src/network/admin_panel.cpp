@@ -145,6 +145,13 @@ static void render_alarms() {
         GP.TABLE_END();
         GP.BREAK();
 
+        if (sensors->exists(SENSOR_ID_MOTION)) {
+            GP.LABEL("Smart: ");
+            GP.CHECK(tmp + "smart", a.smart);
+            GP.NUMBER(tmp + "margin", "10", a.smart_margin_minutes);
+            GP.BREAK();
+        }
+
         GP.SELECT(tmp + "melo", all_chime_names_csv, a.melody_no);
     }
 
@@ -159,9 +166,8 @@ static void save_alarms() {
         alarm_setting_t a = {0};
         String tmp = String("alm_") + i + "_";
 
-        if(ui.getBool(tmp + "enable")) {
-            a.days |= ALARM_DAY_GLOBAL_ENABLE;
-        }
+        a.enabled = ui.getBool(tmp + "enable");
+        a.smart = ui.getBool(tmp + "smart");
 
         for(int d = 0; d < 7; d++) {
             if(ui.getBool(tmp + days[d])) {
@@ -173,6 +179,7 @@ static void save_alarms() {
         a.hour = ui.getInt(tmp + "h");
         a.minute = ui.getInt(tmp + "m");
         a.melody_no = ui.getInt(tmp + "melo");
+        a.smart_margin_minutes = ui.getInt(tmp + "margin");
 
         set_alarm(i, a);
     }
@@ -226,6 +233,8 @@ void build() {
 
     GP.SPOILER_BEGIN("Display", GP_BLUE);
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
+        GP.BREAK();
+        render_int("Show next alarm countdown for [s]:", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS);
         GP.BREAK();
         #if HAS(TEMP_SENSOR)
         render_int("Show temperature for [s]:", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS);

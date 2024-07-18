@@ -242,7 +242,7 @@ void setup() {
     appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
 
     change_state(startup_state);
-    alarm_init();
+    alarm_init(sensors);
 }
 
 void loop() {

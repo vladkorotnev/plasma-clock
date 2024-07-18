@@ -17,6 +17,7 @@
 #include <views/idle_screens/current_weather.h>
 #include <views/idle_screens/word_of_the_day.h>
 #include <views/idle_screens/fb2k.h>
+#include <views/idle_screens/next_alarm.h>
 #include <views/overlays/signal_icon.h>
 #include <views/overlays/touch_arrows_ovl.h>
 #include <input/keys.h>
@@ -26,6 +27,7 @@ static char LOG_TAG[] = "APL_IDLE";
 
 typedef enum MainViewId: uint16_t {
     VIEW_CLOCK = 0,
+    VIEW_NEXT_ALARM,
 #if HAS(TEMP_SENSOR)
     VIEW_INDOOR_WEATHER,
 #endif
@@ -41,20 +43,7 @@ typedef enum MainViewId: uint16_t {
     VIEW_MAX
 } MainViewId_t;
 
-static int screen_times_ms[VIEW_MAX] = {
-    30000, // VIEW_CLOCK
-#if HAS(TEMP_SENSOR)
-    10000, // VIEW_INDOOR_WEATHER
-#endif
-#if HAS(SWITCHBOT_METER_INTEGRATION)
-    10000, // VIEW_REMOTE_WEATHER,
-#endif
-    25000, // VIEW_OUTDOOR_WEATHER
-#if HAS(WORDNIK_API)
-    25000, // VIEW_WORD_OF_THE_DAY
-#endif
-    0, // VIEW_FB2K
-};
+static int screen_times_ms[VIEW_MAX] = {0};
 
 int current_screen_time_ms = 0;
 
@@ -67,6 +56,7 @@ static SensorPool * sensors;
 static Renderable * mainView;
 
 static SimpleClock * clockView;
+static NextAlarmView * nextAlarmView;
 
 static RainOverlay * rain;
 static ThunderOverlay * thunder;
@@ -191,6 +181,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
 
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
+    screen_times_ms[VIEW_NEXT_ALARM] = prefs_get_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS) * 1000;
 #if HAS(TEMP_SENSOR)
     screen_times_ms[VIEW_INDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS) * 1000;
 #endif
@@ -222,6 +213,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
     fb2kView = new Fb2kView();
+    nextAlarmView = new NextAlarmView();
 
     touchArrows = new TouchArrowOverlay();
     touchArrows->bottom = true;
@@ -234,6 +226,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
+    slideShow->add_view(nextAlarmView, VIEW_NEXT_ALARM);
 #if HAS(TEMP_SENSOR)
     indoorView = new IndoorView(sensors);
     slideShow->add_view(indoorView, VIEW_INDOOR_WEATHER);

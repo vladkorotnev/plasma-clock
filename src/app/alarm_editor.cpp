@@ -45,7 +45,11 @@ public:
     }
 
     void step() {
-        snprintf(time_buf, 6, "%02d:%02d", setting.hour, setting.minute);
+        if(!setting.smart || setting.smart_margin_minutes == 0) {
+            snprintf(time_buf, 16, "%02d:%02d", setting.hour, setting.minute);
+        } else {
+            snprintf(time_buf, 16, "%02d:%02d (-%02d)", setting.hour, setting.minute, setting.smart_margin_minutes);
+        }
 
         if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
             _action(index);
@@ -57,7 +61,7 @@ private:
     alarm_setting_t setting;
     int index;
     char index_str[4];
-    char time_buf[6];
+    char time_buf[16];
 };
 
 class AlarmDaySelectorView: public Composite {
@@ -154,6 +158,10 @@ public:
 
         add_view(new AlarmDaySelectorView("Days", alm, activation));
         add_view(new MenuActionItemView("Time", [pushPop, this]() { pushPop(true, ts_view); }, nullptr, time_str));
+    #if HAS(MOTION_SENSOR) // CBA to inject SensorPool which would only be used to check for existence of the sensor
+        add_view(new MenuBooleanSelectorView("Smart Alarm", alm->smart, [alm](bool newSmart) { alm->smart = newSmart; }));
+        add_view(new MenuNumberSelectorView("Smart margin", 1, 30, 1, alm->smart_margin_minutes, activation, [alm](int newMargin) { alm->smart_margin_minutes = newMargin; }));
+    #endif
         add_view(new MenuMelodySelectorView(b, "Melody", alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
     }
 
