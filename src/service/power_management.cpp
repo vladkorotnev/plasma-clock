@@ -27,7 +27,7 @@ static int lightnessThreshDown;
 
 extern "C" void PMTaskFunction( void * pvParameter );
 
-static void wake_up() {
+static void wake_up(TickType_t now) {
     // There was some motion, reenable the display
     if(isDisplayOff) {
         ESP_LOGI(LOG_TAG, "Start display");
@@ -51,7 +51,10 @@ static void wake_up() {
     #endif
     }
 
-    lastMotionTime = xTaskGetTickCount();
+    // cannot use getTickCount here, because then lastMotionTime will be in the future
+    // and thus further conditions will think it's way off in the past (due to ticktype_t being unsigned)
+    // which causes blinking when waking up the device with buttons without triggering motion somehow
+    lastMotionTime = now;
 }
 
 void PMTaskFunction( void * pvParameter )
@@ -92,7 +95,7 @@ void PMTaskFunction( void * pvParameter )
         if(hid_info) {
             // wake up on keypress
             if(hid_info->last_result > 0) {
-                wake_up();
+                wake_up(now);
             }
         }
 
@@ -102,7 +105,7 @@ void PMTaskFunction( void * pvParameter )
         if(motion_info != nullptr) {
             if(motion_info->last_result > 0) {
                 // There was some motion, reenable the display
-                wake_up();
+                wake_up(now);
             } else {
               if(now - lastMotionTime >= pdMS_TO_TICKS(motionlessTimeOff) && !isDisplayOff) {
                 // No motion for a while, turn off display, first only logically

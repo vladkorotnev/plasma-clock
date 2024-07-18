@@ -7,6 +7,7 @@ static char LOG_TAG[] = "KEYP";
 static TaskHandle_t hTask;
 
 static void keypad_task(void*) {
+#if HAS(KEYPAD)
     while(1) {
         for(auto i: HWCONF_KEYPAD) {
             int lvl = gpio_get_level(i.first);
@@ -15,6 +16,7 @@ static void keypad_task(void*) {
 
         vTaskDelay(pdMS_TO_TICKS(10));
     }
+#endif
 }
 
 void keypad_start() {
