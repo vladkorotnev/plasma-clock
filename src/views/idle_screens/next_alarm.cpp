@@ -21,16 +21,27 @@ inline void itoa_padded(uint i, char * a) {
     a[2] = 0;
 }
 
-NextAlarmView::NextAlarmView() {
+NextAlarmView::NextAlarmView(): DroppingDigits() {
     show_alarm = false;
     time_remaining = {0};
     font = &xnu_font;
+    phase = -1;
+    disp_h = 0;
+    disp_m = 0;
+    next_h = 0;
+    next_m = 0;
 }
 
 void NextAlarmView::prepare() {
+    recalculate();
+    disp_h = next_h;
+    disp_m = next_m;
+}
+
+void NextAlarmView::recalculate() {
     const alarm_setting_t * alarm = get_upcoming_alarm();
     if(alarm != nullptr) {
-        tk_time_of_day_t now = get_current_time_coarse();
+        tk_time_of_day_t now = get_current_time_precise();
         tk_time_of_day_t alarm_time = { 0 };
         alarm_time.hour = alarm->hour;
         alarm_time.minute = alarm->minute;
@@ -43,6 +54,30 @@ void NextAlarmView::prepare() {
     }
 }
 
+void NextAlarmView::step() {
+    recalculate();
+    if(time_remaining.hour > 0) {
+        next_h = time_remaining.hour;
+        next_m = time_remaining.minute;
+    } else {
+        next_h = time_remaining.minute;
+        next_m = time_remaining.second;
+    }
+
+    // this pattern actually makes sense, extract it into DroppingDigits?
+    if((next_h != disp_h || next_m != disp_m) && phase == -1) {
+        phase = 0;
+    } else if (phase < 17 && phase > -1) {
+        phase++;
+    }
+
+    if(phase == 17) {
+        disp_h = next_h;
+        disp_m = next_m;
+        phase = -1;
+    }
+}
+
 void NextAlarmView::render(FantaManipulator *fb) {
     fb->put_sprite(&sleep_icns, 0, 0);
 
@@ -50,27 +85,17 @@ void NextAlarmView::render(FantaManipulator *fb) {
     int text_width = char_count * font->width;
     int left_offset = (fb->get_width() - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
 
-    char hour_str[3] = { 0 };
-    char minute_str[3] = { 0 };
-    if(time_remaining.hour > 0) {
-        itoa_padded(time_remaining.hour, hour_str);
-        itoa_padded(time_remaining.minute, minute_str);
-    } else {
-        itoa_padded(time_remaining.minute, hour_str);
-        itoa_padded(time_remaining.second, minute_str);
-    }
-    
-    fb->put_string(font, hour_str, left_offset, 0);
+    draw_dropping_number(fb, disp_h, next_h, phase == -1 ? 0 : phase, left_offset);
     left_offset += 2 * font->width;
     
     fb->put_glyph(font, ':', left_offset, 0);
     left_offset += font->width;
 
-    fb->put_string(font, minute_str, left_offset, 0);
+    draw_dropping_number(fb, disp_m, next_m, phase == -1 ? 0 : phase, left_offset);
 }
 
 int NextAlarmView::desired_display_time() {
-    prepare();
+    recalculate();
     if(show_alarm && time_remaining.hour < 8) {
         return DISP_TIME_NO_OVERRIDE;
     } else {
