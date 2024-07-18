@@ -117,7 +117,7 @@ static void render_alarms() {
         tmp = String("alm_") + i + "_";
         
         GP.LABEL("Enabled: ");
-        GP.CHECK(tmp + "enable", ALARM_IS_ENABLED(a));
+        GP.CHECK(tmp + "enable", a.enabled);
         GP.BREAK();
 
         GP.TABLE_BEGIN();

@@ -69,15 +69,15 @@ static void alarm_task(void*) {
 
         for(int i = 0; i < ALARM_LIST_SIZE; i++) {
             alarm_setting_t alarm = alarms[i];
-            if(ALARM_IS_ENABLED(alarm)) {
-                if(alarm.days == ALARM_DAY_GLOBAL_ENABLE || ALARM_ON_DAY(alarm, today.dayOfWeek)){
+            if(alarm.enabled) {
+                if(alarm.days == 0 || ALARM_ON_DAY(alarm, today.dayOfWeek)){
                     if(alarm.hour == now.hour && alarm.minute == now.minute) {
                         ESP_LOGI(LOG_TAG, "Triggering alarm at index %i", i);
                         triggered_alarm = &alarms[i];
                         memcpy(&last_alarmed, &now, sizeof(tk_time_of_day_t));
                         memcpy(&last_alarmed_day, &today, sizeof(tk_date_t));
 
-                        if(alarm.days == ALARM_DAY_GLOBAL_ENABLE) {
+                        if(alarm.days == 0) {
                             ESP_LOGI(LOG_TAG, "Alarm %i was singular, turning OFF!", i);
                             alarm.days = 0;
                             set_alarm(i, alarm);

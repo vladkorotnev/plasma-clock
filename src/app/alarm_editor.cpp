@@ -30,8 +30,8 @@ public:
 
     void render(FantaManipulator *fb) {
         // box around number
-        fb->rect(0, 2, 10 + ALARM_IS_ENABLED(setting), 12, ALARM_IS_ENABLED(setting));
-        fb->put_string(&keyrus0808_font, index_str, 2, 4, ALARM_IS_ENABLED(setting));
+        fb->rect(0, 2, 10 + setting.enabled, 12, setting.enabled);
+        fb->put_string(&keyrus0808_font, index_str, 2, 4, setting.enabled);
 
         fb->put_string(&keyrus0808_font, time_buf, 14, 0);
 
@@ -62,10 +62,10 @@ private:
 
 class AlarmDaySelectorView: public Composite {
 public:
-    AlarmDaySelectorView(const char * title, uint8_t * day_list, std::function<void(bool, Renderable*)> onActivated):
+    AlarmDaySelectorView(const char * title, alarm_setting_t * setting, std::function<void(bool, Renderable*)> onActivated):
         isActive {false},
         label(new StringScroll(&keyrus0808_font, title)),
-        dayList(day_list),
+        setting(setting),
         cursor { 0 },
         onActivated(onActivated) {
             add_subrenderable(label);
@@ -87,10 +87,10 @@ public:
                 if(cursor < 0) cursor = 6;
             } else if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
                 uint8_t day_mask = ALARM_DAY_OF_WEEK(cursor);
-                if((*dayList & day_mask) != 0) {
-                    *dayList &= ~day_mask;
+                if((setting->days & day_mask) != 0) {
+                    setting->days &= ~day_mask;
                 } else {
-                    *dayList |= day_mask;
+                    setting->days |= day_mask;
                 }
             } else if(hid_test_key_state(KEY_LEFT)) {
                 onActivated(false, this);
@@ -112,10 +112,10 @@ public:
             framecount = 0;
         }
 
-        if(isActive || (*dayList != 0 && *dayList != ALARM_DAY_GLOBAL_ENABLE)) {
+        if(isActive || setting->days != 0) {
             for(int d = 0; d < 7; d++) {
                 int ltr_x = fb->get_width() - 70 + d * (keyrus0808_font.width + 2);
-                bool lit_up = (*dayList & ALARM_DAY_OF_WEEK(d)) != 0;
+                bool lit_up = (setting->days & ALARM_DAY_OF_WEEK(d)) != 0;
 
                 if(isActive && d == cursor && cursorShows) {
                     fb->rect(ltr_x - 2, 7, ltr_x + 8, 15, lit_up);
@@ -133,7 +133,7 @@ private:
     bool isActive;
     bool cursorShows;
     StringScroll * label;
-    uint8_t * dayList;
+    alarm_setting_t * setting;
     int cursor;
     std::function<void(bool, Renderable*)> onActivated;
 };
@@ -148,15 +148,11 @@ public:
             pushPop(false, ts_view);
         });
 
-        add_view(new MenuBooleanSelectorView("Enabled", ALARM_IS_ENABLED(*alm), [alm](bool newEnabled) {
-            if(newEnabled) {
-                alm->days |= ALARM_DAY_GLOBAL_ENABLE;
-            } else {
-                alm->days &= ~ALARM_DAY_GLOBAL_ENABLE;
-            }
+        add_view(new MenuBooleanSelectorView("Enabled", alm->enabled, [alm](bool newEnabled) {
+            alm->enabled = newEnabled;
         }));
 
-        add_view(new AlarmDaySelectorView("Days", &alm->days, activation));
+        add_view(new AlarmDaySelectorView("Days", alm, activation));
         add_view(new MenuActionItemView("Time", [pushPop, this]() { pushPop(true, ts_view); }, nullptr, time_str));
         add_view(new MenuMelodySelectorView(b, "Melody", alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
     }
