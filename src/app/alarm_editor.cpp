@@ -189,6 +189,7 @@ AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b): ProtoShimNavMenu::ProtoShimNa
     beeper = b;
     current_editor = nullptr;
     current_editing_idx = 0;
+    edit_flag = false;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
         if(isActive) push_renderable(instance, TRANSITION_NONE);
         else pop_renderable(TRANSITION_NONE);
@@ -203,6 +204,7 @@ AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b): ProtoShimNavMenu::ProtoShimNa
         if(current_editor != nullptr) {
             delete current_editor;
         }
+        edit_flag = true;
         current_editing_idx = editIdx;
         const alarm_setting_t * settings = get_alarm_list();
         current_editing_setting = settings[editIdx];
@@ -225,7 +227,9 @@ void AppShimAlarmEditor::pop_renderable(transition_type_t transition) {
 
     if(back_stack.size() == 1) {
         // returning to alarm list, likely from editing screen
-        if(current_editor != nullptr) {
+        if(current_editor != nullptr && edit_flag) {
+            // cannot delete current_editor here because it's still used by the transition coordinator for animation
+            edit_flag = false;
             set_alarm(current_editing_idx, current_editing_setting);
             main_menu->get_view(current_editing_idx)->prepare();
         }

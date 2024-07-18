@@ -46,6 +46,11 @@ static TickType_t startedAt;
 static TickType_t maxDur;
 
 void app_alarming_prepare(Beeper* beeper) {
+    // do this prior to changing state because apparently this may get called from a separate thread, so step() goes ahead of prepare() and thus exits the alarm right away?
+    // TODO: somehow stick the state switching to the UI thread!! and all that
+    startedAt = xTaskGetTickCount();
+    maxDur = pdMS_TO_TICKS( prefs_get_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES) * 60000 );
+
     if(seq) {
         seq->stop_sequence();
         free(seq);
@@ -57,8 +62,6 @@ void app_alarming_prepare(Beeper* beeper) {
     arrows->prepare();
     arrows->active = true;
     clockView->prepare();
-
-    state = BLINKERING;
     framecount = 0;
     snooze_minutes = prefs_get_int(PREFS_KEY_ALARM_SNOOZE_MINUTES);
 
@@ -67,9 +70,8 @@ void app_alarming_prepare(Beeper* beeper) {
         melody = melody_from_no(alarm->melody_no);
         seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
     }
-    startedAt = xTaskGetTickCount();
-    maxDur = pdMS_TO_TICKS( prefs_get_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES) * 60000 );
     power_mgmt_pause();
+    state = BLINKERING;
 }
 
 void app_alarming_draw(FantaManipulator* fb) {

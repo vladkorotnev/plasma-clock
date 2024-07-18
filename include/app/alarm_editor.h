@@ -16,4 +16,5 @@ private:
     int current_editing_idx;
     alarm_setting_t current_editing_setting;
     AlarmEditorView * current_editor;
+    bool edit_flag;
 };
