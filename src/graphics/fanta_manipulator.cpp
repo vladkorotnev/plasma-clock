@@ -47,7 +47,7 @@ void FantaManipulator::clear() {
 }
 
 void FantaManipulator::plot_pixel(int x, int y, bool state) {
-    if(x < 0 || y < 0 || x > buffer_size/2 || y > height) {
+    if(x < 0 || y < 0 || x >= width || y >= height) {
         return;
     }
 
