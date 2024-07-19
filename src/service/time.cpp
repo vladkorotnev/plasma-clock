@@ -150,41 +150,27 @@ tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b) 
 
 
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
-    return a.hour == b.hour && a.minute == b.minute && a.second == b.second && a.millisecond == b.millisecond;
+    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
+    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    return a_ms == b_ms;
 }
 
 bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
-    if (a.hour < b.hour) {
-        return true;
-    } else if (a.hour == b.hour) {
-        if (a.minute < b.minute) {
-            return true;
-        } else if (a.minute == b.minute) {
-            if (a.second < b.second) {
-                return true;
-            } else if (a.second == b.second) {
-                return a.millisecond < b.millisecond;
-            }
-        }
-    }
-    return false;
+    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
+    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    return a_ms < b_ms;
+}
+
+bool operator<=(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
+    return (a < b) || (a == b);
 }
 
 bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
-    return !(a < b || a == b);
+    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
+    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    return a_ms > b_ms;
 }
 
-bool time_is_within_hour_from(const tk_time_of_day_t& start_of_hour, const tk_time_of_day_t& now) {
-    // Calculate the time difference in minutes
-    int64_t start_minutes = start_of_hour.hour * 60 + start_of_hour.minute;
-    int64_t now_minutes = now.hour * 60 + now.minute;
-    int64_t diff_minutes = now_minutes - start_minutes;
-
-    // Handle wrapping around midnight
-    if (diff_minutes < 0) {
-        diff_minutes += 24 * 60;
-    }
-
-    // Check if the difference is within 1 hour (60 minutes)
-    return diff_minutes <= 60;
+bool operator>=(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
+    return (a > b) || (a == b);
 }

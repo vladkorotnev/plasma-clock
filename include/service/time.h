@@ -11,6 +11,8 @@ typedef struct tk_time_of_day {
     int millisecond;
 } tk_time_of_day_t;
 
+static const tk_time_of_day_t ONE_HOUR = { .hour = 1, .minute = 0, .second = 0, .millisecond = 0 };
+
 typedef struct tk_date {
     int year;
     int month;
@@ -36,6 +38,6 @@ void set_current_date(tk_date_t);
 tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+bool operator<=(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
-
-bool time_is_within_hour_from(const tk_time_of_day_t& start_of_hour, const tk_time_of_day_t& now);
+bool operator>=(const tk_time_of_day_t& a, const tk_time_of_day_t& b);

@@ -99,8 +99,7 @@ static void alarm_task(void*) {
                         // Simple smart alarm logic based on motion sensing
                         tk_time_of_day_t margin_as_time = { .hour = 0, .minute = alarm.smart_margin_minutes, .second = 0, .millisecond = 0 };
                         tk_time_of_day_t earliest_time = alarm_time - margin_as_time;
-                        // no upper boundary 'cause that is covered by the outer condition (exact cutoff)
-                        if (time_is_within_hour_from(earliest_time, now)) {
+                        if ((now - earliest_time <= ONE_HOUR) && (alarm_time - now <= ONE_HOUR)) {
                             // We are now within the alarm margin, so in "armed" state
                             sensor_info_t * motn = sensors->get_info(SENSOR_ID_MOTION);
                             if(motn) {
