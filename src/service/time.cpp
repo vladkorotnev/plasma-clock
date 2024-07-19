@@ -173,3 +173,18 @@ bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
 bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
     return !(a < b || a == b);
 }
+
+bool time_is_within_hour_from(const tk_time_of_day_t& start_of_hour, const tk_time_of_day_t& now) {
+    // Calculate the time difference in minutes
+    int64_t start_minutes = start_of_hour.hour * 60 + start_of_hour.minute;
+    int64_t now_minutes = now.hour * 60 + now.minute;
+    int64_t diff_minutes = now_minutes - start_minutes;
+
+    // Handle wrapping around midnight
+    if (diff_minutes < 0) {
+        diff_minutes += 24 * 60;
+    }
+
+    // Check if the difference is within 1 hour (60 minutes)
+    return diff_minutes <= 60;
+}

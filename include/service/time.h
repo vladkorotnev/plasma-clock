@@ -37,3 +37,5 @@ tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+
+bool time_is_within_hour_from(const tk_time_of_day_t& start_of_hour, const tk_time_of_day_t& now);

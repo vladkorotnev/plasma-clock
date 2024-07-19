@@ -87,24 +87,20 @@ static void alarm_task(void*) {
 
         for(int i = 0; i < ALARM_LIST_SIZE; i++) {
             alarm_setting_t alarm = alarms[i];
+            tk_time_of_day_t alarm_time = { .hour = alarm.hour, .minute = alarm.minute, .second = 0, .millisecond = 0 };
             if(alarm.enabled) {
                 if(alarm.days == 0 || ALARM_ON_DAY(alarm, today.dayOfWeek)){
-                    if(alarm.hour == now.hour && alarm.minute == now.minute) {
+                    if(now == alarm_time) {
                         ESP_LOGI(LOG_TAG, "Triggering alarm %i due to TIME reasons", i);
                         _trigger_alarm_if_needed(today, i);
                         break;
                     } else if(alarm.smart && alarm.smart_margin_minutes > 0
-                        && sensors && sensors->exists(SENSOR_ID_MOTION)
-                        && now.hour <= alarm.hour && now.minute < alarm.minute) {
+                        && sensors && sensors->exists(SENSOR_ID_MOTION)) {
                         // Simple smart alarm logic based on motion sensing
                         tk_time_of_day_t margin_as_time = { .hour = 0, .minute = alarm.smart_margin_minutes, .second = 0, .millisecond = 0 };
-                        tk_time_of_day_t alarm_time = { .hour = alarm.hour, .minute = alarm.minute, .second = 0, .millisecond = 0 };
                         tk_time_of_day_t earliest_time = alarm_time - margin_as_time;
-                        if (
-                            (now.hour >= earliest_time.hour && now.minute >= earliest_time.minute) ||
-                            // edge case if the time wraps around midnight:
-                            (now.hour == 0 && earliest_time.hour == 23 && now.minute < earliest_time.minute)
-                        ) {
+                        // no upper boundary 'cause that is covered by the outer condition (exact cutoff)
+                        if (time_is_within_hour_from(earliest_time, now)) {
                             // We are now within the alarm margin, so in "armed" state
                             sensor_info_t * motn = sensors->get_info(SENSOR_ID_MOTION);
                             if(motn) {
