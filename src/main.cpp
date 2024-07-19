@@ -35,6 +35,8 @@
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
+static device_state_t _actual_current_state = STATE_BOOT;
+static transition_type_t _next_transition = TRANSITION_NONE;
 const device_state_t startup_state = STATE_IDLE;
 static std::stack<device_state_t> state_stack = {};
 
@@ -55,12 +57,18 @@ static bool fps_counter = false;
 void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
         current_state = STATE_OTAFVU;
+        _actual_current_state = STATE_OTAFVU;
         return; // all other things handled in the FVU process
     }
 
     if(to == current_state) return;
+
+    // calling `change_state` from outside of main thread causes a prepare() call on the upcoming view
+    // to be out of sequence with step()/render() depending on what the main thread was up to at the time.
+    // So just keep the requested change in memory and do it when main thread gets around to it.
+    // might we need a queue here?
+    _next_transition = transition;
     current_state = to;
-    appHost->switch_to(current_state, transition);
 }
 
 void push_state(device_state_t next, transition_type_t transition) {
@@ -252,4 +260,10 @@ void loop() {
         graph->unlock();
     }
     desktop->step();
+    
+    // thread safe state change kind of thing
+    if(_actual_current_state != current_state) {
+        _actual_current_state = current_state;
+        appHost->switch_to(_actual_current_state, _next_transition);
+    }
 }

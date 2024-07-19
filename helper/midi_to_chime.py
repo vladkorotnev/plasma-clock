@@ -12,6 +12,7 @@ name = argv[2]
 
 last_time = 0
 evts = [] # of (freq in hz or 0, delay in ms)
+ended = False
 
 for msg in mid:
     if msg.type == "note_on" or msg.type == "note_off":
@@ -23,13 +24,23 @@ for msg in mid:
         else:
             # note off
             evts.append([0, 0])
+    elif msg.type == "end_of_track":
+        print(msg)
+        if ended:
+            raise Exception("WTF, already ended")
+        ended = True
+        if evts[-1][0] == 0:
+            # pause exists, just extend it
+            evts[-1][1] = int(msg.time * 1000)
+        else:
+            evts.append([0, int(msg.time*1000)])
         
         
 print(evts)
 
 print("static const melody_item_t "+name+"_data[] = {")
 i = 0
-while i < len(evts) - 1:
+while i < len(evts):
     if evts[i][0] != 0 or evts[i][1] != 0:
         print("    {"+str(evts[i][0])+", "+str(evts[i][1])+"}, ")
     i+=1
