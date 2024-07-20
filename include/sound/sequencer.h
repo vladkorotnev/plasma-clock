@@ -2,6 +2,7 @@
 #include <sound/beeper.h>
 
 #define SEQ_LEN_FLAG_TIMBRE_SET (INT_MAX - 1)
+#define SEQ_LEN_FLAG_THE_LOOPAH (INT_MAX - 2)
 
 typedef struct melody_item {
     /// @brief Frequency of the note in Hz. 0 for a pause.
@@ -35,6 +36,7 @@ private:
     melody_sequence_t current_sequence;
     beeper_channel_t current_channel;
     size_t pointer;
+    size_t loop_point;
     bool is_running;
     int repetitions;
     TaskHandle_t hTask;

@@ -19,8 +19,11 @@ extern const melody_sequence_t gammapolisz;
 extern const melody_sequence_t like_the_wind;
 extern const melody_sequence_t waiting_freqs;
 extern const melody_sequence_t the_way;
+extern const melody_sequence_t guitar_hero;
+extern const melody_sequence_t syabon;
+extern const melody_sequence_t steiner;
 
-static constexpr const char * all_chime_names_csv = "Just Beep,PC-98 Boot,Русь 28,Штрих-М,A.M. - Arise,Caramelldansen,BoA - Duvet,T-Square - Truth,Haruhi no Omoi,When Present Is Past,Hishoku no Sora,Bouken Desho Desho,Gentle Jena,Gammapolisz,Like The Wind (TMMS),NightRadio - Waiting Freqs,NightRadio - The Way,Random";
+static constexpr const char * all_chime_names_csv = "Just Beep,PC-98 Boot,Русь 28,Штрих-М,A.M. - Arise,Caramelldansen,BoA - Duvet,T-Square - Truth,Haruhi no Omoi,WAVE & DRAX - When Present Is Past,Hishoku no Sora,Bouken Desho Desho,Gentle Jena,Omega - Gammapolisz,Like The Wind (TMMS),NightRadio - Waiting Freqs,NightRadio - The Way,Dougal &amp; Gammer - Guitar Hero,Hachiya Nanashi - Shabon,Gate Of Steiner,Random";
 static const std::vector<const char *> all_chime_names = {
     "Beep",
     "PC-98 Boot",
@@ -39,6 +42,9 @@ static const std::vector<const char *> all_chime_names = {
     "Like The Wind (TMMS)",
     "Waiting Freqs",
     "The Way",
+    "Guitar Hero",
+    "Shabon",
+    "Gate Of Steiner",
     "(Randomize)"
 };
 static const melody_sequence_t all_chime_list[] = {
@@ -59,6 +65,9 @@ static const melody_sequence_t all_chime_list[] = {
     like_the_wind,
     waiting_freqs,
     the_way,
+    guitar_hero,
+    syabon,
+    steiner,
 };
 static const int all_chime_count = sizeof(all_chime_list)/sizeof(melody_sequence_t);
 
