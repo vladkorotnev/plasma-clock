@@ -40,17 +40,6 @@ fanta_buffer_t sprite_to_fanta(const sprite_t* sprite) {
     return _convert_to_fanta(sprite->width, sprite->height, sprite->data);
 }
 
-void fanta_offset_y(fanta_buffer_t fanta, int vert_offset, size_t width) {
-    uint16_t * columns = (uint16_t*) fanta;
-    for(int i = 0; i < width; i++) {
-        if(vert_offset > 0) {
-            columns[i] <<= vert_offset;
-        } else if(vert_offset < 0) {
-            columns[i] >>= abs(vert_offset);
-        }
-    }
-}
-
 ani_sprite_state_t ani_sprite_prepare(const ani_sprite* as) {
     return ani_sprite_state_t {
         .ani_sprite = as,

@@ -17,7 +17,6 @@ public:
     int estimated_frame_count();
     void prepare();
     void render(FantaManipulator *);
-    void step();
 
 private:
     const font_definition_t * font;
@@ -30,7 +29,6 @@ private:
     int wait_frames;
 
     fanta_buffer_t backing_buffer;
-    fanta_buffer_t temp_buffer;
     int backing_buffer_width;
     size_t backing_buffer_size;
 };

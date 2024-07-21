@@ -69,6 +69,7 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
     *dirty = true;
 }
 
+// NB: This still relies too much on the fact our displays are 16 bits tall. Someday when porting to another display this will bite us in the ass.
 void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h, fanta_buffer_t mask, bool invert) {
     if(w <= 0 || h <= 0) return;
     
@@ -77,22 +78,25 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
         fanta_column_mask |= (1 << i);
     }
 
-    fanta_offset_y(fanta, y, w);
-    if(mask) {
-        fanta_offset_y(mask, y, w);
-    }
-
     uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
 
     int target_idx = x * 2;
     for(int i = std::max(0, -target_idx); i < w*2; i++) {
         if(target_idx + i > buffer_size - 1) break;
-        uint8_t current_column_mask = mask_data[i % 2];
+        uint8_t current_halfcolumn_mask = mask_data[i % 2];
         if(mask) {
-            current_column_mask &= mask[i];
+            uint16_t buf_mask_column = ((uint16_t*) mask)[i / 2];
+            if(y > 0) buf_mask_column <<= y;
+            else if(y < 0) buf_mask_column >>= abs(y);
+
+            current_halfcolumn_mask &= ((uint8_t*)&buf_mask_column)[i % 2];
         }
 
-        buffer[target_idx + i] = ((uint8_t) (invert ? ~fanta[i] : fanta[i]) & current_column_mask) | (buffer[target_idx + i] & ~current_column_mask);
+        uint16_t buf_column = ((uint16_t*)fanta)[i / 2];
+        if(y > 0) buf_column <<= y;
+        else if(y < 0) buf_column >>= abs(y);
+        uint8_t buf_halfcolumn = ((uint8_t*)&buf_column)[i % 2];
+        buffer[target_idx + i] = ((uint8_t) (invert ? ~buf_halfcolumn : buf_halfcolumn) & current_halfcolumn_mask) | (buffer[target_idx + i] & ~current_halfcolumn_mask);
     }
 
     *dirty = true;
@@ -128,7 +132,14 @@ void FantaManipulator::put_string(const font_definition_t * font, const char * s
 
 void FantaManipulator::scroll(int dx, int dy) {
     if(dy != 0) {
-        fanta_offset_y(buffer, dy, width);
+        uint16_t * columns = (uint16_t*) buffer;
+        for(int i = 0; i < width; i++) {
+            if(dy > 0) {
+                columns[i] <<= dy;
+            } else if(dy < 0) {
+                columns[i] >>= abs(dy);
+            }
+        }
     }
 
     if(dx > 0) {

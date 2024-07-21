@@ -13,7 +13,6 @@ StringScroll::StringScroll(const font_definition_t * f, const char * s) {
     left_margin = 0;
     holdoff = 0;
     backing_buffer = nullptr;
-    temp_buffer = nullptr;
     set_string(s);
 
     switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
@@ -50,9 +49,6 @@ void StringScroll::set_string(const char * s) {
     if(backing_buffer != nullptr) {
         free(backing_buffer);
     }
-    if(temp_buffer != nullptr) {
-        free(temp_buffer);
-    }
 
     if(string != nullptr) {
         int width = measure_string_width(font, string);
@@ -61,8 +57,7 @@ void StringScroll::set_string(const char * s) {
 
         backing_buffer_size = 2 * width;
         backing_buffer = (fanta_buffer_t) malloc(backing_buffer_size);
-        temp_buffer = (fanta_buffer_t) malloc(backing_buffer_size);
-        if(backing_buffer == nullptr || temp_buffer == nullptr) {
+        if(backing_buffer == nullptr) {
             ESP_LOGE("SCRL", "Out Of Memory allocating backing buffer of size %i", backing_buffer_size);
         }
         else {
@@ -70,7 +65,6 @@ void StringScroll::set_string(const char * s) {
             FantaManipulator * bb = new FantaManipulator(backing_buffer, backing_buffer_size, width, 16, NULL, &dummy);
             bb->put_string(font, string, 0, 0);
             delete bb;
-            memcpy(temp_buffer, backing_buffer, backing_buffer_size);
         }
     }
 
@@ -91,11 +85,11 @@ int StringScroll::estimated_frame_count() {
 }
 
 void StringScroll::render(FantaManipulator * fb) {
-    if(temp_buffer == nullptr) return;
+    if(backing_buffer == nullptr) return;
 
     if(scroll_only_if_not_fit) {
         if(string_width <= fb->get_width()) {
-            fb->put_fanta(temp_buffer, align_to_right ? fb->get_width() - string_width : 0, y_position, backing_buffer_width, font->height);
+            fb->put_fanta(backing_buffer, align_to_right ? fb->get_width() - string_width : 0, y_position, backing_buffer_width, font->height);
             return;
         }
     }
@@ -123,14 +117,8 @@ void StringScroll::render(FantaManipulator * fb) {
         }
     }
 
-    fb->put_fanta(temp_buffer, fb->get_width() - position, y_position, backing_buffer_width, font->height);
-}
-
-void StringScroll::step() {
-    // because put_fanta corrupts the provided buffer, we need to copy it before rendering the next frame
-    if(temp_buffer == nullptr || backing_buffer == nullptr) return;
-    memcpy(temp_buffer, backing_buffer, backing_buffer_size);
-}
+    fb->put_fanta(backing_buffer, fb->get_width() - position, y_position, backing_buffer_width, font->height);
+} 
 
 void StringScroll::rewind() {
     position = 0;

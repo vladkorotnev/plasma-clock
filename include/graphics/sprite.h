@@ -42,8 +42,6 @@ typedef uint8_t* fanta_buffer_t;
 /// @note Unused pixels are filled with 0's. Transparency et al. should be handled by the drawing code.
 extern fanta_buffer_t sprite_to_fanta(const sprite_t*);
 extern fanta_buffer_t mask_to_fanta(const sprite_t*);
-/// @brief Offset a raw Fanta buffer vertically. Negative is towards the top.
-extern void fanta_offset_y(fanta_buffer_t,int,size_t);
 
 /// @brief Initialize a playback context for an animated sprite
 extern ani_sprite_state_t ani_sprite_prepare(const ani_sprite*);
