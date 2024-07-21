@@ -21,17 +21,19 @@ FantaManipulator::~FantaManipulator() {
 }
 
 bool FantaManipulator::lock(TickType_t timeout) {
+    if(buffer_semaphore == NULL) return true;
     return xSemaphoreTake(buffer_semaphore, timeout);
 }
 
 void FantaManipulator::unlock() {
+    if(buffer_semaphore == NULL) return;
     xSemaphoreGive(buffer_semaphore);
 }
 
 FantaManipulator* FantaManipulator::slice(int x, int w) {
     if(x > buffer_size/2) {
         ESP_LOGE(LOG_TAG, "Position (X=%i) is out of bounds of the screen", x);
-        return NULL;
+        return nullptr;
     }
 
     if(w > width - x) {
@@ -71,9 +73,7 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
     if(w <= 0 || h <= 0) return;
     
     uint16_t fanta_column_mask = 0x0;
-    for(int i = y; i < y + h; i++) {
-        if(i < 0) continue;
-        if(i > 16) break;
+    for(int i = std::max(y, 0); i < std::min(y + h, 16); i++) {
         fanta_column_mask |= (1 << i);
     }
 
@@ -84,10 +84,9 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
 
     uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
 
-    size_t target_idx = x * 2;
-    for(int i = 0; i < w*2; i++) {
-        if(target_idx + i > buffer_size - 1) continue;
-        if(target_idx + i < 0) continue;
+    int target_idx = x * 2;
+    for(int i = std::max(0, -target_idx); i < w*2; i++) {
+        if(target_idx + i > buffer_size - 1) break;
         uint8_t current_column_mask = mask_data[i % 2];
         if(mask) {
             current_column_mask &= mask[i];

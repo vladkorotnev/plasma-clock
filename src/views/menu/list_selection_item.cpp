@@ -23,6 +23,7 @@ MenuListSelectorView::MenuListSelectorView(const char * title, std::vector<const
 
 MenuListSelectorView::~MenuListSelectorView() {
     delete label;
+    delete value;
 }
 
 

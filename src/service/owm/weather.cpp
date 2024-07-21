@@ -120,7 +120,7 @@ void weather_start() {
         "OWM",
         4096,
         nullptr,
-        8,
+        1,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

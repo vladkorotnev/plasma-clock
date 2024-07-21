@@ -147,22 +147,6 @@ const alarm_setting_t* get_upcoming_alarm() {
         }
     }
 
-    // If none today, look for alarms in tomorrow
-    if(next_alarm == nullptr) {
-        for (int i = 0; i < ALARM_LIST_SIZE; i++) {
-            const alarm_setting_t * alarm = &alarms[i];
-            if (alarm->enabled) {
-                if (alarm->days == 0 || ALARM_ON_DAY(*alarm, (today.dayOfWeek + 1) % 7)) {
-                    tk_time_of_day_t alarm_time = { .hour = alarm->hour, .minute = alarm->minute, .second = 0, .millisecond = 0 };
-                    if (alarm_time < next_alarm_time) {
-                        next_alarm_time = alarm_time;
-                        next_alarm = alarm;
-                    }
-                }
-            }
-        }
-    }
-
     return next_alarm;
 }
 

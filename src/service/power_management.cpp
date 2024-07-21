@@ -164,7 +164,7 @@ void power_mgmt_start(SensorPool * s, DisplayDriver * d, Beeper * b) {
         "PM",
         4096,
         nullptr,
-        10,
+        4,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

@@ -32,14 +32,7 @@ void CurrentWeatherView::prepare() {
 }
 
 void CurrentWeatherView::step() {
-    current_weather_t w;
-    if(weather_get_current(&w) && w.last_updated != weather.last_updated) {
-        weather = w;
-        prepare_for_new_weather();
-    } else {
-        prerender_icon_frame();
-    }
-
+    prerender_icon_frame();
     bottom_line->step();
 }
 

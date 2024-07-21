@@ -113,7 +113,7 @@ void wotd_start() {
         "WOTD",
         8000,
         nullptr,
-        8,
+        1,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
