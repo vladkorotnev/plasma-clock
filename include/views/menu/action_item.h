@@ -16,5 +16,6 @@ private:
     const sprite_t * _icon;
     StringScroll * label;
     StringScroll * sublabel;
+    const char * subtitle;
     std::function<void()> _action;
 };
