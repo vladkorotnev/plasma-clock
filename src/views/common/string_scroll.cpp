@@ -56,7 +56,7 @@ void StringScroll::set_string(const char * s) {
         string_width = width;
 
         backing_buffer_size = 2 * width;
-        backing_buffer = (fanta_buffer_t) malloc(backing_buffer_size);
+        backing_buffer = (fanta_buffer_t) gralloc(backing_buffer_size);
         if(backing_buffer == nullptr) {
             ESP_LOGE("SCRL", "Out Of Memory allocating backing buffer of size %i", backing_buffer_size);
         }

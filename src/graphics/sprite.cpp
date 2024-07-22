@@ -5,10 +5,18 @@
 
 static char LOG_TAG[] = "FB_SPR";
 
+void* gralloc(const size_t size) {
+#ifndef BOARD_HAS_PSRAM
+    return malloc(size);
+#else
+    return heap_caps_malloc(size, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+#endif
+}
+
 fanta_buffer_t _convert_to_fanta(uint8_t width, uint8_t height, const uint8_t* data) {
     size_t required_size = width;
 
-    uint16_t * columns = (uint16_t*) malloc(required_size * sizeof(uint16_t));
+    uint16_t * columns = (uint16_t*) gralloc(required_size * sizeof(uint16_t));
     if(columns == nullptr) {
         ESP_LOGE(LOG_TAG, "Allocation failed");
         return nullptr;

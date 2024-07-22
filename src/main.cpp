@@ -30,7 +30,6 @@
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
-#include <stack>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -44,7 +43,7 @@ static ViewCompositor * desktop;
 static ViewMultiplexor * appHost;
 static FpsCounter * fpsCounter;
 
-static DisplayFramebuffer * fb;
+IRAM_ATTR static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
 static Console * con;
 static SensorPool * sensors;
@@ -170,6 +169,11 @@ void bringup_hid() {
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
+
+#ifdef BOARD_HAS_PSRAM
+    heap_caps_malloc_extmem_enable(16);
+#endif
+
     display_driver.reset();
 
     display_driver.set_power(true);
@@ -253,6 +257,18 @@ void setup() {
     alarm_init(sensors);
 }
 
+static TickType_t memory_last_print = 0;
+static void print_memory() {
+    TickType_t now = xTaskGetTickCount();
+    if(now - memory_last_print > pdMS_TO_TICKS(30000)) {
+        ESP_LOGI(LOG_TAG, "HEAP: %d free of %d (%d minimum)", ESP.getFreeHeap(), ESP.getHeapSize(), ESP.getMinFreeHeap());
+#ifdef BOARD_HAS_PSRAM
+        ESP_LOGI(LOG_TAG, "PSRAM: %d free of %d (%d minimum)", ESP.getFreePsram(), ESP.getPsramSize(), ESP.getMinFreePsram());
+#endif
+        memory_last_print = now;
+    }
+}
+
 void loop() {
     fb->wait_next_frame();
     if(graph->lock()) {
@@ -266,4 +282,5 @@ void loop() {
         _actual_current_state = current_state;
         appHost->switch_to(_actual_current_state, _next_transition);
     }
+    print_memory();
 }

@@ -42,10 +42,10 @@ void WeatherTaskFunction( void * pvParameter )
 {
     ESP_LOGI(LOG_TAG, "Task started");
 
-    static WiFiClient client;
-    static HTTPClient http;
+    EXT_RAM_ATTR static WiFiClient client;
+    EXT_RAM_ATTR static HTTPClient http;
 
-    static char url[256];
+    EXT_RAM_ATTR static char url[256];
     snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str());
 
     bool isFailure = false;

@@ -47,3 +47,6 @@ extern fanta_buffer_t mask_to_fanta(const sprite_t*);
 extern ani_sprite_state_t ani_sprite_prepare(const ani_sprite*);
 /// @brief Get the current animation frame to be drawn for an animated sprite
 extern sprite_t ani_sprite_frame(ani_sprite_state_t*);
+
+/// Allocate memory in the fast space, for graphics use specifically
+void* gralloc(const size_t);
