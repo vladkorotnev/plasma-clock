@@ -136,6 +136,16 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 
     static const sprite_t wrench_icns = { .width = 16, .height = 16, .data = wrench_icns_data, .mask = nullptr };
 
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    static const uint8_t weight_icns_data[] = {
+        // By PiiXL
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x08, 0x10, 0x08, 0x10, 0x28, 0x14, 0x28, 0x14, 0xab, 0xd5, 
+	    0xab, 0xd5, 0xab, 0xd5, 0x28, 0x14, 0x28, 0x14, 0x08, 0x10, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00
+    };
+
+    static const sprite_t weight_icns = { .width = 16, .height = 16, .data = weight_icns_data, .mask = nullptr };
+#endif
+
     static ListView * settings_menu = new ListView();
     settings_menu->add_view(new MenuActionItemView("Clock", [this](){ push_submenu(clock_menu); }, &clock_icns));
     settings_menu->add_view(new MenuActionItemView("Display", [this](){ push_submenu(display_menu); }, &display_icns));
@@ -153,6 +163,9 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     main_menu->add_view(new MenuActionItemView("Clock", [this](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
     main_menu->add_view(new MenuActionItemView("Alarm", [this](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    main_menu->add_view(new MenuActionItemView("Weighing", [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
+#endif
     main_menu->add_view(new MenuActionItemView("Settings", [this](){ push_submenu(settings_menu); }, &wrench_icns));
 }   
 

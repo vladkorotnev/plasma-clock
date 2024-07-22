@@ -27,6 +27,7 @@
 #include <app/menu.h>
 #include <app/alarm_editor.h>
 #include <app/timer_editor.h>
+#include <app/weighing.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -252,6 +253,9 @@ void setup() {
     appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
+#endif
 
     change_state(startup_state);
     alarm_init(sensors);

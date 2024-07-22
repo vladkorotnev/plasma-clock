@@ -1,4 +1,5 @@
 #include <views/transitions/transitions.h>
+#include <device_config.h>
 
 typedef enum device_state {
     STATE_BOOT,
@@ -7,6 +8,9 @@ typedef enum device_state {
     STATE_TIMER_EDITOR,
     STATE_IDLE,
     STATE_ALARMING,
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    STATE_WEIGHING,
+#endif
 
     STATE_OTAFVU,
 } device_state_t;

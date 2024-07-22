@@ -330,4 +330,12 @@ void app_idle_process() {
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
     hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
+
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    if(sensor_info_t * info = sensors->get_info(SENSOR_ID_BALANCE_BOARD_STARTLED)) {
+        if(info->last_result) {
+            push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+        }
+    }
+#endif
 }

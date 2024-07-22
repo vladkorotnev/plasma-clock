@@ -80,6 +80,8 @@ static constexpr prefs_key_t PREFS_KEY_ALARM_MAX_DURATION_MINUTES = "alm_dur";
 static constexpr prefs_key_t PREFS_KEY_TIMER_TIME_SECONDS = "timer_time";
 static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
 
+static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());
