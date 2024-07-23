@@ -68,14 +68,16 @@ void WordOfTheDayView::prepare() {
         last_update = ts;
         wotd_get_current(word_buffer, 32, definition_buffer, 256);
         ESP_LOGI(LOG_TAG, "New word of the day");
+        bottom_line->set_string(definition_buffer);
     }
 
+    bottom_line->rewind();
     icon_state = ani_sprite_prepare(&book_icon);
-    bottom_line->set_string(definition_buffer);
 }
 
 void WordOfTheDayView::step() {
     current_icon_frame = ani_sprite_frame(&icon_state);
+    bottom_line->step();
 }
 
 void WordOfTheDayView::render(FantaManipulator *fb) {

@@ -27,6 +27,7 @@ MenuNumberSelectorView::MenuNumberSelectorView(const char * title, int min_, int
 
 MenuNumberSelectorView::~MenuNumberSelectorView() {
     delete label;
+    delete value;
 }
 
 void MenuNumberSelectorView::step() {

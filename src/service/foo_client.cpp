@@ -225,7 +225,7 @@ void foo_client_begin() {
         "FOOCLI",
         4096,
         nullptr,
-        10,
+        2,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

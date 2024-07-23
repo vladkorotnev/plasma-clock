@@ -1,6 +1,7 @@
 #include <views/menu/action_item.h>
 
-MenuActionItemView::MenuActionItemView(const char * title, std::function<void()> action, const sprite_t * icon, const char * subtitle) {
+MenuActionItemView::MenuActionItemView(const char * title, std::function<void()> action, const sprite_t * icon, const char * subtitle_) {
+    subtitle = subtitle_;
     label = new StringScroll((subtitle == nullptr) ? &keyrus0816_font : &keyrus0808_font, title);
     label->start_at_visible = true;
     label->holdoff = 240;
@@ -27,6 +28,11 @@ MenuActionItemView::~MenuActionItemView() {
 }
 
 void MenuActionItemView::step() {
+    if(sublabel != nullptr && subtitle != nullptr) {
+        // dynamically update subtitle because the underlying value might have changed
+        sublabel->set_string(subtitle);
+    }
+
     Composite::step();
 
     if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {

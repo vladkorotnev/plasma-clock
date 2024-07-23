@@ -11,14 +11,14 @@
 static char LOG_TAG[] = "WORDNIK";
 
 static const char * currentApi = "https://api.wordnik.com/v4/words.json/wordOfTheDay?api_key=%s";
-static String apiKey;
+EXT_RAM_ATTR static String apiKey;
 static TickType_t interval;
 
 static TaskHandle_t hTask = NULL;
 
 static SemaphoreHandle_t cacheSemaphore;
-static char wordCache[128];
-static char definitionCache[256];
+EXT_RAM_ATTR static char wordCache[128];
+EXT_RAM_ATTR static char definitionCache[256];
 static TickType_t lastUpdate = 0;
 
 TickType_t wotd_get_last_update() {
@@ -44,10 +44,10 @@ void WordnikTaskFunction( void * pvParameter )
 {
     ESP_LOGI(LOG_TAG, "Task started");
 
-    static WiFiClientSecure client;
-    static HTTPClient http;
+    EXT_RAM_ATTR static WiFiClientSecure client;
+    EXT_RAM_ATTR static HTTPClient http;
 
-    static char url[128];
+    EXT_RAM_ATTR static char url[128];
     snprintf(url, 150, currentApi, apiKey.c_str());
     bool isFailure = false;
 
@@ -58,7 +58,7 @@ void WordnikTaskFunction( void * pvParameter )
         ESP_LOGV(LOG_TAG, "Query: %s", url);
         int response = http.GET();
         if(response == 200) {
-            JsonDocument response;
+            EXT_RAM_ATTR JsonDocument response;
 
             DeserializationError error = deserializeJson(response, http.getStream());
 
@@ -113,7 +113,7 @@ void wotd_start() {
         "WOTD",
         8000,
         nullptr,
-        8,
+        1,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

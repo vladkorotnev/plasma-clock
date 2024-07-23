@@ -19,6 +19,11 @@ typedef enum sensor_id {
     /// @brief A sensor using Switchbot Meter broadcasts for humidity measurement
     SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY,
 
+    /// @brief A sensor using a Balance Board for weight measurements, 100 units = 1kg
+    SENSOR_ID_BALANCE_BOARD_MILLIKILOS,
+    /// @brief A sensor triggering when a significant change of weight was detected on the Balance Board
+    SENSOR_ID_BALANCE_BOARD_STARTLED,
+
     /// @brief A virtual sensor indicating whether the PMU has been startled (brought out of the low power mode) recently
     VIRTSENSOR_ID_PMU_STARTLED,
     /// @brief A virtual sensor indicating whether the HID has been startled recently

@@ -13,6 +13,7 @@ public:
     int left_margin;
     void set_string(const char*);
     void set_y_position(int);
+    void rewind();
     int estimated_frame_count();
     void prepare();
     void render(FantaManipulator *);
@@ -26,4 +27,8 @@ private:
     int increment;
     int frame_counter;
     int wait_frames;
+
+    fanta_buffer_t backing_buffer;
+    int backing_buffer_width;
+    size_t backing_buffer_size;
 };

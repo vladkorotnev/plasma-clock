@@ -5,6 +5,7 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 #include <freertos/event_groups.h>
+#include <math.h>
 
 /// @brief A framebuffer for driving the plasma display
 class DisplayFramebuffer {

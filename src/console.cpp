@@ -35,7 +35,7 @@ Console::Console(const font_definition_t * f, DisplayFramebuffer * fb) {
         "CONS",
         4096,
         this,
-        10,
+        2,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

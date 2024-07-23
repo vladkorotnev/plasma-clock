@@ -26,6 +26,8 @@ typedef enum alarming_state {
     SNOOZE_HOLD_COUNTDOWN,
     SNOOZING,
     STOP_HOLD_COUNTDOWN,
+
+    STOPPED
 } alarming_state_t;
 
 static SimpleClock *clockView = nullptr;
@@ -40,7 +42,15 @@ static int snooze_minutes = 0;
 static bool is_snoozing = false;
 static melody_sequence_t melody;
 
+static TickType_t startedAt;
+static TickType_t maxDur;
+
 void app_alarming_prepare(Beeper* beeper) {
+    // do this prior to changing state because apparently this may get called from a separate thread, so step() goes ahead of prepare() and thus exits the alarm right away?
+    // TODO: somehow stick the state switching to the UI thread!! and all that
+    startedAt = xTaskGetTickCount();
+    maxDur = pdMS_TO_TICKS( prefs_get_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES) * 60000 );
+
     if(seq) {
         seq->stop_sequence();
         free(seq);
@@ -52,8 +62,6 @@ void app_alarming_prepare(Beeper* beeper) {
     arrows->prepare();
     arrows->active = true;
     clockView->prepare();
-
-    state = BLINKERING;
     framecount = 0;
     snooze_minutes = prefs_get_int(PREFS_KEY_ALARM_SNOOZE_MINUTES);
 
@@ -63,6 +71,7 @@ void app_alarming_prepare(Beeper* beeper) {
         seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
     }
     power_mgmt_pause();
+    state = BLINKERING;
 }
 
 void app_alarming_draw(FantaManipulator* fb) {
@@ -87,7 +96,7 @@ void app_alarming_draw(FantaManipulator* fb) {
                 }
 
                 if(framecount == 255) {
-                    #if HAS(TOUCH_PLANE)
+                    #if HAS(TOUCH_PLANE) || HAS(KEYPAD)
                     arrows->left = true;
                     arrows->top = false;
                     arrows->bottom = false;
@@ -195,6 +204,7 @@ void begin_snoozing() {
 }
 
 void stop_alarm() {
+    state = STOPPED;
     clear_triggered_alarm();
     seq->stop_sequence();
     power_mgmt_resume();
@@ -238,6 +248,14 @@ void app_alarming_process() {
                     arrows->right = false;
                     state = STOP_HOLD_COUNTDOWN;
                     #endif
+                }
+
+                if(maxDur > 0) {
+                    // there is a max set limit
+                    if(xTaskGetTickCount() - startedAt > maxDur) {
+                        stop_alarm();
+                        return;
+                    }
                 }
             }
         break;

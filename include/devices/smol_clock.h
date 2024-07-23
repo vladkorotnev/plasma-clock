@@ -9,7 +9,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "microPIS-OS"
-#define PRODUCT_VERSION "2.0"
+#define PRODUCT_VERSION "2.1"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_12;
@@ -39,7 +39,7 @@ const gpio_num_t HWCONF_WS0010_EN_GPIO = GPIO_NUM_18;
 // ---- Connection to touch plane ----
 const touch_plane_definition_t HWCONF_TOUCH_PLANE = {
     // Screen panel
-    {/*GPIO_NUM_32*/ TOUCH_PAD_NUM9, {.key = KEY_RIGHT, .press_threshold = 7, .release_threshold = -3}},
+    {/*GPIO_NUM_32*/ TOUCH_PAD_NUM9, {.key = KEY_RIGHT, .press_threshold = 10, .release_threshold = -6}},
     {/*GPIO_NUM_33*/ TOUCH_PAD_NUM8, {.key = KEY_UP, .press_threshold = 7, .release_threshold = -2}},
     {/*GPIO_NUM_27*/ TOUCH_PAD_NUM7, {.key = KEY_DOWN, .press_threshold = 7, .release_threshold = -2}},
     {/*GPIO_NUM_14*/ TOUCH_PAD_NUM6, {.key = KEY_LEFT, .press_threshold = 7, .release_threshold = -2}},

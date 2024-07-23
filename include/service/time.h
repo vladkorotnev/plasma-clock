@@ -11,6 +11,8 @@ typedef struct tk_time_of_day {
     int millisecond;
 } tk_time_of_day_t;
 
+static const tk_time_of_day_t ONE_HOUR = { .hour = 1, .minute = 0, .second = 0, .millisecond = 0 };
+
 typedef struct tk_date {
     int year;
     int month;
@@ -32,3 +34,10 @@ tk_date_t get_current_date();
 void set_current_time(tk_time_of_day_t);
 /// @brief Set the current date without changing the timezone et al
 void set_current_date(tk_date_t);
+
+tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+bool operator<=(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+bool operator>=(const tk_time_of_day_t& a, const tk_time_of_day_t& b);

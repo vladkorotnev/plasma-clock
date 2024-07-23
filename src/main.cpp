@@ -6,6 +6,7 @@
 #include <console.h>
 #include <sensor/sensors.h>
 #include <input/touch_plane.h>
+#include <input/keypad.h>
 #include <input/hid_sensor.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
@@ -26,14 +27,16 @@
 #include <app/menu.h>
 #include <app/alarm_editor.h>
 #include <app/timer_editor.h>
+#include <app/weighing.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
-#include <stack>
 
 static char LOG_TAG[] = "APL_MAIN";
 
 static device_state_t current_state = STATE_BOOT;
+static device_state_t _actual_current_state = STATE_BOOT;
+static transition_type_t _next_transition = TRANSITION_NONE;
 const device_state_t startup_state = STATE_IDLE;
 static std::stack<device_state_t> state_stack = {};
 
@@ -41,7 +44,7 @@ static ViewCompositor * desktop;
 static ViewMultiplexor * appHost;
 static FpsCounter * fpsCounter;
 
-static DisplayFramebuffer * fb;
+IRAM_ATTR static DisplayFramebuffer * fb;
 static FantaManipulator * graph;
 static Console * con;
 static SensorPool * sensors;
@@ -49,17 +52,21 @@ static OTAFVUManager * ota;
 static Beeper * beepola;
 static BeepSequencer * bs;
 
-static bool fps_counter = false;
-
 void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
         current_state = STATE_OTAFVU;
+        _actual_current_state = STATE_OTAFVU;
         return; // all other things handled in the FVU process
     }
 
     if(to == current_state) return;
+
+    // calling `change_state` from outside of main thread causes a prepare() call on the upcoming view
+    // to be out of sequence with step()/render() depending on what the main thread was up to at the time.
+    // So just keep the requested change in memory and do it when main thread gets around to it.
+    // might we need a queue here?
+    _next_transition = transition;
     current_state = to;
-    appHost->switch_to(current_state, transition);
 }
 
 void push_state(device_state_t next, transition_type_t transition) {
@@ -153,11 +160,19 @@ void bringup_hid() {
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     }
 #endif
+#if HAS(KEYPAD)
+    keypad_start();
+#endif
 }
 
 void setup() {
     // Set up serial for logs
     Serial.begin(115200);
+
+#ifdef BOARD_HAS_PSRAM
+    heap_caps_malloc_extmem_enable(16);
+#endif
+
     display_driver.reset();
 
     display_driver.set_power(true);
@@ -219,7 +234,6 @@ void setup() {
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
     admin_panel_prepare(sensors, beepola);
-    fps_counter = prefs_get_bool(PREFS_KEY_FPS_COUNTER);
 
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 
@@ -236,9 +250,24 @@ void setup() {
     appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
+#endif
 
     change_state(startup_state);
-    alarm_init();
+    alarm_init(sensors);
+}
+
+static TickType_t memory_last_print = 0;
+static void print_memory() {
+    TickType_t now = xTaskGetTickCount();
+    if(now - memory_last_print > pdMS_TO_TICKS(30000)) {
+        ESP_LOGI(LOG_TAG, "HEAP: %d free of %d (%d minimum)", ESP.getFreeHeap(), ESP.getHeapSize(), ESP.getMinFreeHeap());
+#ifdef BOARD_HAS_PSRAM
+        ESP_LOGI(LOG_TAG, "PSRAM: %d free of %d (%d minimum)", ESP.getFreePsram(), ESP.getPsramSize(), ESP.getMinFreePsram());
+#endif
+        memory_last_print = now;
+    }
 }
 
 void loop() {
@@ -248,4 +277,11 @@ void loop() {
         graph->unlock();
     }
     desktop->step();
+    
+    // thread safe state change kind of thing
+    if(_actual_current_state != current_state) {
+        _actual_current_state = current_state;
+        appHost->switch_to(_actual_current_state, _next_transition);
+    }
+    print_memory();
 }

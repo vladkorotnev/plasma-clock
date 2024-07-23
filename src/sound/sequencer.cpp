@@ -28,6 +28,8 @@ BeepSequencer::~BeepSequencer() {
 
 void BeepSequencer::play_sequence(const melody_sequence_t melody, beeper_channel_t ch, int repeat) {
     pointer = 0;
+    loop_point = 0;
+    timbre = DUTY_SQUARE;
     current_sequence = melody;
     current_channel = ch;
     repetitions = repeat;
@@ -70,21 +72,27 @@ void BeepSequencer::stop_sequence() {
 void BeepSequencer::task() {
     while(is_running) {
         melody_item_t cur = current_sequence.array[pointer];
-        if(cur.frequency == 0) {
-            beeper->stop_tone(current_channel);
+        if(cur.length == SEQ_LEN_FLAG_TIMBRE_SET) {
+            timbre = cur.frequency;
+        } else if(cur.length == SEQ_LEN_FLAG_THE_LOOPAH) {
+            loop_point = pointer + 1;
         } else {
-            beeper->start_tone(current_channel, cur.frequency);
+            if(cur.frequency == 0) {
+                beeper->stop_tone(current_channel);
+            } else {
+                beeper->start_tone(current_channel, cur.frequency, timbre);
+            }
+            vTaskDelay(cur.length);
         }
 
-        vTaskDelay(cur.length);
         pointer ++;
 
         if(pointer >= current_sequence.count) {
             if(repetitions > 0) {
                 repetitions--;
-                pointer = 0;
+                pointer = loop_point;
             } else if(repetitions < 0) {
-                pointer = 0;
+                pointer = loop_point;
             } else {
                 beeper->stop_tone(current_channel);
                 is_running = false;

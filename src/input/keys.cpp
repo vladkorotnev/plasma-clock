@@ -61,11 +61,11 @@ static key_state_t min_state_of_mask(key_bitmask_t keys, bool peek = false) {
 }
 
 void hid_set_key_state(key_id_t key, bool state) {
-    if(state) {
+    if(state && (active_keys & KEY_ID_TO_BIT(key)) == 0) {
         keypress_started_at[key] = xTaskGetTickCount();
         keypress_repeated_at[key] = xTaskGetTickCount();
         active_keys |= KEY_ID_TO_BIT(key);
-    } else {
+    } else if(!state && (active_keys & KEY_ID_TO_BIT(key)) != 0) {
         active_keys &= ~KEY_ID_TO_BIT(key);
     }
 }

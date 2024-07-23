@@ -53,6 +53,7 @@ static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS = "s_rem
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS = "s_outside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS = "s_wotd_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS = "s_foo_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS = "s_alm_s";
 
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_ON = "h_chime_on";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_START_HOUR = "h_chime_start";
@@ -74,9 +75,12 @@ static constexpr prefs_key_t PREFS_KEY_SWITCHBOT_EMULATES_LOCAL = "wos_emus";
 
 static constexpr prefs_key_t PREFS_KEY_ALARM_LIST = "alarms";
 static constexpr prefs_key_t PREFS_KEY_ALARM_SNOOZE_MINUTES = "snz_minutes";
+static constexpr prefs_key_t PREFS_KEY_ALARM_MAX_DURATION_MINUTES = "alm_dur";
 
 static constexpr prefs_key_t PREFS_KEY_TIMER_TIME_SECONDS = "timer_time";
 static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
+
+static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
 
 void prefs_force_save();
 

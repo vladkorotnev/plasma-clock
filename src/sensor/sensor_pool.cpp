@@ -25,7 +25,7 @@ SensorPool::SensorPool() {
         "SENS",
         4096,
         this,
-        10,
+        3,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

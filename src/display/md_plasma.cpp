@@ -84,9 +84,9 @@ void MorioDenkiPlasmaDriver::set_databus(uint8_t data) {
 
 void MorioDenkiPlasmaDriver::pulse_clock() {
     gpio_set_level(clk_gpio, 0);
-    delayMicroseconds(5);
+    delayMicroseconds(1);
     gpio_set_level(clk_gpio, 1);
-    delayMicroseconds(5);
+    delayMicroseconds(1);
 }
 
 void MorioDenkiPlasmaDriver::set_show(bool show) {
