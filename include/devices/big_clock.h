@@ -20,8 +20,8 @@ const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {
     GPIO_NUM_2, 
     GPIO_NUM_0,
     GPIO_NUM_4, 
-    GPIO_NUM_16, 
-    GPIO_NUM_17, 
+    GPIO_NUM_32,
+    GPIO_NUM_33,
     GPIO_NUM_5, 
     GPIO_NUM_18
 };
@@ -48,9 +48,7 @@ const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_35;
 const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
 const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
 
-// ---- TBD: Connection of buttons ----
-// Free GPIOS: 36, 39, 34, 27
-
+// ---- Connection of buttons ----
 const keypad_definition_t HWCONF_KEYPAD = {
     {GPIO_NUM_27, KEY_LEFT},
     {GPIO_NUM_39, KEY_RIGHT},

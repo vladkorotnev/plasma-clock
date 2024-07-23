@@ -52,8 +52,6 @@ static OTAFVUManager * ota;
 static Beeper * beepola;
 static BeepSequencer * bs;
 
-static bool fps_counter = false;
-
 void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
         current_state = STATE_OTAFVU;
@@ -236,7 +234,6 @@ void setup() {
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
     admin_panel_prepare(sensors, beepola);
-    fps_counter = prefs_get_bool(PREFS_KEY_FPS_COUNTER);
 
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 

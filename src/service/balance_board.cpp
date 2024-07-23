@@ -33,7 +33,6 @@ void wiimote_callback(wiimote_event_type_t event_type, uint16_t handle, uint8_t 
   {
     if (data[1] == 0x34)
     {
-      // https://wiibrew.org/wiki/Wii_Balance_Board#Data_Format
       TickType_t now = xTaskGetTickCount();
 
       float weight[4];
