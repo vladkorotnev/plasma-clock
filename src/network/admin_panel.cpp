@@ -129,7 +129,7 @@ static void render_alarms() {
         GP.TR();
          for(int d = 0; d < 7; d++) {
                 GP.TD();
-                GP.CHECK(tmp + days[d], ALARM_ON_DAY(a, 0));
+                GP.CHECK(tmp + days[d], ALARM_ON_DAY(a, d));
         }
         GP.TABLE_END();
         GP.BREAK();
