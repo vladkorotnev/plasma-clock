@@ -17,8 +17,8 @@ MenuListSelectorView::MenuListSelectorView(const char * title, std::vector<const
         value->left_margin = 10;
         label->start_at_visible = true;
         label->holdoff = 100;
-        add_subrenderable(label);
-        add_subrenderable(value);
+        add_composable(label);
+        add_composable(value);
 }
 
 MenuListSelectorView::~MenuListSelectorView() {

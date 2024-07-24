@@ -8,6 +8,7 @@ typedef enum device_state {
     STATE_TIMER_EDITOR,
     STATE_IDLE,
     STATE_ALARMING,
+    STATE_STOPWATCH,
 #if HAS(BALANCE_BOARD_INTEGRATION)
     STATE_WEIGHING,
 #endif

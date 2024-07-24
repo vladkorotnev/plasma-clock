@@ -1,7 +1,7 @@
 #include "views/common/string_scroll.h"
 #include <service/prefs.h>
 
-StringScroll::StringScroll(const font_definition_t * f, const char * s) {
+StringScroll::StringScroll(const font_definition_t * f, const char * s): Composable() {
     font = f;
     position = INT_MAX;
     string_width = 0;

@@ -1,56 +1,37 @@
 #include <views/menu/time_setting.h>
 #include <input/keys.h>
 
-void MenuTimeSettingView::render(FantaManipulator *fb) {
-    if(animationPhase > -1) {
-        animationPhase++;
-        cursorTimer = 0;
-        isShowingCursor = false;
-        if(animationPhase == 16) {
-            animationPhase = -1;
-            isShowingCursor = true;
-            prevHour = hour;
-            prevMinute = minute;
-            prevSecond = second;
-        }
-    } else {
-        prevHour = hour;
-        prevMinute = minute;
-        prevSecond = second;
-    }
+void MenuTimeSettingView::prepare() {
+    hourView->value = hour;
+    minuteView->value = minute;
+    secondView->value = second;
+    Composite::prepare();
+}
 
+void MenuTimeSettingView::render(FantaManipulator *fb) {
     cursorTimer++;
     if(cursorTimer == 30) {
         cursorTimer = 0;
         isShowingCursor = !isShowingCursor;
     }
 
-    int char_count = showSeconds ? 8 : 5; // XX:XX:XX or XX:XX
-    int text_width = char_count * font->width;
-    int left_offset = fb->get_width() / 2 - text_width / 2;
-    int cursor_offset = 0;
+    Composite::render(fb);
 
-    draw_dropping_number(fb, prevHour, hour, animationPhase, left_offset);
-    if(cursorPosition == CursorPosition::HOUR) cursor_offset = left_offset;
-    left_offset += 2 * font->width;
-    
-    fb->put_glyph(font, ':', left_offset, 0);
-    left_offset += font->width;
-
-    draw_dropping_number(fb, prevMinute, minute, animationPhase, left_offset);
-    if(cursorPosition == CursorPosition::MINUTE) cursor_offset = left_offset;
-    left_offset += 2 * font->width;
+    fb->put_glyph(&xnu_font, ':', hourView->x_offset + hourView->width, 0);
 
     if (showSeconds) {
-        fb->put_glyph(font, ':', left_offset, 0);
-        left_offset += font->width;
+        fb->put_glyph(&xnu_font, ':', minuteView->x_offset + minuteView->width, 0);
+    }
 
-        draw_dropping_number(fb, prevSecond, second, animationPhase, left_offset);
-        if(cursorPosition == CursorPosition::SECOND) cursor_offset = left_offset;
+    DroppingDigitView * editedView;
+    switch(cursorPosition) {
+        case HOUR: editedView = hourView; break;
+        case MINUTE: editedView = minuteView; break;
+        case SECOND: editedView = secondView; break;
     }
 
     if(isShowingCursor) {
-        fb->rect(cursor_offset - 2, 0, cursor_offset + 2 * font->width + 1, 15, false);
+        fb->rect(editedView->x_offset - 2, 0, editedView->x_offset + editedView->width + 1, 15, false);
     }
 }
 
@@ -63,7 +44,7 @@ void MenuTimeSettingView::add_hr(bool increment) {
         if(hour < 0) hour = 23;
     }
 
-    if(animationPhase == -1) animationPhase = 0;
+    hourView->value = hour;
 }
 
 void MenuTimeSettingView::add_min(bool increment) {
@@ -80,7 +61,7 @@ void MenuTimeSettingView::add_min(bool increment) {
             add_hr(false);
         }
     }
-    if(animationPhase == -1) animationPhase = 0;
+    minuteView->value = minute;
 }
 
 void MenuTimeSettingView::add_sec(bool increment) {
@@ -97,7 +78,7 @@ void MenuTimeSettingView::add_sec(bool increment) {
             add_min(false);
         }
     }
-    if(animationPhase == -1) animationPhase = 0;
+    secondView->value = second;
 }
 
 void MenuTimeSettingView::step() {
@@ -127,7 +108,5 @@ void MenuTimeSettingView::step() {
         }
     }
 
-    if(animationPhase == 8) {
-        beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
-    }
+    Composite::step();
 }

@@ -5,14 +5,31 @@
 #include <input/keys.h>
 
 
-class AppShimTimerEditor::TimerEditorMainScreen: public Renderable, DroppingDigits {
+class AppShimTimerEditor::TimerEditorMainScreen: public Composite {
 public:
     static void xTimerCallback(TimerHandle_t xTimer) {
         TimerEditorMainScreen * that = static_cast<TimerEditorMainScreen *>(pvTimerGetTimerID( xTimer ));
         that->tick();
     }
 
-    TimerEditorMainScreen(Beeper *b, std::function<void(bool, Renderable *)> _activation): DroppingDigits() {
+    TimerEditorMainScreen(Beeper *b, std::function<void(bool, Renderable *)> _activation) {
+        hourView = new DroppingDigitView(2, 0, b);
+        minuteView = new DroppingDigitView(2, 0, b);
+        secondView = new DroppingDigitView(2, 0, b);
+
+        int char_count = 10; // XX:XX:XX []
+        int text_width = char_count * xnu_font.width;
+        int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
+        hourView->x_offset = left_offset;
+        left_offset += hourView->width + xnu_font.width;
+        minuteView->x_offset = left_offset;
+        left_offset += hourView->width + xnu_font.width;
+        secondView->x_offset = left_offset;
+
+        add_composable(hourView);
+        add_composable(minuteView);
+        add_composable(secondView);
+
         beeper = b;
         activation = _activation;
         if(beeper != nullptr) {
@@ -24,7 +41,9 @@ public:
             });
         }
         load_prefs();
-        animationPhase = -1;
+        hourView->value = hour;
+        minuteView->value = minute;
+        secondView->value = second;
         cursorTimer = 0;
         isRunning = false;
 
@@ -44,61 +63,38 @@ public:
         if(melodySelector != nullptr) {
             delete melodySelector;
         }
+
+        delete hourView;
+        delete minuteView;
+        delete secondView;
     }
 
     void render(FantaManipulator *fb) {
-        if(animationPhase > -1) {
-            animationPhase++;
-            cursorTimer = 0;
-            isShowingCursor = false;
-            if(animationPhase == 16) {
-                animationPhase = -1;
-                isShowingCursor = true;
-                prevHour = hour;
-                prevMinute = minute;
-                prevSecond = second;
-            }
-        } else {
-            prevHour = hour;
-            prevMinute = minute;
-            prevSecond = second;
-        }
-
         cursorTimer++;
         if(cursorTimer == 30) {
             cursorTimer = 0;
             isShowingCursor = !isShowingCursor;
         }
 
-        int char_count = 10; // XX:XX:XX []
-        int text_width = char_count * font->width;
-        int left_offset = fb->get_width()/2 - text_width/2;
         int cursor_offset = 0;
 
-        draw_dropping_number(fb, prevHour, hour, animationPhase, left_offset);
-        if(cursorPosition == CursorPosition::HOUR) cursor_offset = left_offset;
-        left_offset += 2 * font->width;
+        if(cursorPosition == CursorPosition::HOUR) cursor_offset = hourView->x_offset;
+        if(cursorPosition == CursorPosition::MINUTE) cursor_offset = minuteView->x_offset;
+        if(cursorPosition == CursorPosition::SECOND) cursor_offset = secondView->x_offset;
+
+        Composite::render(fb);
         
-        fb->put_glyph(font, ':', left_offset, 0);
-        left_offset += font->width;
+        fb->put_glyph(&xnu_font, ':', hourView->x_offset + hourView->width, 0);
+        fb->put_glyph(&xnu_font, ':', minuteView->x_offset + minuteView->width, 0);
 
-        draw_dropping_number(fb, prevMinute, minute, animationPhase, left_offset);
-        if(cursorPosition == CursorPosition::MINUTE) cursor_offset = left_offset;
-        left_offset += 2 * font->width;
-
-        fb->put_glyph(font, ':', left_offset, 0);
-        left_offset += font->width;
-
-        draw_dropping_number(fb, prevSecond, second, animationPhase, left_offset);
-        if(cursorPosition == CursorPosition::SECOND) cursor_offset = left_offset;
-        left_offset += 3*font->width;
+        int left_offset = secondView->x_offset + secondView->width + xnu_font.width;
 
         if(isRunning) fb->rect(left_offset-1, 0, left_offset + 17, 15, true);
         fb->put_glyph(&keyrus0816_font, 0x10, left_offset, 0, isRunning);
         if(cursorPosition == CursorPosition::PLAY_PAUSE) cursor_offset = left_offset;
 
         if(isShowingCursor) {
-            fb->rect(cursor_offset - 2, 0, cursor_offset + 2 * font->width + 1, 15, false);
+            fb->rect(cursor_offset - 2, 0, cursor_offset + 2 * xnu_font.width + 1, 15, false);
         }
     }
 
@@ -139,9 +135,7 @@ public:
 
         if(hid_test_key_any() && sequencer) sequencer->stop_sequence();
 
-        if(animationPhase == 8) {
-            beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
-        }
+        Composite::step();
     }
 
     void tick() {
@@ -167,10 +161,9 @@ private:
     };
     bool isRunning;
     int hour, minute, second;
-    int prevHour;
-    int prevMinute;
-    int prevSecond;
-    int animationPhase;
+    DroppingDigitView * hourView;
+    DroppingDigitView * minuteView;
+    DroppingDigitView * secondView;
     uint8_t cursorTimer;
     CursorPosition cursorPosition;
     bool isShowingCursor;
@@ -198,8 +191,7 @@ private:
             hour -= 1;
             if(hour < 0) hour = 23;
         }
-
-        if(animationPhase == -1) animationPhase = 0;
+        hourView->value = hour;
     }
     void add_min(bool increment) {
         if(increment) {
@@ -215,7 +207,7 @@ private:
                 add_hr(false);
             }
         }
-        if(animationPhase == -1) animationPhase = 0;
+        minuteView->value = minute;
     }
     void add_sec(bool increment) {
         if(increment) {
@@ -231,7 +223,7 @@ private:
                 add_min(false);
             }
         }
-        if(animationPhase == -1) animationPhase = 0;
+        secondView->value = second;
     }
     void start_stop() {
         isRunning = !isRunning;

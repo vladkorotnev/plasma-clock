@@ -21,11 +21,6 @@ typedef struct tk_date {
     int dayOfWeek;
 } tk_date_t;
 
-typedef struct tk_datetime {
-    tk_date_t date;
-    tk_time_of_day_t time;
-} tk_datetime_t;
-
 /// @brief Start up the timekeeping service
 void timekeeping_begin();
 
@@ -40,7 +35,7 @@ void set_current_time(tk_time_of_day_t);
 /// @brief Set the current date without changing the timezone et al
 void set_current_date(tk_date_t);
 /// @brief Returns the system uptime as human-readable components
-tk_datetime_t get_uptime();
+tk_time_of_day_t get_uptime();
 
 tk_time_of_day_t operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b);

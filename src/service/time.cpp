@@ -125,27 +125,18 @@ void set_current_date(tk_date_t date) {
     ESP_LOGI(LOG_TAG, "Changed date, current: %04d/%02d/%02d %02d:%02d:%02d", date.year, date.month, date.day, time.hour, time.minute, time.second);
 }
 
-tk_datetime_t get_uptime() {
+tk_time_of_day_t get_uptime() {
     int64_t uptime_us = esp_timer_get_time();
     int64_t uptime_ms = uptime_us / 1000;
     int64_t uptime_s = uptime_ms / 1000;
     int64_t uptime_m = uptime_s / 60;
     int64_t uptime_h = uptime_m / 60;
-    int64_t uptime_d = uptime_h / 24;
 
-    return tk_datetime_t {
-        .date = {
-            .year = 0,
-            .month = 0,
-            .day = (int) uptime_d,
-            .dayOfWeek = 0
-        },
-        .time = {
-            .hour = (int) uptime_h % 24,
-            .minute = (int) uptime_m % 60,
-            .second = (int) uptime_s % 60,
-            .millisecond = (int) uptime_ms % 1000
-        }
+    return {
+        .hour = (int) uptime_h,
+        .minute = (int) uptime_m % 60,
+        .second = (int) uptime_s % 60,
+        .millisecond = (int) uptime_ms % 1000
     };
 }
 

@@ -77,7 +77,7 @@ public:
         framecount { 0 },
         cursorShows { true },
         onActivated(onActivated) {
-            add_subrenderable(label);
+            add_composable(label);
         }
     
     ~AlarmDaySelectorView() {

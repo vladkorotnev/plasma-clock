@@ -5,7 +5,7 @@
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
 
-class AppShimWeighing::WeighingView: public Renderable {
+class AppShimWeighing::WeighingView: public Composable {
 public:
     WeighingView(SensorPool*s): 
         sensors(s),

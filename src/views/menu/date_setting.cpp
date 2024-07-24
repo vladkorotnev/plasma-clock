@@ -1,54 +1,33 @@
 #include <views/menu/date_setting.h>
 #include <input/keys.h>
 
-void MenuDateSettingView::render(FantaManipulator *fb) {
-    if(animationPhase > -1) {
-        animationPhase++;
-        cursorTimer = 0;
-        isShowingCursor = false;
-        if(animationPhase == 16) {
-            animationPhase = -1;
-            isShowingCursor = true;
-            prevYear = year;
-            prevMonth = month;
-            prevDay = day;
-        }
-    } else {
-        prevYear = year;
-        prevMonth = month;
-        prevDay = day;
-    }
+void MenuDateSettingView::prepare() {
+    yearView->value = year;
+    monthView->value = month;
+    dayView->value = day;
+    Composite::prepare();
+}
 
+void MenuDateSettingView::render(FantaManipulator *fb) {
     cursorTimer++;
     if(cursorTimer == 30) {
         cursorTimer = 0;
         isShowingCursor = !isShowingCursor;
     }
 
-    int char_count = 10; // YYYY/MM/dd
-    int text_width = char_count * font->width;
-    int left_offset = fb->get_width() / 2 - text_width / 2;
-    int cursor_offset = 0;
-
-    draw_dropping_number(fb, prevYear, year, animationPhase, left_offset);
-    if(cursorPosition == YEAR) cursor_offset = left_offset;
-    left_offset += 4 * font->width;
+    Composite::render(fb);
     
-    fb->put_glyph(font, '/', left_offset, 0);
-    left_offset += font->width;
+    fb->put_glyph(&xnu_font, '/', yearView->x_offset + yearView->width, 0);
+    fb->put_glyph(&xnu_font, '/', monthView->x_offset + monthView->width, 0);
 
-    draw_dropping_number(fb, prevMonth, month, animationPhase, left_offset);
-    if(cursorPosition == MONTH) cursor_offset = left_offset;
-    left_offset += 2 * font->width;
-
-    fb->put_glyph(font, '/', left_offset, 0);
-    left_offset += font->width;
-
-    draw_dropping_number(fb, prevDay, day, animationPhase, left_offset);
-    if(cursorPosition == DAY) cursor_offset = left_offset;
-
+    DroppingDigitView * editedView;
+    switch(cursorPosition) {
+        case DAY: editedView = dayView; break;
+        case MONTH: editedView = monthView; break;
+        case YEAR: editedView = yearView; break;
+    }
     if(isShowingCursor) {
-        fb->rect(cursor_offset - 2, 0, cursor_offset + (cursorPosition == YEAR ? 4 : 2) * font->width + 1, 15, false);
+        fb->rect(editedView->x_offset - 2, 0, editedView->x_offset + editedView->width + 1, 15, false);
     }
 }
 
@@ -60,8 +39,8 @@ void MenuDateSettingView::add_year(bool increment) {
         year -= 1;
         if(year < 1970) year = 2099;
     }
+    yearView->value = year;
     ensure_valid_day();
-    if(animationPhase == -1) animationPhase = 0;
 }
 
 void MenuDateSettingView::add_month(bool increment) {
@@ -78,8 +57,8 @@ void MenuDateSettingView::add_month(bool increment) {
             add_year(false);
         }
     }
+    monthView->value = month;
     ensure_valid_day();
-    if(animationPhase == -1) animationPhase = 0;
 }
 
 void MenuDateSettingView::add_day(bool increment) {
@@ -96,11 +75,12 @@ void MenuDateSettingView::add_day(bool increment) {
             day = get_max_day_for_month();
         }
     }
-    if(animationPhase == -1) animationPhase = 0;
+    dayView->value = day;
 }
 
 void MenuDateSettingView::ensure_valid_day() {
     day = std::min(day, get_max_day_for_month());
+    dayView->value = day;
 }
 
 int MenuDateSettingView::get_max_day_for_month() {
@@ -138,7 +118,5 @@ void MenuDateSettingView::step() {
         if(cursorPosition == 3) cursorPosition = YEAR;
     }
 
-    if(animationPhase == 8) {
-        beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
-    }
+    Composite::step();
 }
