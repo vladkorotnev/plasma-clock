@@ -24,6 +24,7 @@ private:
         WAIT_CONNECT,
         WEIGHING
     };
+    WeighingAppState curState;
     void update_state(transition_type_t);
 };
 #endif

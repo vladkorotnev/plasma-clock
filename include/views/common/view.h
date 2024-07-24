@@ -15,23 +15,52 @@ public:
     virtual void cleanup() { }
 };
 
-class Composite: public Renderable {
+class Composable: public Renderable {
 public:
-    void add_subrenderable(Renderable * r) { subrenderables.push_back(r); }
+    int x_offset = 0;
+    int width = -1;
+};
+
+class ClipView: public Composable {
+public:
+    ClipView(Renderable* content):
+        content(content)
+    {}
+
+    ~ClipView() {
+        delete content;
+    }
+
+protected:
+    Renderable * content;
+};
+
+class Composite: public Composable {
+public:
+    void add_composable(Composable * r) { composables.push_back(r); }
+    void add_subrenderable(Renderable * r) { add_composable(new ClipView(r)); }
     void prepare() {
-        for(Renderable *r: subrenderables) r->prepare();
+        for(Composable *r: composables) r->prepare();
     }
     void render(FantaManipulator*fb) {
-        for(Renderable *r: subrenderables) r->render(fb);
+        for(Composable *r: composables) {
+            if(r->x_offset <= 0 && r->width < 0) {
+                r->render(fb);
+            } else if(r->width > 0) {
+                FantaManipulator * temp = fb->slice(r->x_offset, r->width);
+                r->render(temp);
+                delete temp;
+            }
+        }
     }
     void step() {
-        for(Renderable *r: subrenderables) r->step();
+        for(Composable *r: composables) r->step();
     }
     void cleanup() {
-        for(Renderable *r: subrenderables) r->cleanup();
+        for(Renderable *r: composables) r->cleanup();
     }
 protected:
-    std::vector<Renderable*> subrenderables = {};
+    std::vector<Composable*> composables = {};
 };
 
 /// @brief Do not override the user-specified display time

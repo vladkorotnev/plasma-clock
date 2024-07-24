@@ -2,11 +2,12 @@
 #include <views/framework.h>
 
 /// @brief Scrolling string view
-class StringScroll: public Renderable {
+class StringScroll: public Composable {
 public:
     StringScroll(const font_definition_t*, const char* string = nullptr);
     int string_width;
     bool scroll_only_if_not_fit;
+    bool stopped;
     bool align_to_right;
     bool start_at_visible;
     int holdoff;

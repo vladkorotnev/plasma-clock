@@ -13,8 +13,11 @@ static bool initialized = false;
 static FauxSensor *kiloSensor;
 static TimerSensor *startledSensor;
 static TaskHandle_t hTask;
+static uint16_t hRemote = 0;
 static TickType_t lastUpdate = 0;
-static int blinks = 0;
+static TickType_t lastBlink = 0;
+static bool lastLed = false;
+static bool forceLed = false;
 static bool button = false;
 // Low-pass filter parameters
 static const float alpha = 0.1f; // Smoothing factor (0.0 - 1.0)
@@ -31,7 +34,7 @@ void wiimote_callback(wiimote_event_type_t event_type, uint16_t handle, uint8_t 
 {
   if (event_type == WIIMOTE_EVENT_DATA)
   {
-    if (data[1] == 0x34)
+    if (len > 11 && data[1] == 0x34)
     {
       TickType_t now = xTaskGetTickCount();
 
@@ -57,18 +60,20 @@ void wiimote_callback(wiimote_event_type_t event_type, uint16_t handle, uint8_t 
 
         ESP_LOGV(LOG_TAG, "Balance board value: %f kg", kilos);
         lastUpdate = now;
-
-        if (blinks > 0)
-        {
-          blinks--;
-          wiimote.set_led(handle, blinks % 2);
-        }
       }
 
       button = (data[3] & 0x08) != 0;
       if (button)
       {
         startledSensor->trigger();
+      }
+
+      if(!forceLed) {
+        if(now - lastBlink >= pdMS_TO_TICKS((lastLed ? 125 : 120000))) {
+          lastLed = !lastLed;
+          wiimote.set_led(handle, lastLed ? 1 : 0);
+          lastBlink = now;
+        }
       }
     }
   }
@@ -92,9 +97,8 @@ void wiimote_callback(wiimote_event_type_t event_type, uint16_t handle, uint8_t 
   else if (event_type == WIIMOTE_EVENT_CONNECT)
   {
     ESP_LOGI(LOG_TAG, "WIIMOTE_EVENT_CONNECT");
-    wiimote.set_led(handle, 1);
     sts = BB_CONNECTED;
-    blinks = 20;
+    hRemote = handle;
   }
   else if (event_type == WIIMOTE_EVENT_DISCONNECT)
   {
@@ -144,6 +148,13 @@ void balance_board_scan(bool state)
 balance_board_state_t balance_board_state()
 {
   return sts;
+}
+
+void balance_board_led(bool ledSts) {
+  if(sts != BB_CONNECTED) return;
+
+  forceLed = ledSts;
+  wiimote.set_led(hRemote, ledSts ? 1 : 0);
 }
 
 #endif

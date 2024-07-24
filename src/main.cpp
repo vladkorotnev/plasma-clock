@@ -27,6 +27,7 @@
 #include <app/menu.h>
 #include <app/alarm_editor.h>
 #include <app/timer_editor.h>
+#include <app/stopwatch.h>
 #include <app/weighing.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
@@ -250,6 +251,7 @@ void setup() {
     appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
+    appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
 #if HAS(BALANCE_BOARD_INTEGRATION)
     appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
 #endif
@@ -266,6 +268,8 @@ static void print_memory() {
 #ifdef BOARD_HAS_PSRAM
         ESP_LOGI(LOG_TAG, "PSRAM: %d free of %d (%d minimum)", ESP.getFreePsram(), ESP.getPsramSize(), ESP.getMinFreePsram());
 #endif
+        tk_time_of_day_t uptime = get_uptime();
+        ESP_LOGI(LOG_TAG, "Uptime: %02dh%02dm%02ds%03dms", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
         memory_last_print = now;
     }
 }

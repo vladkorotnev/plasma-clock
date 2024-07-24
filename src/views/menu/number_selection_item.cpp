@@ -19,8 +19,8 @@ MenuNumberSelectorView::MenuNumberSelectorView(const char * title, int min_, int
         value->holdoff = 100;
         label->start_at_visible = true;
         label->holdoff = 100;
-        add_subrenderable(label);
-        add_subrenderable(value);
+        add_composable(label);
+        add_composable(value);
         itoa(currentValue, currentValueStr, 10);
         value->set_string(currentValueStr);
     }

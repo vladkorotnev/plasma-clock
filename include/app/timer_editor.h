@@ -5,7 +5,7 @@
 #include <app/proto/navigation_stack.h>
 #include <sound/sequencer.h>
 
-class AppShimTimerEditor: public ProtoShimNavigationStack, DroppingDigits {
+class AppShimTimerEditor: public ProtoShimNavigationStack {
 public:
     AppShimTimerEditor(Beeper *);
     ~AppShimTimerEditor();

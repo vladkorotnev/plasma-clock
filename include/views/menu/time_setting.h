@@ -5,7 +5,7 @@
 #include <fonts.h>
 #include <sound/beeper.h>
 
-class MenuTimeSettingView: public Renderable, DroppingDigits {
+class MenuTimeSettingView: public Composite {
 public:
     int hour;
     int minute;
@@ -15,18 +15,31 @@ public:
         hour(initialHour),
         minute(initialMinute),
         second(initialSeconds),
-        prevHour(initialHour),
-        prevMinute(initialMinute),
-        prevSecond(initialSeconds),
+        hourView(new DroppingDigitView(2, initialHour, b)),
+        minuteView(new DroppingDigitView(2, initialMinute, b)),
+        secondView(new DroppingDigitView(2, initialSeconds, b)),
         showSeconds(showSeconds),
-        animationPhase { -1 },
         cursorTimer { 0 },
         cursorPosition { CursorPosition::HOUR },
         isShowingCursor { false },
         onFinish(onFinish),
-        beeper(b),
-        DroppingDigits() {}
+        beeper(b) {
+            int char_count = showSeconds ? 8 : 5; // XX:XX:XX or XX:XX
+            int text_width = char_count * xnu_font.width;
+            int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
 
+            hourView->x_offset = left_offset;
+            minuteView->x_offset = hourView->x_offset + hourView->width + xnu_font.width;
+            secondView->x_offset = minuteView->x_offset + minuteView->width + xnu_font.width;
+
+            add_composable(hourView);
+            add_composable(minuteView);
+            if(showSeconds) {
+                add_composable(secondView);
+            }
+        }
+
+    void prepare();
     void step();
     void render(FantaManipulator *fb);
 
@@ -38,11 +51,10 @@ private:
         MINUTE,
         SECOND
     };
+    DroppingDigitView * hourView;
+    DroppingDigitView * minuteView;
+    DroppingDigitView * secondView;
     bool showSeconds;
-    int prevHour;
-    int prevMinute;
-    int prevSecond;
-    int animationPhase;
     uint8_t cursorTimer;
     CursorPosition cursorPosition;
     bool isShowingCursor;

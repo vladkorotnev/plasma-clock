@@ -15,27 +15,35 @@ static const sprite_t sleep_icns = {
     .mask = nullptr
 };
 
-inline void itoa_padded(uint i, char * a) {
-    a[0] = '0' + (i / 10);
-    a[1] = '0' + (i % 10);
-    a[2] = 0;
-}
 
-NextAlarmView::NextAlarmView(): DroppingDigits() {
+NextAlarmView::NextAlarmView() {
     show_alarm = false;
     time_remaining = {0};
-    font = &xnu_font;
-    phase = -1;
     disp_h = 0;
     disp_m = 0;
-    next_h = 0;
-    next_m = 0;
+
+    hourView = new DroppingDigitView(2, 0);
+    minuteView = new DroppingDigitView(2, 0);
+
+    int char_count = 5; // XX:XX
+    int text_width = char_count * xnu_font.width;
+    int left_offset = (HWCONF_DISPLAY_WIDTH_PX - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
+    hourView->x_offset = left_offset;
+    minuteView->x_offset = hourView->x_offset + hourView->width + xnu_font.width;
+
+    add_composable(hourView);
+    add_composable(minuteView);
+}
+
+NextAlarmView::~NextAlarmView() {
+    delete hourView, minuteView;
 }
 
 void NextAlarmView::prepare() {
     recalculate();
-    disp_h = next_h;
-    disp_m = next_m;
+    hourView->value = disp_h;
+    minuteView->value = disp_m;
+    Composite::prepare();
 }
 
 void NextAlarmView::recalculate() {
@@ -49,6 +57,14 @@ void NextAlarmView::recalculate() {
         time_remaining = alarm_time - now;
 
         show_alarm = time_remaining.hour < 8;
+
+        if(time_remaining.hour > 0) {
+            disp_h = time_remaining.hour;
+            disp_m = time_remaining.minute;
+        } else {
+            disp_h = time_remaining.minute;
+            disp_m = time_remaining.second;
+        }
     } else {
         show_alarm = false;
     }
@@ -56,42 +72,15 @@ void NextAlarmView::recalculate() {
 
 void NextAlarmView::step() {
     recalculate();
-    if(time_remaining.hour > 0) {
-        next_h = time_remaining.hour;
-        next_m = time_remaining.minute;
-    } else {
-        next_h = time_remaining.minute;
-        next_m = time_remaining.second;
-    }
-
-    // this pattern actually makes sense, extract it into DroppingDigits?
-    if((next_h != disp_h || next_m != disp_m) && phase == -1) {
-        phase = 0;
-    } else if (phase < 17 && phase > -1) {
-        phase++;
-    }
-
-    if(phase == 17) {
-        disp_h = next_h;
-        disp_m = next_m;
-        phase = -1;
-    }
+    hourView->value = disp_h;
+    minuteView->value = disp_m;
+    Composite::step();
 }
 
 void NextAlarmView::render(FantaManipulator *fb) {
+    Composite::render(fb);
     fb->put_sprite(&sleep_icns, 0, 0);
-
-    int char_count = 5; // XX:XX
-    int text_width = char_count * font->width;
-    int left_offset = (fb->get_width() - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
-
-    draw_dropping_number(fb, disp_h, next_h, phase == -1 ? 0 : phase, left_offset);
-    left_offset += 2 * font->width;
-    
-    fb->put_glyph(font, ':', left_offset, 0);
-    left_offset += font->width;
-
-    draw_dropping_number(fb, disp_m, next_m, phase == -1 ? 0 : phase, left_offset);
+    fb->put_glyph(&xnu_font, ':', hourView->x_offset + hourView->width, 0);
 }
 
 int NextAlarmView::desired_display_time() {

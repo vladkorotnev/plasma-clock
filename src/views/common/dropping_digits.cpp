@@ -1,6 +1,6 @@
 #include <views/common/dropping_digits.h>
 
-
+// TODO: remove all those and rely only on the DroppingDigitView
 inline void itoa_padded(uint i, char * a) {
     a[0] = '0' + (i / 10);
     a[1] = '0' + (i % 10);

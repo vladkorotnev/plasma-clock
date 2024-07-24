@@ -6,6 +6,23 @@
 #include <rsrc/common_icons.h>
 #include <service/time.h>
 
+class UptimeView: public MenuInfoItemView {
+public:
+    UptimeView(): MenuInfoItemView("Uptime", "") {
+        bottom_label->stopped = true;
+    }
+
+    void step() {
+        tk_time_of_day_t uptime = get_uptime();
+        snprintf(buf, 16, "%d:%d:%d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
+        bottom_label->set_string(buf);
+        MenuInfoItemView::step();
+    }
+
+private:
+    char buf[16];
+};
+
 AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
@@ -43,7 +60,6 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         tk_date_t today = get_current_date();
         if(ds_view != nullptr) delete ds_view;
         ds_view = new MenuDateSettingView(beeper, today.year, today.month, today.day, [this](int y, int m, int d) {
-            // todo: set date
             tk_date_t new_date = {
                 .year = y, .month = m, .day = d
             };
@@ -103,6 +119,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     String tmp = NetworkManager::current_ip();
     strncpy(buf_ip, tmp.c_str(), 16);
     system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
+    system_info->add_view(new UptimeView());
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL
@@ -136,6 +153,14 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 
     static const sprite_t wrench_icns = { .width = 16, .height = 16, .data = wrench_icns_data, .mask = nullptr };
 
+    static const uint8_t stopwatch_icns_data[] = {
+        // By PiiXL
+        0x07, 0xc0, 0x08, 0x20, 0x08, 0x20, 0x06, 0xc0, 0x00, 0x04, 0x37, 0xfa, 0x6c, 0x0c, 0xdb, 0x76, 
+	    0xd7, 0x7a, 0xd7, 0x7a, 0xd7, 0x0a, 0xd7, 0xfa, 0xd7, 0xfa, 0xdb, 0xf6, 0x6c, 0x0c, 0x37, 0xf8
+    };
+
+    static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr };
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     static const uint8_t weight_icns_data[] = {
         // By PiiXL
@@ -162,6 +187,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 
     main_menu->add_view(new MenuActionItemView("Clock", [this](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
+    main_menu->add_view(new MenuActionItemView("Stopwatch", [this](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
     main_menu->add_view(new MenuActionItemView("Alarm", [this](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
     main_menu->add_view(new MenuActionItemView("Weighing", [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));

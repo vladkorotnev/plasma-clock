@@ -34,8 +34,10 @@ tk_date_t get_current_date();
 void set_current_time(tk_time_of_day_t);
 /// @brief Set the current date without changing the timezone et al
 void set_current_date(tk_date_t);
+/// @brief Returns the system uptime as human-readable components
+tk_time_of_day_t get_uptime();
 
-tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
+tk_time_of_day_t operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator<=(const tk_time_of_day_t& a, const tk_time_of_day_t& b);

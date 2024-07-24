@@ -125,6 +125,23 @@ void set_current_date(tk_date_t date) {
     ESP_LOGI(LOG_TAG, "Changed date, current: %04d/%02d/%02d %02d:%02d:%02d", date.year, date.month, date.day, time.hour, time.minute, time.second);
 }
 
+tk_time_of_day_t get_uptime() {
+    int64_t uptime_us = esp_timer_get_time();
+    int64_t uptime_ms = uptime_us / 1000;
+    int64_t uptime_s = uptime_ms / 1000;
+    int64_t uptime_m = uptime_s / 60;
+    int64_t uptime_h = uptime_m / 60;
+
+    return {
+        .hour = (int) uptime_h,
+        .minute = (int) uptime_m % 60,
+        .second = (int) uptime_s % 60,
+        .millisecond = (int) uptime_ms % 1000
+    };
+}
+
+// Why not std::chrono? idk, legacy I guess
+
 tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
     tk_time_of_day result = { 0 };
 

@@ -13,8 +13,8 @@ MenuInfoItemView::MenuInfoItemView(const char * title, const char * subtitle) {
     bottom_label->holdoff = 100;
     bottom_label->align_to_right = true;
 
-    add_subrenderable(top_label);
-    add_subrenderable(bottom_label);
+    add_composable(top_label);
+    add_composable(bottom_label);
 }
 
 MenuInfoItemView::~MenuInfoItemView() {
