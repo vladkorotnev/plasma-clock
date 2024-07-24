@@ -15,6 +15,10 @@ public:
         disp_value { 0 }
     {}
 
+    void prepare() {
+        balance_board_led(true);
+    }
+
     void render(FantaManipulator *fb) {
         int text_width = value_len * font->width;
         int left_offset = fb->get_width() / 2 - text_width / 2;
@@ -24,17 +28,30 @@ public:
     void step() {
         if(sensors->exists(SENSOR_ID_BALANCE_BOARD_MILLIKILOS)) {
             if(sensor_info_t * info = sensors->get_info(SENSOR_ID_BALANCE_BOARD_MILLIKILOS)) {
+                TickType_t now = xTaskGetTickCount();
                 int value = info->last_result / 10;
-                snprintf(value_str, 12, "%c %d.%d kg %c", value == 0 ? 0x10 : ' ', value / 10, abs(value % 10), value == 0 ? 0x11 : ' ');
+                bool stable = false;
+                if(value != disp_value) {
+                    last_change = now;
+                    disp_value = value;
+                }
+                else stable = (now - last_change >= pdMS_TO_TICKS(1000));
+
+                snprintf(value_str, 12, "%c %d.%d kg %c", stable ? 0x10 : ' ', value / 10, abs(value % 10), stable ? 0x11 : ' ');
                 value_len = strlen(value_str);
             }
         }
+    }
+
+    void cleanup() {
+        balance_board_led(false);
     }
 
 private:
     SensorPool *sensors;
     const font_definition_t * font;
     int disp_value;
+    TickType_t last_change;
     char value_str[12];
     int value_len;
 };
@@ -107,16 +124,21 @@ void AppShimWeighing::step() {
 }
 
 void AppShimWeighing::update_state(transition_type_t t) {
+    WeighingAppState old = curState;
     switch(balance_board_state()) {
         case BB_IDLE:
-            carousel->switch_to(NEED_CONNECT, t);
+            curState = NEED_CONNECT;
             break;
         case BB_SCANNING:
-            carousel->switch_to(WAIT_CONNECT, t);
+            curState = WAIT_CONNECT;
             break;
         case BB_CONNECTED:
-            carousel->switch_to(WEIGHING, t);
+            curState = WEIGHING;
             break;
+    }
+    if(old != curState) {
+        lastActivity = xTaskGetTickCount();
+        carousel->switch_to(curState, t);
     }
 }
 

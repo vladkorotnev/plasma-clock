@@ -74,6 +74,8 @@ public:
         label(new StringScroll(&keyrus0808_font, title)),
         setting(setting),
         cursor { 0 },
+        framecount { 0 },
+        cursorShows { true },
         onActivated(onActivated) {
             add_subrenderable(label);
         }

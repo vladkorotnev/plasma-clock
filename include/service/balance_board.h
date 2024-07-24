@@ -14,4 +14,5 @@ void balance_board_start(SensorPool*);
 void balance_board_scan(bool);
 balance_board_state_t balance_board_state();
 void balance_board_zero();
+void balance_board_led(bool);
 #endif
