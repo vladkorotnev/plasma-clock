@@ -6,6 +6,23 @@
 #include <rsrc/common_icons.h>
 #include <service/time.h>
 
+class UptimeView: public MenuInfoItemView {
+public:
+    UptimeView(): MenuInfoItemView("Uptime", "") {
+        bottom_label->stopped = true;
+    }
+
+    void step() {
+        tk_datetime_t uptime = get_uptime();
+        snprintf(buf, 16, "%dd %dh%dm%ds", uptime.date.day, uptime.time.hour, uptime.time.minute, uptime.time.second, uptime.time.millisecond);
+        bottom_label->set_string(buf);
+        MenuInfoItemView::step();
+    }
+
+private:
+    char buf[16];
+};
+
 AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
@@ -103,6 +120,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     String tmp = NetworkManager::current_ip();
     strncpy(buf_ip, tmp.c_str(), 16);
     system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
+    system_info->add_view(new UptimeView());
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL

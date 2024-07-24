@@ -13,6 +13,7 @@ StringScroll::StringScroll(const font_definition_t * f, const char * s) {
     left_margin = 0;
     holdoff = 0;
     backing_buffer = nullptr;
+    stopped = false;
     set_string(s);
 
     switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
@@ -87,8 +88,8 @@ int StringScroll::estimated_frame_count() {
 void StringScroll::render(FantaManipulator * fb) {
     if(backing_buffer == nullptr) return;
 
-    if(scroll_only_if_not_fit) {
-        if(string_width <= fb->get_width()) {
+    if(scroll_only_if_not_fit || stopped) {
+        if(string_width <= fb->get_width() || stopped) {
             fb->put_fanta(backing_buffer, align_to_right ? fb->get_width() - string_width : 0, y_position, backing_buffer_width, font->height);
             return;
         }

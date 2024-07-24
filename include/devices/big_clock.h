@@ -12,7 +12,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "2.1"
+#define PRODUCT_VERSION "2.2"
 
 // ---- Connection to DISP BOARD ----
 const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {

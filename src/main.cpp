@@ -266,6 +266,8 @@ static void print_memory() {
 #ifdef BOARD_HAS_PSRAM
         ESP_LOGI(LOG_TAG, "PSRAM: %d free of %d (%d minimum)", ESP.getFreePsram(), ESP.getPsramSize(), ESP.getMinFreePsram());
 #endif
+        tk_datetime_t uptime = get_uptime();
+        ESP_LOGI(LOG_TAG, "Uptime: %id %02dh%02dm%02ds%03dms", uptime.date.day, uptime.time.hour, uptime.time.minute, uptime.time.second, uptime.time.millisecond);
         memory_last_print = now;
     }
 }
