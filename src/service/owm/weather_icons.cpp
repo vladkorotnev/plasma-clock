@@ -42,7 +42,8 @@ const ani_sprite_t thunderstorm_icon = {
     .frames = 9,
     .screen_frames_per_frame = 7,
     .holdoff_frames = 0,
-    .data = thunderstorm_data
+    .data = thunderstorm_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t drizzle_data[] = { 
@@ -71,7 +72,8 @@ const ani_sprite_t drizzle_icon = {
     .frames = 9,
     .screen_frames_per_frame = 7,
     .holdoff_frames = 0,
-    .data = drizzle_data
+    .data = drizzle_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 
@@ -102,7 +104,8 @@ const ani_sprite_t rain_icon = {
     .frames = 10,
     .screen_frames_per_frame = 7,
     .holdoff_frames = 0,
-    .data = rain_data
+    .data = rain_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t sun_data[] = { 
@@ -132,7 +135,8 @@ const ani_sprite_t sun_icon = {
     .frames = 10,
     .screen_frames_per_frame = 7,
     .holdoff_frames = 0,
-    .data = sun_data
+    .data = sun_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t clouds_data[] = {
@@ -184,7 +188,8 @@ const ani_sprite_t clouds_icon = {
     .frames = 21,
     .screen_frames_per_frame = 7,
     .holdoff_frames = 2,
-    .data = clouds_data
+    .data = clouds_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t broken_clouds_data[] = {
@@ -220,7 +225,8 @@ const ani_sprite_t broken_clouds_icon = {
     .frames = 13,
     .screen_frames_per_frame = 7,
     .holdoff_frames = 0,
-    .data = broken_clouds_data
+    .data = broken_clouds_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t overcast_data[] = {
@@ -238,7 +244,8 @@ const ani_sprite_t overcast_icon = {
     .frames = 4,
     .screen_frames_per_frame = 14,
     .holdoff_frames = 4,
-    .data = overcast_data
+    .data = overcast_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t snow_data[] = {
@@ -251,7 +258,8 @@ const ani_sprite_t snow_icon = {
     .frames = 1,
     .screen_frames_per_frame = 60,
     .holdoff_frames = 0,
-    .data = snow_data
+    .data = snow_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 const uint8_t mist_data[] = {
@@ -264,5 +272,6 @@ const ani_sprite_t mist_icon = {
     .frames = 1,
     .screen_frames_per_frame = 60,
     .holdoff_frames = 0,
-    .data = mist_data
+    .data = mist_data,
+    .format = SPRFMT_HORIZONTAL
 };

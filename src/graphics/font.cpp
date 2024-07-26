@@ -15,7 +15,8 @@ sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph) {
         .width = font->width,
         .height = font->height,
         .data = &font->data[start_idx],
-        .mask = nullptr
+        .mask = nullptr,
+        .format = SPRFMT_HORIZONTAL
     };
 
     return rslt;

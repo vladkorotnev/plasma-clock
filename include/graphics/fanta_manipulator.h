@@ -73,4 +73,5 @@ private:
     bool * dirty;
     int width;
     int height;
+    void put_horizontal_data(const uint8_t* data, int x, int y, int width, int height, const uint8_t* mask, bool invert);
 };

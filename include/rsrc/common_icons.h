@@ -18,7 +18,8 @@ static const sprite_t alarm_icns = {
     .width = 16,
     .height = 16,
     .data = alarm_icns_data,
-    .mask = nullptr
+    .mask = nullptr,
+    .format = SPRFMT_HORIZONTAL
 };
 
 static const uint8_t good_icns_data[] = {
@@ -26,14 +27,14 @@ static const uint8_t good_icns_data[] = {
     0x7f, 0xfe, 0x7f, 0xfa, 0x7f, 0xfc, 0x7f, 0xfc, 0x7f, 0xf4, 0x7f, 0xf8, 0x7f, 0xe8, 0x0f, 0xf0
 };
 
-static const sprite_t good_icns = { .width = 16, .height = 16, .data = good_icns_data, .mask = nullptr };
+static const sprite_t good_icns = { .width = 16, .height = 16, .data = good_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
 static const uint8_t hourglass_icns_data[] = {
     0x3f, 0xfe, 0x00, 0x00, 0x10, 0x04, 0x10, 0x04, 0x10, 0x04, 0x0b, 0xe8, 0x05, 0xd0, 0x02, 0xa0, 
     0x02, 0x20, 0x04, 0x10, 0x08, 0x88, 0x11, 0xc4, 0x12, 0xe4, 0x15, 0x74, 0x00, 0x00, 0x3f, 0xfe
 };
 
-static const sprite_t hourglass_icns = { .width = 16, .height = 16, .data = hourglass_icns_data, .mask = nullptr };
+static const sprite_t hourglass_icns = { .width = 16, .height = 16, .data = hourglass_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
 static const uint8_t icon_thermo_data[] = {
     // By PiiXL
@@ -46,5 +47,6 @@ static const sprite_t icon_thermo_1616 = {
     .width = 16,
     .height = 16,
     .data = icon_thermo_data,
-    .mask = nullptr
+    .mask = nullptr,
+    .format = SPRFMT_HORIZONTAL
 };

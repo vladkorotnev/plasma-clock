@@ -128,7 +128,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x7f, 0xfe, 0x6e, 0x3e, 0x57, 0xfe, 0x50, 0x3e, 0x3f, 0xdc, 0x7c, 0x38, 0x7d, 0xf0, 0x3c, 0x00
     };
 
-    static const sprite_t status_icns = { .width = 16, .height = 16, .data = status_icns_data, .mask = nullptr };
+    static const sprite_t status_icns = { .width = 16, .height = 16, .data = status_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t clock_icns_data[] = {
         // By PiiXL
@@ -136,7 +136,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x4f, 0x09, 0x5f, 0xfd, 0x5f, 0xfd, 0x5f, 0xfd, 0x6f, 0xfb, 0x37, 0x76, 0x18, 0x0c, 0x0f, 0xf8
     };
 
-    static const sprite_t clock_icns = { .width = 16, .height = 16, .data = clock_icns_data, .mask = nullptr };
+    static const sprite_t clock_icns = { .width = 16, .height = 16, .data = clock_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t display_icns_data[] = {
         // By PiiXL
@@ -144,7 +144,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x40, 0x09, 0x40, 0x0f, 0x40, 0x09, 0x40, 0x0f, 0x60, 0x19, 0x7f, 0xff, 0x00, 0x00, 0x18, 0x0c
     };
 
-    static const sprite_t display_icns = { .width = 16, .height = 16, .data = display_icns_data, .mask = nullptr };
+    static const sprite_t display_icns = { .width = 16, .height = 16, .data = display_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t wrench_icns_data[] = {
         // By PiiXL
@@ -152,7 +152,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x0f, 0xc7, 0x1f, 0xff, 0x3f, 0xff, 0x6f, 0xfe, 0x5f, 0xfc, 0x3b, 0x00, 0x76, 0x00, 0x6c, 0x00
     };
 
-    static const sprite_t wrench_icns = { .width = 16, .height = 16, .data = wrench_icns_data, .mask = nullptr };
+    static const sprite_t wrench_icns = { .width = 16, .height = 16, .data = wrench_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t stopwatch_icns_data[] = {
         // By PiiXL
@@ -160,7 +160,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 	    0xd7, 0x7a, 0xd7, 0x7a, 0xd7, 0x0a, 0xd7, 0xfa, 0xd7, 0xfa, 0xdb, 0xf6, 0x6c, 0x0c, 0x37, 0xf8
     };
 
-    static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr };
+    static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     static const uint8_t weight_icns_data[] = {
@@ -169,7 +169,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 	    0xab, 0xd5, 0xab, 0xd5, 0x28, 0x14, 0x28, 0x14, 0x08, 0x10, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00
     };
 
-    static const sprite_t weight_icns = { .width = 16, .height = 16, .data = weight_icns_data, .mask = nullptr };
+    static const sprite_t weight_icns = { .width = 16, .height = 16, .data = weight_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 #endif
 
     static ListView * settings_menu = new ListView();

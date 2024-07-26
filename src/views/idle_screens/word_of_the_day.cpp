@@ -35,7 +35,8 @@ static const ani_sprite_t book_icon = {
     .frames = 8,
     .screen_frames_per_frame = 4,
     .holdoff_frames = 8,
-    .data = spr_book_data
+    .data = spr_book_data,
+    .format = SPRFMT_HORIZONTAL
 };
 
 WordOfTheDayView::WordOfTheDayView() {

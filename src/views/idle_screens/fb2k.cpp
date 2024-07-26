@@ -13,7 +13,7 @@ static const uint8_t icn_music_data[] = {
 };
 
 static const sprite_t icn_music = {
-    .width = 16, .height = 16, .data = icn_music_data, .mask = nullptr
+    .width = 16, .height = 16, .data = icn_music_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL
 };
 
 Fb2kView::Fb2kView() {

@@ -70,7 +70,7 @@ void FantaManipulator::plot_pixel(int x, int y, bool state) {
 }
 
 // NB: This still relies too much on the fact our displays are 16 bits tall. Someday when porting to another display this will bite us in the ass.
-void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int h, fanta_buffer_t mask, bool invert) {
+void FantaManipulator::put_fanta(const fanta_buffer_t fanta, int x, int y, int w, int h, fanta_buffer_t mask, bool invert) {
     if(w <= 0 || h <= 0) return;
     
     uint16_t fanta_column_mask = 0x0;
@@ -102,16 +102,67 @@ void FantaManipulator::put_fanta(fanta_buffer_t fanta, int x, int y, int w, int 
     *dirty = true;
 }
 
-void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool invert) {
-    fanta_buffer_t fanta = sprite_to_fanta(sprite);
-    fanta_buffer_t mask = nullptr;
-    if(sprite->mask) {
-        mask = mask_to_fanta(sprite);
+void FantaManipulator::put_horizontal_data(const uint8_t* data, int x, int y, int w, int h, const uint8_t* mask, bool invert) {
+    if(w <= 0 || h <= 0) return;
+    
+    uint16_t fanta_column_mask = 0x0;
+    for(int i = std::max(y, 0); i < std::min(y + h, 16); i++) {
+        fanta_column_mask |= (1 << i);
     }
-    put_fanta(fanta, x, y, sprite->width, sprite->height, mask, invert);
-    free(fanta);
-    if(mask) {
-        free(mask);
+
+    uint8_t * mask_data = (uint8_t*) &fanta_column_mask;
+
+    int target_idx = x * 2;
+    for(int i = std::max(0, -target_idx); i < w*2; i++) {
+        if(target_idx + i > buffer_size - 1) break;
+        int i_spr = i / 2;
+        uint8_t current_halfcolumn_mask = mask_data[i % 2];
+
+        if(mask) {
+            uint16_t buf_mask_column = 0;
+
+            for(int j = std::min(h, 16) - 1; j >= 0; j--) {
+                buf_mask_column <<= 1;
+                uint8_t cur_byte = mask[j*std::max((w/8), 1) + i_spr / 8];
+                if(w < 8) cur_byte <<= (8 - w);
+                buf_mask_column |= (cur_byte >> (7 - (i_spr % 8))) & 0x1;
+            }
+
+            if(y > 0) buf_mask_column <<= y;
+            else if(y < 0) buf_mask_column >>= abs(y);
+
+            current_halfcolumn_mask &= ((uint8_t*)&buf_mask_column)[i % 2];
+        }
+
+        uint16_t buf_column = 0;
+        for(int j = std::min(h, 16) - 1; j >= 0; j--) {
+            buf_column <<= 1;
+            uint8_t cur_byte = data[j*std::max((w/8), 1) + i_spr / 8];
+            if(w < 8) cur_byte <<= (8 - w);
+            buf_column |= (cur_byte >> (7 - (i_spr % 8))) & 0x1;
+        }
+        if(y > 0) buf_column <<= y;
+        else if(y < 0) buf_column >>= abs(y);
+        uint8_t buf_halfcolumn = ((uint8_t*)&buf_column)[i % 2];
+        buffer[target_idx + i] = ((uint8_t) (invert ? ~buf_halfcolumn : buf_halfcolumn) & current_halfcolumn_mask) | (buffer[target_idx + i] & ~current_halfcolumn_mask);
+    }
+
+    *dirty = true;
+}
+
+void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool invert) {
+    switch(sprite->format) {
+        case SPRFMT_NATIVE:
+            put_fanta((const fanta_buffer_t) sprite->data, x, y, sprite->width, sprite->height, (const fanta_buffer_t) sprite->mask, invert);
+            break;
+
+        case SPRFMT_HORIZONTAL:
+            put_horizontal_data(sprite->data, x, y, sprite->width, sprite->height, sprite->mask, invert);
+            break;
+
+        default:
+            ESP_LOGE(LOG_TAG, "Unsupported sprfmt=%i !!", sprite->format);
+            break;
     }
 }
 

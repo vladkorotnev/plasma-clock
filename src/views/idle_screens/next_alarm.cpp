@@ -12,7 +12,8 @@ static const uint8_t sleep_icns_data[] = {
 static const sprite_t sleep_icns = {
     .width = 16, .height = 16,
     .data = sleep_icns_data,
-    .mask = nullptr
+    .mask = nullptr,
+    .format = SPRFMT_HORIZONTAL
 };
 
 
