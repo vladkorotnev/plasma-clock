@@ -8,34 +8,51 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 ## Available widgets
 
 * Clock
+
     ![](docs/img/widget/clock_pretty.png)
+    
 * Indoor temperature
+
     ![](docs/img/widget/indoor_pretty.png)
+    
 * Switchbot Meter temperature
 * Weather (via [OpenWeatherMap](https://openweathermap.org/))
+    
     ![](docs/img/widget/weather_pretty.png)
+
 * Weather Effect (raining and thunder on idle screen when rain/thunderstorm outside)
+    
     ![](docs/img/widget/rainclock_pretty.png)
+
 * Word of the Day (via [Wordnik](https://wordnik.com/))
+    
     ![](docs/img/widget/word_pretty.png)
+
 * Foobar2000 (via [foo_controlverver](https://github.com/vladkorotnev/foo_controlserver/tree/fix-streams))
+    
     ![](docs/img/widget/foo_pretty.png)
+    
 * Remaining sleep time (when using alarm app)
+    
     ![](docs/img/widget/sleep_pretty.png)
 
 ## Available apps
 
 * Idle (home screen)
 * Timer
+    
     ![](docs/img/app/timer_pretty.png)
     ![](docs/img/app/timer_melo_pretty.png)
 * Stopwatch
+    
     ![](docs/img/app/stopwatch_pretty.png)
 * Alarm (Smart Wake Up on devices with motion sensor)
+    
     ![](docs/img/app/alarm_pretty.png)
     ![](docs/img/app/alarm2_pretty.png)
 * Weighing Scale (via Wii Balance Board)
 * Settings
+    
     ![](docs/img/app/setting0_pretty.png)
     ![](docs/img/app/setting1_pretty.png)
     ![](docs/img/app/setting2_pretty.png)
