@@ -31,6 +31,11 @@ public:
         delete content;
     }
 
+    void prepare() { content->prepare(); }
+    void render(FantaManipulator*fb) { content->render(fb); }
+    void step() { content->step(); }
+    void cleanup() { content->cleanup(); }
+
 protected:
     Renderable * content;
 };

@@ -14,7 +14,7 @@ public:
 
     void step() {
         tk_time_of_day_t uptime = get_uptime();
-        snprintf(buf, 16, "%d:%d:%d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
+        snprintf(buf, 16, "%02d:%02d:%02d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
         bottom_label->set_string(buf);
         MenuInfoItemView::step();
     }
