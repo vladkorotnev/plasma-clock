@@ -171,7 +171,7 @@ void setup() {
     Serial.begin(115200);
 
 #ifdef BOARD_HAS_PSRAM
-    heap_caps_malloc_extmem_enable(16);
+    heap_caps_malloc_extmem_enable(0);
 #endif
 
     display_driver.reset();
@@ -234,7 +234,7 @@ void setup() {
     wotd_start();
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
-    admin_panel_prepare(sensors, beepola);
+    admin_panel_prepare(sensors, beepola, graph);
 
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 

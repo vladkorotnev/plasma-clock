@@ -46,6 +46,9 @@ void WordnikTaskFunction( void * pvParameter )
 
     EXT_RAM_ATTR static WiFiClientSecure client;
     EXT_RAM_ATTR static HTTPClient http;
+#ifdef BOARD_HAS_PSRAM
+    mbedtls_platform_set_calloc_free(ps_calloc, free);
+#endif
 
     EXT_RAM_ATTR static char url[128];
     snprintf(url, 150, currentApi, apiKey.c_str());
@@ -89,6 +92,7 @@ void WordnikTaskFunction( void * pvParameter )
             ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
             isFailure = true;
         }
+        client.stop();
         vTaskDelay(isFailure ? pdMS_TO_TICKS(10000) : interval);
     }
 }

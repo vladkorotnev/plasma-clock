@@ -7,6 +7,7 @@
 #include <service/wordnik.h>
 #include <service/alarm.h>
 #include <views/transitions/transitions.h>
+#include <graphics/screenshooter.h>
 #include <input/keys.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
@@ -17,6 +18,9 @@ static TaskHandle_t hTask = NULL;
 static GyverPortal ui;
 static SensorPool *sensors;
 static Beeper *beeper;
+static FantaManipulator *disp;
+
+Screenshooter screenshooter;
 
 extern "C" void AdminTaskFunction( void * pvParameter );
 
@@ -160,8 +164,8 @@ static void render_alarms() {
     GP.FORM_END();
 }
 
-static void save_alarms() {
-    if(!ui.form("/alarms")) return;
+static bool save_alarms() {
+    if(!ui.form("/alarms")) return false;
     ESP_LOGI(LOG_TAG, "Save alarms");
     for(int i = 0; i < ALARM_LIST_SIZE; i++) {
         alarm_setting_t a = {0};
@@ -185,28 +189,35 @@ static void save_alarms() {
         set_alarm(i, a);
     }
     beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+    return true;
 }
 
-static inline void _rmc_key(const char * key, key_id_t id) {
+static inline bool _rmc_key(const char * key, key_id_t id) {
     if(ui.clickDown(key)) {
         hid_set_key_state(id, true);
+        return true;
     }
     else if(ui.clickUp(key)) {
         hid_set_key_state(id, false);
+        return true;
     }
+    return false;
 }
 
-static void process_remote() {
+static bool process_remote() {
     if(ui.hold()) {
-        _rmc_key("rmc_up", KEY_UP);
-        _rmc_key("rmc_down", KEY_DOWN);
-        _rmc_key("rmc_left", KEY_LEFT);
-        _rmc_key("rmc_right", KEY_RIGHT);
-        _rmc_key("rmc_headpat", KEY_HEADPAT);
+        bool rslt = false;
+        rslt |= _rmc_key("rmc_up", KEY_UP);
+        rslt |= _rmc_key("rmc_down", KEY_DOWN);
+        rslt |= _rmc_key("rmc_left", KEY_LEFT);
+        rslt |= _rmc_key("rmc_right", KEY_RIGHT);
+        rslt |= _rmc_key("rmc_headpat", KEY_HEADPAT);
+        return rslt;
     }
+    return false;
 }
 
-void build() {
+static void build() {
     GP.BUILD_BEGIN();
     GP.PAGE_TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
     GP.THEME(GP_DARK);
@@ -215,14 +226,28 @@ void build() {
     GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
 
     GP.SPOILER_BEGIN("Remote", GP_BLUE);
-        GP.BUTTON("rmc_up", "↑");
-        GP.BREAK();
-        GP.BUTTON("rmc_left", "←");
-        GP.BUTTON("rmc_right", "→");
-        GP.BREAK();
-        GP.BUTTON("rmc_down", "↓");
-        GP.HR();
         GP.BUTTON("rmc_headpat", "Headpat");
+        GP.HR();
+        GP.TABLE_BEGIN();
+            GP.TR();
+                GP.TD();
+                GP.TD();
+                GP.BUTTON("rmc_up", "↑");
+                GP.TD();
+            GP.TR();
+                GP.TD();
+                GP.BUTTON("rmc_left", "←");
+                GP.TD();
+                GP.TD();
+                GP.BUTTON("rmc_right", "→");
+            GP.TR();
+                GP.TD();
+                GP.TD();
+                GP.BUTTON("rmc_down", "↓");
+                GP.TD();
+        GP.TABLE_END();
+        GP.HR();
+        GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -311,7 +336,7 @@ void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Sensors", GP_BLUE);
-    GP.JQ_UPDATE_BEGIN(1000);
+    GP.JQ_UPDATE_BEGIN(10000);
         sensor_info_t* sens;
 
         GP.LABEL("WiFi: ");
@@ -475,34 +500,13 @@ void build() {
 }
 
 static char binary_mime[] = "application/octet-stream";
+static char png_mime[] = "image/png";
 void downloadPartition(const void * partition, size_t size) {
     ui.server.send_P(200, binary_mime, (const char*) partition, size);
 } 
 void action() {
-    if(ui.download()) {
-        const void * ptrPart;
-        partition_handle_t hPart;
-        size_t szPart;
-
-        if(ui.uri().endsWith("prefs_backup.bin")) {
-            if(mount_settings(&ptrPart, &hPart, &szPart)) {
-                downloadPartition(ptrPart, szPart);
-                unmount_partition(hPart);
-            }
-        }
-        else if(ui.uri().endsWith("crashdump.elf")) {
-            // MEMO: read with
-            // python %IDF_PATH%\components\espcoredump\espcoredump.py info_corefile --core R:\crashdump.elf .pio\build\bigclock-nodemcu-32s\firmware.elf
-            if(mount_crash(&ptrPart, &hPart, &szPart)) {
-                downloadPartition(ptrPart, szPart);
-                unmount_partition(hPart);
-            }
-        }
-        return;
-    }
-
-    save_alarms();
-    process_remote();
+    if(process_remote()) return;
+    if(save_alarms()) return;
     if(ui.click()) {
         save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30);
         save_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120);
@@ -568,14 +572,47 @@ void action() {
             s->wait_end_play();
             ESP.restart();
         }
+        return;
+    }
+
+    if(ui.download()) {
+        const void * ptrPart;
+        partition_handle_t hPart;
+        size_t szPart;
+
+        if(ui.uri().endsWith("prefs_backup.bin")) {
+            if(mount_settings(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        else if(ui.uri().endsWith("crashdump.elf")) {
+            // MEMO: read with
+            // python %IDF_PATH%\components\espcoredump\espcoredump.py info_corefile --core R:\crashdump.elf .pio\build\bigclock-nodemcu-32s\firmware.elf
+            if(mount_crash(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        else if(ui.uri().endsWith("screen.png")) {
+            const uint8_t * outBuf = nullptr;
+            size_t outLen = 0;
+            if(screenshooter.capture(disp, &outBuf, &outLen)) {
+                ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
+                free((void*)outBuf);
+            } else {
+                ui.server.send(500, "", "");
+            }
+        }
     }
 }
 
 bool prefs_uploading = false;
 
-void admin_panel_prepare(SensorPool* s, Beeper* b) {
+void admin_panel_prepare(SensorPool* s, Beeper* b, FantaManipulator * g) {
     sensors = s;
     beeper = b;
+    disp = g;
     ui.attachBuild(build);
     ui.attach(action);
     ui.downloadAuto(false);
@@ -630,7 +667,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b) {
         "ADM",
         4096,
         nullptr,
-        2,
+        4,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
