@@ -57,6 +57,36 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
     ![](docs/img/app/setting1_pretty.png)
     ![](docs/img/app/setting2_pretty.png)
 
+## Available chime tones
+
+**(All chime tones are covers adapted for single channel beeper by DJ AKASAKA)**
+
+* Simple beep
+* PC-98 Boot Chime
+* Russ28 (Русь 28) Hourly Chime (poorly timed Beethoven's 5th Symphony)
+* Some mid-2000s Shtrikh-M (Штрих-М) POS Boot chime
+* [A.M. - Arise](https://youtu.be/cuOVP6pJ9Ww?t=264): [MIDI](helper/chimes/arise.mid)
+* [Caramell - Caramelldansen](https://youtu.be/o6Zp4cW8w8A?t=51): [MIDI](helper/chimes/caramelldansen.mid)
+* [BôA - Duvet](https://youtu.be/Uoox9fpmDP0) (simple version): [MIDI](helper/chimes/duvet.mid)
+* [T-Square - Truth](https://youtu.be/FZaUPGjjA4c?t=77): [MIDI](helper/chimes/truth.mid)
+* [Kosaki Satoru - Haruhi no Omoi](https://www.youtube.com/watch?v=KMKoyHKYSNk): [MIDI](helper/chimes/haruhi_no_omoi.mid)
+* [WAVE and DRAX - When Present Is Past](https://modarchive.org/index.php?request=view_by_moduleid&query=140039): [MIDI](helper/chimes/when_present_is_past.mid)
+* [Kawada Mami - Hishoku no Sora](https://www.youtube.com/watch?v=FNl1ud7KxtI): [MIDI](helper/chimes/hishoku.mid)
+* [Hirano Aya - Bouken Desho Desho](https://www.youtube.com/watch?v=C337shIT9LI): [MIDI](helper/chimes/bouken.mid)
+* [Magome Togoshi, Shinji Orito - Gentle Jena](https://www.youtube.com/watch?v=lR4dw_B423E): [MIDI](helper/chimes/gentlejena.mid)
+* [OMEGA - Gammapolisz](https://www.youtube.com/watch?v=XCqdrQxMrxI): [MIDI](helper/chimes/gammapolisz.mid)
+* [? - Like The Wind (TMMS)](https://www.youtube.com/watch?v=uYpkri8Kv2E): [MIDI](helper/chimes/like_the_wind.mid)
+* [NightRadio - Waiting Freqs](https://www.youtube.com/watch?v=_0MBreuq94Y): [MIDI](helper/chimes/waiting_freqs.mid)
+* [NightRadio - The Way](https://nightradio.bandcamp.com/track/the-way): [MIDI](helper/chimes/the_way.mid)
+* [Dougal & Gammer — Guitar Hero](https://youtu.be/ID4pO9epHPA?t=89): [MIDI](helper/chimes/gtrhero.mid)
+* [蜂屋ななし — シャボン](https://youtu.be/UHRlXm_tV8o?t=41): [MIDI](helper/chimes/syabon.mid)
+* [Takeshi Abo — Gate of Steiner](https://www.youtube.com/watch?v=2Q9MqL83FeE): [MIDI](helper/chimes/steiner.mid)
+* [deadballP — 永遠に続く五線譜](https://www.youtube.com/watch?v=p1sh68qk4Nk): [MIDI](helper/chimes/towa.mid)
+* [Cream puff — Mermaid girl](https://youtu.be/AaUMvgfHpUo?t=16): [MIDI](helper/chimes/mermgrl.mid)
+* [Brisk & Trixxy — Eye Opener](https://youtu.be/81QqHUpyBhg?t=83): [MIDI](helper/chimes/eye_opener.mid)
+
+MIDI to sequencer conversion tool (supports note events in one track only, track end event, and comment event): [midi_to_chime](helper/midi_to_chime.py)
+
 ## System Requirements
 
 The basic configuration without any bluetooth functionality (no Switchbot or Balance Board integration) seems to work just fine on an ESP32 WROOM. However to be less limited by RAM size in further features I've decided to make WROVER the requirement, so further versions are not guaranteed to run on WROOM.
