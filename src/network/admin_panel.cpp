@@ -7,6 +7,7 @@
 #include <service/wordnik.h>
 #include <service/alarm.h>
 #include <views/transitions/transitions.h>
+#include <input/keys.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
 #include <Arduino.h>
@@ -184,7 +185,25 @@ static void save_alarms() {
         set_alarm(i, a);
     }
     beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+}
 
+static inline void _rmc_key(const char * key, key_id_t id) {
+    if(ui.clickDown(key)) {
+        hid_set_key_state(id, true);
+    }
+    else if(ui.clickUp(key)) {
+        hid_set_key_state(id, false);
+    }
+}
+
+static void process_remote() {
+    if(ui.hold()) {
+        _rmc_key("rmc_up", KEY_UP);
+        _rmc_key("rmc_down", KEY_DOWN);
+        _rmc_key("rmc_left", KEY_LEFT);
+        _rmc_key("rmc_right", KEY_RIGHT);
+        _rmc_key("rmc_headpat", KEY_HEADPAT);
+    }
 }
 
 void build() {
@@ -194,6 +213,18 @@ void build() {
     GP.JQ_SUPPORT();
 
     GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
+
+    GP.SPOILER_BEGIN("Remote", GP_BLUE);
+        GP.BUTTON("rmc_up", "↑");
+        GP.BREAK();
+        GP.BUTTON("rmc_left", "←");
+        GP.BUTTON("rmc_right", "→");
+        GP.BREAK();
+        GP.BUTTON("rmc_down", "↓");
+        GP.HR();
+        GP.BUTTON("rmc_headpat", "Headpat");
+    GP.SPOILER_END();
+    GP.BREAK();
 
     GP.SPOILER_BEGIN("WiFi", GP_BLUE);
         render_string("SSID", PREFS_KEY_WIFI_SSID);
@@ -288,6 +319,12 @@ void build() {
         char buf[16];
         snprintf(buf, 15, "(%i dBm)", NetworkManager::rssi());
         GP.LABEL(buf, "rssi_val");
+        GP.BREAK();
+
+        GP.LABEL("Uptime: ");
+        tk_time_of_day_t uptime = get_uptime();
+        snprintf(buf, 16, "%02d:%02d:%02d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
+        GP.LABEL(buf, "uptime_val");
         GP.BREAK();
 
         #if HAS(LIGHT_SENSOR)
@@ -465,6 +502,7 @@ void action() {
     }
 
     save_alarms();
+    process_remote();
     if(ui.click()) {
         save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30);
         save_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120);

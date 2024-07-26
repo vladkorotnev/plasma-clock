@@ -1,17 +1,22 @@
 #include <input/keypad.h>
 #include <device_config.h>
 #include <esp32-hal-log.h>
+#include <map>
 
 static char LOG_TAG[] = "KEYP";
 
 static TaskHandle_t hTask;
+static std::map<gpio_num_t, bool> oldStates = {};
 
 static void keypad_task(void*) {
 #if HAS(KEYPAD)
     while(1) {
         for(auto i: HWCONF_KEYPAD) {
-            int lvl = gpio_get_level(i.first);
-            hid_set_key_state(i.second, lvl > 0);
+            bool lvl = gpio_get_level(i.first) > 0;
+            if(oldStates[i.first] != lvl) {
+                oldStates[i.first] = lvl;
+                hid_set_key_state(i.second, lvl);
+            }
         }
 
         vTaskDelay(pdMS_TO_TICKS(10));
@@ -29,6 +34,7 @@ void keypad_start() {
 
     for(auto i: HWCONF_KEYPAD) {
         io_conf.pin_bit_mask |= 1ULL << i.first;
+        oldStates[i.first] = false;
     }
 
     ESP_ERROR_CHECK(gpio_config(&io_conf));
