@@ -222,7 +222,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
-    thunderClock->add_layer(thunder);
+    if(prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY))
+        thunderClock->add_layer(thunder);
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
@@ -247,7 +248,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     ViewCompositor * rainyClock = new ViewCompositor();
     rainyClock->add_layer(slideShow);
     rainyClock->add_layer(signalIndicator);
-    rainyClock->add_layer(rain);
+    if(prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY))
+        rainyClock->add_layer(rain);
     rainyClock->add_layer(touchArrows);
     mainView = rainyClock;
 

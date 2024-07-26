@@ -28,6 +28,7 @@ static constexpr prefs_key_t PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS = "mot_hv_
 
 static constexpr prefs_key_t PREFS_KEY_WEATHER_LAT = "w_lat";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_LON = "w_lon";
+static constexpr prefs_key_t PREFS_KEY_WEATHER_OVERLAY = "w_ovl";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_APIKEY = "w_apikey";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_INTERVAL_MINUTES = "w_interval_m";
 

@@ -436,6 +436,7 @@ static void build() {
         render_string("Longitude", PREFS_KEY_WEATHER_LON);
         render_string("API Key", PREFS_KEY_WEATHER_APIKEY, true);
         render_int("Update interval [m]:", PREFS_KEY_WEATHER_INTERVAL_MINUTES);
+        render_bool("Weather effects on display:", PREFS_KEY_WEATHER_OVERLAY);
 
         current_weather_t weather;
         if(weather_get_current(&weather)) {
@@ -541,6 +542,7 @@ void action() {
         save_string(PREFS_KEY_WEATHER_APIKEY);
         save_string(PREFS_KEY_WEATHER_LAT);
         save_string(PREFS_KEY_WEATHER_LON);
+        save_bool(PREFS_KEY_WEATHER_OVERLAY);
         save_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES, 30, 24 * 60);
         save_string(PREFS_KEY_WORDNIK_APIKEY);
         save_int(PREFS_KEY_WORDNIK_INTERVAL_MINUTES, 60, 3600);
