@@ -119,7 +119,7 @@ There is a remote control server you can enable in settings for debugging remote
 
 Also included is a [primitive client](helper/remote-control.py) that has pretty poor performance, but allows recording GIFs and taking screenshots. All of the screenshots and GIFs in this readme were made that way.
 
-![](docs/img/pisosremote.mp4)
+<video controls src="docs/img/pisosremote.mp4"></video>
 
 ### Usage
 
