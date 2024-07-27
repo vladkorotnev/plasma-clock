@@ -78,6 +78,8 @@ You can also read the quest I went through trying to get it to run "in real time
     
     *(blinking lights warning!)*
 * Weighing Scale (via Wii Balance Board)
+    
+    ![](docs/img/app/weighing.gif)
 * Settings
     
     ![](docs/img/app/settings.gif)
