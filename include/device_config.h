@@ -13,6 +13,7 @@
 
 #ifdef ESP32
     #define HAS_BLUETOOTH_LE
+    #define HAS_BLUETOOTH_CLASSIC
 #endif
 
 #ifdef DEVICE_PLASMA_CLOCK
@@ -26,7 +27,13 @@
 // ---- DEPENDENCY RULES
 #if !HAS(BLUETOOTH_LE)
     #if HAS(SWITCHBOT_METER_INTEGRATION)
-        #undef HAS_SWITCHBOT_METER_INTEGRATION
+        #error Switchbot requires Bluetooth LE
+    #endif
+#endif
+
+#if !HAS(BLUETOOTH_CLASSIC)
+    #if HAS(BALANCE_BOARD_INTEGRATION)
+        #error Balance Board requires Bluetooth Classic
     #endif
 #endif
 

@@ -100,7 +100,8 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         normalActivationFunction
     ));
     display_menu->add_view(new MenuBooleanSettingView("FPS counter", PREFS_KEY_FPS_COUNTER));
-    display_menu->add_view(new MenuBooleanSettingView("Weather effect", PREFS_KEY_WEATHER_OVERLAY));
+    display_menu->add_view(new MenuBooleanSettingView("Weather effects", PREFS_KEY_WEATHER_OVERLAY));
+    display_menu->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         "WiFi signal",
         {"Off", "Disconnected", "Display power on", "Always"},

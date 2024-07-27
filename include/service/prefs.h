@@ -83,6 +83,8 @@ static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
 
 static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
 
+static constexpr prefs_key_t PREFS_KEY_REMOTE_SERVER = "rc_svr";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());

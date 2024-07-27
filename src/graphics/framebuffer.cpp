@@ -3,7 +3,7 @@
 #include <Arduino.h>
 #include <freertos/task.h>
 
-static const int DESIRED_FPS = 65;
+static const int DESIRED_FPS = 60;
 
 #define EVT_BIT_ENDED_DRAWING (1 << 0)
 

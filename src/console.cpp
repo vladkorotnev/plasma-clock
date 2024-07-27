@@ -12,7 +12,6 @@ void ConsoleTaskFunction( void * pvParameter )
     ESP_LOGV(LOG_TAG, "Running task");
     Console * that = static_cast<Console*> ( pvParameter );
 
-
     while(1) {
         that->task();
     }
@@ -170,13 +169,18 @@ void Console::set_font(const font_definition_t* f) {
 }
 
 void Console::set_active(bool act) {
-    active = act;
     if(act) {
+        if(hTask != NULL) vTaskResume(hTask);
         disp->wait_next_frame();
+    } else {
+        flush();
+        if(hTask != NULL) vTaskSuspend(hTask);
     }
+    active = act;
 }
 
 void Console::flush() {
+    if(!active) return;
     char * next_line = nullptr;
     while(xQueuePeek(hQueue, &next_line, 0)) {
         vTaskDelay(100);

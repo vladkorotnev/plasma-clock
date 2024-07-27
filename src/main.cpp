@@ -2,6 +2,7 @@
 #include <device_config.h>
 #include <display/display.h>
 #include <graphics/framebuffer.h>
+#include <graphics/screenshooter.h>
 #include <fonts.h>
 #include <console.h>
 #include <sensor/sensors.h>
@@ -45,7 +46,8 @@ static ViewCompositor * desktop;
 static ViewMultiplexor * appHost;
 static FpsCounter * fpsCounter;
 
-IRAM_ATTR static DisplayFramebuffer * fb;
+static DisplayFramebuffer * fb;
+static Screenshooter * screenshooter;
 static FantaManipulator * graph;
 static Console * con;
 static SensorPool * sensors;
@@ -171,7 +173,7 @@ void setup() {
     Serial.begin(115200);
 
 #ifdef BOARD_HAS_PSRAM
-    heap_caps_malloc_extmem_enable(0);
+    heap_caps_malloc_extmem_enable(16);
 #endif
 
     display_driver.reset();
@@ -184,6 +186,8 @@ void setup() {
 #endif
 
     fb = new DisplayFramebuffer(&display_driver);
+    screenshooter = new Screenshooter(fb->manipulate());
+
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     con->print("");
@@ -209,6 +213,11 @@ void setup() {
     }
 
     con->clear();
+    if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
+        screenshooter->start_server(3939);
+        con->print("RC server up!");
+        delay(1000);
+    }
     con->print(NetworkManager::network_name());
     con->print("%i dBm", NetworkManager::rssi());
     delay(2000);
@@ -234,7 +243,7 @@ void setup() {
     wotd_start();
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
-    admin_panel_prepare(sensors, beepola, graph);
+    admin_panel_prepare(sensors, beepola, screenshooter);
 
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 

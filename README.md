@@ -5,6 +5,30 @@ Personal Information System OS (formerly Plasma Information Screen OS).
 
 A somewhat portable relatively-stylish pixel-art clock/weather station.
 
+![](docs/img/hero.jpg)
+
+## A remark on the Morio Denki Plasma Display
+
+**This display uses high voltage, which could be lethal!!**
+
+The display comes from a bus or a train, supposedly. 
+
+It has the following labels on the PCBs:
+
+* Morio Denki 6M06056 (the 8085-based control board I wasn't able to get running)
+* MD 16101DS-CONT82 06 (the actual framebuffer/drive board)
+* MD-24T-ADT (2) 8201 (the boards on the plasma tube itself)
+
+Despite using a standard "HDD" Molex 4-pin connector for the drive board power, it expects +160V on the pin where normally +12V would be supplied. Take care not to mix up the power supplies. (Plugging in +12V into the plasma board doesn't seem to damage it. Plugging in +160V into an HDD, on the other hand...)
+
+More detailed info is available in the following articles:
+
+* На русском: https://habr.com/ru/companies/timeweb/articles/808805/
+* 日本語で: https://elchika.com/article/b9f39c29-64aa-42ab-8f73-e6e27a72bd0e/
+* Demo video: https://youtu.be/D4MiHmhhjeQ
+
+You can also read the quest I went through trying to get it to run "in real time" at [EEVBlog Forums](https://www.eevblog.com/forum/repair/trying-to-figure-out-if-a-vfd-displaydriver-is-broken-(74-series-logic)/).
+
 ## Available widgets
 
 * Clock
@@ -18,11 +42,11 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 * Switchbot Meter temperature
 * Weather (via [OpenWeatherMap](https://openweathermap.org/))
     
-    ![](docs/img/widget/weather_pretty.png)
+    ![](docs/img/widget/weather.gif)
 
 * Weather Effect (raining and thunder on idle screen when rain/thunderstorm outside)
     
-    ![](docs/img/widget/rainclock_pretty.png)
+    ![](docs/img/widget/rain.gif)
 
 * Word of the Day (via [Wordnik](https://wordnik.com/))
     
@@ -41,21 +65,20 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 * Idle (home screen)
 * Timer
     
-    ![](docs/img/app/timer_pretty.png)
+    ![](docs/img/app/timer.gif)
     ![](docs/img/app/timer_melo_pretty.png)
 * Stopwatch
     
-    ![](docs/img/app/stopwatch_pretty.png)
+    ![](docs/img/app/stopwatch.gif)
 * Alarm (Smart Wake Up on devices with motion sensor)
     
     ![](docs/img/app/alarm_pretty.png)
     ![](docs/img/app/alarm2_pretty.png)
+    [Alarm Animation](docs/img/app/alarm.gif) *(blinking lights warning!)*
 * Weighing Scale (via Wii Balance Board)
 * Settings
     
-    ![](docs/img/app/setting0_pretty.png)
-    ![](docs/img/app/setting1_pretty.png)
-    ![](docs/img/app/setting2_pretty.png)
+    ![](docs/img/app/settings.gif)
 
 ## Available chime tones
 
@@ -86,6 +109,45 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 * [Brisk & Trixxy — Eye Opener](https://youtu.be/81QqHUpyBhg?t=83): [MIDI](helper/chimes/eye_opener.mid)
 
 MIDI to sequencer conversion tool (supports note events in one track only, track end event, and comment event): [midi_to_chime](helper/midi_to_chime.py)
+
+## Remote Control Server
+
+There is a remote control server you can enable in settings for debugging remotely when uploading firmware via OTA, or using an emulator without any screen and buttons.
+
+Also included is a [primitive client](helper/remote-control.py) that has pretty poor performance, but allows recording GIFs and taking screenshots. All of the screenshots and GIFs in this readme were made that way.
+
+![](docs/img/pisosremote.mp4)
+
+### Usage
+
+1. Enable "Remote Control Server" under Settings → Display.
+2. Save and Restart PIS-OS
+3. Run `python ./helper/remote-control.py <CLOCK-IP>` on your computer. Port 3939 must be accessible.
+
+### Protocol
+
+The protocol is very simple.
+
+The control client sends a control packet to the clock via UDP:
+
+```
+{
+    uint16_t magic = 0x3939;
+    key_id_t pressed = (set bits of those keys that were pressed since last transaction);
+    key_id_t released = (set bits of those keys that were released since last transaction);
+}
+```
+
+After that the client should expect a UDP packet from the clock with the format:
+
+```
+{
+    uint16_t magic = 0x8888;
+    uint16_t display_width;
+    uint16_t display_height;
+    ... remainder: bitmap data in fanta buffer format
+}
+```
 
 ## System Requirements
 
@@ -139,24 +201,6 @@ The basic configuration without any bluetooth functionality (no Switchbot or Bal
 
 * Wii Balance Board. Set feature flag `HAS_BALANCE_BOARD_INTEGRATION`. [Driver](src/service/balance_board.cpp), based upon [code by Sasaki Takeru](https://github.com/takeru/Wiimote/tree/d81319c62ac5931da868cc289386a6d4880a4b15), requires WROVER module
 
-## Morio Denki Plasma Display Info
+----
 
-**This display uses high voltage, which could be lethal!!**
-
-The display comes from a bus or a train, supposedly. 
-
-It has the following labels on the PCBs:
-
-* Morio Denki 6M06056 (the 8085-based control board I wasn't able to get running)
-* MD 16101DS-CONT82 06 (the actual framebuffer/drive board)
-* MD-24T-ADT (2) 8201 (the boards on the plasma tube itself)
-
-Despite using a standard "HDD" Molex 4-pin connector for the drive board power, it expects +160V on the pin where normally +12V would be supplied. Take care not to mix up the power supplies. (Plugging in +12V into the plasma board doesn't seem to damage it. Plugging in +160V into an HDD, on the other hand...)
-
-More detailed info is available in the following articles:
-
-* На русском: https://habr.com/ru/companies/timeweb/articles/808805/
-* 日本語で: https://elchika.com/article/b9f39c29-64aa-42ab-8f73-e6e27a72bd0e/
-* Demo video: https://youtu.be/D4MiHmhhjeQ
-
-You can also read the quest I went through trying to get it to run "in real time" at [EEVBlog Forums](https://www.eevblog.com/forum/repair/trying-to-figure-out-if-a-vfd-displaydriver-is-broken-(74-series-logic)/).
+by Genjitsu Labs / akasaka, 2024.

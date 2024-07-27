@@ -18,9 +18,7 @@ static TaskHandle_t hTask = NULL;
 static GyverPortal ui;
 static SensorPool *sensors;
 static Beeper *beeper;
-static FantaManipulator *disp;
-
-Screenshooter screenshooter;
+static Screenshooter *screenshooter;
 
 extern "C" void AdminTaskFunction( void * pvParameter );
 
@@ -490,6 +488,7 @@ static void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
+        render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
         GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
         GP.BUTTON_DOWNLOAD("crashdump.elf", "Last crash dump", GP_BLUE);
         GP.FILE_UPLOAD_RAW("prefs_restore", "Settings restore", GP_BLUE, "", "", "/prefs_restore");
@@ -599,7 +598,7 @@ void action() {
         else if(ui.uri().endsWith("screen.png")) {
             const uint8_t * outBuf = nullptr;
             size_t outLen = 0;
-            if(screenshooter.capture(disp, &outBuf, &outLen)) {
+            if(screenshooter->capture_png(&outBuf, &outLen)) {
                 ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
                 free((void*)outBuf);
             } else {
@@ -611,10 +610,10 @@ void action() {
 
 bool prefs_uploading = false;
 
-void admin_panel_prepare(SensorPool* s, Beeper* b, FantaManipulator * g) {
+void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
     sensors = s;
     beeper = b;
-    disp = g;
+    screenshooter = ss;
     ui.attachBuild(build);
     ui.attach(action);
     ui.downloadAuto(false);
