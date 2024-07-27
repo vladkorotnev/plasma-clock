@@ -74,7 +74,9 @@ You can also read the quest I went through trying to get it to run "in real time
     
     ![](docs/img/app/alarm_pretty.png)
     ![](docs/img/app/alarm2_pretty.png)
-    [Alarm Animation](docs/img/app/alarm.gif) *(blinking lights warning!)*
+    ![](docs/img/app/alarm.gif)
+    
+    *(blinking lights warning!)*
 * Weighing Scale (via Wii Balance Board)
 * Settings
     
