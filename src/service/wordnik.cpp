@@ -46,9 +46,6 @@ void WordnikTaskFunction( void * pvParameter )
 
     EXT_RAM_ATTR static WiFiClientSecure client;
     EXT_RAM_ATTR static HTTPClient http;
-#ifdef BOARD_HAS_PSRAM
-    mbedtls_platform_set_calloc_free(ps_calloc, free);
-#endif
 
     EXT_RAM_ATTR static char url[128];
     snprintf(url, 150, currentApi, apiKey.c_str());
@@ -61,7 +58,7 @@ void WordnikTaskFunction( void * pvParameter )
         ESP_LOGV(LOG_TAG, "Query: %s", url);
         int response = http.GET();
         if(response == 200) {
-            EXT_RAM_ATTR JsonDocument response;
+            EXT_RAM_ATTR static JsonDocument response;
 
             DeserializationError error = deserializeJson(response, http.getStream());
 

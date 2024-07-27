@@ -22,6 +22,7 @@ PRESS_STS=0
 RELEASE_STS=0
 DISP_STS=[]
 DISP_RES=(0,0)
+CANVAS_RES=(500,80)
 
 REC_IMGS=[]
 REC_STS=False
@@ -43,14 +44,16 @@ def _buf_to_pillow(buf, width, height):
     return out_img.filter(ImageFilter.GaussianBlur(radius=PIX_SIZE/10))
 
 def _buf_to_screen(buf, width, height):
-    global PIX_COLOR, PIX_PITCH_H, PIX_PITCH_W, PIX_SIZE, canvas
+    global PIX_COLOR, PIX_PITCH_H, PIX_PITCH_W, PIX_SIZE, CANVAS_RES, canvas
     canvas.delete('all')
+    left_offset = ((CANVAS_RES[0] - width) / 2) / PIX_SIZE
+    top_offset = ((CANVAS_RES[1] - height) / 2) / PIX_SIZE
     for x in range(width):
         for y in range(height):
             tidx = (x * (height // 8)) + (y // 8)
             col = buf[tidx]
             v = col & (1 << (y % 8))
-            canvas.create_rectangle(x * (PIX_SIZE+PIX_PITCH_W), y * (PIX_SIZE+PIX_PITCH_H), x * (PIX_SIZE+PIX_PITCH_W)+PIX_SIZE, y * (PIX_SIZE+PIX_PITCH_H)+PIX_SIZE,fill=("white" if v>0 else "black"))
+            canvas.create_rectangle(x * PIX_SIZE + left_offset, y * PIX_SIZE + top_offset, x * PIX_SIZE+PIX_SIZE + left_offset, y * PIX_SIZE+PIX_SIZE + top_offset, fill=("white" if v>0 else "black"))
 
 def render_screenshot():
     global DISP_STS, DISP_RES
@@ -143,7 +146,7 @@ window.grid_columnconfigure(2, weight=1, uniform="foo")
 window.grid_columnconfigure(3, weight=1, uniform="foo")
 
 # Create the canvas
-canvas = tk.Canvas(window, width=510, height=82, bg="black")
+canvas = tk.Canvas(window, width=CANVAS_RES[0], height=CANVAS_RES[1], bg="black")
 canvas.grid(row = 1, column = 0, columnspan=4)
 
 left_button = tk.Button(window, text="←")
