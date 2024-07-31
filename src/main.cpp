@@ -177,7 +177,7 @@ void setup() {
 #endif
 
     // The SPI driver messes up display pinmux, so it must initialize first
-    Beeper::InitSPI(HWCONF_BEEPER_GPIO);
+    Beeper::InitI2S(HWCONF_BEEPER_GPIO);
 
     display_driver.initialize();
     display_driver.reset();
