@@ -88,6 +88,11 @@ void pop_state(device_state_t expected, transition_type_t transition) {
     }
 }
 
+void bringup_sound() {
+    beepola = new Beeper();
+    WaveOut::set_output_callback(beepola->get_callback());
+}
+
 void bringup_light_sensor() {
 #if HAS(LIGHT_SENSOR)
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
@@ -198,7 +203,7 @@ void setup() {
     con->print("");
     
     con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
-    beepola = new Beeper();
+    bringup_sound();
     // while(1){
     //     beepola->start_tone(CHANNEL_SYSTEM, 440);
     //     delay(500);

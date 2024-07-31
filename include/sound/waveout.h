@@ -1,8 +1,11 @@
+#pragma once
 #include <driver/i2s.h>
 #include <esp32-hal-gpio.h>
 #include <functional>
 
 typedef std::function<size_t (uint8_t* buffer, size_t size)> WaveGeneratorCallback;
+
+static const WaveGeneratorCallback NULL_GENERATOR = [](uint8_t*, size_t) { return 0; };
 
 class WaveOut {
 public:
@@ -15,8 +18,8 @@ public:
 
 private:
     static const i2s_port_t I2S_NUM = I2S_NUM_0;
-    static const size_t DMA_BUF_LEN = 128;
-    static const size_t DMA_NUM_BUF = 2;
+    static const size_t DMA_BUF_LEN = 256;
+    static const size_t DMA_NUM_BUF = 4;
     static const size_t RENDER_CHUNK_SIZE = DMA_BUF_LEN;
     static bool i2sInited;
     static TaskHandle_t hTask;

@@ -5,7 +5,7 @@ static char LOG_TAG[] = "WOUT";
 
 bool WaveOut::i2sInited = false;
 TaskHandle_t WaveOut::hTask = NULL;
-WaveGeneratorCallback WaveOut::callback = [](uint8_t*, size_t) { return 0; };
+WaveGeneratorCallback WaveOut::callback = NULL_GENERATOR;
 
 void WaveOut::init_I2S(gpio_num_t pin) {
     if(WaveOut::i2sInited) return;
