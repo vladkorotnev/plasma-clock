@@ -46,7 +46,7 @@ void BeepSequencer::start_task() {
         "MELODY",
         4096,
         this,
-        configMAX_PRIORITIES - 1,
+        7,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

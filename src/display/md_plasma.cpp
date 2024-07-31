@@ -25,8 +25,6 @@ MorioDenkiPlasmaDriver::MorioDenkiPlasmaDriver(
     bright_gpio = bright;
     show_gpio = show;
     hv_en_gpio = hv_enable;
-
-    initialize();
 }
 
 void MorioDenkiPlasmaDriver::initialize() {

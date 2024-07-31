@@ -169,13 +169,17 @@ void bringup_hid() {
 }
 
 void setup() {
+    vTaskPrioritySet(NULL, configMAX_PRIORITIES - 2);
     // Set up serial for logs
     Serial.begin(115200);
-
 #ifdef BOARD_HAS_PSRAM
     heap_caps_malloc_extmem_enable(16);
 #endif
 
+    // The SPI driver messes up display pinmux, so it must initialize first
+    Beeper::InitSPI(HWCONF_BEEPER_GPIO);
+
+    display_driver.initialize();
     display_driver.reset();
 
     display_driver.set_power(true);
@@ -193,8 +197,13 @@ void setup() {
     con->print("");
     
     con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
-    delay(500);
-    beepola = new Beeper(HWCONF_BEEPER_GPIO, HWCONF_BEEPER_PWM_CHANNEL);
+    beepola = new Beeper();
+    // while(1){
+    //     beepola->start_tone(CHANNEL_SYSTEM, 440);
+    //     delay(500);
+    //     beepola->stop_tone(CHANNEL_SYSTEM);
+    //     delay(500);
+    // }
     bs = new BeepSequencer(beepola);
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
 
@@ -244,8 +253,6 @@ void setup() {
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
     admin_panel_prepare(sensors, beepola, screenshooter);
-
-    vTaskPrioritySet(NULL, configMAX_PRIORITIES - 1);
 
     con->set_active(false);
     fb->clear();
