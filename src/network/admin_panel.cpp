@@ -12,6 +12,7 @@
 #include <sound/melodies.h>
 #include <GyverPortal.h>
 #include <Arduino.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "ADMIN";
 static TaskHandle_t hTask = NULL;
@@ -668,7 +669,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
         "ADM",
         4096,
         nullptr,
-        4,
+        pisosTASK_PRIORITY_WEBADMIN,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

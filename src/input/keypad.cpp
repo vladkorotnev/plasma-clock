@@ -2,6 +2,7 @@
 #include <device_config.h>
 #include <esp32-hal-log.h>
 #include <map>
+#include <os_config.h>
 
 static char LOG_TAG[] = "KEYP";
 
@@ -45,7 +46,7 @@ void keypad_start() {
             "KEYPAD",
             4096,
             nullptr,
-            configMAX_PRIORITIES - 3,
+            pisosTASK_PRIORITY_KEYPAD,
             &hTask
         );
 #endif

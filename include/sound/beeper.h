@@ -24,7 +24,6 @@ public:
 
 class Beeper {
 public:
-    static void InitI2S(gpio_num_t pin);
     Beeper();
     ~Beeper();
     void set_channel_state(beeper_channel_t, bool);

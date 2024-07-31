@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "SCAP";
 
@@ -230,7 +231,7 @@ void Screenshooter::start_server(uint16_t port) {
         "VNC",
         2048,
         framebuffer,
-        3,
+        pisosTASK_PRIORITY_REMOTE_DESKTOP,
         &hServerTask
     );
 }

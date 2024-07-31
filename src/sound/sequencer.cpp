@@ -1,4 +1,5 @@
 #include <sound/sequencer.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "MELODY";
 
@@ -46,7 +47,7 @@ void BeepSequencer::start_task() {
         "MELODY",
         4096,
         this,
-        7,
+        pisosTASK_PRIORITY_MELODY_SEQUENCER,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

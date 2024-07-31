@@ -7,6 +7,7 @@
 #include <hal/touch_sensor_types.h>
 #include <hal/touch_sensor_hal.h>
 #include <console.h>
+#include <os_config.h>
 
 // I don't know how this works
 // But seems like it works with my janky tinfoil touch screen thingamajiggie
@@ -121,7 +122,7 @@ esp_err_t touchplane_start() {
             "TOUCH",
             1024,
             nullptr,
-            configMAX_PRIORITIES - 3,
+            pisosTASK_PRIORITY_KEYPAD,
             &hTask
         );
     }

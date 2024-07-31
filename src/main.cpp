@@ -9,6 +9,7 @@
 #include <input/touch_plane.h>
 #include <input/keypad.h>
 #include <input/hid_sensor.h>
+#include <sound/waveout.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -177,7 +178,7 @@ void setup() {
 #endif
 
     // The SPI driver messes up display pinmux, so it must initialize first
-    Beeper::InitI2S(HWCONF_BEEPER_GPIO);
+    WaveOut::init_I2S(HWCONF_BEEPER_GPIO);
 
     display_driver.initialize();
     display_driver.reset();

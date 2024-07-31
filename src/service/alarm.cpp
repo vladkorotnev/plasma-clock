@@ -2,6 +2,7 @@
 #include <service/time.h>
 #include <service/prefs.h>
 #include <state.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "ALM";
 
@@ -158,7 +159,7 @@ void alarm_init(SensorPool* s) {
         "ALARM",
         4096,
         nullptr,
-        4,
+        pisosTASK_PRIORITY_ALARM,
         &hTask
     );
 }

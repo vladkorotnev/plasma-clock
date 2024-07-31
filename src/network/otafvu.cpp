@@ -1,5 +1,6 @@
 #include <network/otafvu.h>
 #include <device_config.h>
+#include <os_config.h>
 
 #if HAS(OTAFVU)
 #include <sound/melodies.h>
@@ -52,7 +53,7 @@ OTAFVUManager::OTAFVUManager(Console* c, BeepSequencer*s) {
         "OTAFVU",
         4096,
         this,
-        10,
+        pisosTASK_PRIORITY_OTAFVU,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
