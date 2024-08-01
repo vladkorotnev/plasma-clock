@@ -41,9 +41,6 @@ public:
             });
         }
         load_prefs();
-        hourView->value = hour;
-        minuteView->value = minute;
-        secondView->value = second;
         cursorTimer = 0;
         isRunning = false;
 
@@ -175,6 +172,9 @@ private:
         minute = (saved_time % 3600) / 60;
         second = saved_time % 60;
         cursorPosition = saved_time == 0 ? CursorPosition::SECOND : CursorPosition::PLAY_PAUSE;
+        hourView->value = hour;
+        minuteView->value = minute;
+        secondView->value = second;
     }
 
     void save_prefs() {
