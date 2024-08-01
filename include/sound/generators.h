@@ -5,10 +5,12 @@ class ToneGenerator {
 public:
     enum Parameter {
         PARAMETER_FREQUENCY,
+        PARAMETER_DUTY,
         PARAMETER_ACTIVE
     };
     virtual size_t generate_samples(void* buffer, size_t length, uint32_t wanted_samples) { return 0; }
     virtual void set_parameter(Parameter p, int v) { }
+    virtual void reset_phase() {}
 };
 
 
@@ -18,7 +20,7 @@ public:
         phase{0},
         wavelength{0},
         active { false },
-        duty_offset { 0 }
+        duty { 2 }
     {}
 
     void set_frequency(int freq) {
@@ -37,6 +39,10 @@ public:
         phase = 0;
     }
 
+    void reset_phase() override {
+        phase = 0;
+    }
+
     void set_parameter(Parameter p, int v) override {
         switch(p) {
             case PARAMETER_ACTIVE:
@@ -48,6 +54,11 @@ public:
                 set_active(v != 0);
                 break;
 
+            case PARAMETER_DUTY:
+                if(abs(v) < 2) duty = 2;
+                else duty = v;
+                break;
+
             default: break;
         }
     }
@@ -55,7 +66,8 @@ public:
     size_t generate_samples(void* buffer, size_t length, uint32_t want_samples_) override {
         if(!active || wavelength == 0) return 0;
 
-        int bits_high = wavelength / 2 - duty_offset;
+        int bits_high = wavelength / abs(duty);
+        if(duty < 0) bits_high = wavelength - bits_high;
         uint8_t* buff = (uint8_t*) buffer;
         uint32_t want_samples = want_samples == 0 ? (length * 8) : std::min(want_samples_, length * 8);
         size_t idx = 0;
@@ -77,6 +89,6 @@ public:
 private:
     int phase;
     int wavelength;
-    int duty_offset;
+    int duty;
     bool active;
 };

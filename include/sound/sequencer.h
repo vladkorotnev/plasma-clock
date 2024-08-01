@@ -4,6 +4,7 @@
 
 typedef enum melody_item_type {
     FREQ_SET, // or 0 to turn off
+    DUTY_SET,
     DELAY,
     LOOP_POINT_SET,
     MAX_INVALID

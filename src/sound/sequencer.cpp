@@ -32,6 +32,7 @@ void NewSequencer::play_sequence(const melody_sequence_t * s, int repeat) {
     loop_point = 0;
     is_running = true;
     remaining_delay_samples = 0;
+    for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, 0);
     xEventGroupClearBits(wait_end_group, BIT_END_PLAY);
     process_steps_until_delay();
 }
@@ -55,6 +56,10 @@ void NewSequencer::process_steps_until_delay() {
     switch(cur_line->command) {
         case FREQ_SET:
             voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, cur_line->argument1);
+            // if(cur_line->argument1 > 0) for(int i = 0; i < CHANNELS; i++) voices[i]->reset_phase(); // retrig for unison
+            break;
+        case DUTY_SET:
+            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, cur_line->argument1);
             break;
         case LOOP_POINT_SET:
             loop_point = pointer + 1;

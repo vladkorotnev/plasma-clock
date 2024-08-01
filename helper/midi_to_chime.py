@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-# this is very jank, do not expect it to work as is
-# it worked for some melodies though
-
+import pdb
 from sys import argv
 from mido import MidiFile
 import freq_note_converter
@@ -10,45 +8,64 @@ import freq_note_converter
 mid = MidiFile(argv[1])
 name = argv[2]
 
-last_time = 0
-evts = [] # of (freq in hz or 0, delay in ms)
 ended = False
 
+class Event():
+    def __init__(self, kind, chan, arg):
+        self.kind = kind
+        self.chan = chan
+        self.arg = arg
+
+    def __str__(self):
+        return f"    {{{self.kind}, {str(self.chan)}, {str(int(self.arg))}}},"
+
+class Comment():
+    def __init__(self, s):
+        self.content = s
+        self.kind = "REM"
+
+    def __str__(self):
+        return f"    /* {self.content} */"
+
+evts = []
+
+def prev_note_off_event(chan):
+    for i in range(1,len(evts)+1):
+        e = evts[-i]
+        if e.kind == "FREQ_SET" and e.arg == 0 and e.chan == chan:
+            return e
+        elif e.kind == "DELAY":
+            return None
+    return None
+
 for msg in mid:
+    print(msg)
     if msg.type == "note_on" or msg.type == "note_off":
-        print(msg)
-        if msg.time > 0 and len(evts) > 0 and evts[-1][1] == 0:
-            evts[-1][1] = int(msg.time * 1000)
+        if msg.time > 0.005:
+            evts.append(Event("DELAY", 0, msg.time * 1000))
         if msg.type == "note_on" and msg.velocity > 0:
-            evts.append([int(freq_note_converter.from_note_index(msg.note).freq), 0, ""])
+            existing_evt = prev_note_off_event(msg.channel)
+            if existing_evt is not None:
+                existing_evt.arg = freq_note_converter.from_note_index(msg.note).freq
+            else:
+                evts.append(Event("FREQ_SET", msg.channel, freq_note_converter.from_note_index(msg.note).freq))
         else:
             # note off
-            evts.append([0, 0, ""])
+            evts.append(Event("FREQ_SET", msg.channel, 0))
     elif msg.type == "end_of_track":
-        print(msg)
         if ended:
             raise Exception("WTF, already ended")
         ended = True
-        if evts[-1][0] == 0:
-            # pause exists, just extend it
-            evts[-1][1] = int(msg.time * 1000)
-        else:
-            evts.append([0, int(msg.time*1000), ""])
+        evts.append(Event("DELAY", 0, msg.time * 1000))
     elif msg.type == "marker":
-        evts[-1][2] = msg.text
+        if msg.time > 0.005:
+            evts.append(Event("DELAY", 0, msg.time * 1000))
+        evts.append(Comment(msg.text))
         
-        
-print(evts)
 
 print("static const melody_item_t "+name+"_data[] = {")
-i = 0
-while i < len(evts):
-    if evts[i][0] != 0 or evts[i][1] != 0:
-        print("    {"+str(evts[i][0])+", "+str(evts[i][1])+"}, ")
-    if evts[i][2] != "":
-        print("    ")
-        print("    // " + evts[i][2])
-    i+=1
+for e in evts:
+    print(str(e))
 print("};")
 
 print("const melody_sequence_t "+name+" = MELODY_OF("+name+"_data);")
