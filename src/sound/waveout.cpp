@@ -5,7 +5,7 @@ static char LOG_TAG[] = "WOUT";
 
 bool WaveOut::i2sInited = false;
 TaskHandle_t WaveOut::hTask = NULL;
-WaveGeneratorCallback WaveOut::callback = NULL_GENERATOR;
+WaveGeneratorCallback WaveOut::callback[] = {NULL_GENERATOR, NULL_GENERATOR};
 
 void WaveOut::init_I2S(gpio_num_t pin) {
     if(WaveOut::i2sInited) return;
@@ -54,10 +54,14 @@ void WaveOut::task(void*) {
     const size_t fast_chunk_size = RENDER_CHUNK_SIZE / sizeof(uint32_t);
     static size_t out_size = 0;
     while(1) {
-        size_t generated_bytes = callback(chunk, RENDER_CHUNK_SIZE);
-        if(generated_bytes > 0) {
+        size_t total = 0;
+        for(int i = 0; i < CHANNEL_COUNT; i++) {
+            size_t generated_bytes = callback[i](chunk, RENDER_CHUNK_SIZE);
+            if(generated_bytes > total) total = generated_bytes;
+        }
+        if(total > 0) {
             for(size_t i = 0; i < fast_chunk_size; i++) fast_chunk[i] = ~fast_chunk[i];
-            i2s_write(I2S_NUM, chunk, generated_bytes, &out_size, portMAX_DELAY);
+            i2s_write(I2S_NUM, chunk, total, &out_size, portMAX_DELAY);
             memset(chunk, 0, RENDER_CHUNK_SIZE);
         } else {
             i2s_write(I2S_NUM, null, RENDER_CHUNK_SIZE, &out_size, portMAX_DELAY);
@@ -66,6 +70,6 @@ void WaveOut::task(void*) {
     }
 }
 
-void WaveOut::set_output_callback(WaveGeneratorCallback cb) {
-    callback = cb;
+void WaveOut::set_output_callback(int channel, WaveGeneratorCallback cb) {
+    callback[channel] = cb;
 }

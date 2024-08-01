@@ -23,7 +23,7 @@ private:
     char buf[16];
 };
 
-AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
         if(isActive) push_renderable(instance, TRANSITION_NONE);
@@ -40,8 +40,8 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     clock_menu->add_view(new MenuBooleanSettingView("Tick sound", PREFS_KEY_TICKING_SOUND));
     clock_menu->add_view(new MenuBooleanSettingView("Ticking only when screen on", PREFS_KEY_NO_SOUND_WHEN_OFF));
     clock_menu->add_view(new MenuBooleanSettingView("Hourly chime", PREFS_KEY_HOURLY_CHIME_ON));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(beeper, "First chime", PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(beeper, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "First chime", PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime from", PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime until", PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
@@ -181,9 +181,6 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     settings_menu->add_view(new MenuInfoItemView("Notice", "Full settings are only available in the Web UI"));
     settings_menu->add_view(new MenuActionItemView("Save & Restart", [this](){ 
         prefs_force_save();
-        BeepSequencer * s = new BeepSequencer(beeper);
-        s->play_sequence(tulula_fvu, CHANNEL_ALARM, SEQUENCER_NO_REPEAT);
-        s->wait_end_play();
         ESP.restart();
     }, &good_icns));
 

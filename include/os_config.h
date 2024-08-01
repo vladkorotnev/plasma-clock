@@ -17,4 +17,8 @@
 #define pisosTASK_PRIORITY_POWER_MANAGEMENT 4
 #define pisosTASK_PRIORITY_WORDNIK 1
 #define pisosTASK_PRIORITY_WEATHER 1
-#define pisosTASK_PRIORITY_MELODY_SEQUENCER 7
+
+// ----- WaveOut channels -----
+
+#define pisosWAVE_CHANNEL_BEEPER 0
+#define pisosWAVE_CHANNEL_SEQUENCER 1

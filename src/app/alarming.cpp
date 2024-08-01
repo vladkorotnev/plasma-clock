@@ -31,7 +31,7 @@ typedef enum alarming_state {
 } alarming_state_t;
 
 static SimpleClock *clockView = nullptr;
-static BeepSequencer *seq = nullptr;
+static NewSequencer *seq = nullptr;
 static TouchArrowOverlay *arrows = nullptr;
 static TickType_t snoozeUntil;
 static alarming_state_t state;
@@ -40,12 +40,12 @@ static bool clock_inverting = false;
 static uint8_t snooze_hold_remain = 0;
 static int snooze_minutes = 0;
 static bool is_snoozing = false;
-static melody_sequence_t melody;
+static const melody_sequence_t * melody;
 
 static TickType_t startedAt;
 static TickType_t maxDur;
 
-void app_alarming_prepare(Beeper* beeper) {
+void app_alarming_prepare(NewSequencer* s) {
     // do this prior to changing state because apparently this may get called from a separate thread, so step() goes ahead of prepare() and thus exits the alarm right away?
     // TODO: somehow stick the state switching to the UI thread!! and all that
     startedAt = xTaskGetTickCount();
@@ -53,9 +53,8 @@ void app_alarming_prepare(Beeper* beeper) {
 
     if(seq) {
         seq->stop_sequence();
-        free(seq);
     }
-    seq = new BeepSequencer(beeper);
+    seq = s;
 
     if(!arrows) arrows = new TouchArrowOverlay();
     if(!clockView) clockView = new SimpleClock();
@@ -68,7 +67,7 @@ void app_alarming_prepare(Beeper* beeper) {
     const alarm_setting_t * alarm = get_triggered_alarm();
     if(alarm) {
         melody = melody_from_no(alarm->melody_no);
-        seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
+        seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
     }
     power_mgmt_pause();
     state = BLINKERING;
@@ -285,7 +284,7 @@ void app_alarming_process() {
             } else if(xTaskGetTickCount() >= snoozeUntil) {
                 is_snoozing = false;
                 state = BLINKERING;
-                seq->play_sequence(melody, CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
+                seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
             }
         break;
 

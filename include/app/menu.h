@@ -3,11 +3,12 @@
 #include <views/framework.h>
 #include <graphics/framebuffer.h>
 #include <sound/beeper.h>
+#include <sound/sequencer.h>
 #include <sensor/sensor.h>
 
 class AppShimMenu: public ProtoShimNavMenu {
 public:
-    AppShimMenu(Beeper*);
+    AppShimMenu(Beeper*, NewSequencer*);
 
     void prepare();
     void step();

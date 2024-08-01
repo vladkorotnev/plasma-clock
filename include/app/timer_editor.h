@@ -7,7 +7,7 @@
 
 class AppShimTimerEditor: public ProtoShimNavigationStack {
 public:
-    AppShimTimerEditor(Beeper *);
+    AppShimTimerEditor(Beeper *, NewSequencer *);
     ~AppShimTimerEditor();
 private:
     class TimerEditorMainScreen;

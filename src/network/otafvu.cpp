@@ -24,7 +24,7 @@ void OtaFvuTaskFunction( void * pvParameter )
     }
 }
 
-OTAFVUManager::OTAFVUManager(Console* c, BeepSequencer*s) {
+OTAFVUManager::OTAFVUManager(Console* c, NewSequencer*s) {
     ESP_LOGI(LOG_TAG, "Initializing");
     con = c;
     seq = s;
@@ -80,7 +80,7 @@ void OTAFVUManager::get_ready() {
     // Keep display on when updating
     power_mgmt_pause();
 
-    seq->play_sequence(tulula_fvu, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
+    seq->play_sequence(tulula_fvu, SEQUENCER_NO_REPEAT);
 }
 
 void OTAFVUManager::shut_up_and_explode() {
@@ -88,7 +88,7 @@ void OTAFVUManager::shut_up_and_explode() {
     con->set_font(&keyrus0816_font);
     con->clear();
     con->print("OTAFVU Done!");
-    seq->play_sequence(oelutz_fvu, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
+    seq->play_sequence(oelutz_fvu, SEQUENCER_NO_REPEAT);
     seq->wait_end_play();
     ESP.restart();
 }

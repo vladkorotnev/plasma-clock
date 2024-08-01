@@ -93,12 +93,6 @@ static void save_melody(prefs_key_t key) {
         ESP_LOGV(LOG_TAG, "Preview chime #%i for %s", temp_chime, key);
         
         prefs_set_int(key, temp_chime);
-
-        melody_sequence_t melody = melody_from_no(temp_chime);
-        BeepSequencer * s = new BeepSequencer(beeper);
-        s->play_sequence(melody, CHANNEL_NOTICE, SEQUENCER_NO_REPEAT);
-        s->wait_end_play();
-        delete s;
     }
 }
 
@@ -569,9 +563,6 @@ void action() {
 
         if(ui.click(reboot_btn)) {
             prefs_force_save();
-            BeepSequencer * s = new BeepSequencer(beeper);
-            s->play_sequence(tulula_fvu, CHANNEL_NOTICE, SEQUENCER_NO_REPEAT);
-            s->wait_end_play();
             ESP.restart();
         }
         return;

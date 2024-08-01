@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <device_config.h>
+#include <os_config.h>
 #include <display/display.h>
 #include <graphics/framebuffer.h>
 #include <graphics/screenshooter.h>
@@ -54,7 +55,7 @@ static Console * con;
 static SensorPool * sensors;
 static OTAFVUManager * ota;
 static Beeper * beepola;
-static BeepSequencer * bs;
+static NewSequencer * seq;
 
 void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
@@ -90,7 +91,9 @@ void pop_state(device_state_t expected, transition_type_t transition) {
 
 void bringup_sound() {
     beepola = new Beeper();
-    WaveOut::set_output_callback(beepola->get_callback());
+    seq = new NewSequencer();
+    WaveOut::set_output_callback(pisosWAVE_CHANNEL_BEEPER, beepola->get_callback());
+    WaveOut::set_output_callback(pisosWAVE_CHANNEL_SEQUENCER, seq->get_callback());
 }
 
 void bringup_light_sensor() {
@@ -204,9 +207,8 @@ void setup() {
     
     con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
     bringup_sound();
-    bs = new BeepSequencer(beepola);
 
-    bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
+    seq->play_sequence(&pc98_pipo, SEQUENCER_NO_REPEAT);
 
 #if HAS(TOUCH_PLANE)
 // No beeper on non-touch because it will be annoying with physical buttons
@@ -234,7 +236,7 @@ void setup() {
     con->print(NetworkManager::current_ip().c_str());
     delay(2000);
 
-    ota = new OTAFVUManager(con, bs);
+    ota = new OTAFVUManager(con, seq);
 
     sensors = new SensorPool();
 
@@ -263,11 +265,11 @@ void setup() {
     desktop->add_layer(appHost);
     desktop->add_layer(new FpsCounter(fb));
 
-    appHost->add_view(new AppShimIdle(sensors, beepola), STATE_IDLE);
-    appHost->add_view(new AppShimAlarming(beepola), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(beepola), STATE_MENU);
-    appHost->add_view(new AppShimAlarmEditor(beepola), STATE_ALARM_EDITOR);
-    appHost->add_view(new AppShimTimerEditor(beepola), STATE_TIMER_EDITOR);
+    appHost->add_view(new AppShimIdle(sensors, beepola, seq), STATE_IDLE);
+    appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
+    appHost->add_view(new AppShimMenu(beepola, seq), STATE_MENU);
+    appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
+    appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
 #if HAS(BALANCE_BOARD_INTEGRATION)
     appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
