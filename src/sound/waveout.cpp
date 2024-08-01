@@ -19,7 +19,7 @@ void WaveOut::init_I2S(gpio_num_t pin) {
         .intr_alloc_flags = ESP_INTR_FLAG_LEVEL2,
         .dma_buf_count = DMA_NUM_BUF,
         .dma_buf_len = DMA_BUF_LEN,
-        .use_apll = false,
+        .use_apll = true,
         .bits_per_chan = I2S_BITS_PER_CHAN_DEFAULT
     };
 
@@ -48,14 +48,17 @@ void WaveOut::init_I2S(gpio_num_t pin) {
 }
 
 void WaveOut::task(void*) {
-    uint8_t chunk[RENDER_CHUNK_SIZE];
-    uint8_t null[RENDER_CHUNK_SIZE] = { 0xFF };
-    size_t out_size = 0;
+    static uint8_t chunk[RENDER_CHUNK_SIZE] = { 0x0 };
+    static const uint8_t null[RENDER_CHUNK_SIZE] = { 0xFF };
+    static uint32_t * fast_chunk = (uint32_t*) chunk;
+    const size_t fast_chunk_size = RENDER_CHUNK_SIZE / sizeof(uint32_t);
+    static size_t out_size = 0;
     while(1) {
         size_t generated_bytes = callback(chunk, RENDER_CHUNK_SIZE);
         if(generated_bytes > 0) {
-            for(size_t i = 0; i < generated_bytes; i++) chunk[i] = ~chunk[i];
+            for(size_t i = 0; i < fast_chunk_size; i++) fast_chunk[i] = ~fast_chunk[i];
             i2s_write(I2S_NUM, chunk, generated_bytes, &out_size, portMAX_DELAY);
+            memset(chunk, 0, RENDER_CHUNK_SIZE);
         } else {
             i2s_write(I2S_NUM, null, RENDER_CHUNK_SIZE, &out_size, portMAX_DELAY);
         }

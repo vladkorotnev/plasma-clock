@@ -182,7 +182,7 @@ void setup() {
     heap_caps_malloc_extmem_enable(16);
 #endif
 
-    // The SPI driver messes up display pinmux, so it must initialize first
+    // The I2S driver messes up display pinmux, so it must initialize first
     WaveOut::init_I2S(HWCONF_BEEPER_GPIO);
 
     display_driver.initialize();
@@ -204,13 +204,8 @@ void setup() {
     
     con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
     bringup_sound();
-    // while(1){
-    //     beepola->start_tone(CHANNEL_SYSTEM, 440);
-    //     delay(500);
-    //     beepola->stop_tone(CHANNEL_SYSTEM);
-    //     delay(500);
-    // }
     bs = new BeepSequencer(beepola);
+
     bs->play_sequence(pc98_pipo, CHANNEL_SYSTEM, SEQUENCER_NO_REPEAT);
 
 #if HAS(TOUCH_PLANE)

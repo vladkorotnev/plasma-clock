@@ -1,6 +1,6 @@
 #pragma once
+#include <sound/waveout.h>
 #include <esp32-hal-gpio.h>
-#include <sound/mixer.h>
 typedef enum beeper_channels {
     /// @brief Channel for ambient sounds (clock ticking, etc)
     CHANNEL_AMBIANCE = 0,
@@ -17,6 +17,16 @@ typedef enum beeper_channels {
 
 static const uint16_t DUTY_SQUARE = 2;
 
+class ToneGenerator {
+public:
+    enum Parameter {
+        PARAMETER_FREQUENCY,
+        PARAMETER_ACTIVE
+    };
+    virtual size_t generate_samples(void* buffer, size_t length, uint32_t wanted_samples) { return 0; }
+    virtual void set_parameter(Parameter p, int v) { }
+};
+
 class Beeper: public WaveGenerator {
 public:
     Beeper();
@@ -31,15 +41,11 @@ public:
     /// @brief Play a tone for a precise amount of milliseconds. Blocks the whole tasks and might block neighboring tasks, so use sparingly.
     void beep_blocking(beeper_channel_t, uint freq, uint len, uint16_t duty = DUTY_SQUARE);
 private:
+    static const uint8_t POLY_VOICES = 2;
+    static const uint8_t DEFAULT_BEEP_VOICE_IDX = 0;
+    ToneGenerator* voices[POLY_VOICES];
     uint8_t channel_status;
     int active_channel;
     int samples;
-    int phase;
-    int wavelength;
     int duration_samples;
-    bool active;
-    bool bit_state;
-    void set_frequency(int freq);
-    void set_duration(int ms);
-    void set_active(bool a);
 };
