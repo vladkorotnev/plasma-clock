@@ -49,7 +49,7 @@ void WaveOut::init_I2S(gpio_num_t pin) {
 
 void WaveOut::task(void*) {
     static uint8_t chunk[RENDER_CHUNK_SIZE+1] = { 0x0 };
-    static const uint8_t null[RENDER_CHUNK_SIZE+1] = { 0xFF };
+    static const uint8_t null[RENDER_CHUNK_SIZE+1] = { 0 };
     static uint32_t * fast_chunk = (uint32_t*) chunk;
     const size_t fast_chunk_size = RENDER_CHUNK_SIZE / sizeof(uint32_t);
     static size_t out_size = 0;
@@ -60,7 +60,7 @@ void WaveOut::task(void*) {
             if(generated_bytes > total) total = generated_bytes;
         }
         if(total > 0) {
-            for(size_t i = 0; i < fast_chunk_size; i++) fast_chunk[i] = ~fast_chunk[i];
+            // for(size_t i = 0; i < fast_chunk_size; i++) fast_chunk[i] = ~fast_chunk[i];
             i2s_write(I2S_NUM, chunk, total, &out_size, portMAX_DELAY);
             memset(chunk, 0, RENDER_CHUNK_SIZE+1);
         } else {

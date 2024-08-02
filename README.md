@@ -172,7 +172,7 @@ The basic configuration without any bluetooth functionality (no Switchbot or Bal
 
 ### Speaker (at least one required)
 
-* Piezo speaker ([driver](src/sound/beeper.cpp), [music](src/sound/melodies.cpp))
+* Piezo speakers: *now with 1-bit DMA polyphony!* ([driver](src/sound/beeper.cpp), [music](src/sound/melodies.cpp), [sequencer](src/sound/sequencer.cpp))
 
 ### Haptics (WIP)
 

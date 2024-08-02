@@ -69,7 +69,7 @@ public:
         int bits_high = wavelength / abs(duty);
         if(duty < 0) bits_high = wavelength - bits_high;
         uint8_t* buff = (uint8_t*) buffer;
-        uint32_t want_samples = want_samples == 0 ? (length * 8) : std::min(want_samples_, length * 8);
+        uint32_t want_samples = want_samples_ == 0 ? (length * 8) : std::min(want_samples_, length * 8);
         size_t idx = 0;
         int bit = 7;
 
