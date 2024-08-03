@@ -34,7 +34,9 @@ public:
     size_t fill_buffer(void* buffer, size_t length) override;
     
 private:
-    static const int CHANNELS = 4;
+    static const int TONE_CHANNELS = 4;
+    static const int EXTRA_CHANNELS = 1;
+    static const int CHANNELS = TONE_CHANNELS + EXTRA_CHANNELS;
     ToneGenerator * voices[CHANNELS] = { nullptr };
     const melody_sequence_t * sequence;
     size_t pointer;

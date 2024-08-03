@@ -7,7 +7,9 @@ static char LOG_TAG[] = "MELODY";
 #define BIT_END_PLAY 0b00000001
 
 NewSequencer::NewSequencer() {
-    for(int i = 0; i < CHANNELS; i++) voices[i] = new SquareGenerator();
+    // Ch 0, 1, 2, 3: tone
+    for(int i = 0; i < TONE_CHANNELS; i++) voices[i] = new SquareGenerator();
+    voices[4] = new NoiseGenerator(); // Ch4: Noise
     wait_end_group = xEventGroupCreate();
 }
 
@@ -56,7 +58,7 @@ void NewSequencer::process_steps_until_delay() {
     switch(cur_line->command) {
         case FREQ_SET:
             voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, cur_line->argument1);
-            // if(cur_line->argument1 > 0) for(int i = 0; i < CHANNELS; i++) voices[i]->reset_phase(); // retrig for unison
+            // if(cur_line->argument1 > 0) for(int i = 0; i < TONE_CHANNELS; i++) voices[i]->reset_phase(); // retrig for unison
             break;
         case DUTY_SET:
             voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, cur_line->argument1);

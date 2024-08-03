@@ -61,6 +61,8 @@ for msg in mid:
         if msg.time > 0.005:
             evts.append(Event("DELAY", 0, msg.time * 1000))
         evts.append(Comment(msg.text))
+        if msg.text == "LOOP":
+            evts.append(Event("LOOP_POINT_SET", 0, 0))
         
 
 print("static const melody_item_t "+name+"_data[] = {")
