@@ -3,6 +3,7 @@
 
 class DisplayDriver {
 public:
+    virtual void initialize();
     /// @brief Reset the display controller
     virtual void reset();
     /// @brief Send an array of half-columns to the display controller

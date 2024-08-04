@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "FOOCLI";
 
@@ -225,7 +226,7 @@ void foo_client_begin() {
         "FOOCLI",
         4096,
         nullptr,
-        2,
+        pisosTASK_PRIORITY_FOOBAR_CLIENT,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

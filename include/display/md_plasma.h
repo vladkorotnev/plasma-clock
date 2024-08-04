@@ -23,6 +23,8 @@ public:
         const gpio_num_t blanking,
         const gpio_num_t hv_enable
     );
+
+    void initialize();
     
     /// @brief Reset the display controller
     void reset();
@@ -44,7 +46,6 @@ private:
     gpio_num_t bright_gpio;
     gpio_num_t show_gpio;
     gpio_num_t hv_en_gpio;
-    void initialize();
     inline void set_databus(uint8_t data);
     inline void pulse_clock();
     /// @brief Send a half-column to the display controller

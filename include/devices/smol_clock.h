@@ -9,7 +9,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "microPIS-OS"
-#define PRODUCT_VERSION "2.3"
+#define PRODUCT_VERSION "3.0"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_12;

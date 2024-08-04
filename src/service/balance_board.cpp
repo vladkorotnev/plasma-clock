@@ -1,5 +1,7 @@
 #include <service/balance_board.h>
 #include <service/prefs.h>
+#include <os_config.h>
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
 #include <Wiimote.h>
 
@@ -132,7 +134,7 @@ void balance_board_start(SensorPool *sensors)
           LOG_TAG,
           8192,
           nullptr,
-          2,
+          pisosTASK_PRIORITY_BALANCEBOARD,
           &hTask))
   {
     ESP_LOGE(LOG_TAG, "Task creation failed");

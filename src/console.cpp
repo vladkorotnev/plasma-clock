@@ -1,6 +1,7 @@
 #include <console.h>
 #include <string.h>
 #include <Arduino.h>
+#include <os_config.h>
 
 static const char CURSOR_OFF = ' ';
 static char LOG_TAG[] = "CONS";
@@ -34,7 +35,7 @@ Console::Console(const font_definition_t * f, DisplayFramebuffer * fb) {
         "CONS",
         4096,
         this,
-        2,
+        pisosTASK_PRIORITY_CONSOLE,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

@@ -1,5 +1,6 @@
 #include <device_config.h>
 #include <service/wordnik.h>
+#include <os_config.h>
 
 #if HAS(WORDNIK_API)
 #include <service/prefs.h>
@@ -113,7 +114,7 @@ void wotd_start() {
         "WOTD",
         8000,
         nullptr,
-        1,
+        pisosTASK_PRIORITY_WORDNIK,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

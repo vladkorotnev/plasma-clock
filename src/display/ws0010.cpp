@@ -21,11 +21,10 @@ Ws0010OledDriver::Ws0010OledDriver(
     en_gpio = en;
     is_writing_ddram = false;
     ddram_ptr = 0;
-
-    initialize();
 }
 
 void Ws0010OledDriver::initialize() {
+    // TODO use parlio?
     ESP_LOGI(LOG_TAG, "Initializing Winstar WS0010 OLED bus with data bus: %i %i %i %i %i %i %i %i, rs=%i, en=%i", databus_gpios[0], databus_gpios[1], databus_gpios[2], databus_gpios[3], databus_gpios[4], databus_gpios[5], databus_gpios[6], databus_gpios[7], rs_gpio, en_gpio);
 
     gpio_config_t io_conf = {

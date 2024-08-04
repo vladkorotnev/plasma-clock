@@ -2,6 +2,7 @@
 #include <service/prefs.h>
 #include <input/keys.h>
 #include <Arduino.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "PM";
 static TaskHandle_t hTask = NULL;
@@ -164,7 +165,7 @@ void power_mgmt_start(SensorPool * s, DisplayDriver * d, Beeper * b) {
         "PM",
         4096,
         nullptr,
-        4,
+        pisosTASK_PRIORITY_POWER_MANAGEMENT,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
