@@ -1,5 +1,6 @@
 #include <device_config.h>
 #include <service/wordnik.h>
+#include <os_config.h>
 
 #if HAS(WORDNIK_API)
 #include <service/prefs.h>
@@ -58,7 +59,7 @@ void WordnikTaskFunction( void * pvParameter )
         ESP_LOGV(LOG_TAG, "Query: %s", url);
         int response = http.GET();
         if(response == 200) {
-            EXT_RAM_ATTR JsonDocument response;
+            EXT_RAM_ATTR static JsonDocument response;
 
             DeserializationError error = deserializeJson(response, http.getStream());
 
@@ -87,9 +88,9 @@ void WordnikTaskFunction( void * pvParameter )
             }
         } else {
             ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
-            ESP_LOGE(LOG_TAG, "%s", http.getString());
             isFailure = true;
         }
+        client.stop();
         vTaskDelay(isFailure ? pdMS_TO_TICKS(10000) : interval);
     }
 }
@@ -113,7 +114,7 @@ void wotd_start() {
         "WOTD",
         8000,
         nullptr,
-        1,
+        pisosTASK_PRIORITY_WORDNIK,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

@@ -1,6 +1,7 @@
 #include <console.h>
 #include <string.h>
 #include <Arduino.h>
+#include <os_config.h>
 
 static const char CURSOR_OFF = ' ';
 static char LOG_TAG[] = "CONS";
@@ -11,7 +12,6 @@ void ConsoleTaskFunction( void * pvParameter )
 {
     ESP_LOGV(LOG_TAG, "Running task");
     Console * that = static_cast<Console*> ( pvParameter );
-
 
     while(1) {
         that->task();
@@ -35,7 +35,7 @@ Console::Console(const font_definition_t * f, DisplayFramebuffer * fb) {
         "CONS",
         4096,
         this,
-        2,
+        pisosTASK_PRIORITY_CONSOLE,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
@@ -170,13 +170,18 @@ void Console::set_font(const font_definition_t* f) {
 }
 
 void Console::set_active(bool act) {
-    active = act;
     if(act) {
+        if(hTask != NULL) vTaskResume(hTask);
         disp->wait_next_frame();
+    } else {
+        flush();
+        if(hTask != NULL) vTaskSuspend(hTask);
     }
+    active = act;
 }
 
 void Console::flush() {
+    if(!active) return;
     char * next_line = nullptr;
     while(xQueuePeek(hQueue, &next_line, 0)) {
         vTaskDelay(100);

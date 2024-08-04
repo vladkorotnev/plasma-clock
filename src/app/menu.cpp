@@ -14,7 +14,7 @@ public:
 
     void step() {
         tk_time_of_day_t uptime = get_uptime();
-        snprintf(buf, 16, "%d:%d:%d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
+        snprintf(buf, 16, "%02d:%02d:%02d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
         bottom_label->set_string(buf);
         MenuInfoItemView::step();
     }
@@ -23,7 +23,7 @@ private:
     char buf[16];
 };
 
-AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
         if(isActive) push_renderable(instance, TRANSITION_NONE);
@@ -40,8 +40,8 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     clock_menu->add_view(new MenuBooleanSettingView("Tick sound", PREFS_KEY_TICKING_SOUND));
     clock_menu->add_view(new MenuBooleanSettingView("Ticking only when screen on", PREFS_KEY_NO_SOUND_WHEN_OFF));
     clock_menu->add_view(new MenuBooleanSettingView("Hourly chime", PREFS_KEY_HOURLY_CHIME_ON));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(beeper, "First chime", PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(beeper, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "First chime", PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime from", PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime until", PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
@@ -100,6 +100,8 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         normalActivationFunction
     ));
     display_menu->add_view(new MenuBooleanSettingView("FPS counter", PREFS_KEY_FPS_COUNTER));
+    display_menu->add_view(new MenuBooleanSettingView("Weather effects", PREFS_KEY_WEATHER_OVERLAY));
+    display_menu->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         "WiFi signal",
         {"Off", "Disconnected", "Display power on", "Always"},
@@ -127,7 +129,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x7f, 0xfe, 0x6e, 0x3e, 0x57, 0xfe, 0x50, 0x3e, 0x3f, 0xdc, 0x7c, 0x38, 0x7d, 0xf0, 0x3c, 0x00
     };
 
-    static const sprite_t status_icns = { .width = 16, .height = 16, .data = status_icns_data, .mask = nullptr };
+    static const sprite_t status_icns = { .width = 16, .height = 16, .data = status_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t clock_icns_data[] = {
         // By PiiXL
@@ -135,7 +137,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x4f, 0x09, 0x5f, 0xfd, 0x5f, 0xfd, 0x5f, 0xfd, 0x6f, 0xfb, 0x37, 0x76, 0x18, 0x0c, 0x0f, 0xf8
     };
 
-    static const sprite_t clock_icns = { .width = 16, .height = 16, .data = clock_icns_data, .mask = nullptr };
+    static const sprite_t clock_icns = { .width = 16, .height = 16, .data = clock_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t display_icns_data[] = {
         // By PiiXL
@@ -143,7 +145,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x40, 0x09, 0x40, 0x0f, 0x40, 0x09, 0x40, 0x0f, 0x60, 0x19, 0x7f, 0xff, 0x00, 0x00, 0x18, 0x0c
     };
 
-    static const sprite_t display_icns = { .width = 16, .height = 16, .data = display_icns_data, .mask = nullptr };
+    static const sprite_t display_icns = { .width = 16, .height = 16, .data = display_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t wrench_icns_data[] = {
         // By PiiXL
@@ -151,7 +153,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
         0x0f, 0xc7, 0x1f, 0xff, 0x3f, 0xff, 0x6f, 0xfe, 0x5f, 0xfc, 0x3b, 0x00, 0x76, 0x00, 0x6c, 0x00
     };
 
-    static const sprite_t wrench_icns = { .width = 16, .height = 16, .data = wrench_icns_data, .mask = nullptr };
+    static const sprite_t wrench_icns = { .width = 16, .height = 16, .data = wrench_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
     static const uint8_t stopwatch_icns_data[] = {
         // By PiiXL
@@ -159,7 +161,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 	    0xd7, 0x7a, 0xd7, 0x7a, 0xd7, 0x0a, 0xd7, 0xfa, 0xd7, 0xfa, 0xdb, 0xf6, 0x6c, 0x0c, 0x37, 0xf8
     };
 
-    static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr };
+    static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     static const uint8_t weight_icns_data[] = {
@@ -168,7 +170,7 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
 	    0xab, 0xd5, 0xab, 0xd5, 0x28, 0x14, 0x28, 0x14, 0x08, 0x10, 0x08, 0x10, 0x00, 0x00, 0x00, 0x00
     };
 
-    static const sprite_t weight_icns = { .width = 16, .height = 16, .data = weight_icns_data, .mask = nullptr };
+    static const sprite_t weight_icns = { .width = 16, .height = 16, .data = weight_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 #endif
 
     static ListView * settings_menu = new ListView();
@@ -179,9 +181,6 @@ AppShimMenu::AppShimMenu(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
     settings_menu->add_view(new MenuInfoItemView("Notice", "Full settings are only available in the Web UI"));
     settings_menu->add_view(new MenuActionItemView("Save & Restart", [this](){ 
         prefs_force_save();
-        BeepSequencer * s = new BeepSequencer(beeper);
-        s->play_sequence(tulula_fvu, CHANNEL_ALARM, SEQUENCER_NO_REPEAT);
-        s->wait_end_play();
         ESP.restart();
     }, &good_icns));
 

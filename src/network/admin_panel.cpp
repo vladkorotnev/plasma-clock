@@ -7,15 +7,19 @@
 #include <service/wordnik.h>
 #include <service/alarm.h>
 #include <views/transitions/transitions.h>
+#include <graphics/screenshooter.h>
+#include <input/keys.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
 #include <Arduino.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "ADMIN";
 static TaskHandle_t hTask = NULL;
 static GyverPortal ui;
 static SensorPool *sensors;
 static Beeper *beeper;
+static Screenshooter *screenshooter;
 
 extern "C" void AdminTaskFunction( void * pvParameter );
 
@@ -89,12 +93,6 @@ static void save_melody(prefs_key_t key) {
         ESP_LOGV(LOG_TAG, "Preview chime #%i for %s", temp_chime, key);
         
         prefs_set_int(key, temp_chime);
-
-        melody_sequence_t melody = melody_from_no(temp_chime);
-        BeepSequencer * s = new BeepSequencer(beeper);
-        s->play_sequence(melody, CHANNEL_NOTICE, SEQUENCER_NO_REPEAT);
-        s->wait_end_play();
-        delete s;
     }
 }
 
@@ -159,8 +157,8 @@ static void render_alarms() {
     GP.FORM_END();
 }
 
-static void save_alarms() {
-    if(!ui.form("/alarms")) return;
+static bool save_alarms() {
+    if(!ui.form("/alarms")) return false;
     ESP_LOGI(LOG_TAG, "Save alarms");
     for(int i = 0; i < ALARM_LIST_SIZE; i++) {
         alarm_setting_t a = {0};
@@ -184,16 +182,67 @@ static void save_alarms() {
         set_alarm(i, a);
     }
     beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
-
+    return true;
 }
 
-void build() {
+static inline bool _rmc_key(const char * key, key_id_t id) {
+    if(ui.clickDown(key)) {
+        hid_set_key_state(id, true);
+        return true;
+    }
+    else if(ui.clickUp(key)) {
+        hid_set_key_state(id, false);
+        return true;
+    }
+    return false;
+}
+
+static bool process_remote() {
+    if(ui.hold()) {
+        bool rslt = false;
+        rslt |= _rmc_key("rmc_up", KEY_UP);
+        rslt |= _rmc_key("rmc_down", KEY_DOWN);
+        rslt |= _rmc_key("rmc_left", KEY_LEFT);
+        rslt |= _rmc_key("rmc_right", KEY_RIGHT);
+        rslt |= _rmc_key("rmc_headpat", KEY_HEADPAT);
+        return rslt;
+    }
+    return false;
+}
+
+static void build() {
     GP.BUILD_BEGIN();
     GP.PAGE_TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
     GP.THEME(GP_DARK);
     GP.JQ_SUPPORT();
 
     GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
+
+    GP.SPOILER_BEGIN("Remote", GP_BLUE);
+        GP.BUTTON("rmc_headpat", "Headpat");
+        GP.HR();
+        GP.TABLE_BEGIN();
+            GP.TR();
+                GP.TD();
+                GP.TD();
+                GP.BUTTON("rmc_up", "↑");
+                GP.TD();
+            GP.TR();
+                GP.TD();
+                GP.BUTTON("rmc_left", "←");
+                GP.TD();
+                GP.TD();
+                GP.BUTTON("rmc_right", "→");
+            GP.TR();
+                GP.TD();
+                GP.TD();
+                GP.BUTTON("rmc_down", "↓");
+                GP.TD();
+        GP.TABLE_END();
+        GP.HR();
+        GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
+    GP.SPOILER_END();
+    GP.BREAK();
 
     GP.SPOILER_BEGIN("WiFi", GP_BLUE);
         render_string("SSID", PREFS_KEY_WIFI_SSID);
@@ -280,7 +329,7 @@ void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Sensors", GP_BLUE);
-    GP.JQ_UPDATE_BEGIN(1000);
+    GP.JQ_UPDATE_BEGIN(10000);
         sensor_info_t* sens;
 
         GP.LABEL("WiFi: ");
@@ -288,6 +337,12 @@ void build() {
         char buf[16];
         snprintf(buf, 15, "(%i dBm)", NetworkManager::rssi());
         GP.LABEL(buf, "rssi_val");
+        GP.BREAK();
+
+        GP.LABEL("Uptime: ");
+        tk_time_of_day_t uptime = get_uptime();
+        snprintf(buf, 16, "%02d:%02d:%02d", uptime.hour, uptime.minute, uptime.second, uptime.millisecond);
+        GP.LABEL(buf, "uptime_val");
         GP.BREAK();
 
         #if HAS(LIGHT_SENSOR)
@@ -374,6 +429,7 @@ void build() {
         render_string("Longitude", PREFS_KEY_WEATHER_LON);
         render_string("API Key", PREFS_KEY_WEATHER_APIKEY, true);
         render_int("Update interval [m]:", PREFS_KEY_WEATHER_INTERVAL_MINUTES);
+        render_bool("Weather effects on display:", PREFS_KEY_WEATHER_OVERLAY);
 
         current_weather_t weather;
         if(weather_get_current(&weather)) {
@@ -427,6 +483,7 @@ void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
+        render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
         GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
         GP.BUTTON_DOWNLOAD("crashdump.elf", "Last crash dump", GP_BLUE);
         GP.FILE_UPLOAD_RAW("prefs_restore", "Settings restore", GP_BLUE, "", "", "/prefs_restore");
@@ -438,33 +495,13 @@ void build() {
 }
 
 static char binary_mime[] = "application/octet-stream";
+static char png_mime[] = "image/png";
 void downloadPartition(const void * partition, size_t size) {
     ui.server.send_P(200, binary_mime, (const char*) partition, size);
 } 
 void action() {
-    if(ui.download()) {
-        const void * ptrPart;
-        partition_handle_t hPart;
-        size_t szPart;
-
-        if(ui.uri().endsWith("prefs_backup.bin")) {
-            if(mount_settings(&ptrPart, &hPart, &szPart)) {
-                downloadPartition(ptrPart, szPart);
-                unmount_partition(hPart);
-            }
-        }
-        else if(ui.uri().endsWith("crashdump.elf")) {
-            // MEMO: read with
-            // python %IDF_PATH%\components\espcoredump\espcoredump.py info_corefile --core R:\crashdump.elf .pio\build\bigclock-nodemcu-32s\firmware.elf
-            if(mount_crash(&ptrPart, &hPart, &szPart)) {
-                downloadPartition(ptrPart, szPart);
-                unmount_partition(hPart);
-            }
-        }
-        return;
-    }
-
-    save_alarms();
+    if(process_remote()) return;
+    if(save_alarms()) return;
     if(ui.click()) {
         save_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30);
         save_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120);
@@ -499,6 +536,7 @@ void action() {
         save_string(PREFS_KEY_WEATHER_APIKEY);
         save_string(PREFS_KEY_WEATHER_LAT);
         save_string(PREFS_KEY_WEATHER_LON);
+        save_bool(PREFS_KEY_WEATHER_OVERLAY);
         save_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES, 30, 24 * 60);
         save_string(PREFS_KEY_WORDNIK_APIKEY);
         save_int(PREFS_KEY_WORDNIK_INTERVAL_MINUTES, 60, 3600);
@@ -525,19 +563,49 @@ void action() {
 
         if(ui.click(reboot_btn)) {
             prefs_force_save();
-            BeepSequencer * s = new BeepSequencer(beeper);
-            s->play_sequence(tulula_fvu, CHANNEL_NOTICE, SEQUENCER_NO_REPEAT);
-            s->wait_end_play();
             ESP.restart();
+        }
+        return;
+    }
+
+    if(ui.download()) {
+        const void * ptrPart;
+        partition_handle_t hPart;
+        size_t szPart;
+
+        if(ui.uri().endsWith("prefs_backup.bin")) {
+            if(mount_settings(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        else if(ui.uri().endsWith("crashdump.elf")) {
+            // MEMO: read with
+            // python %IDF_PATH%\components\espcoredump\espcoredump.py info_corefile --core R:\crashdump.elf .pio\build\bigclock-nodemcu-32s\firmware.elf
+            if(mount_crash(&ptrPart, &hPart, &szPart)) {
+                downloadPartition(ptrPart, szPart);
+                unmount_partition(hPart);
+            }
+        }
+        else if(ui.uri().endsWith("screen.png")) {
+            const uint8_t * outBuf = nullptr;
+            size_t outLen = 0;
+            if(screenshooter->capture_png(&outBuf, &outLen)) {
+                ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
+                free((void*)outBuf);
+            } else {
+                ui.server.send(500, "", "");
+            }
         }
     }
 }
 
 bool prefs_uploading = false;
 
-void admin_panel_prepare(SensorPool* s, Beeper* b) {
+void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
     sensors = s;
     beeper = b;
+    screenshooter = ss;
     ui.attachBuild(build);
     ui.attach(action);
     ui.downloadAuto(false);
@@ -592,7 +660,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b) {
         "ADM",
         4096,
         nullptr,
-        2,
+        pisosTASK_PRIORITY_WEBADMIN,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

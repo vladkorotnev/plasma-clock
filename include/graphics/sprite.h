@@ -2,13 +2,23 @@
 #include <stdint.h>
 #include <string.h>
 
-/// @brief A piece of graphics, laid out horizontally. 
-/// @details I.e. a 14x2 spritewill consist of 4 bytes. 0th one will contain the leftmost 6 pixels of the top row aligned towards LSB, 
-///          1st one will contain the rightmost 8 pixels, 2nd one will contain the leftmost 6px of the bottom row, and so forth.
+typedef enum sprite_fmt {
+    /// A horizontally laid out sprite
+    /// @details I.e. a 14x2 sprite will consist of 4 bytes. 0th one will contain the leftmost 6 pixels of the top row aligned towards LSB, 
+    ///          1st one will contain the rightmost 8 pixels, 2nd one will contain the leftmost 6px of the bottom row, and so forth.
+    SPRFMT_HORIZONTAL,
+    /// A vertically laid out sprite
+    /// @details I.e. a 14x2 sprite will consist of 4 bytes. 0th one will contain the 8 pixels of the leftmost column with top left being MSB,
+    ///          1st one will contain the next 6 pixels of the lefrmost column aligned towards MSB, 2nd one will contain the top 8px of the second column and so on.
+    SPRFMT_NATIVE
+} sprite_fmt_t;
+
+/// @brief A piece of graphics with a size and optional mask
 typedef struct sprite {
     uint8_t width, height;
     const uint8_t* data;
     const uint8_t* mask;
+    sprite_fmt_t format;
 } sprite_t;
 
 /// @brief An animated sprite. 
@@ -22,6 +32,7 @@ typedef struct ani_sprite {
     /// @brief How many display frames should the first frame be shown before the animation loops
     uint8_t holdoff_frames;
     const uint8_t* data;
+    sprite_fmt_t format;
 } ani_sprite_t;
 
 /// @brief A context of a playing animated sprite
@@ -37,11 +48,6 @@ typedef struct ani_sprite_state {
 } ani_sprite_state_t;
 
 typedef uint8_t* fanta_buffer_t;
-
-/// @brief Convert a horizontally laid out, LSB aligned sprite bitmap of an arbitrary size, to a vertically aligned 16-bit-per-column Fanta buffer. 
-/// @note Unused pixels are filled with 0's. Transparency et al. should be handled by the drawing code.
-extern fanta_buffer_t sprite_to_fanta(const sprite_t*);
-extern fanta_buffer_t mask_to_fanta(const sprite_t*);
 
 /// @brief Initialize a playback context for an animated sprite
 extern ani_sprite_state_t ani_sprite_prepare(const ani_sprite*);

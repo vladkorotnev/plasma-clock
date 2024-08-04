@@ -4,6 +4,7 @@
 #include <WiFi.h>
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "WEATHER";
 
@@ -88,7 +89,6 @@ void WeatherTaskFunction( void * pvParameter )
             }
         } else {
             ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
-            ESP_LOGE(LOG_TAG, "%s", http.getString());
             isFailure = true;
         }
         vTaskDelay(isFailure ? pdMS_TO_TICKS(5000) : interval);
@@ -120,7 +120,7 @@ void weather_start() {
         "OWM",
         4096,
         nullptr,
-        1,
+        pisosTASK_PRIORITY_WEATHER,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

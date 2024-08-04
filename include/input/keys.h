@@ -3,11 +3,11 @@
 #include <sound/beeper.h>
 
 typedef enum key_id {
-    KEY_UP = (1<< 1),
-    KEY_DOWN = (1 << 2),
-    KEY_LEFT = (1 << 3),
-    KEY_RIGHT = (1 << 4),
-    KEY_HEADPAT = (1 << 5),
+    KEY_UP = (1 << 0),
+    KEY_DOWN = (1 << 1),
+    KEY_LEFT = (1 << 2),
+    KEY_RIGHT = (1 << 3),
+    KEY_HEADPAT = (1 << 4),
 
     KEY_MAX_INVALID = 0xFF
 } key_id_t;

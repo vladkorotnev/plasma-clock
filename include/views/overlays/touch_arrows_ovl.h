@@ -47,7 +47,8 @@ public:
             .width = 7,
             .height = 8, 
             .data = arrow_top_data,
-            .mask = arrow_top_mask_data
+            .mask = arrow_top_mask_data,
+            .format = SPRFMT_HORIZONTAL
         };
 
         static const uint8_t arrow_bottom_data[] = {
@@ -74,7 +75,8 @@ public:
             .width = 7, 
             .height = 8, 
             .data = arrow_bottom_data,
-            .mask = arrow_bottom_mask_data
+            .mask = arrow_bottom_mask_data,
+            .format = SPRFMT_HORIZONTAL
         };
 
         static const uint8_t arrow_right_data[] = {
@@ -99,7 +101,8 @@ public:
             .width = 8,
             .height = 7, 
             .data = arrow_right_data,
-            .mask = arrow_right_mask_data
+            .mask = arrow_right_mask_data,
+            .format = SPRFMT_HORIZONTAL
         };
 
         static const uint8_t arrow_left_data[] = {
@@ -124,7 +127,8 @@ public:
             .width = 8,
             .height = 7, 
             .data = arrow_left_data,
-            .mask = arrow_left_mask_data
+            .mask = arrow_left_mask_data,
+            .format = SPRFMT_HORIZONTAL
         };
 
         if(!active) return;

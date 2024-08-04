@@ -1,43 +1,20 @@
 #include <sound/beeper.h>
-#include <esp32-hal-ledc.h>
-#include <driver/ledc.h>
+#include <driver/i2s.h>
+#include <algorithm>
+#include <sound/waveout.h>
 
-static void ledcWriteToneD(uint8_t chan, uint32_t freq, uint32_t duty)
-{
-    if(!freq){
-        ledcWrite(chan, 0);
-        return;
-    }
+static char LOG_TAG[] = "BOOP";
 
-    uint8_t group=(chan/8), timer=((chan/2)%4);
-
-    ledc_timer_config_t ledc_timer = {
-        .speed_mode       = (ledc_mode_t) group,
-        .duty_resolution  = (ledc_timer_bit_t) 10,
-        .timer_num        = (ledc_timer_t) timer,
-        .freq_hz          = freq, 
-        .clk_cfg          = (ledc_clk_cfg_t) 0
-    };
-
-    if(ledc_timer_config(&ledc_timer) != ESP_OK)
-    {
-        log_e("ledcSetup failed!");
-        return;
-    }
-
-    ledcWrite(chan, duty);
+Beeper::Beeper(): 
+        duration_samples{0},
+        samples {0},
+        channel_status { 0xFF },
+        active_channel { -1 } {
+    voice = new SquareGenerator();
 }
 
-static portMUX_TYPE _spinlock = portMUX_INITIALIZER_UNLOCKED;
-
-Beeper::Beeper(gpio_num_t pin, uint8_t ch) {
-    pwm_channel = ch;
-    channel_status = 0xFF;
-    active_channel = -1;
-
-    ledcSetup(pwm_channel, 10000, 8);
-    ledcAttachPin(pin, pwm_channel);
-    ledcWrite(pwm_channel, 0);
+Beeper::~Beeper() {
+    delete voice;
 }
 
 void Beeper::set_channel_state(beeper_channel_t ch, bool active) {
@@ -55,24 +32,44 @@ bool Beeper::is_channel_enabled(beeper_channel_t ch) {
     return (channel_status & (1 << ch)) > 0;
 }
 
+size_t Beeper::fill_buffer(void* buffer, size_t length_) {
+    int want_samples = duration_samples == 0? 0: (duration_samples - samples);
+    size_t length = duration_samples == 0? length_ : std::min(length_, (size_t) (want_samples / 8));
+    size_t generated = voice->generate_samples(buffer, length, want_samples);
+    samples += generated*8;
+    if(duration_samples > 0 && duration_samples <= samples) {
+        voice->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+    }
+    return generated;
+}
+
 void Beeper::start_tone(beeper_channel_t ch, uint freq, uint16_t duty) {
     if(active_channel > ch) return;
     if(!is_channel_enabled(ch)) return;
 
     if(active_channel < ch) active_channel = ch;
-    ledcWriteToneD(pwm_channel, freq, duty);
+
+    duration_samples = 0;
+    samples = 0;
+    voice->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, freq);
 }
 
 void Beeper::stop_tone(beeper_channel_t ch) {
     if(active_channel != ch) return;
-    ledcWrite(pwm_channel, 0);
     active_channel = -1;
+
+    voice->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
 }
 
 void Beeper::beep_blocking(beeper_channel_t ch, uint freq, uint len, uint16_t duty) {
-    taskENTER_CRITICAL(&_spinlock);
-    start_tone(ch, freq, duty);
-    delayMicroseconds(len * 1000);
-    stop_tone(ch);
-    taskEXIT_CRITICAL(&_spinlock);
+    if(active_channel > ch) return;
+    if(!is_channel_enabled(ch)) return;
+
+    if(active_channel < ch) active_channel = ch;
+    
+    samples = 0;
+    duration_samples = len * (WaveOut::BAUD_RATE / 1000);
+    voice->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, freq);
+    vTaskDelay(len);
+    active_channel = -1;
 }

@@ -2,8 +2,9 @@
 #include <string.h>
 #include <Arduino.h>
 #include <freertos/task.h>
+#include <os_config.h>
 
-static const int DESIRED_FPS = 65;
+static const int DESIRED_FPS = 60;
 
 #define EVT_BIT_ENDED_DRAWING (1 << 0)
 
@@ -80,7 +81,7 @@ void DisplayFramebuffer::setup_task() {
         "FBuf",
         4096,
         this,
-        configMAX_PRIORITIES - 1,
+        pisosTASK_PRIORITY_FRAMEBUFFER,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

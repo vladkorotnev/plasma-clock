@@ -28,6 +28,7 @@ static constexpr prefs_key_t PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS = "mot_hv_
 
 static constexpr prefs_key_t PREFS_KEY_WEATHER_LAT = "w_lat";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_LON = "w_lon";
+static constexpr prefs_key_t PREFS_KEY_WEATHER_OVERLAY = "w_ovl";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_APIKEY = "w_apikey";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_INTERVAL_MINUTES = "w_interval_m";
 
@@ -81,6 +82,8 @@ static constexpr prefs_key_t PREFS_KEY_TIMER_TIME_SECONDS = "timer_time";
 static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
 
 static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
+
+static constexpr prefs_key_t PREFS_KEY_REMOTE_SERVER = "rc_svr";
 
 void prefs_force_save();
 

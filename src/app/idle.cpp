@@ -50,7 +50,7 @@ int current_screen_time_ms = 0;
 static bool did_prepare = false;
 
 static Beeper * beepola;
-static BeepSequencer * sequencer;
+static NewSequencer * sequencer;
 static SensorPool * sensors;
 
 static Renderable * mainView;
@@ -110,9 +110,9 @@ void hourly_chime() {
           && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
         ) {
             int melody_no = (now.hour == first_hour) ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
-            melody_sequence_t melody = melody_from_no(melody_no);
+            const melody_sequence_t * melody = melody_from_no(melody_no);
 
-            sequencer->play_sequence(melody, CHANNEL_CHIME, SEQUENCER_NO_REPEAT);
+            sequencer->play_sequence(melody, SEQUENCER_NO_REPEAT);
         }
     }
 }
@@ -166,12 +166,12 @@ void weather_overlay_update() {
     }
 }
 
-void app_idle_prepare(SensorPool* s, Beeper* b) {
+void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     if(did_prepare) return;
 
     did_prepare = true;
     beepola = b;
-    sequencer = new BeepSequencer(beepola);
+    sequencer = seq;
     sensors = s;
 
     tk_time_of_day now = get_current_time_coarse();
@@ -222,7 +222,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
 
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
-    thunderClock->add_layer(thunder);
+    if(prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY))
+        thunderClock->add_layer(thunder);
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
@@ -247,7 +248,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b) {
     ViewCompositor * rainyClock = new ViewCompositor();
     rainyClock->add_layer(slideShow);
     rainyClock->add_layer(signalIndicator);
-    rainyClock->add_layer(rain);
+    if(prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY))
+        rainyClock->add_layer(rain);
     rainyClock->add_layer(touchArrows);
     mainView = rainyClock;
 
@@ -323,7 +325,11 @@ void app_idle_process() {
     }
     else {
         change_screen_if_needed();
-        touchArrows->active = hid_test_key_any(KEYMASK_ALL) != KEYSTATE_RELEASED;
+        key_state_t anykey = hid_test_key_any(KEYMASK_ALL);
+        touchArrows->active = anykey != KEYSTATE_RELEASED;
+        if(anykey != KEYSTATE_RELEASED) {
+            sequencer->stop_sequence();
+        }
     }
 
     hourly_chime();

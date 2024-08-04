@@ -149,7 +149,7 @@ private:
 
 class AppShimAlarmEditor::AlarmEditorView: public ListView {
 public:
-    AlarmEditorView(alarm_setting_t *alm, Beeper *b, std::function<void(bool, Renderable*)> activation, std::function<void(bool, Renderable*)> pushPop): ListView::ListView() {
+    AlarmEditorView(alarm_setting_t *alm, Beeper *b, NewSequencer *s, std::function<void(bool, Renderable*)> activation, std::function<void(bool, Renderable*)> pushPop): ListView::ListView() {
         setting = alm;
         ts_view = new MenuTimeSettingView(b, setting->hour, setting->minute, [this, pushPop](int h, int m, int s) {
             setting->hour = h;
@@ -167,7 +167,7 @@ public:
         add_view(new MenuBooleanSelectorView("Smart Alarm", alm->smart, [alm](bool newSmart) { alm->smart = newSmart; }));
         add_view(new MenuNumberSelectorView("Smart margin", 1, 30, 1, alm->smart_margin_minutes, activation, [alm](int newMargin) { alm->smart_margin_minutes = newMargin; }));
     #endif
-        add_view(new MenuMelodySelectorView(b, "Melody", alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
+        add_view(new MenuMelodySelectorView(s, "Melody", alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
     }
 
     ~AlarmEditorView() {
@@ -187,8 +187,9 @@ private:
     MenuTimeSettingView *ts_view;
 };
 
-AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b): ProtoShimNavMenu::ProtoShimNavMenu() {
+AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
+    sequencer = s;
     current_editor = nullptr;
     current_editing_idx = 0;
     edit_flag = false;
@@ -210,7 +211,7 @@ AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b): ProtoShimNavMenu::ProtoShimNa
         current_editing_idx = editIdx;
         const alarm_setting_t * settings = get_alarm_list();
         current_editing_setting = settings[editIdx];
-        current_editor = new AlarmEditorView(&current_editing_setting, beeper, normalActivationFunction, pushPop);
+        current_editor = new AlarmEditorView(&current_editing_setting, beeper, sequencer, normalActivationFunction, pushPop);
         push_renderable(current_editor, TRANSITION_SLIDE_HORIZONTAL_LEFT);
     };
 

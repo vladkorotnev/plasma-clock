@@ -1,6 +1,7 @@
 #include <sensor/sensor.h>
 #include <Arduino.h>
 #include <freertos/FreeRTOS.h>
+#include <os_config.h>
 
 static char LOG_TAG[] = "SENS";
 
@@ -25,7 +26,7 @@ SensorPool::SensorPool() {
         "SENS",
         4096,
         this,
-        3,
+        pisosTASK_PRIORITY_SENSOR,
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");

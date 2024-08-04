@@ -17,6 +17,7 @@ public:
         const gpio_num_t en
     );
 
+    void initialize();
     /// @brief Reset the display controller
     void reset();
     void clear();
@@ -41,7 +42,6 @@ private:
     bool is_writing_ddram;
     uint8_t ddram_ptr;
 
-    void initialize();
     inline void set_databus(uint8_t data);
     inline void set_is_command(bool);
     inline void pulse_clock();

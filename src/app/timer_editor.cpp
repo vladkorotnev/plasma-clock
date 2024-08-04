@@ -12,7 +12,7 @@ public:
         that->tick();
     }
 
-    TimerEditorMainScreen(Beeper *b, std::function<void(bool, Renderable *)> _activation) {
+    TimerEditorMainScreen(Beeper *b, NewSequencer *s, std::function<void(bool, Renderable *)> _activation) {
         hourView = new DroppingDigitView(2, 0, b);
         minuteView = new DroppingDigitView(2, 0, b);
         secondView = new DroppingDigitView(2, 0, b);
@@ -31,19 +31,16 @@ public:
         add_composable(secondView);
 
         beeper = b;
+        sequencer = s;
         activation = _activation;
         if(beeper != nullptr) {
-            sequencer = new BeepSequencer(beeper);
-            melodySelector = new MenuMelodySelectorPreferenceView(beeper, "Timer Melody", PREFS_KEY_TIMER_MELODY, [_activation](bool isActive, Renderable * that) {
+            melodySelector = new MenuMelodySelectorPreferenceView(sequencer, "Timer Melody", PREFS_KEY_TIMER_MELODY, [_activation](bool isActive, Renderable * that) {
                 if(!isActive) {
                     _activation(false, that);
                 }
             });
         }
         load_prefs();
-        hourView->value = hour;
-        minuteView->value = minute;
-        secondView->value = second;
         cursorTimer = 0;
         isRunning = false;
 
@@ -57,9 +54,6 @@ public:
     }
 
     ~TimerEditorMainScreen() {
-        if(sequencer != nullptr) {
-            delete sequencer;
-        }
         if(melodySelector != nullptr) {
             delete melodySelector;
         }
@@ -144,7 +138,7 @@ public:
         if(hour == 0 && minute == 0 && second == 0) {
             isRunning = false;
             push_state(STATE_TIMER_EDITOR); // in case we are on a different screen
-            if(sequencer) sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), CHANNEL_ALARM, SEQUENCER_REPEAT_INDEFINITELY);
+            if(sequencer) sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY);
             load_prefs();
         } else {
             add_sec(false);
@@ -154,7 +148,7 @@ public:
 private:
     std::function<void(bool, Renderable *)> activation;
     Beeper *beeper;
-    BeepSequencer *sequencer;
+    NewSequencer *sequencer;
     MenuMelodySelectorPreferenceView * melodySelector;
     enum CursorPosition {
         HOUR, MINUTE, SECOND, PLAY_PAUSE
@@ -175,6 +169,9 @@ private:
         minute = (saved_time % 3600) / 60;
         second = saved_time % 60;
         cursorPosition = saved_time == 0 ? CursorPosition::SECOND : CursorPosition::PLAY_PAUSE;
+        hourView->value = hour;
+        minuteView->value = minute;
+        secondView->value = second;
     }
 
     void save_prefs() {
@@ -239,8 +236,8 @@ private:
     }
 };
 
-AppShimTimerEditor::AppShimTimerEditor(Beeper * b): ProtoShimNavigationStack(
-    new TimerEditorMainScreen(b, [this](bool isActive, Renderable * dst) {
+AppShimTimerEditor::AppShimTimerEditor(Beeper * b, NewSequencer * s): ProtoShimNavigationStack(
+    new TimerEditorMainScreen(b, s, [this](bool isActive, Renderable * dst) {
         if(isActive) push_renderable(dst);
         else pop_renderable();
     })
