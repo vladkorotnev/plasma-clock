@@ -144,3 +144,99 @@ size_t NoiseGenerator::generate_samples(void* buffer, size_t length, uint32_t wa
     
     return idx + 1;
 }
+
+Sampler::Sampler():
+    playhead { 0 },
+    waveform { nullptr },
+    remaining_samples { 0 },
+    skip_factor { 1 },
+    stretch_factor { 1 },
+    active { false },
+    state { false }
+{}
+
+void Sampler::load_sample(const rle_sample_t * s) {
+    waveform = s;
+    rewind();
+    skip_factor = 1;
+    stretch_factor = 1;
+}
+
+void Sampler::rewind() {
+    if(waveform == nullptr || waveform->rle_data == nullptr || waveform->length == 0) return;
+    playhead = 0;
+    remaining_samples = waveform->rle_data[0];
+}
+
+void Sampler::set_parameter(Parameter p, int v) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            active = (v != 0);
+            rewind();
+            break;
+
+        case PARAMETER_FREQUENCY:
+            if(waveform == nullptr) return;
+            if(v == 0) {
+                active = false;
+            }
+            else {
+                if(v >= waveform->root_frequency) {
+                    stretch_factor = std::max(WaveOut::BAUD_RATE / waveform->sample_rate , 1);
+                    skip_factor = std::max(v / waveform->root_frequency, 1); // not handling the case where sample rate is > waveout rate
+                } 
+                else if(v < waveform->root_frequency) {
+                    stretch_factor = std::max(WaveOut::BAUD_RATE / waveform->sample_rate, 1) * std::max(waveform->root_frequency / v, 1);
+                    skip_factor = 1; // not handling the case where sample rate is > waveout rate
+                }
+                ESP_LOGV("SAMP", "New stretch = %i, skip = %i", stretch_factor, skip_factor);
+                active = true;
+                rewind();
+            }
+            break;
+
+        case PARAMETER_SAMPLE_ADDR:
+            if(v == 0) return;
+            load_sample((const rle_sample_t*) v);
+            break;
+
+        default: break;
+    }
+}
+
+size_t Sampler::generate_samples(void * buffer, size_t length, uint32_t want_samples_) {
+    if(!active || waveform == nullptr || waveform->length == 0 || waveform->rle_data == nullptr)
+        return 0;
+
+    uint8_t* buff = (uint8_t*) buffer;
+    uint32_t want_samples = want_samples_ == 0 ? (length * 8) : std::min(want_samples_, length * 8);
+    size_t idx = 0;
+    int bit = 7;
+
+    for(int s = 0; s < want_samples; s++) {
+        idx = s / 8;
+        bit = 8 - (s % 8);
+        
+        if(state) {
+            buff[idx] |= (1 << bit);
+        }
+
+        if(stretch_factor == 1 || (s > 0 && (s % stretch_factor) == 0)) {
+            if(skip_factor > remaining_samples) {
+                playhead = (playhead + std::max(skip_factor / 8, 1)) % waveform->length;
+                remaining_samples = waveform->rle_data[playhead] - ((skip_factor % 8) - remaining_samples);
+                state ^= 1;
+            } else {
+                remaining_samples -= skip_factor;
+            }
+
+            if(remaining_samples == 0) {
+                playhead = (playhead + 1) % waveform->length;
+                remaining_samples = waveform->rle_data[playhead];
+                state ^= 1;
+            }
+        }
+    }
+    
+    return idx + 1;
+}

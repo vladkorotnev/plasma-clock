@@ -325,7 +325,11 @@ void app_idle_process() {
     }
     else {
         change_screen_if_needed();
-        touchArrows->active = hid_test_key_any(KEYMASK_ALL) != KEYSTATE_RELEASED;
+        key_state_t anykey = hid_test_key_any(KEYMASK_ALL);
+        touchArrows->active = anykey != KEYSTATE_RELEASED;
+        if(anykey != KEYSTATE_RELEASED) {
+            sequencer->stop_sequence();
+        }
     }
 
     hourly_chime();

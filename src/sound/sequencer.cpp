@@ -10,6 +10,7 @@ NewSequencer::NewSequencer() {
     // Ch 0, 1, 2, 3: tone
     for(int i = 0; i < TONE_CHANNELS; i++) voices[i] = new SquareGenerator();
     voices[4] = new NoiseGenerator(); // Ch4: Noise
+    voices[5] = new Sampler(); // Ch5: RLE PWM
     wait_end_group = xEventGroupCreate();
 }
 
@@ -68,6 +69,9 @@ void NewSequencer::process_steps_until_delay() {
             break;
         case DELAY:
             remaining_delay_samples = cur_line->argument1 * WaveOut::BAUD_RATE / 1000;
+            break;
+        case SAMPLE_LOAD:
+            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_SAMPLE_ADDR, cur_line->argument1);
             break;
         default:
             break;

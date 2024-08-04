@@ -7,6 +7,7 @@ typedef enum melody_item_type {
     DUTY_SET,
     DELAY,
     LOOP_POINT_SET,
+    SAMPLE_LOAD,
     MAX_INVALID
 } melody_item_type_t;
 
@@ -35,7 +36,7 @@ public:
     
 private:
     static const int TONE_CHANNELS = 4;
-    static const int EXTRA_CHANNELS = 1;
+    static const int EXTRA_CHANNELS = 2;
     static const int CHANNELS = TONE_CHANNELS + EXTRA_CHANNELS;
     ToneGenerator * voices[CHANNELS] = { nullptr };
     const melody_sequence_t * sequence;
