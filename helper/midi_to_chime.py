@@ -46,9 +46,9 @@ for msg in mid:
         if msg.type == "note_on" and msg.velocity > 0:
             existing_evt = prev_note_off_event(msg.channel)
             if existing_evt is not None:
-                existing_evt.arg = freq_note_converter.from_note_index(msg.note).freq
+                existing_evt.arg = freq_note_converter.from_note_index(msg.note).freq/2
             else:
-                evts.append(Event("FREQ_SET", msg.channel, freq_note_converter.from_note_index(msg.note).freq))
+                evts.append(Event("FREQ_SET", msg.channel, freq_note_converter.from_note_index(msg.note).freq/2))
         else:
             # note off
             evts.append(Event("FREQ_SET", msg.channel, 0))
@@ -60,6 +60,9 @@ for msg in mid:
         evts.append(Comment(msg.text))
         if msg.text == "LOOP":
             evts.append(Event("LOOP_POINT_SET", 0, 0))
+    elif msg.type == "control_change":
+        if msg.control == 2:
+            evts.append(Event("DUTY_SET", msg.channel, msg.value))
         
 
 print("static const melody_item_t "+name+"_data[] = {")
