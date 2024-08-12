@@ -40,9 +40,9 @@ def prev_note_off_event(chan):
 
 for msg in mid:
     print(msg)
-    if msg.type == "note_on" or msg.type == "note_off":
-        if msg.time > 0.005:
+    if msg.time > 0.005:
             evts.append(Event("DELAY", 0, msg.time * 1000))
+    if msg.type == "note_on" or msg.type == "note_off":
         if msg.type == "note_on" and msg.velocity > 0:
             existing_evt = prev_note_off_event(msg.channel)
             if existing_evt is not None:
@@ -56,10 +56,7 @@ for msg in mid:
         if ended:
             raise Exception("WTF, already ended")
         ended = True
-        evts.append(Event("DELAY", 0, msg.time * 1000))
     elif msg.type == "marker":
-        if msg.time > 0.005:
-            evts.append(Event("DELAY", 0, msg.time * 1000))
         evts.append(Comment(msg.text))
         if msg.text == "LOOP":
             evts.append(Event("LOOP_POINT_SET", 0, 0))

@@ -6,6 +6,7 @@
 #define HAS_OUTPUT_WS0010
 #define HAS_TEMP_SENSOR
 #define HAS_TOUCH_PLANE
+#define HAS_SERIAL_MIDI
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "microPIS-OS"

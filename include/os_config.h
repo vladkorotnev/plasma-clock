@@ -17,6 +17,7 @@
 #define pisosTASK_PRIORITY_POWER_MANAGEMENT 4
 #define pisosTASK_PRIORITY_WORDNIK 1
 #define pisosTASK_PRIORITY_WEATHER 1
+#define pisosTASK_PRIORITY_SERIAL_MIDI 3
 
 // ----- WaveOut channels -----
 
