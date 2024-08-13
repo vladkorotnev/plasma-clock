@@ -84,9 +84,9 @@ You can also read the quest I went through trying to get it to run "in real time
     
     ![](docs/img/app/settings.gif)
 
-## Available chime tones
+## Available chime melodies
 
-**(All chime tones are covers adapted for single channel beeper by DJ AKASAKA)**
+**(All chime tones are covers adapted for single channel beeper or 1-bit PIS-OS Sequencer by DJ AKASAKA)**
 
 * Simple beep
 * PC-98 Boot Chime
@@ -113,11 +113,16 @@ You can also read the quest I went through trying to get it to run "in real time
 * [Brisk & Trixxy — Eye Opener](https://youtu.be/81QqHUpyBhg?t=83): [MIDI](helper/chimes/eye_opener.mid)
 * [Hiroyuki Oshima - The Ark Awakes From The Sea Of Chaos](https://www.youtube.com/watch?app=desktop&v=cB7eevDk1s0): [MIDI](helper/chimes/ark.mid)
 * [Timbaland - Give It To Me](https://youtube.com/watch?v=RgoiSJ23cSc) also known as [Skibidi Toilet](https://youtu.be/6dMjCa0nqK0): [MIDI](helper/chimes/skibidi_toilet.mid)
-* [PinocchioP - God-ish (神っぽいな)](https://www.youtube.com/watch?v=EHBFKhLUVig): [MIDI](helper/chimes/kamippoina.mid)
+* [PinocchioP - God-ish (神っぽいな)](https://www.youtube.com/watch?v=EHBFKhLUVig): [MIDI](helper/chimes/kamippoina.mid) with samples of original song's vocals
+* [KOTOKO - Re-sublimity](https://youtu.be/QXDwb2rueYM?t=65): [MIDI](helper/chimes/resublimity.mid) - simple piano-ish score, better cover TBD?
 
-MIDI to sequencer conversion tool (supports note events in one track only, track end event, and comment event): [midi_to_chime](helper/midi_to_chime.py)
+## Creating your own melodies
+
+There is a MIDI to sequencer conversion tool (supports note events in one track only, track end event, and comment event): [midi_to_chime](helper/midi_to_chime.py)
 
 8 bit 8 kHz wave to RLE sample conversion tool (not even reading the header, so very jank): [pwm.py](helper/pwm.py)
+
+You can also use the `HAS_SERIAL_MIDI` feature flag in combination with Hairless MIDI Serial to get a rough idea of how the ringtones will sound when writing them in e.g. Sekaiju. However exact representation in comparison to the native sequencer converter script is not guaranteed. Additionally there is no way of using PWM samples in this MIDI mode.
 
 ## Remote Control Server
 
@@ -187,6 +192,7 @@ The basic configuration without any bluetooth functionality (no Switchbot or Bal
 * `HAS_WORDNIK_API`: compile with the Word Of The Day service using [Wordnik API](https://developer.wordnik.com/). This requires SSL, so bloats the firmware size significantly.
 * `HAS_BLUETOOTH_LE`: automatically set on ESP32. Required for Switchbot-over-BLE. Uses Arduino-BLE and increases firmware size significantly.
 * `HAS_OTAFVU`: OTA updates via ArduinoOTA. Currently disabled due to partition size constraints from the above.
+* `HAS_SERIAL_MIDI`: Enable receiving MIDI data over serial. Makes the CPU a tad bit hotter so probably do not include this feature flag in production builds, unless you really want a MIDI powered alarm clock for some reason.
 
 ### Thermal sensors
 

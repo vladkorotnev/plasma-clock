@@ -101,6 +101,8 @@ NewSequencer::NewSequencer() {
     voices[4] = new NoiseGenerator(); // Ch4: Noise
     voices[5] = new Sampler(); // Ch5: RLE PWM
     wait_end_group = xEventGroupCreate();
+
+#if HAS(SERIAL_MIDI)
     xTaskCreate(
         serMidiTask,
         "MIDI",
@@ -109,6 +111,7 @@ NewSequencer::NewSequencer() {
         pisosTASK_PRIORITY_SERIAL_MIDI,
         &hMidiTask
     );
+#endif
 }
 
 NewSequencer::~NewSequencer() {

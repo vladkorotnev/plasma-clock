@@ -35,7 +35,7 @@ public:
 
         fb->put_string(&keyrus0808_font, time_buf, 14, 0);
 
-        if(setting.days == ALARM_DAY_GLOBAL_ENABLE || setting.days == 0) {
+        if(setting.days == 0) {
             fb->put_string(&keyrus0808_font, "Only Once", 14, 8);
         } else {
             for(int d = 0; d < 7; d++) {
