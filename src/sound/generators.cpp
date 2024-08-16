@@ -72,17 +72,6 @@ size_t SquareGenerator::generate_samples(void* buffer, size_t length, uint32_t w
 }
 
 
-static const int NOISETAB_SIZE = 256;
-static uint8_t NOISETAB[NOISETAB_SIZE] = { 0 };
-static bool NOISETAB_READY = false;
-
-static void _create_noisetab_if_needed() {
-    if(!NOISETAB_READY) {
-        esp_fill_random(NOISETAB, NOISETAB_SIZE);
-        NOISETAB_READY = true;
-    }
-}
-
 NoiseGenerator::NoiseGenerator():
     phase { 0 },
     wavelength { 0 },
