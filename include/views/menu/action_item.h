@@ -10,12 +10,11 @@ public:
     ~MenuActionItemView();
 
     void step();
-    void render(FantaManipulator *fb);
 
 private:
-    const sprite_t * _icon;
     StringScroll * label;
     StringScroll * sublabel;
+    SpriteView * iconView;
     const char * subtitle;
     std::function<void()> _action;
 };

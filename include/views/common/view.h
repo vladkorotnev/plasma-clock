@@ -55,6 +55,10 @@ public:
                 FantaManipulator * temp = fb->slice(r->x_offset, r->width);
                 r->render(temp);
                 delete temp;
+            } else if(r->width == -1) {
+                FantaManipulator * temp = fb->slice(r->x_offset, fb->get_width() - r->x_offset);
+                r->render(temp);
+                delete temp;
             }
         }
     }
