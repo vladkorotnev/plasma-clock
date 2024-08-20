@@ -484,6 +484,7 @@ static void build() {
 
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
+        render_bool("Serial MIDI input", PREFS_KEY_SERIAL_MIDI);
         GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
         GP.BUTTON_DOWNLOAD("crashdump.elf", "Last crash dump", GP_BLUE);
         GP.FILE_UPLOAD_RAW("prefs_restore", "Settings restore", GP_BLUE, "", "", "/prefs_restore");
@@ -547,6 +548,8 @@ void action() {
         save_bool(PREFS_KEY_SWITCHBOT_METER_ENABLE);
         save_string(PREFS_KEY_SWITCHBOT_METER_MAC);
         save_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
+        save_bool(PREFS_KEY_REMOTE_SERVER);
+        save_bool(PREFS_KEY_SERIAL_MIDI);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;

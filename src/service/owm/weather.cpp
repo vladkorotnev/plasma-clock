@@ -8,7 +8,7 @@
 
 static char LOG_TAG[] = "WEATHER";
 
-static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s";
+static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s&exclude=minutely,alerts";
 static String apiKey;
 static TickType_t interval;
 static String latitude; 

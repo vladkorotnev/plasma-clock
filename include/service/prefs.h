@@ -84,6 +84,7 @@ static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
 static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
 
 static constexpr prefs_key_t PREFS_KEY_REMOTE_SERVER = "rc_svr";
+static constexpr prefs_key_t PREFS_KEY_SERIAL_MIDI = "serimid";
 
 void prefs_force_save();
 

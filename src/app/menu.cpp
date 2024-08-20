@@ -101,7 +101,6 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     ));
     display_menu->add_view(new MenuBooleanSettingView("FPS counter", PREFS_KEY_FPS_COUNTER));
     display_menu->add_view(new MenuBooleanSettingView("Weather effects", PREFS_KEY_WEATHER_OVERLAY));
-    display_menu->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         "WiFi signal",
         {"Off", "Disconnected", "Display power on", "Always"},
@@ -122,6 +121,8 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     strncpy(buf_ip, tmp.c_str(), 16);
     system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
     system_info->add_view(new UptimeView());
+    system_info->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
+    system_info->add_view(new MenuBooleanSettingView("Serial MIDI Input", PREFS_KEY_SERIAL_MIDI));
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL
@@ -163,6 +164,14 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
 
     static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
+    static const uint8_t weather_icns_data[] = {
+        // By PiiXL
+        0x07, 0x00, 0x0f, 0x80, 0x0f, 0xb0, 0x77, 0x78, 0xfb, 0xf8, 0xff, 0xf6, 0xbf, 0xff, 0xcf, 0xff, 
+        0x7f, 0xfe, 0x00, 0x00, 0x22, 0x24, 0x44, 0x48, 0x89, 0x10, 0x02, 0x00, 0x24, 0x20, 0x40, 0x40
+    };
+
+    static const sprite_t weather_icns = { .width = 16, .height = 16, .data = weather_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     static const uint8_t weight_icns_data[] = {
         // By PiiXL
@@ -187,6 +196,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     main_menu->add_view(new MenuActionItemView("Clock", [this](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
     main_menu->add_view(new MenuActionItemView("Stopwatch", [this](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
+    main_menu->add_view(new MenuActionItemView("Weather", [this]() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
     main_menu->add_view(new MenuActionItemView("Alarm", [this](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
     main_menu->add_view(new MenuActionItemView("Weighing", [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));

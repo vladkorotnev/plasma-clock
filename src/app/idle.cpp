@@ -14,7 +14,7 @@
 #include <views/idle_screens/indoor_view.h>
 #endif
 #include <views/framework.h>
-#include <views/idle_screens/current_weather.h>
+#include <views/weather/current_weather.h>
 #include <views/idle_screens/word_of_the_day.h>
 #include <views/idle_screens/fb2k.h>
 #include <views/idle_screens/next_alarm.h>

@@ -1,4 +1,4 @@
-#include "views/idle_screens/current_weather.h"
+#include "views/weather/current_weather.h"
 #include <service/owm/weather_icons.h>
 #include <fonts.h>
 #include <esp32-hal-log.h>
