@@ -125,7 +125,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
     system_info->add_view(new UptimeView());
     system_info->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
+#if HAS(SERIAL_MIDI)
     system_info->add_view(new MenuBooleanSettingView("Serial MIDI Input", PREFS_KEY_SERIAL_MIDI));
+#endif
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL
