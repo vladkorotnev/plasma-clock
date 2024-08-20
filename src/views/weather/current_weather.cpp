@@ -50,33 +50,14 @@ void CurrentWeatherView::prepare() {
 
 void CurrentWeatherView::prepare_for_new_weather() {
     icon = sprite_from_conditions(weather.conditions);
-    if(icon.data != nullptr) {
-        animation->set_sprite(&icon);
+    if(icon->data != nullptr) {
+        animation->set_sprite(icon);
     }
 
     snprintf(top_text, sizeof(top_text), "%.01f\370C %i%%", kelvin_to(weather.temperature_kelvin, CELSIUS), weather.humidity_percent);
     snprintf(bottom_text, sizeof(bottom_text), "%s. Feels like %.01f\370C. Wind %.01f m/s. Pressure %i hPa.", weather.description, kelvin_to(weather.feels_like_kelvin, CELSIUS), weather.windspeed_mps, weather.pressure_hpa);
     top_line->set_string(top_text);
     bottom_line->set_string(bottom_text);
-}
-
-ani_sprite_t CurrentWeatherView::sprite_from_conditions(weather_condition_t conditions) {
-    switch(conditions) {
-        case THUNDERSTORM: return thunderstorm_icon;
-        case DRIZZLE: return drizzle_icon;
-        case RAIN: return rain_icon;
-        case SNOW: return snow_icon;
-        case MIST: return mist_icon;
-        case CLEAR: return sun_icon;
-        case CLOUDS: return clouds_icon;
-        case SCATTERED_CLOUDS: return clouds_icon;
-        case BROKEN_CLOUDS: return broken_clouds_icon;
-        case OVERCAST: return overcast_icon;
-
-        case UNKNOWN:
-        default:
-            return ani_sprite_t { 0 };
-    }
 }
 
 void CurrentWeatherView::render(FantaManipulator* fb) {

@@ -82,7 +82,8 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
 #if HAS(SWITCHBOT_METER_INTEGRATION)
         screen_times->add_view(new MenuNumberSelectorPreferenceView("Switchbot Meter", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Current Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("2-day Forecast", PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(WORDNIK_API)
         screen_times->add_view(new MenuNumberSelectorPreferenceView("Wordnik", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif

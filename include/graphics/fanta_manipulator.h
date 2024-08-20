@@ -56,7 +56,7 @@ public:
     /// @brief Invert all pixels of the buffer
     void invert();
     /// @brief Draws a line using Bresenham's algorithm
-    void line(int x1, int y1, int x2, int y2);
+    void line(int x1, int y1, int x2, int y2, bool state = true);
     /// @brief Draws a rectangle
     void rect(int x1, int y1, int x2, int y2, bool fill);
 

@@ -1,12 +1,5 @@
 #pragma once
 #include <graphics/sprite.h>
+#include <service/owm/weather.h>
 
-extern const ani_sprite_t thunderstorm_icon;
-extern const ani_sprite_t drizzle_icon;
-extern const ani_sprite_t rain_icon;
-extern const ani_sprite_t sun_icon;
-extern const ani_sprite_t clouds_icon;
-extern const ani_sprite_t broken_clouds_icon;
-extern const ani_sprite_t overcast_icon;
-extern const ani_sprite_t snow_icon;
-extern const ani_sprite_t mist_icon;
+const ani_sprite_t * sprite_from_conditions(weather_condition_t conditions);

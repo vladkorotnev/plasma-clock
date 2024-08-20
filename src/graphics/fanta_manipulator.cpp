@@ -227,7 +227,7 @@ void FantaManipulator::invert() {
     }
 }
 
-void FantaManipulator::line(int x1, int y1, int x2, int y2) {
+void FantaManipulator::line(int x1, int y1, int x2, int y2, bool state) {
   int dx = abs(x2 - x1);
   int dy = abs(y2 - y1);
   int sx = x1 < x2 ? 1 : -1;
@@ -235,7 +235,7 @@ void FantaManipulator::line(int x1, int y1, int x2, int y2) {
   int err = (dx > dy ? dx : -dy) / 2;
 
   while (true) {
-    plot_pixel(x1, y1, true);
+    plot_pixel(x1, y1, state);
 
     if (x1 == x2 && y1 == y2) {
       break;

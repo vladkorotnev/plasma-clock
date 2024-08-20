@@ -15,6 +15,7 @@
 #endif
 #include <views/framework.h>
 #include <views/weather/current_weather.h>
+#include <views/weather/daily_forecast.h>
 #include <views/idle_screens/word_of_the_day.h>
 #include <views/idle_screens/fb2k.h>
 #include <views/idle_screens/next_alarm.h>
@@ -35,6 +36,7 @@ typedef enum MainViewId: uint16_t {
     VIEW_REMOTE_WEATHER,
 #endif
     VIEW_OUTDOOR_WEATHER,
+    VIEW_WEATHER_FORECAST,
 #if HAS(WORDNIK_API)
     VIEW_WORD_OF_THE_DAY,
 #endif
@@ -72,6 +74,7 @@ static WoSensorView * remoteWeatherView;
 #endif
 
 static CurrentWeatherView * weatherView;
+static DailyForecastView * forecastView;
 #if HAS(WORDNIK_API)
 static WordOfTheDayView * wotdView;
 #endif
@@ -189,6 +192,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     screen_times_ms[VIEW_REMOTE_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS) * 1000;
 #endif
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
+    screen_times_ms[VIEW_WEATHER_FORECAST] = prefs_get_int(PREFS_KEY_SCRN_TIME_FORECAST_SECONDS) * 1000;
 #if HAS(WORDNIK_API)
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
 #endif
@@ -212,6 +216,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     thunder = new ThunderOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
     signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
+    forecastView = new DailyForecastView();
     fb2kView = new Fb2kView();
     nextAlarmView = new NextAlarmView();
 
@@ -237,6 +242,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     slideShow->add_view(remoteWeatherView, VIEW_REMOTE_WEATHER);
 #endif
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
+    slideShow->add_view(forecastView, VIEW_WEATHER_FORECAST);
 #if HAS(WORDNIK_API)
     wotdView = new WordOfTheDayView();
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);

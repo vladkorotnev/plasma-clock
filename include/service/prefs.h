@@ -52,6 +52,7 @@ static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS = "s_remote_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS = "s_outside_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FORECAST_SECONDS = "s_forecast_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS = "s_wotd_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS = "s_foo_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS = "s_alm_s";

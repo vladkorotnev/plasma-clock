@@ -20,8 +20,7 @@ private:
     char top_text[32];
     current_weather_t weather;
     AniSpriteView * animation;
-    ani_sprite_t icon;
-    ani_sprite_t sprite_from_conditions(weather_condition_t);
+    const ani_sprite_t * icon;
     void prerender_icon_frame();
     void prepare_for_new_weather();
 };

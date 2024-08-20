@@ -44,6 +44,10 @@ You can also read the quest I went through trying to get it to run "in real time
     
     ![](docs/img/widget/weather.gif)
 
+* Weather Forecast
+
+    ![](docs/img/widget/forecast.gif)
+
 * Weather Effect (raining and thunder on idle screen when rain/thunderstorm outside)
     
     ![](docs/img/widget/rain.gif)

@@ -1,5 +1,9 @@
 #pragma once
 #include <freertos/FreeRTOS.h>
+#include <service/time.h>
+
+#define FORECAST_WEATHER_DAYS 4
+#define FORECAST_WEATHER_HOURS 24
 
 typedef enum weather_condition_code {
     UNKNOWN = 0,
@@ -32,6 +36,23 @@ typedef struct current_weather {
     char description[64];
 } current_weather_t;
 
+typedef struct forecast_weather {
+    float day_temperature_kelvin;
+    float night_temperature_kelvin;
+    int pressure_hpa;
+    weather_condition_t conditions;
+    unsigned int precipitation_percentage;
+    tk_date_t date;
+} forecast_weather_t;
+
+typedef struct hourly_weather {
+    float temperature_kelvin;
+    int pressure_hpa;
+    weather_condition_t conditions;
+    unsigned int precipitation_percentage;
+    tk_time_of_day_t time;
+} hourly_weather_t;
+
 typedef enum temperature_unit {
     KELVIN,
     CELSIUS,
@@ -47,5 +68,8 @@ void weather_stop();
 bool weather_get_current(current_weather_t *);
 /// @brief Set a dummy weather state for demo purposes
 void weather_set_demo(current_weather_t *);
+
+const forecast_weather_t * weather_get_forecast(int day_from_now);
+const hourly_weather_t * weather_get_hourly(int hour_from_now);
 
 float kelvin_to(float, temperature_unit_t);
