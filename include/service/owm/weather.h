@@ -3,7 +3,7 @@
 #include <service/time.h>
 
 #define FORECAST_WEATHER_DAYS 4
-#define FORECAST_WEATHER_HOURS 24
+#define FORECAST_WEATHER_HOURS 25
 
 typedef enum weather_condition_code {
     UNKNOWN = 0,

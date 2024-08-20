@@ -298,6 +298,8 @@ static void build() {
         GP.BREAK();
         render_int("Show 2-day forecast for [s]:", PREFS_KEY_SCRN_TIME_FORECAST_SECONDS);
         GP.BREAK();
+        render_int("Show precipitation % graph for [s]:", PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS);
+        GP.BREAK();
         #if HAS(WORDNIK_API)
         render_int("Show word of the day for [s]:", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS);
         GP.BREAK();
@@ -526,6 +528,7 @@ void action() {
         save_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 0, 3600);
+        save_int(PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600);
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);

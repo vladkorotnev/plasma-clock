@@ -255,17 +255,17 @@ void FantaManipulator::line(int x1, int y1, int x2, int y2, bool state) {
   }
 }
 
-void FantaManipulator::rect(int x1, int y1, int x2, int y2, bool fill) {
+void FantaManipulator::rect(int x1, int y1, int x2, int y2, bool fill, bool state) {
     if (fill) {
         for (int i = x1; i < x2; i++) {
             for (int j = y1; j < y2+1; j++) {
-                plot_pixel(i, j, true);
+                plot_pixel(i, j, state);
             }
         }
     } else {
-        line(x1, y1, x2, y1);
-        line(x2, y1, x2, y2);
-        line(x2, y2, x1, y2);
-        line(x1, y2, x1, y1);
+        line(x1, y1, x2, y1, state);
+        line(x2, y1, x2, y2, state);
+        line(x2, y2, x1, y2, state);
+        line(x1, y2, x1, y1, state);
     }
 }

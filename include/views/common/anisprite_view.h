@@ -24,7 +24,7 @@ protected:
 
 class AniSpriteView: public SpriteView {
 public:
-    AniSpriteView(const ani_sprite * sprite = nullptr) {
+    AniSpriteView(const ani_sprite * sprite = nullptr): SpriteView(nullptr) {
         set_sprite(sprite);
     }
 
@@ -48,7 +48,7 @@ public:
     }
 
 private:
-    const ani_sprite * icon;
-    ani_sprite_state_t icon_state;
-    sprite_t current_icon_frame;
+    const ani_sprite * icon = nullptr;
+    ani_sprite_state_t icon_state = { 0 };
+    sprite_t current_icon_frame = { 0 };
 };

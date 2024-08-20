@@ -37,6 +37,7 @@ typedef enum MainViewId: uint16_t {
 #endif
     VIEW_OUTDOOR_WEATHER,
     VIEW_WEATHER_FORECAST,
+    VIEW_WEATHER_PRECIPITATION_CHART,
 #if HAS(WORDNIK_API)
     VIEW_WORD_OF_THE_DAY,
 #endif
@@ -193,6 +194,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
 #endif
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
     screen_times_ms[VIEW_WEATHER_FORECAST] = prefs_get_int(PREFS_KEY_SCRN_TIME_FORECAST_SECONDS) * 1000;
+    screen_times_ms[VIEW_WEATHER_PRECIPITATION_CHART] = prefs_get_int(PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS) * 1000;
 #if HAS(WORDNIK_API)
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
 #endif

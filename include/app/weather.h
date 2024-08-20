@@ -2,6 +2,7 @@
 #include <views/framework.h>
 #include <views/weather/current_weather.h>
 #include <views/weather/daily_forecast.h>
+#include <views/weather/chart_precipitation.h>
 #include <state.h>
 
 class AppShimWeather: public ListView {
@@ -9,9 +10,11 @@ public:
     AppShimWeather() {
         conditions = new CurrentWeatherView();
         forecast = new DailyForecastView(true);
-
-        add_view(forecast);
+        precipitation = new WeatherPrecipitationChart();
+        
         add_view(conditions);
+        add_view(precipitation);
+        add_view(forecast);
     }
 
     void step() override {
@@ -22,6 +25,7 @@ public:
     }
 
 private:
+    WeatherPrecipitationChart * precipitation;
     CurrentWeatherView * conditions;
     DailyForecastView * forecast;
 };
