@@ -5,14 +5,14 @@
 
 class WeatherPrecipitationChart: public WeatherChartCommon {
 public:
-    WeatherPrecipitationChart(): WeatherChartCommon() {
+    WeatherPrecipitationChart(bool hint_enabled = false): WeatherChartCommon() {
         filled = true;
         show_maximum = false;
         show_minimum = false;
         autoscale = false;
         minimum = 0;
-        maximum = 100;
-        hint = "PoP, %";
+        maximum = 95;
+        hint = hint_enabled ? "PoP, %" : nullptr;
     }
 
     void prepare() override {
@@ -29,9 +29,23 @@ public:
                             cursor_index = p;
                         }
                     }
+                    int val = f->precipitation_percentage;
+                    if(x == 0) {
+                        const hourly_weather_t * prev = weather_get_hourly(i - 1);
+                        if(prev != nullptr) {
+                            val += prev->precipitation_percentage;
+                            val /= 2;
+                        }
+                    } else if(x == 3) {
+                        const hourly_weather_t * next = weather_get_hourly(i + 1);
+                        if(next != nullptr) {
+                            val += next->precipitation_percentage;
+                            val /= 2;
+                        }
+                    }
                     points.push_back({
                         .annotation = (f->time.hour % 6 == 0 && x == 0 && i > 3) ? f->time.hour : -1,
-                        .value = interpolate(f->precipitation_percentage)
+                        .value = interpolate(val)
                     });
                     p++;
                 }
@@ -40,7 +54,12 @@ public:
         WeatherChartCommon::prepare();
     }
 
-    int desired_display_time() override { return DISP_TIME_NO_OVERRIDE; }
+    int desired_display_time() override { 
+        for(auto p: points) {
+            if(p.value > 7) return DISP_TIME_NO_OVERRIDE;
+        }
+        return DISP_TIME_DONT_SHOW; // don't show if no data
+    }
 
 private:
     int interpolate(unsigned int pct) {

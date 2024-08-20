@@ -11,8 +11,8 @@ public:
     AppShimWeather() {
         conditions = new CurrentWeatherView();
         forecast = new DailyForecastView(true);
-        precipitation = new WeatherPrecipitationChart();
-        pressure = new WeatherPressureChart();
+        precipitation = new WeatherPrecipitationChart(true);
+        pressure = new WeatherPressureChart(true);
         
         add_view(conditions);
         add_view(precipitation);

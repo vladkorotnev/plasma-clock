@@ -36,4 +36,5 @@ private:
     bool cursor_phase = false;
     int reveal_index = 0;
     bool show_hint = true;
+    bool show_legend = true;
 };

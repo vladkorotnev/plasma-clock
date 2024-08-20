@@ -8,6 +8,7 @@ void WeatherChartCommon::prepare() {
     reveal_index = 0;
     hint_framecounter = 0;
     show_hint = true;
+    show_legend = true;
     update_minmax_if_needed();
 }
 
@@ -28,36 +29,40 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
             }
         }
 
-        for(int p_idx = 0; p_idx < points.size(); p_idx++) {
-            auto p = points[p_idx];
-            int y = fb->get_height() - (p.value - minimum) * fb->get_height() / (maximum - minimum);
+        if(show_legend) {
+            for(int p_idx = 0; p_idx < points.size(); p_idx++) {
+                auto p = points[p_idx];
+                int y = fb->get_height() - (p.value - minimum) * fb->get_height() / (maximum - minimum);
 
-            if(p.annotation >= 0) {
-                snprintf(buf, 7, "%d", p.annotation);
-                int x = (p_idx >= 3) ? p_idx - 3 : 0; 
-                int w = measure_string_width(&fps_counter_font, buf) + 1;
-                int txt_y = fb->get_height() - 5;
-                if(y >= txt_y) txt_y = y - 6;
-                fb->rect(x, txt_y - 1, x + w, txt_y + 5, true, false);
-                fb->put_string(&fps_counter_font, buf, x + 1, txt_y);
+                if(p.annotation >= 0) {
+                    snprintf(buf, 7, "%d", p.annotation);
+                    int x = (p_idx >= 3) ? p_idx - 3 : 0; 
+                    int w = measure_string_width(&fps_counter_font, buf) + 1;
+                    int txt_y = fb->get_height() - 5;
+                    if(y >= txt_y) txt_y = y - 6;
+                    fb->rect(x, txt_y - 1, x + w, txt_y + 5, true, false);
+                    fb->put_string(&fps_counter_font, buf, x + 1, txt_y);
+                }
             }
         }
     }
 
-    if(show_minimum) {
-        snprintf(buf, 7, "%d", minimum);
-        int w = measure_string_width(&fps_counter_font, buf) + 1;
-        int x = fb->get_width() - w; 
-        fb->rect(x, fb->get_height() - 5, x + w, fb->get_height(), true, false);
-        fb->put_string(&fps_counter_font, buf, x + 1, fb->get_height() - 5);
-    }
-    
-    if(show_maximum) {
-        snprintf(buf, 7, "%d", maximum);
-        int w = measure_string_width(&fps_counter_font, buf) + 1;
-        int x = fb->get_width() - w; 
-        fb->rect(x, 0, x + w, 6, true, false);
-        fb->put_string(&fps_counter_font, buf, x + 1, 0);
+    if(show_legend) {
+        if(show_minimum) {
+            snprintf(buf, 7, "%d", minimum);
+            int w = measure_string_width(&fps_counter_font, buf) + 1;
+            int x = fb->get_width() - w; 
+            fb->rect(x, fb->get_height() - 5, x + w, fb->get_height(), true, false);
+            fb->put_string(&fps_counter_font, buf, x + 1, fb->get_height() - 5);
+        }
+        
+        if(show_maximum) {
+            snprintf(buf, 7, "%d", maximum);
+            int w = measure_string_width(&fps_counter_font, buf) + 1;
+            int x = fb->get_width() - w; 
+            fb->rect(x, 0, x + w, 6, true, false);
+            fb->put_string(&fps_counter_font, buf, x + 1, 0);
+        }
     }
 
     if(show_hint && hint != nullptr) {
@@ -76,10 +81,13 @@ void WeatherChartCommon::step() {
         cursor_phase ^= 1;
     }
 
-    if(hint_framecounter < 121) {
+    if(hint_framecounter < 241) {
         hint_framecounter++;
         if(hint_framecounter == 120) {
             show_hint = false;
+        }
+        if(hint_framecounter == ((hint == nullptr) ? 120 : 240)) {
+            show_legend = false;
         }
     }
 }
