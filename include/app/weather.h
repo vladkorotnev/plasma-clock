@@ -3,6 +3,7 @@
 #include <views/weather/current_weather.h>
 #include <views/weather/daily_forecast.h>
 #include <views/weather/chart_precipitation.h>
+#include <views/weather/chart_pressure.h>
 #include <state.h>
 
 class AppShimWeather: public ListView {
@@ -11,9 +12,11 @@ public:
         conditions = new CurrentWeatherView();
         forecast = new DailyForecastView(true);
         precipitation = new WeatherPrecipitationChart();
+        pressure = new WeatherPressureChart();
         
         add_view(conditions);
         add_view(precipitation);
+        add_view(pressure);
         add_view(forecast);
     }
 
@@ -26,6 +29,7 @@ public:
 
 private:
     WeatherPrecipitationChart * precipitation;
+    WeatherPressureChart * pressure;
     CurrentWeatherView * conditions;
     DailyForecastView * forecast;
 };
