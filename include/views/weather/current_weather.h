@@ -14,13 +14,13 @@ public:
 private:
     const font_definition_t * big_font;
     const font_definition_t * small_font;
-    StringScroll * bottom_line;
-    StringScroll * top_line;
-    char bottom_text[128];
-    char top_text[32];
-    current_weather_t weather;
-    AniSpriteView * animation;
-    const ani_sprite_t * icon;
+    StringScroll * bottom_line = nullptr;
+    StringScroll * top_line = nullptr;
+    char bottom_text[128] = { 0 };
+    char top_text[32] = { 0 };
+    current_weather_t weather = { 0 };
+    AniSpriteView * animation = nullptr;
+    const ani_sprite_t * icon = nullptr;
     void prerender_icon_frame();
     void prepare_for_new_weather();
 };

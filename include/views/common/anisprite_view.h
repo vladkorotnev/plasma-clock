@@ -42,7 +42,7 @@ public:
     }
 
     void step() override {
-        if(icon->data == nullptr || icon_state.ani_sprite == nullptr) return;
+        if(icon == nullptr || icon->data == nullptr || icon_state.ani_sprite == nullptr) return;
         current_icon_frame = ani_sprite_frame(&icon_state);
         current = &current_icon_frame;
     }
