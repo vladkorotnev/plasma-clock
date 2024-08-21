@@ -6,6 +6,7 @@
 class WeatherPrecipitationChart: public WeatherChartCommon {
 public:
     WeatherPrecipitationChart(bool hint_enabled = false): WeatherChartCommon() {
+        is_on_screen = false;
         filled = true;
         show_maximum = false;
         show_minimum = false;
@@ -16,6 +17,30 @@ public:
     }
 
     void prepare() override {
+        load_data();
+        WeatherChartCommon::prepare();
+        is_on_screen = true;
+    }
+
+    int desired_display_time() override {
+        if(!is_on_screen)
+            load_data();
+        
+        for(auto p: points) {
+            if(p.value > 7) return DISP_TIME_NO_OVERRIDE;
+        }
+        return DISP_TIME_DONT_SHOW; // don't show if no data
+    }
+
+    void cleanup() override {
+        is_on_screen = false;
+        WeatherChartCommon::cleanup();
+    }
+
+private:
+    bool is_on_screen = false;
+
+    void load_data() {
         points.clear();
         cursor_index = -1;
         tk_time_of_day_t now = get_current_time_coarse();
@@ -51,17 +76,8 @@ public:
                 }
             }
         }
-        WeatherChartCommon::prepare();
     }
 
-    int desired_display_time() override { 
-        for(auto p: points) {
-            if(p.value > 7) return DISP_TIME_NO_OVERRIDE;
-        }
-        return DISP_TIME_DONT_SHOW; // don't show if no data
-    }
-
-private:
     int interpolate(unsigned int pct) {
         if(pct < 7) return 7;
         return pct;  
