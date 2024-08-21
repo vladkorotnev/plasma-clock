@@ -48,6 +48,10 @@ You can also read the quest I went through trying to get it to run "in real time
 
     ![](docs/img/widget/forecast.gif)
 
+* Hourly Precipitation and Pressure charts
+
+    ![](docs/img/widget/charts.gif)
+
 * Weather Effect (raining and thunder on idle screen when rain/thunderstorm outside)
     
     ![](docs/img/widget/rain.gif)
