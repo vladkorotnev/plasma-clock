@@ -121,6 +121,10 @@ NewSequencer::~NewSequencer() {
     for(int i = 0; i < CHANNELS; i++) delete voices[i];
 }
 
+bool NewSequencer::is_sequencing() {
+    return is_running;
+}
+
 void NewSequencer::stop_sequence() {
     is_running = false;
     for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);

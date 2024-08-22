@@ -36,6 +36,7 @@ public:
     void play_sequence(const melody_sequence_t *, int repeat);
     void stop_sequence();
     void wait_end_play();
+    bool is_sequencing();
     size_t fill_buffer(void* buffer, size_t length) override;
 #if HAS(SERIAL_MIDI)
     void midi_task();
