@@ -10,7 +10,7 @@ public:
         show_maximum = true;
         show_minimum = true;
         autoscale = true;
-        hint = hint_enabled ? "Pressure hPa" : nullptr;
+        hint = hint_enabled ? "P, hPa" : nullptr;
     }
 
     void prepare() override {

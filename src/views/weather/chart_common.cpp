@@ -6,8 +6,8 @@
 WeatherChartCommon::WeatherChartCommon() {
     hint_lbl = new StringScroll(&keyrus0808_font);
     hint_lbl->x_offset = 0;
-    hint_lbl->set_y_position(0);
-    hint_lbl->render_mode = TEXT_NO_BACKGROUND | TEXT_OUTLINED | TEXT_INVERTED | OUTLINE_INVERTED;
+    hint_lbl->set_y_position(1);
+    hint_lbl->render_mode = TEXT_NO_BACKGROUND | TEXT_OUTLINED;
     add_composable(hint_lbl);
 }
 
@@ -93,6 +93,12 @@ void WeatherChartCommon::step() {
         if(hint_framecounter == ((hint == nullptr) ? 120 : 240)) {
             show_legend = false;
         }
+    }
+
+    if(hid_test_key_any(KEY_HEADPAT | KEY_RIGHT) == KEYSTATE_HIT) {
+        hint_framecounter = 0;
+        hint_lbl->hidden = false;
+        show_legend = true;
     }
 }
 

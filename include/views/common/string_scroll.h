@@ -29,6 +29,7 @@ private:
     int increment;
     int frame_counter;
     int wait_frames;
+    int v_padding;
 
     fanta_buffer_t backing_buffer;
     fanta_buffer_t mask_buffer;
