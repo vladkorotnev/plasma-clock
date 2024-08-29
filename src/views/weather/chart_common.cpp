@@ -3,11 +3,20 @@
 #include <vector>
 #include <algorithm>
 
+WeatherChartCommon::WeatherChartCommon() {
+    hint_lbl = new StringScroll(&keyrus0808_font);
+    hint_lbl->x_offset = 0;
+    hint_lbl->set_y_position(0);
+    hint_lbl->render_mode = TEXT_NO_BACKGROUND | TEXT_OUTLINED | TEXT_INVERTED | OUTLINE_INVERTED;
+    add_composable(hint_lbl);
+}
+
 void WeatherChartCommon::prepare() {
-    Composable::prepare();
+    hint_lbl->set_string(hint);
+    Screen::prepare();
     reveal_index = 0;
     hint_framecounter = 0;
-    show_hint = true;
+    hint_lbl->hidden = false;
     show_legend = true;
     update_minmax_if_needed();
 }
@@ -16,7 +25,6 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
     fb->clear();
     static char buf[8] = { 0 };
 
-    Composable::render(fb);
     if(points.size() > 0) {
         for(int p_idx = 0; p_idx < std::min((int)points.size(), reveal_index); p_idx++) {
             auto p = points[p_idx];
@@ -41,7 +49,7 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
                     int txt_y = fb->get_height() - 5;
                     if(y >= txt_y) txt_y = y - 6;
                     fb->rect(x, txt_y - 1, x + w, txt_y + 5, true, false);
-                    fb->put_string(&fps_counter_font, buf, x + 1, txt_y);
+                    fb->put_string(&fps_counter_font, buf, x + 1, txt_y, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
                 }
             }
         }
@@ -52,26 +60,22 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
             snprintf(buf, 7, "%d", minimum);
             int w = measure_string_width(&fps_counter_font, buf) + 1;
             int x = fb->get_width() - w; 
-            fb->rect(x, fb->get_height() - 5, x + w, fb->get_height(), true, false);
-            fb->put_string(&fps_counter_font, buf, x + 1, fb->get_height() - 5);
+            fb->put_string(&fps_counter_font, buf, x, fb->get_height() - 5, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
         }
         
         if(show_maximum) {
             snprintf(buf, 7, "%d", maximum);
             int w = measure_string_width(&fps_counter_font, buf) + 1;
             int x = fb->get_width() - w; 
-            fb->rect(x, 0, x + w, 6, true, false);
-            fb->put_string(&fps_counter_font, buf, x + 1, 0);
+            fb->put_string(&fps_counter_font, buf, x, 0, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
         }
     }
 
-    if(show_hint && hint != nullptr) {
-        fb->put_string(&keyrus0808_font, hint, 0, 0, true);
-    }
+    Screen::render(fb);
 }
 
 void WeatherChartCommon::step() {
-    Composable::step();
+    Screen::step();
     if(reveal_index < points.size()) {
         reveal_index += 4;
     }
@@ -84,7 +88,7 @@ void WeatherChartCommon::step() {
     if(hint_framecounter < 241) {
         hint_framecounter++;
         if(hint_framecounter == 120) {
-            show_hint = false;
+            hint_lbl->hidden = true;
         }
         if(hint_framecounter == ((hint == nullptr) ? 120 : 240)) {
             show_legend = false;

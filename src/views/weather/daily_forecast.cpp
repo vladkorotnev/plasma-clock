@@ -21,9 +21,10 @@ public:
         night_temp->x_offset = 17;
         
         date = new StringScroll(&fps_counter_font);
+        date->render_mode = TEXT_OUTLINED | TEXT_NO_BACKGROUND;
         date->stopped = true;
         date->set_y_position(11);
-        date->x_offset = 8;
+        date->x_offset = 9;
 
         add_composable(icon);
         add_composable(date);
@@ -58,14 +59,6 @@ public:
         } else {
             date->set_string("");
         }
-    }
-
-    void render(FantaManipulator *fb) override {
-        Composite::render(fb);
-
-        // add "border" to the date
-        fb->line(7, 10, 15, 10, false);
-        fb->line(7, 10, 7, 15, false);
     }
 
 private:

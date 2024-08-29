@@ -46,9 +46,9 @@ public:
     /// @param glyph Glyph code to place
     /// @param x X position for the glyph
     /// @param y Y position for the glyph
-    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, bool invert = false);
+    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, text_attributes_t style = TEXT_NORMAL);
     /// @brief Draw a string with the specified font at the specified position in the Fanta buffer. Does not do any line wrapping.
-    void put_string(const font_definition_t *, const char *, int x, int y, bool invert = false);
+    void put_string(const font_definition_t *, const char *, int x, int y, text_attributes_t style = TEXT_NORMAL);
     /// @brief Offset the contents of the buffer
     /// @param dx Horizontal offset. Negative is to the left.
     /// @param dy Vertical offset. Negative is to the top.

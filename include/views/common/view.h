@@ -19,6 +19,7 @@ class Composable: public Renderable {
 public:
     int x_offset = 0;
     int width = -1;
+    bool hidden = false;
 };
 
 class ClipView: public Composable {
@@ -49,6 +50,7 @@ public:
     }
     void render(FantaManipulator*fb) {
         for(Composable *r: composables) {
+            if(r->hidden) continue;
             if(r->x_offset <= 0 && r->width < 0) {
                 r->render(fb);
             } else if(r->width > 0) {

@@ -6,6 +6,7 @@ class StringScroll: public Composable {
 public:
     StringScroll(const font_definition_t*, const char* string = nullptr);
     int string_width;
+    text_attributes_t render_mode = TEXT_NORMAL;
     bool scroll_only_if_not_fit;
     bool stopped;
     bool align_to_right;
@@ -30,6 +31,7 @@ private:
     int wait_frames;
 
     fanta_buffer_t backing_buffer;
+    fanta_buffer_t mask_buffer;
     int backing_buffer_width;
     size_t backing_buffer_size;
 };

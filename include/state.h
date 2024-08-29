@@ -16,6 +16,9 @@ typedef enum device_state {
 #endif
 
     STATE_OTAFVU,
+#if HAS(PLAYGROUND)
+    STATE_PLAYGROUND,
+#endif
 } device_state_t;
 
 void change_state(device_state_t, transition_type_t = TRANSITION_WIPE);

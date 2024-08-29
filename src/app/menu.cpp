@@ -198,15 +198,18 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
         ESP.restart();
     }, &good_icns));
 
-    main_menu->add_view(new MenuActionItemView("Clock", [this](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
+    main_menu->add_view(new MenuActionItemView("Clock", [](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
-    main_menu->add_view(new MenuActionItemView("Stopwatch", [this](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
-    main_menu->add_view(new MenuActionItemView("Weather", [this]() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
-    main_menu->add_view(new MenuActionItemView("Alarm", [this](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
+    main_menu->add_view(new MenuActionItemView("Stopwatch", [](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
+    main_menu->add_view(new MenuActionItemView("Weather", []() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
+    main_menu->add_view(new MenuActionItemView("Alarm", [](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
     main_menu->add_view(new MenuActionItemView("Weighing", [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
 #endif
     main_menu->add_view(new MenuActionItemView("Settings", [this](){ push_submenu(settings_menu); }, &wrench_icns));
+#if HAS(PLAYGROUND)
+    main_menu->add_view(new MenuActionItemView("Test", []() { push_state(STATE_PLAYGROUND, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &good_icns));
+#endif
 }   
 
 void AppShimMenu::prepare() {

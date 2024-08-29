@@ -5,6 +5,9 @@
 
 // ---- SOFTWARE FEATURE FLAGS
 
+// Enable the playground app for shits and giggles
+#define HAS_PLAYGROUND
+
 // Enable the Wordnik API and Word Of The Day screen. UNSTABLE: Uses a lot of RAM for HTTPS.
 #define HAS_WORDNIK_API
 

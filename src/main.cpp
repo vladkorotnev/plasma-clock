@@ -33,6 +33,7 @@
 #include <app/stopwatch.h>
 #include <app/weighing.h>
 #include <app/weather.h>
+#include <app/playground.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -275,6 +276,9 @@ void setup() {
     appHost->add_view(new AppShimWeather(), STATE_WEATHER);
 #if HAS(BALANCE_BOARD_INTEGRATION)
     appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
+#endif
+#if HAS(PLAYGROUND)
+    appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
 #endif
 
     change_state(startup_state);

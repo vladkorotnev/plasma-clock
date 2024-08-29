@@ -166,16 +166,38 @@ void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool in
     }
 }
 
-void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, bool invert) {
-    sprite_t char_sprite = sprite_from_glyph(font, glyph);
+void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, text_attributes_t style) {
+    if(x + font->width + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || x - ((style & TEXT_OUTLINED) ? 1 : 0) > get_width()) return;
+    if(y + font->height + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || y - ((style & TEXT_OUTLINED) ? 1 : 0) > get_height()) return;
+
+    bool need_masked_char = ((style & TEXT_NO_BACKGROUND != 0) || (style & TEXT_OUTLINED != 0));
+    bool invert = (style & TEXT_INVERTED) != 0;
+
+    sprite_t char_sprite = sprite_from_glyph(font, glyph, need_masked_char);
+    if(need_masked_char && (style & TEXT_NO_BACKGROUND) == 0) {
+        // If the char is masked but background was requested, prepare the background on our own
+        rect(x, y, x + font->width, y + font->height, true, invert);
+    }
+
+    if((style & TEXT_OUTLINED) != 0) {
+        // Simplest way of drawing an outline is just 9 copies of the character of the opposite color
+        // This is laggy if there is a lot of text going on, TODO optimize? Or better yet stop calling this directly and make a proper Label control
+        for(int xoffs = -1; xoffs <= 1; xoffs++) {
+            for(int yoffs = -1; yoffs <= 1; yoffs++) {
+                if(xoffs == 0 && yoffs == 0) continue;
+                put_sprite(&char_sprite, x + xoffs, y + yoffs, (style & OUTLINE_INVERTED) == 0);
+            }
+        }
+    }
+
     put_sprite(&char_sprite, x, y, invert);
 }
 
-void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y, bool invert) {
+void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y, text_attributes_t style) {
     size_t i = 0;
     int cur_x = x;
     while(char ch = string[i]) {
-        put_glyph(font, ch, cur_x, y, invert);
+        put_glyph(font, ch, cur_x, y, style);
         cur_x += font->width;
         i++;
     }

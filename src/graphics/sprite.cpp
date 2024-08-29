@@ -8,9 +8,9 @@ static char LOG_TAG[] = "FB_SPR";
 
 void* gralloc(const size_t size) {
 #ifndef BOARD_HAS_PSRAM
-    return malloc(size);
+    return calloc(1, size);
 #else
-    return heap_caps_malloc(size, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+    return heap_caps_calloc(1, size, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
 #endif
 }
 

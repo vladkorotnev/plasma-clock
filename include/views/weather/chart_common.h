@@ -8,7 +8,7 @@ public:
     void step() override;
 
 protected:
-    WeatherChartCommon() {}
+    WeatherChartCommon();
 
     struct DataPoint {
         int annotation;
@@ -31,10 +31,10 @@ protected:
     void update_minmax_if_needed();
 
 private:
+    StringScroll * hint_lbl;
     uint8_t cursor_framecounter = 0;
     uint8_t hint_framecounter = 0;
     bool cursor_phase = false;
     int reveal_index = 0;
-    bool show_hint = true;
     bool show_legend = true;
 };

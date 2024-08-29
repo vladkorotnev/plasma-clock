@@ -4,7 +4,7 @@
 
 static char LOG_TAG[] = "FONT";
 
-sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph) {
+sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph, bool masked) {
     if(glyph > font->end_character || glyph < font->start_character) {
         ESP_LOGI(LOG_TAG, "Not known character %u in font", glyph);
         glyph = 0;
@@ -15,13 +15,13 @@ sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph) {
         .width = font->width,
         .height = font->height,
         .data = &font->data[start_idx],
-        .mask = nullptr,
+        .mask = masked ? &font->data[start_idx] : nullptr,
         .format = SPRFMT_HORIZONTAL
     };
 
     return rslt;
 }
 
-extern unsigned int measure_string_width(const font_definition_t* f, const char* s) {
-    return strlen(s) * f->width;
+unsigned int measure_string_width(const font_definition_t* f, const char* s, text_attributes_t attributes) {
+    return strlen(s) * f->width + ((attributes & TEXT_OUTLINED) != 0 ? 2 : 0);
 }
