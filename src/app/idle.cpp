@@ -137,9 +137,9 @@ void hourly_chime() {
                 // Voice chime enabled, speak hour then play chime
                 static char hourBuf[64] = { 0 };
                 if(now.minute == 0) {
-                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su.", now.hour);
+                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", now.hour);
                 } else {
-                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;<NUMK VAL=%i COUNTER=funn>de_su.", now.hour, now.minute);
+                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", now.hour, now.minute);
                 }
                 YukkuriUtterance hourUtterance = YukkuriUtterance(hourBuf, [first_chime](bool) {
                     _play_hourly_chime_if_enabled(first_chime);
