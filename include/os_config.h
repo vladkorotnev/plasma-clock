@@ -23,3 +23,4 @@
 
 #define pisosWAVE_CHANNEL_BEEPER 0
 #define pisosWAVE_CHANNEL_SEQUENCER 1
+#define pisosWAVE_CHANNEL_YUKKURI 2

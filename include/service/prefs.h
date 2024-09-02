@@ -89,6 +89,11 @@ static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
 static constexpr prefs_key_t PREFS_KEY_REMOTE_SERVER = "rc_svr";
 static constexpr prefs_key_t PREFS_KEY_SERIAL_MIDI = "serimid";
 
+static constexpr prefs_key_t PREFS_KEY_VOICE_LICENSE = "v_lic";
+static constexpr prefs_key_t PREFS_KEY_VOICE_SPEED = "v_spd";
+static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_HOUR = "v_hrs";
+static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_DATE = "v_date";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());

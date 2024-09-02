@@ -4,4 +4,4 @@ captures/
 /src/weather_icons
 .vscode/
 /lib/nonfree-aquestalk/aquestalk.h
-/lib/nonfree-aquestalk/libaquestalk.a
+/lib/nonfree-aquestalk/*.a

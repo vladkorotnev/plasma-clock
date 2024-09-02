@@ -44,6 +44,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime from", PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime until", PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuBooleanSettingView("Speak hour", PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView("Voice speed", PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
     clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
         tk_time_of_day_t now = get_current_time_coarse();
         if(ts_view != nullptr) delete ts_view;

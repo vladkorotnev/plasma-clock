@@ -316,6 +316,17 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+#if HAS(AQUESTALK)
+    GP.SPOILER_BEGIN("Voice", GP_BLUE);
+        render_string("License key:", PREFS_KEY_VOICE_LICENSE, true);
+        GP.HR();
+        render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
+        render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
+        render_bool("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE);
+    GP.SPOILER_END();
+    GP.BREAK();
+#endif
+
 #if HAS(TEMP_SENSOR)
     GP.SPOILER_BEGIN("Calibration", GP_BLUE);
         render_int("Temperature offset:", PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET);
@@ -559,6 +570,10 @@ void action() {
         save_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL);
         save_bool(PREFS_KEY_REMOTE_SERVER);
         save_bool(PREFS_KEY_SERIAL_MIDI);
+        save_string(PREFS_KEY_VOICE_LICENSE);
+        save_int(PREFS_KEY_VOICE_SPEED, 1, 200);
+        save_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR);
+        save_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;
