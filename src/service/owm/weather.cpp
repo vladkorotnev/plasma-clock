@@ -8,7 +8,7 @@
 
 static char LOG_TAG[] = "WEATHER";
 
-static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s";
+static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s&exclude=minutely,alerts";
 static String apiKey;
 static TickType_t interval;
 static String latitude; 
@@ -16,6 +16,8 @@ static String longitude;
 static TaskHandle_t hTask = NULL;
 static SemaphoreHandle_t cacheSemaphore;
 static current_weather_t cache = { 0 };
+static forecast_weather_t forecast_daily[FORECAST_WEATHER_DAYS] = { 0 };
+static hourly_weather_t forecast_hourly[FORECAST_WEATHER_HOURS] = { 0 };
 static volatile bool is_demoing = false;
 
 weather_condition_t normalized_conditions(uint conditions) {
@@ -83,6 +85,42 @@ void WeatherTaskFunction( void * pvParameter )
                             cache.description[0] -= ('a' - 'A');
                         }
                     }
+
+                    memset(&forecast_daily, 0, sizeof(forecast_daily));
+                    if(response.containsKey("daily")) {
+                        int day_idx = -1;
+                        for(auto day: response["daily"].as<JsonArray>()) {
+                            if(day_idx >= 0) {
+                                forecast_daily[day_idx] = {
+                                    .day_temperature_kelvin = day["temp"]["day"],
+                                    .night_temperature_kelvin = day["temp"]["night"],
+                                    .pressure_hpa = day["pressure"],
+                                    .conditions = normalized_conditions(day["weather"][0]["id"]),
+                                    .precipitation_percentage = (unsigned int) trunc( day["pop"].as<float>() * 100.0 ),
+                                    .date = unixtime_to_date(day["dt"].as<time_t>())
+                                };
+                            }
+                            day_idx++;
+                            if(day_idx == FORECAST_WEATHER_DAYS) break;
+                        }
+                    }
+
+                    memset(&forecast_hourly, 0, sizeof(forecast_hourly));
+                    if(response.containsKey("hourly")) {
+                        int hr_idx = 0;
+                        for(auto hr: response["hourly"].as<JsonArray>()) {
+                            forecast_hourly[hr_idx] = {
+                                .temperature_kelvin = hr["temp"],
+                                .pressure_hpa = hr["pressure"],
+                                .conditions = normalized_conditions(hr["weather"][0]["id"]),
+                                .precipitation_percentage = (unsigned int) trunc( hr["pop"].as<float>() * 100.0 ),
+                                .time = unixtime_to_time(hr["dt"].as<time_t>())
+                            };
+                            hr_idx++;
+                            if(hr_idx == FORECAST_WEATHER_HOURS) break;
+                        }
+                    }
+
                     xSemaphoreGive(cacheSemaphore);
                     ESP_LOGI(LOG_TAG, "Weather refreshed");
                 }
@@ -146,6 +184,16 @@ bool weather_get_current(current_weather_t * dst) {
 
     xSemaphoreGive(cacheSemaphore);
     return true;
+}
+
+const forecast_weather_t * weather_get_forecast(int day) {
+    if(day < 0 || day >= FORECAST_WEATHER_DAYS) return nullptr;
+    return &forecast_daily[day];
+}
+
+const hourly_weather_t * weather_get_hourly(int hour) {
+    if(hour < 0 || hour >= FORECAST_WEATHER_HOURS) return nullptr;
+    return &forecast_hourly[hour];
 }
 
 float kelvin_to(float k, temperature_unit_t unit) {

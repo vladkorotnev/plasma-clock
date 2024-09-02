@@ -46,9 +46,9 @@ public:
     /// @param glyph Glyph code to place
     /// @param x X position for the glyph
     /// @param y Y position for the glyph
-    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, bool invert = false);
+    void put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, text_attributes_t style = TEXT_NORMAL);
     /// @brief Draw a string with the specified font at the specified position in the Fanta buffer. Does not do any line wrapping.
-    void put_string(const font_definition_t *, const char *, int x, int y, bool invert = false);
+    void put_string(const font_definition_t *, const char *, int x, int y, text_attributes_t style = TEXT_NORMAL);
     /// @brief Offset the contents of the buffer
     /// @param dx Horizontal offset. Negative is to the left.
     /// @param dy Vertical offset. Negative is to the top.
@@ -56,9 +56,9 @@ public:
     /// @brief Invert all pixels of the buffer
     void invert();
     /// @brief Draws a line using Bresenham's algorithm
-    void line(int x1, int y1, int x2, int y2);
+    void line(int x1, int y1, int x2, int y2, bool state = true);
     /// @brief Draws a rectangle
-    void rect(int x1, int y1, int x2, int y2, bool fill);
+    void rect(int x1, int y1, int x2, int y2, bool fill, bool state = true);
 
     /// @brief Get the width of the buffer in pixels
     int get_width();

@@ -44,6 +44,14 @@ You can also read the quest I went through trying to get it to run "in real time
     
     ![](docs/img/widget/weather.gif)
 
+* Weather Forecast
+
+    ![](docs/img/widget/forecast.gif)
+
+* Hourly Precipitation and Pressure charts
+
+    ![](docs/img/widget/charts.gif)
+
 * Weather Effect (raining and thunder on idle screen when rain/thunderstorm outside)
     
     ![](docs/img/widget/rain.gif)
@@ -120,6 +128,9 @@ You can also read the quest I went through trying to get it to run "in real time
 * [Timbaland - Give It To Me](https://youtube.com/watch?v=RgoiSJ23cSc) also known as [Skibidi Toilet](https://youtu.be/6dMjCa0nqK0): [MIDI](helper/chimes/skibidi_toilet.mid), [MP3 Recording](docs/rec/skibidi.mp3)
 * [PinocchioP - God-ish (神っぽいな)](https://www.youtube.com/watch?v=EHBFKhLUVig): [MIDI](helper/chimes/kamippoina.mid), [MP3 Recording](docs/rec/kamippoina.mp3)
 * [KOTOKO - Re-sublimity](https://youtu.be/QXDwb2rueYM?t=65): [MIDI](helper/chimes/resublimity.mid), [MP3 Recording](docs/rec/re_sublimity.mp3) - simple piano-ish score, better cover TBD?
+* [Calvin Harris - Acceptable In The 80s](https://youtu.be/dOV5WXISM24?t=14): [MIDI](helper/chimes/inthe80s.mid)
+* [emon - shake it!](https://www.youtube.com/watch?v=WxexMGe83No): [MIDI](helper/chimes/shakeit.mid), [MP3 Recording](docs/rec/shakeit.mp3)
+* [Omega - Én elmegyek](https://www.youtube.com/watch?v=L74IyC1N43M): [MIDI](helper/chimes/en_elmegyek.mid) (thanks [lemuel_producer](https://www.fiverr.com/lemuel_producer) for the help!)
 
 ## Creating your own melodies
 

@@ -44,6 +44,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime from", PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime until", PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuBooleanSettingView("Speak hour", PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView("Voice speed", PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
     clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
         tk_time_of_day_t now = get_current_time_coarse();
         if(ts_view != nullptr) delete ts_view;
@@ -82,7 +85,10 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
 #if HAS(SWITCHBOT_METER_INTEGRATION)
         screen_times->add_view(new MenuNumberSelectorPreferenceView("Switchbot Meter", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Current Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("2-day Forecast", PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Hourly Precipitation % Graph", PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView("Hourly Pressure Graph", PREFS_KEY_SCRN_TIME_PRESSURE_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(WORDNIK_API)
         screen_times->add_view(new MenuNumberSelectorPreferenceView("Wordnik", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
@@ -101,7 +107,6 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     ));
     display_menu->add_view(new MenuBooleanSettingView("FPS counter", PREFS_KEY_FPS_COUNTER));
     display_menu->add_view(new MenuBooleanSettingView("Weather effects", PREFS_KEY_WEATHER_OVERLAY));
-    display_menu->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         "WiFi signal",
         {"Off", "Disconnected", "Display power on", "Always"},
@@ -122,6 +127,10 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     strncpy(buf_ip, tmp.c_str(), 16);
     system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
     system_info->add_view(new UptimeView());
+    system_info->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
+#if HAS(SERIAL_MIDI)
+    system_info->add_view(new MenuBooleanSettingView("Serial MIDI Input", PREFS_KEY_SERIAL_MIDI));
+#endif
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL
@@ -163,6 +172,14 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
 
     static const sprite_t stopwatch_icns = { .width = 16, .height = 16, .data = stopwatch_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
 
+    static const uint8_t weather_icns_data[] = {
+        // By PiiXL
+        0x07, 0x00, 0x0f, 0x80, 0x0f, 0xb0, 0x77, 0x78, 0xfb, 0xf8, 0xff, 0xf6, 0xbf, 0xff, 0xcf, 0xff, 
+        0x7f, 0xfe, 0x00, 0x00, 0x22, 0x24, 0x44, 0x48, 0x89, 0x10, 0x02, 0x00, 0x24, 0x20, 0x40, 0x40
+    };
+
+    static const sprite_t weather_icns = { .width = 16, .height = 16, .data = weather_icns_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL };
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     static const uint8_t weight_icns_data[] = {
         // By PiiXL
@@ -184,14 +201,18 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
         ESP.restart();
     }, &good_icns));
 
-    main_menu->add_view(new MenuActionItemView("Clock", [this](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
+    main_menu->add_view(new MenuActionItemView("Clock", [](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
     main_menu->add_view(new MenuActionItemView("Timer", [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
-    main_menu->add_view(new MenuActionItemView("Stopwatch", [this](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
-    main_menu->add_view(new MenuActionItemView("Alarm", [this](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
+    main_menu->add_view(new MenuActionItemView("Stopwatch", [](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
+    main_menu->add_view(new MenuActionItemView("Weather", []() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
+    main_menu->add_view(new MenuActionItemView("Alarm", [](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
     main_menu->add_view(new MenuActionItemView("Weighing", [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
 #endif
     main_menu->add_view(new MenuActionItemView("Settings", [this](){ push_submenu(settings_menu); }, &wrench_icns));
+#if HAS(PLAYGROUND)
+    main_menu->add_view(new MenuActionItemView("Test", []() { push_state(STATE_PLAYGROUND, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &good_icns));
+#endif
 }   
 
 void AppShimMenu::prepare() {

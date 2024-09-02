@@ -8,7 +8,6 @@ public:
     Fb2kView();
     void prepare();
     void step();
-    void render(FantaManipulator*);
     int desired_display_time();
 
 private:
@@ -19,4 +18,5 @@ private:
     TickType_t last_update;
     StringScroll * top_line;
     StringScroll * bottom_line;
+    SpriteView * icon;
 };

@@ -31,7 +31,7 @@ public:
     void render(FantaManipulator *fb) {
         // box around number
         fb->rect(0, 2, 10 + setting.enabled, 12, setting.enabled);
-        fb->put_string(&keyrus0808_font, index_str, 2, 4, setting.enabled);
+        fb->put_string(&keyrus0808_font, index_str, 2, 4, setting.enabled ? TEXT_INVERTED : TEXT_NORMAL);
 
         fb->put_string(&keyrus0808_font, time_buf, 14, 0);
 
@@ -39,7 +39,7 @@ public:
             fb->put_string(&keyrus0808_font, "Only Once", 14, 8);
         } else {
             for(int d = 0; d < 7; d++) {
-                fb->put_string(&keyrus0808_font, &day_letters[d * 2], 14 + d * (keyrus0808_font.width + 1), 8, ALARM_ON_DAY(setting, d));
+                fb->put_string(&keyrus0808_font, &day_letters[d * 2], 14 + d * (keyrus0808_font.width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
             }
         }
     }
@@ -129,7 +129,7 @@ public:
                 if(isActive && d == cursor && cursorShows) {
                     fb->rect(ltr_x - 2, 7, ltr_x + 8, 15, lit_up);
                 }
-                fb->put_string(&keyrus0808_font, &day_letters[d * 2], ltr_x, 8, lit_up);
+                fb->put_string(&keyrus0808_font, &day_letters[d * 2], ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
             }
         } else {
             static const char one_time[] = "Only Once";

@@ -24,12 +24,20 @@ Fb2kView::Fb2kView() {
     last_update = 0;
 
     bottom_line = new StringScroll(font);
+    bottom_line->x_offset = 17;
     bottom_line->set_y_position(8);
     bottom_line->set_string(title_buffer);
+    add_composable(bottom_line);
 
     top_line = new StringScroll(font);
+    top_line->x_offset = 17;
     top_line->set_y_position(0);
     top_line->set_string(artist_buffer);
+    add_composable(top_line);
+
+    icon = new SpriteView(&icn_music);
+    icon->width = 16;
+    add_composable(icon);
 
     top_line->holdoff = 50;
     bottom_line->holdoff = 50;
@@ -59,19 +67,12 @@ void Fb2kView::update_if_needed() {
 
 void Fb2kView::prepare() {
     update_if_needed();
+    Screen::prepare();
 }
 
 void Fb2kView::step() {
     update_if_needed();
-}
-
-void Fb2kView::render(FantaManipulator *fb) {
-    fb->put_sprite(&icn_music, 0, 0);
-    
-    FantaManipulator * text_window = fb->slice(15, fb->get_width() - 15);
-    top_line->render(text_window);
-    bottom_line->render(text_window);
-    delete text_window;
+    Screen::step();
 }
 
 int Fb2kView::desired_display_time() {

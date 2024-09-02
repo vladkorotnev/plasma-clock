@@ -14,7 +14,10 @@
 #include <views/idle_screens/indoor_view.h>
 #endif
 #include <views/framework.h>
-#include <views/idle_screens/current_weather.h>
+#include <views/weather/current_weather.h>
+#include <views/weather/daily_forecast.h>
+#include <views/weather/chart_precipitation.h>
+#include <views/weather/chart_pressure.h>
 #include <views/idle_screens/word_of_the_day.h>
 #include <views/idle_screens/fb2k.h>
 #include <views/idle_screens/next_alarm.h>
@@ -35,6 +38,9 @@ typedef enum MainViewId: uint16_t {
     VIEW_REMOTE_WEATHER,
 #endif
     VIEW_OUTDOOR_WEATHER,
+    VIEW_WEATHER_FORECAST,
+    VIEW_WEATHER_PRECIPITATION_CHART,
+    VIEW_WEATHER_PRESSURE_CHART,
 #if HAS(WORDNIK_API)
     VIEW_WORD_OF_THE_DAY,
 #endif
@@ -51,6 +57,7 @@ static bool did_prepare = false;
 
 static Beeper * beepola;
 static NewSequencer * sequencer;
+static Yukkuri * yukkuri = nullptr;
 static SensorPool * sensors;
 
 static Renderable * mainView;
@@ -72,6 +79,9 @@ static WoSensorView * remoteWeatherView;
 #endif
 
 static CurrentWeatherView * weatherView;
+static DailyForecastView * forecastView;
+static WeatherPrecipitationChart * precipitationView;
+static WeatherPressureChart * pressureView;
 #if HAS(WORDNIK_API)
 static WordOfTheDayView * wotdView;
 #endif
@@ -87,32 +97,65 @@ static current_weather_t weather = { 0 };
 static bool tick_tock_enable = false;
 static bool tick_tock = false;
 
-static bool hourly_chime_on = false;
 static int last_chimed_hour = 0;
 
 void sound_tick_tock() {
     tk_time_of_day_t now = get_current_time_precise();
     if(now.millisecond >= 250 && !tick_tock) {
-        beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
+        if(!sequencer->is_sequencing()) {
+            beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
+        }
         tick_tock = true;
     } else if (now.millisecond < 250 && tick_tock) {
         tick_tock = false;
     }
 }
 
+void _play_hourly_chime_if_enabled(bool first_chime) {
+    if(!prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON)) return;
+    int melody_no = first_chime ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
+    const melody_sequence_t * melody = melody_from_no(melody_no);
+    sequencer->play_sequence(melody, SEQUENCER_NO_REPEAT);
+}
+
 void hourly_chime() {
     tk_time_of_day now = get_current_time_coarse();
-    int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) ;
+    int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR);
     if(now.hour != last_chimed_hour) {
         last_chimed_hour = now.hour;
-        if(  hourly_chime_on
-          && now.hour >= first_hour
+        bool first_chime = (now.hour == first_hour);
+        if(  now.hour >= first_hour
           && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
         ) {
-            int melody_no = (now.hour == first_hour) ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
-            const melody_sequence_t * melody = melody_from_no(melody_no);
+#if !HAS(AQUESTALK)
+            _play_hourly_chime_if_enabled(first_chime);
+#else
+            if(!prefs_get_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR)) {
+                // Voice chime disabled, just play normal chime
+                _play_hourly_chime_if_enabled(first_chime);
+            } else {
+                // Voice chime enabled, speak hour then play chime
+                static char hourBuf[64] = { 0 };
+                if(now.minute == 0) {
+                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", now.hour);
+                } else {
+                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", now.hour, now.minute);
+                }
+                YukkuriUtterance hourUtterance = YukkuriUtterance(hourBuf, [first_chime](bool) {
+                    _play_hourly_chime_if_enabled(first_chime);
+                });
 
-            sequencer->play_sequence(melody, SEQUENCER_NO_REPEAT);
+                if(first_chime && prefs_get_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE)) {
+                    // Also need date
+                    static char dateBuf[64] = {0};
+                    tk_date_t today = get_current_date();
+                    snprintf(dateBuf, sizeof(dateBuf), "<NUMK VAL=%i COUNTER=gatsu>;<NUMK VAL=%i COUNTER=nichi>", today.month, today.day);
+                    yukkuri->speak(dateBuf);
+                }
+
+                yukkuri->speak(hourUtterance);
+            }
+#endif
         }
     }
 }
@@ -166,19 +209,19 @@ void weather_overlay_update() {
     }
 }
 
-void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
+void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
     if(did_prepare) return;
 
     did_prepare = true;
     beepola = b;
     sequencer = seq;
     sensors = s;
+    yukkuri = tts;
 
     tk_time_of_day now = get_current_time_coarse();
     last_chimed_hour = now.hour;
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
-    hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
 
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
     screen_times_ms[VIEW_NEXT_ALARM] = prefs_get_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS) * 1000;
@@ -189,6 +232,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     screen_times_ms[VIEW_REMOTE_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS) * 1000;
 #endif
     screen_times_ms[VIEW_OUTDOOR_WEATHER] = prefs_get_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS) * 1000;
+    screen_times_ms[VIEW_WEATHER_FORECAST] = prefs_get_int(PREFS_KEY_SCRN_TIME_FORECAST_SECONDS) * 1000;
+    screen_times_ms[VIEW_WEATHER_PRECIPITATION_CHART] = prefs_get_int(PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS) * 1000;
+    screen_times_ms[VIEW_WEATHER_PRESSURE_CHART] = prefs_get_int(PREFS_KEY_SCRN_TIME_PRESSURE_SECONDS) * 1000;
 #if HAS(WORDNIK_API)
     screen_times_ms[VIEW_WORD_OF_THE_DAY] = prefs_get_int(PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS) * 1000;
 #endif
@@ -212,6 +258,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     thunder = new ThunderOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
     signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
+    forecastView = new DailyForecastView();
+    precipitationView = new WeatherPrecipitationChart();
+    pressureView = new WeatherPressureChart();
     fb2kView = new Fb2kView();
     nextAlarmView = new NextAlarmView();
 
@@ -237,6 +286,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq) {
     slideShow->add_view(remoteWeatherView, VIEW_REMOTE_WEATHER);
 #endif
     slideShow->add_view(weatherView, VIEW_OUTDOOR_WEATHER);
+    slideShow->add_view(forecastView, VIEW_WEATHER_FORECAST);
+    slideShow->add_view(precipitationView, VIEW_WEATHER_PRECIPITATION_CHART);
+    slideShow->add_view(pressureView, VIEW_WEATHER_PRESSURE_CHART);
 #if HAS(WORDNIK_API)
     wotdView = new WordOfTheDayView();
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
@@ -335,7 +387,6 @@ void app_idle_process() {
     hourly_chime();
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
-    hourly_chime_on = prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON);
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     if(sensor_info_t * info = sensors->get_info(SENSOR_ID_BALANCE_BOARD_STARTLED)) {

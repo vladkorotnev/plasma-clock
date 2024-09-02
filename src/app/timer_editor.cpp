@@ -84,7 +84,7 @@ public:
         int left_offset = secondView->x_offset + secondView->width + xnu_font.width;
 
         if(isRunning) fb->rect(left_offset-1, 0, left_offset + 17, 15, true);
-        fb->put_glyph(&keyrus0816_font, 0x10, left_offset, 0, isRunning);
+        fb->put_glyph(&keyrus0816_font, 0x10, left_offset, 0, isRunning ? TEXT_INVERTED : TEXT_NORMAL);
         if(cursorPosition == CursorPosition::PLAY_PAUSE) cursor_offset = left_offset;
 
         if(isShowingCursor) {

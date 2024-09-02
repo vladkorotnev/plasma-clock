@@ -48,13 +48,23 @@ WordOfTheDayView::WordOfTheDayView() {
     strncpy(definition_buffer, "Transfer (a program or data) into memory, or into the central processor from storage.", 255);
 
     last_update = 0;
-    icon_state = ani_sprite_prepare(&book_icon);
+    
+    animation = new AniSpriteView(&book_icon);
+    animation->width = 16;
+    add_composable(animation);
+
+    top_line = new StringScroll(font);
+    top_line->x_offset = animation->width;
+    top_line->set_y_position(0);
+    top_line->set_string(word_buffer);
+    top_line->stopped = true;
+    add_composable(top_line);
 
     bottom_line = new StringScroll(font);
+    bottom_line->x_offset = animation->width;
     bottom_line->set_y_position(8);
     bottom_line->set_string(definition_buffer);
-
-    current_icon_frame = { 0 };
+    add_composable(bottom_line);
 
     ESP_LOGV(LOG_TAG, "Init");
 }
@@ -69,26 +79,11 @@ void WordOfTheDayView::prepare() {
         last_update = ts;
         wotd_get_current(word_buffer, 32, definition_buffer, 256);
         ESP_LOGI(LOG_TAG, "New word of the day");
+        top_line->set_string(word_buffer);
         bottom_line->set_string(definition_buffer);
     }
 
-    bottom_line->rewind();
-    icon_state = ani_sprite_prepare(&book_icon);
-}
-
-void WordOfTheDayView::step() {
-    current_icon_frame = ani_sprite_frame(&icon_state);
-    bottom_line->step();
-}
-
-void WordOfTheDayView::render(FantaManipulator *fb) {
-    if(current_icon_frame.data != nullptr)
-        fb->put_sprite(&current_icon_frame, 0, 0);
-    
-    FantaManipulator * text_window = fb->slice(17, fb->get_width() - 17);
-    text_window->put_string(font, word_buffer, 0, 0);
-    bottom_line->render(text_window);
-    delete text_window;
+    Screen::prepare();
 }
 
 int WordOfTheDayView::desired_display_time() {

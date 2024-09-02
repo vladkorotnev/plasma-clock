@@ -16,14 +16,24 @@ MenuActionItemView::MenuActionItemView(const char * title, std::function<void()>
     } else {
         sublabel = nullptr;
     }
+    if(icon != nullptr) {
+        iconView = new SpriteView(icon);
+        label->x_offset = 17;
+        if(sublabel != nullptr) sublabel->x_offset = 17;
+        add_composable(iconView);
+    } else {
+        iconView = nullptr;
+    }
     _action = action;
-    _icon = icon;
 }
 
 MenuActionItemView::~MenuActionItemView() {
     delete label;
     if(sublabel != nullptr) {
         delete sublabel;
+    }
+    if(iconView != nullptr) {
+        delete iconView;
     }
 }
 
@@ -37,16 +47,5 @@ void MenuActionItemView::step() {
 
     if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
         _action();
-    }
-}
-
-void MenuActionItemView::render(FantaManipulator *fb) {
-    if(_icon == nullptr) {
-        Composite::render(fb);
-    } else {
-        fb->put_sprite(_icon, 0, 0);
-        FantaManipulator *offset = fb->slice(_icon->width + 1, fb->get_width() - _icon->width - 1);
-        Composite::render(offset);
-        delete offset;
     }
 }

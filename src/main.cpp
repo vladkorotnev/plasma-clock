@@ -11,6 +11,7 @@
 #include <input/keypad.h>
 #include <input/hid_sensor.h>
 #include <sound/waveout.h>
+#include <sound/yukkuri.h>
 #include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -32,6 +33,8 @@
 #include <app/timer_editor.h>
 #include <app/stopwatch.h>
 #include <app/weighing.h>
+#include <app/weather.h>
+#include <app/playground.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -56,6 +59,7 @@ static SensorPool * sensors;
 static OTAFVUManager * ota;
 static Beeper * beepola;
 static NewSequencer * seq;
+static Yukkuri * yukkuri = nullptr;
 
 void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
@@ -92,6 +96,13 @@ void pop_state(device_state_t expected, transition_type_t transition) {
 void bringup_sound() {
     beepola = new Beeper();
     seq = new NewSequencer();
+
+#if HAS(AQUESTALK)
+    String license = prefs_get_string(PREFS_KEY_VOICE_LICENSE, AQUESTALK_LICENSE_KEY);
+    yukkuri = new Yukkuri(license.c_str());
+    WaveOut::set_output_callback(pisosWAVE_CHANNEL_YUKKURI, yukkuri->get_callback());
+#endif
+
     WaveOut::set_output_callback(pisosWAVE_CHANNEL_BEEPER, beepola->get_callback());
     WaveOut::set_output_callback(pisosWAVE_CHANNEL_SEQUENCER, seq->get_callback());
 }
@@ -265,14 +276,18 @@ void setup() {
     desktop->add_layer(appHost);
     desktop->add_layer(new FpsCounter(fb));
 
-    appHost->add_view(new AppShimIdle(sensors, beepola, seq), STATE_IDLE);
+    appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
     appHost->add_view(new AppShimMenu(beepola, seq), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
+    appHost->add_view(new AppShimWeather(), STATE_WEATHER);
 #if HAS(BALANCE_BOARD_INTEGRATION)
     appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
+#endif
+#if HAS(PLAYGROUND)
+    appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
 #endif
 
     change_state(startup_state);

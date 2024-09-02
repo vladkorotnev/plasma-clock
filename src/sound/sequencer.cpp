@@ -1,5 +1,6 @@
 #include <sound/sequencer.h>
 #include <os_config.h>
+#include <service/prefs.h>
 #include <algorithm>
 
 static char LOG_TAG[] = "MELODY";
@@ -103,19 +104,25 @@ NewSequencer::NewSequencer() {
     wait_end_group = xEventGroupCreate();
 
 #if HAS(SERIAL_MIDI)
-    xTaskCreate(
-        serMidiTask,
-        "MIDI",
-        2048,
-        this,
-        pisosTASK_PRIORITY_SERIAL_MIDI,
-        &hMidiTask
-    );
+    if(prefs_get_bool(PREFS_KEY_SERIAL_MIDI)) {
+        xTaskCreate(
+            serMidiTask,
+            "MIDI",
+            2048,
+            this,
+            pisosTASK_PRIORITY_SERIAL_MIDI,
+            &hMidiTask
+        );
+    }
 #endif
 }
 
 NewSequencer::~NewSequencer() {
     for(int i = 0; i < CHANNELS; i++) delete voices[i];
+}
+
+bool NewSequencer::is_sequencing() {
+    return is_running;
 }
 
 void NewSequencer::stop_sequence() {

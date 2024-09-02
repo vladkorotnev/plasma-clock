@@ -47,17 +47,32 @@ void timekeeping_begin() {
     tzset();
 }
 
-tk_time_of_day_t get_current_time_coarse() {
-    time_t now;
+tk_date_t unixtime_to_date(time_t unixtime) {
     struct tm timeinfo;
-    time(&now);
-    localtime_r(&now, &timeinfo);
+    localtime_r(&unixtime, &timeinfo);
+    return tk_date_t {
+        .year = timeinfo.tm_year + 1900,
+        .month = timeinfo.tm_mon + 1,
+        .day = timeinfo.tm_mday,
+        .dayOfWeek = timeinfo.tm_wday
+    };
+}
+
+tk_time_of_day_t unixtime_to_time(time_t unixtime) {
+    struct tm timeinfo;
+    localtime_r(&unixtime, &timeinfo);
     return tk_time_of_day_t {
         .hour = timeinfo.tm_hour,
         .minute = timeinfo.tm_min,
         .second = timeinfo.tm_sec,
         .millisecond = 0
     };
+}
+
+tk_time_of_day_t get_current_time_coarse() {
+    time_t now;
+    time(&now);
+    return unixtime_to_time(now);
 }
 tk_time_of_day_t get_current_time_precise() {
     tk_time_of_day_t time = get_current_time_coarse();
@@ -72,15 +87,8 @@ tk_time_of_day_t get_current_time_precise() {
 
 tk_date_t get_current_date() {
     time_t now;
-    struct tm timeinfo;
     time(&now);
-    localtime_r(&now, &timeinfo);
-    return tk_date_t {
-        .year = timeinfo.tm_year + 1900,
-        .month = timeinfo.tm_mon + 1,
-        .day = timeinfo.tm_mday,
-        .dayOfWeek = timeinfo.tm_wday
-    };
+    return unixtime_to_date(now);
 }
 
 void set_current_time(tk_time_of_day_t new_time) {

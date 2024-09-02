@@ -275,3 +275,24 @@ const ani_sprite_t mist_icon = {
     .data = mist_data,
     .format = SPRFMT_HORIZONTAL
 };
+
+const ani_sprite_t null_icon = { 0 };
+
+const ani_sprite_t * sprite_from_conditions(weather_condition_t conditions) {
+    switch(conditions) {
+        case THUNDERSTORM: return &thunderstorm_icon;
+        case DRIZZLE: return &drizzle_icon;
+        case RAIN: return &rain_icon;
+        case SNOW: return &snow_icon;
+        case MIST: return &mist_icon;
+        case CLEAR: return &sun_icon;
+        case CLOUDS: return &clouds_icon;
+        case SCATTERED_CLOUDS: return &clouds_icon;
+        case BROKEN_CLOUDS: return &broken_clouds_icon;
+        case OVERCAST: return &overcast_icon;
+
+        case UNKNOWN:
+        default:
+            return &null_icon;
+    }
+}

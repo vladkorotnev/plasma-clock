@@ -1,7 +1,7 @@
 #pragma once
 #include <sound/waveout.h>
 #include <sound/generators.h>
-#include <esp32-hal-gpio.h>
+
 typedef enum beeper_channels {
     /// @brief Channel for ambient sounds (clock ticking, etc)
     CHANNEL_AMBIANCE = 0,

@@ -1,4 +1,5 @@
 #pragma once
+#include <ctime>
 
 #define TK_TIMEZONE "JST-9"
 #define TK_TIMESERVER "pool.ntp.org"
@@ -36,6 +37,9 @@ void set_current_time(tk_time_of_day_t);
 void set_current_date(tk_date_t);
 /// @brief Returns the system uptime as human-readable components
 tk_time_of_day_t get_uptime();
+
+tk_date_t unixtime_to_date(time_t unixtime);
+tk_time_of_day_t unixtime_to_time(time_t unixtime);
 
 tk_time_of_day_t operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b);

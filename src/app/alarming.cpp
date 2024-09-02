@@ -46,8 +46,6 @@ static TickType_t startedAt;
 static TickType_t maxDur;
 
 void app_alarming_prepare(NewSequencer* s) {
-    // do this prior to changing state because apparently this may get called from a separate thread, so step() goes ahead of prepare() and thus exits the alarm right away?
-    // TODO: somehow stick the state switching to the UI thread!! and all that
     startedAt = xTaskGetTickCount();
     maxDur = pdMS_TO_TICKS( prefs_get_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES) * 60000 );
 
@@ -283,6 +281,7 @@ void app_alarming_process() {
                 return;
             } else if(xTaskGetTickCount() >= snoozeUntil) {
                 is_snoozing = false;
+                startedAt = xTaskGetTickCount();
                 state = BLINKERING;
                 seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
             }

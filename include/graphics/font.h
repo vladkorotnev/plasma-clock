@@ -19,7 +19,23 @@ typedef struct font_definition {
     const uint8_t* data;
 } font_definition_t;
 
+typedef uint8_t text_attributes_t;
+
+typedef enum text_style : text_attributes_t {
+    /// @brief Normal text (black background, white text)
+    TEXT_NORMAL = 0,
+    /// @brief Render only text without background
+    TEXT_NO_BACKGROUND = 1 << 0,
+    /// @brief Render white text with a black outline.
+    TEXT_OUTLINED = 1 << 1,
+    /// @brief Invert the color of the text (white background, black text)
+    TEXT_INVERTED = 1 << 2,
+    /// @brief Invert the color of the outline (white instead of black)
+    OUTLINE_INVERTED = 1 << 3,
+} text_style_t;
+
 /// @brief Fetch a sprite from a font based on it's character code
-extern sprite_t sprite_from_glyph(const font_definition_t*, char16_t glyph);
+/// @param masked Whether the character should have no background (masked by itself)
+extern sprite_t sprite_from_glyph(const font_definition_t*, char16_t glyph, bool masked);
 /// @brief Measure a string's width when drawn with a specified font 
-extern unsigned int measure_string_width(const font_definition_t*, const char*);
+extern unsigned int measure_string_width(const font_definition_t*, const char*, text_attributes_t attributes = TEXT_NORMAL);

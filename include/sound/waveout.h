@@ -13,7 +13,7 @@ public:
     static const int BAUD_RATE = 352800*2; // <- don't ask why this is 4 times larger, I don't know myself
     static const int NYQUIST = BAUD_RATE / 2; // <- we are not using this to connect a DAC but directly a speaker to the data bus, so the max possible frequency is achieved when outputting 01010101...
     static const size_t RENDER_CHUNK_SIZE = 512;
-    static const int CHANNEL_COUNT = 2;
+    static const int CHANNEL_COUNT = 3;
     
     static void init_I2S(gpio_num_t pin);
     static void set_output_callback(int channel, WaveGeneratorCallback callback);

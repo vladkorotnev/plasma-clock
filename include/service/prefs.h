@@ -52,6 +52,9 @@ static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS = "s_remote_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS = "s_outside_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FORECAST_SECONDS = "s_forecast_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS = "s_popcht_s";
+static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_PRESSURE_SECONDS = "s_press_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS = "s_wotd_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS = "s_foo_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS = "s_alm_s";
@@ -84,6 +87,12 @@ static constexpr prefs_key_t PREFS_KEY_TIMER_MELODY = "timer_melo";
 static constexpr prefs_key_t PREFS_KEY_BALANCE_BOARD_OFFSET = "bbrd_offs";
 
 static constexpr prefs_key_t PREFS_KEY_REMOTE_SERVER = "rc_svr";
+static constexpr prefs_key_t PREFS_KEY_SERIAL_MIDI = "serimid";
+
+static constexpr prefs_key_t PREFS_KEY_VOICE_LICENSE = "v_lic";
+static constexpr prefs_key_t PREFS_KEY_VOICE_SPEED = "v_spd";
+static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_HOUR = "v_hrs";
+static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_DATE = "v_date";
 
 void prefs_force_save();
 
