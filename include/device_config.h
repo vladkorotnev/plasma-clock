@@ -20,6 +20,9 @@
 // Enable Wii Balance Board measuring. UNSTABLE: Uses Bluedroid (a FUCKTON of RAM), periodic disconnects or reboots without leaving a stack trace.
 // #define HAS_BALANCE_BOARD_INTEGRATION
 
+// Enable the yukkuri voice talking clock
+#define HAS_AQUESTALK
+
 // ---- HARDWARE
 
 #ifdef ESP32
@@ -45,6 +48,12 @@
 #if !HAS(BLUETOOTH_CLASSIC)
     #if HAS(BALANCE_BOARD_INTEGRATION)
         #error Balance Board requires Bluetooth Classic
+    #endif
+#endif
+
+#if HAS(AQUESTALK)
+    #if !defined(LIBAQUESTALK_FOUND)
+        #error libaquestalk was not found. See `./lib/nonfree-aquestalk/README.md` on how to add it correctly, or disable `HAS_AQUESTALK` feature flag.
     #endif
 #endif
 

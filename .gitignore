@@ -3,3 +3,5 @@ captures/
 .env
 /src/weather_icons
 .vscode/
+/lib/nonfree-aquestalk/aquestalk.h
+/lib/nonfree-aquestalk/libaquestalk.a
