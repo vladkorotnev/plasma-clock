@@ -8,6 +8,7 @@ Yukkuri::Yukkuri(const char * license, uint16_t frame_length) {
         uint8_t mac[6];
         esp_efuse_mac_get_default(mac);
         ESP_LOGI(LOG_TAG, "MAC = %02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+        ESP_LOGI(LOG_TAG, "License: %s", license == nullptr ? "TRIAL" : license);
         uint8_t rslt = CAqTkPicoF_Init(workbuf, frame_length, license);
         if(rslt) {
             ESP_LOGE(LOG_TAG, "Init error (%i)", rslt);

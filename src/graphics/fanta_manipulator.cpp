@@ -197,6 +197,31 @@ void FantaManipulator::put_string(const font_definition_t * font, const char * s
     size_t i = 0;
     int cur_x = x;
     while(char ch = string[i]) {
+        // hacky way of mapping cyrillic from utf8 to cp866 since most of our fonts are from keyrus
+        if((ch & 0b11100000) == 0b11000000 && (string[i + 1] & 0b11000000) == 0b10000000) {
+            if(((ch >> 2) & 7) == 0x04) {
+                // U+04xx
+                ch = ((ch & 0b00000011) << 6) | (string[i + 1] & 0b00111111);
+                i++;
+                if(ch >= 0x10 && ch <= 0x3F) {
+                    ch += (0x80 - 0x10);
+                }
+                else if(ch >= 0x40 && ch <= 0x4F) {
+                    ch += (0xE0 - 0x40);
+                }
+                else if(ch == 0x01) {
+                    ch = 0xF0;
+                }
+                else if(ch == 0x51) {
+                    ch = 0xF1;
+                }
+                else {
+                    // wasn't cyrillic, so draw as is...
+                    i--;
+                    ch = string[i];
+                }
+            }
+        }
         put_glyph(font, ch, cur_x, y, style);
         cur_x += font->width;
         i++;
