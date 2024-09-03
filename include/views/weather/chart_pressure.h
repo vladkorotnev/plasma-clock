@@ -2,6 +2,7 @@
 #include "chart_common.h"
 #include <service/owm/weather.h>
 #include <service/time.h>
+#include <service/localize.h>
 
 class WeatherPressureChart: public WeatherChartCommon {
 public:
@@ -10,7 +11,7 @@ public:
         show_maximum = true;
         show_minimum = true;
         autoscale = true;
-        hint = hint_enabled ? "P, hPa" : nullptr;
+        hint = hint_enabled ? localized_string("P, hPa") : nullptr;
     }
 
     void prepare() override {

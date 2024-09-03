@@ -210,10 +210,10 @@ void FantaManipulator::put_string(const font_definition_t * font, const char * s
                     ch += (0xE0 - 0x40);
                 }
                 else if(ch == 0x01) {
-                    ch = 0xF0;
+                    ch = 0x85;// 0xF0;
                 }
                 else if(ch == 0x51) {
-                    ch = 0xF1;
+                    ch = 0xA5;// 0xF1;
                 }
                 else {
                     // wasn't cyrillic, so draw as is...

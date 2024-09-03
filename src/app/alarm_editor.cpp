@@ -1,15 +1,9 @@
 #include <app/alarm_editor.h>
 #include <views/menu/menu.h>
 #include <state.h>
-static const char day_letters[14] = {
-    'S', 0,
-    'M', 0,
-    'T', 0,
-    'W', 0,
-    'T', 0,
-    'F', 0,
-    'S', 0,
-};
+#include <service/localize.h>
+
+static const char * _day_letters = day_letters();
 
 class AlarmItemView: public Renderable {
 public:
@@ -36,10 +30,10 @@ public:
         fb->put_string(&keyrus0808_font, time_buf, 14, 0);
 
         if(setting.days == 0) {
-            fb->put_string(&keyrus0808_font, "Only Once", 14, 8);
+            fb->put_string(&keyrus0808_font, localized_string("Only Once"), 14, 8);
         } else {
             for(int d = 0; d < 7; d++) {
-                fb->put_string(&keyrus0808_font, &day_letters[d * 2], 14 + d * (keyrus0808_font.width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
+                fb->put_string(&keyrus0808_font, &_day_letters[d * 2], 14 + d * (keyrus0808_font.width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
             }
         }
     }
@@ -129,10 +123,10 @@ public:
                 if(isActive && d == cursor && cursorShows) {
                     fb->rect(ltr_x - 2, 7, ltr_x + 8, 15, lit_up);
                 }
-                fb->put_string(&keyrus0808_font, &day_letters[d * 2], ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
+                fb->put_string(&keyrus0808_font, &_day_letters[d * 2], ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
             }
         } else {
-            static const char one_time[] = "Only Once";
+            static const char * one_time = localized_string("Only Once");
             fb->put_string(&keyrus0808_font, one_time, fb->get_width() - measure_string_width(&keyrus0808_font, one_time), 8);
         }
     }
@@ -157,17 +151,17 @@ public:
             pushPop(false, ts_view);
         });
 
-        add_view(new MenuBooleanSelectorView("Enabled", alm->enabled, [alm](bool newEnabled) {
+        add_view(new MenuBooleanSelectorView(localized_string("Enabled"), alm->enabled, [alm](bool newEnabled) {
             alm->enabled = newEnabled;
         }));
 
-        add_view(new AlarmDaySelectorView("Days", alm, activation));
-        add_view(new MenuActionItemView("Time", [pushPop, this]() { pushPop(true, ts_view); }, nullptr, time_str));
+        add_view(new AlarmDaySelectorView(localized_string("Repeat on"), alm, activation));
+        add_view(new MenuActionItemView(localized_string("Time"), [pushPop, this]() { pushPop(true, ts_view); }, nullptr, time_str));
     #if HAS(MOTION_SENSOR) // CBA to inject SensorPool which would only be used to check for existence of the sensor
-        add_view(new MenuBooleanSelectorView("Smart Alarm", alm->smart, [alm](bool newSmart) { alm->smart = newSmart; }));
-        add_view(new MenuNumberSelectorView("Smart margin", 1, 30, 1, alm->smart_margin_minutes, activation, [alm](int newMargin) { alm->smart_margin_minutes = newMargin; }));
+        add_view(new MenuBooleanSelectorView(localized_string("Smart Alarm"), alm->smart, [alm](bool newSmart) { alm->smart = newSmart; }));
+        add_view(new MenuNumberSelectorView(localized_string("Smart margin"), 1, 30, 1, alm->smart_margin_minutes, activation, [alm](int newMargin) { alm->smart_margin_minutes = newMargin; }));
     #endif
-        add_view(new MenuMelodySelectorView(s, "Melody", alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
+        add_view(new MenuMelodySelectorView(s, localized_string("Melody"), alm->melody_no, activation, [alm](int newMelodyNo) { alm->melody_no = newMelodyNo; }));
     }
 
     ~AlarmEditorView() {
@@ -218,8 +212,8 @@ AppShimAlarmEditor::AppShimAlarmEditor(Beeper *b, NewSequencer *s): ProtoShimNav
     for(int i = 0; i < ALARM_LIST_SIZE; i++) {
         main_menu->add_view(new AlarmItemView(i, beginEditing));
     }
-    main_menu->add_view(new MenuNumberSelectorPreferenceView("Snooze time", PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30, 1, normalActivationFunction));
-    main_menu->add_view(new MenuNumberSelectorPreferenceView("Max beeping time, minutes", PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120, 1, normalActivationFunction));
+    main_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Snooze time"), PREFS_KEY_ALARM_SNOOZE_MINUTES, 0, 30, 1, normalActivationFunction));
+    main_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Max beeping time, minutes"), PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120, 1, normalActivationFunction));
 }
 
 void AppShimAlarmEditor::pop_renderable(transition_type_t transition) {

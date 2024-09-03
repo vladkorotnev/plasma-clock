@@ -8,6 +8,7 @@
 #include <service/owm/weather.h>
 #include <service/prefs.h>
 #include <service/power_management.h>
+#include <service/localize.h>
 #include <views/framework.h>
 #include <views/overlays/touch_arrows_ovl.h>
 #include <views/idle_screens/simple_clock.h>
@@ -111,7 +112,7 @@ void app_alarming_draw(FantaManipulator* fb) {
         case HINTING_SNOOZE:
             {
                 snooze_hold_remain = fb->get_width();
-                static const char snooze_str[] = "SNOOZE";
+                static const char * snooze_str = localized_string("SNOOZE");
                 fb->put_string(&keyrus0816_font, snooze_str, 12, 0);
                 arrows->render(fb);
                 if(framecount >= 180) {
@@ -128,7 +129,7 @@ void app_alarming_draw(FantaManipulator* fb) {
         case HINTING_STOP:
             {
                 snooze_hold_remain = fb->get_width();
-                static const char stop_str[] = "STOP";
+                static const char * stop_str = localized_string("STOP");
                 fb->put_string(&keyrus0816_font, stop_str, fb->get_width() - 12 - measure_string_width(&keyrus0816_font, stop_str), 0);
                 arrows->render(fb);
                 if(framecount >= 180) {
@@ -155,7 +156,7 @@ void app_alarming_draw(FantaManipulator* fb) {
 
         case SNOOZE_HOLD_COUNTDOWN:
             {
-                static const char hold_str[] = "HOLD";
+                static const char * hold_str = localized_string("HOLD");
                 fb->put_string(&keyrus0816_font, hold_str, 12, 0);
                 arrows->render(fb);
                 if(snooze_hold_remain > 0) snooze_hold_remain -= 1;
@@ -167,7 +168,7 @@ void app_alarming_draw(FantaManipulator* fb) {
 
         case STOP_HOLD_COUNTDOWN:
             {
-                static const char hold_str[] = "HOLD";
+                static const char * hold_str = localized_string("HOLD");
                 fb->put_string(&keyrus0816_font, hold_str, fb->get_width() - 12 - measure_string_width(&keyrus0816_font, hold_str), 0);
                 arrows->render(fb);
                 if(snooze_hold_remain > 0 && framecount % 2 == 0) snooze_hold_remain -= 1;

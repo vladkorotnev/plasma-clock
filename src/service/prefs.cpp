@@ -1,5 +1,6 @@
 #include "service/prefs.h"
 #include <Preferences.h>
+#include "nvs_flash.h"
 
 static char LOG_TAG[] = "PREF";
 static Preferences * store = nullptr;
@@ -9,7 +10,10 @@ inline void init_store_if_needed() {
     if(store == nullptr) {
         ESP_LOGI(LOG_TAG, "Initialize");
         store = new Preferences();
-        store->begin(STORE_DOMAIN);
+        nvs_flash_init(); // <- sometimes language settings are being checked before Arduino finished initializing, so we need to bring NVS up on our own
+        if(!store->begin(STORE_DOMAIN)) {
+            store = nullptr;
+        }
     }
 }
 

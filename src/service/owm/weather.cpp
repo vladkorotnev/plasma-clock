@@ -5,10 +5,11 @@
 #include <HTTPClient.h>
 #include <ArduinoJson.h>
 #include <os_config.h>
+#include <service/localize.h>
 
 static char LOG_TAG[] = "WEATHER";
 
-static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s&exclude=minutely,alerts";
+static const char * currentApi = "http://api.openweathermap.org/data/3.0/onecall?lat=%s&lon=%s&APPID=%s&exclude=minutely,alerts&lang=%s";
 static String apiKey;
 static TickType_t interval;
 static String latitude; 
@@ -49,7 +50,19 @@ void WeatherTaskFunction( void * pvParameter )
     EXT_RAM_ATTR static HTTPClient http;
 
     EXT_RAM_ATTR static char url[256];
-    snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str());
+
+    static const char * langcode;
+    switch(active_display_language()) {
+        case DSPL_LANG_RU:
+            langcode = "ru";
+            break;
+        case DSPL_LANG_EN:
+        default:
+            langcode = "en";
+            break;
+    }
+
+    snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str(), langcode);
 
     bool isFailure = false;
 
@@ -81,7 +94,7 @@ void WeatherTaskFunction( void * pvParameter )
                         String desc = response["current"]["weather"][0]["description"].as<String>();
                         strncpy(cache.description, desc.c_str(), sizeof(cache.description));
                         // Capitalize first letter
-                        if(cache.description[0] >= 'a') {
+                        if(cache.description[0] >= 'a' && cache.description[0] <= 'z') {
                             cache.description[0] -= ('a' - 'A');
                         }
                     }

@@ -94,6 +94,8 @@ static constexpr prefs_key_t PREFS_KEY_VOICE_SPEED = "v_spd";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_HOUR = "v_hrs";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_DATE = "v_date";
 
+static constexpr prefs_key_t PREFS_KEY_DISP_LANGUAGE = "d_lang";
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());

@@ -2,6 +2,7 @@
 #include <service/balance_board.h>
 #include <state.h>
 #include <service/prefs.h>
+#include <service/localize.h>
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
 
@@ -62,8 +63,8 @@ AppShimWeighing::AppShimWeighing(SensorPool* s) {
     sensors = s;
     lastActivity = xTaskGetTickCount();
 
-    carousel->add_view(new MenuInfoItemView("Disconnected", "\x1A to connect"), NEED_CONNECT);
-    carousel->add_view(new MenuInfoItemView("Scanning...", "Press the SYNC button on the Balance Board now"), WAIT_CONNECT);
+    carousel->add_view(new MenuInfoItemView(localized_string("BB_DSCNCT"), localized_string("BB_CNCT_GUIDE")), NEED_CONNECT);
+    carousel->add_view(new MenuInfoItemView(localized_string("BB_SCN"), localized_string("BB_SYNC_NOW")), WAIT_CONNECT);
     carousel->add_view(new WeighingView(s), WEIGHING);
 
     add_subrenderable(carousel);

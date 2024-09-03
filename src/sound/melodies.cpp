@@ -12874,8 +12874,8 @@ const char * all_chime_names_csv = "Just Beep,PC-98 Boot,Русь 28,Штрих-
 const std::vector<const char *> all_chime_names = {
     "Beep",
     "PC-98 Boot",
-    "\x90\xE3\xE1\xEC 28",
-    "\x98\xE2\xE0\xA8\xE5-M",
+    "Русь 28",
+    "Штрих-M",
     "A.M. - Arise",
     "Caramelldansen",
     "BoA - Duvet",

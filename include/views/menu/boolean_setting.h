@@ -3,6 +3,7 @@
 #include <input/keys.h>
 #include <service/prefs.h>
 #include <fonts.h>
+#include <service/localize.h>
 
 class MenuBooleanSelectorView: public Renderable {
 public:
@@ -18,8 +19,8 @@ public:
 protected:
     bool _currentValue;
 private:
-    const char * on_str = "Yes";
-    const char * off_str = "No";
+    const char * on_str = localized_string("Yes");
+    const char * off_str = localized_string("No");
     key_id_t _button;
     StringScroll * label;
     std::function<void(bool)> _onChange;

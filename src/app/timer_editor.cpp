@@ -2,8 +2,8 @@
 #include <state.h>
 #include <views/menu/time_setting.h>
 #include <service/prefs.h>
+#include <service/localize.h>
 #include <input/keys.h>
-
 
 class AppShimTimerEditor::TimerEditorMainScreen: public Composite {
 public:
@@ -34,7 +34,7 @@ public:
         sequencer = s;
         activation = _activation;
         if(beeper != nullptr) {
-            melodySelector = new MenuMelodySelectorPreferenceView(sequencer, "Timer Melody", PREFS_KEY_TIMER_MELODY, [_activation](bool isActive, Renderable * that) {
+            melodySelector = new MenuMelodySelectorPreferenceView(sequencer, localized_string("Melody"), PREFS_KEY_TIMER_MELODY, [_activation](bool isActive, Renderable * that) {
                 if(!isActive) {
                     _activation(false, that);
                 }
