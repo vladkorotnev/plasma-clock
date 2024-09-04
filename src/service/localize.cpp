@@ -193,7 +193,15 @@ const char * localized_string(const std::string key, display_language_t l) {
     }
 }
 
-const std::string _tts_number_in_language(int number, spoken_language_t lang, bool isOrdinal) {
+
+typedef enum tts_number_kind {
+    TTSNUM_NOMINATIVE, // default
+    TTSNUM_NOMINATIVE_M, // один, два, три...
+    TTSNUM_NOMINATIVE_F, // одна, две, три...
+    TTSNUM_ORDINAL // первое, второе, третье...
+} tts_number_kind_t;
+
+const std::string _tts_number_in_language(int number, spoken_language_t lang, tts_number_kind_t kind) {
     if(number > 999) return "";
 
     const std::string * minus;
@@ -266,7 +274,7 @@ const std::string _tts_number_in_language(int number, spoken_language_t lang, bo
                     "na'innti", // 90
                     "ha'nndure_tu" // 100
                 };
-                numbers = isOrdinal ? en_ordinals : en_numbers;
+                numbers = (kind == TTSNUM_ORDINAL) ? en_ordinals : en_numbers;
             }
             break;
 
@@ -274,10 +282,41 @@ const std::string _tts_number_in_language(int number, spoken_language_t lang, bo
             {
                 static const std::string ru_minus = "mi'nu_su/";
                 minus = &ru_minus;
-                static const std::string ru_numbers[] = {
+                static const std::string ru_numbers_m[] = {
                     "no'ri",
                     "oji'nn",
                     "dua'",
+                    "turi'",
+                    "cheti'ri",
+                    "pya'_tu",
+                    "she'_si_ti",
+                    "she'nn",
+                    "wo'shenn",
+                    "zye'bya_ti",
+                    "zye'sya_ti",
+                    "oji'nnaza_ti",
+                    "duena'za_ti",
+                    "turina'za_ti",
+                    "cheti'runaza_ti",
+                    "pya_tuna'za_ti",
+                    "she_suna'za_ti",
+                    "syemuna'za_ti",
+                    "vosyemuna'za_ti",
+                    "zyebyatuna'za_ti",
+                    "dua'za_ti",
+                    "turi'sa_ti", // 30
+                    "so'ra_ku", // 40
+                    "pi_tujyesia'_tu", // 50,
+                    "si'_sujyesia'_tu", // 60
+                    "sye'nnjyesia_ti", // 70
+                    "vo'syennjyese_ti", // 80
+                    "jyebyano'_suta", // 90
+                    "_suto'" // 100
+                };
+                static const std::string ru_numbers_f[] = {
+                    "no'ri",
+                    "o_tuna'",
+                    "duye'",
                     "turi'",
                     "cheti'ri",
                     "pya'_tu",
@@ -336,7 +375,19 @@ const std::string _tts_number_in_language(int number, spoken_language_t lang, bo
                     "jyebyano'_suta", // 90
                     "_suto'" // 100
                 };
-                numbers = isOrdinal ? ru_ordinals : ru_numbers;
+                switch(kind) {
+                    case TTSNUM_NOMINATIVE_F:
+                        numbers = ru_numbers_f;
+                        break;
+                    case TTSNUM_ORDINAL:
+                        numbers = ru_ordinals;
+                        break;
+                    case TTSNUM_NOMINATIVE:
+                    case TTSNUM_NOMINATIVE_M:
+                    default:
+                        numbers = ru_numbers_m;
+                        break;
+                }
             }
             break;
 
@@ -363,7 +414,7 @@ const std::string _tts_number_in_language(int number, spoken_language_t lang, bo
                 acc += "e'nn_tu/"; // "and"
             }
             acc += numbers[teens];
-            if(teens == 20 && isOrdinal) {
+            if(teens == 20 && kind == TTSNUM_ORDINAL) {
                 // twentieTH / двадцаТОЕ
                 acc += (lang == TTS_LANG_EN ? "_tu" : "toie");
             }
@@ -374,7 +425,7 @@ const std::string _tts_number_in_language(int number, spoken_language_t lang, bo
         int ones = number % 10;
         acc += numbers[(decades - 2) + 20];
         if(ones > 0) {
-            if(isOrdinal && lang == TTS_LANG_RU) {
+            if(kind == TTSNUM_ORDINAL && lang == TTS_LANG_RU) {
                 if(decades == 2 || decades == 3 || decades == 7 || decades == 8) {
                     // двадцаТЬ нное, тридцаТЬ нное, семьдесять нное, восемьдесять нное
                     acc += "_ti";
@@ -390,7 +441,7 @@ const std::string _tts_number_in_language(int number, spoken_language_t lang, bo
             }
             acc += '/';
             acc += numbers[ones];
-        } else if (isOrdinal) {
+        } else if (kind == TTSNUM_ORDINAL) {
             if(lang == TTS_LANG_RU) {
                 if(decades == 2 || decades == 3 || decades == 7 || decades == 8 || decades == 5 || decades == 6) {
                     // двадцаТое, тридцаТое, семьдесятое, восемьдесятое, пятьдесятое, шестьдесятое
@@ -496,21 +547,33 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
 
         case TTS_LANG_RU:
             {
-                std::string acc = _tts_number_in_language(time.hour, TTS_LANG_RU, false);
+                std::string acc = _tts_number_in_language(time.hour, TTS_LANG_RU, TTSNUM_NOMINATIVE_M);
+                int hr_ones = time.hour % 10;
+                if(hr_ones == 0 || hr_ones >= 5 || ((time.hour / 10) % 10) == 1) {
+                    acc += "/chiso'_fu";
+                }
+                else if(hr_ones == 1) {
+                    acc += "/cha'_su";
+                }
+                else if(hr_ones >= 2) {
+                    acc += "/chisa'";
+                }
+                
                 if(time.minute == 0) {
-                    if(time.hour == 0 || time.hour >= 5) {
-                        acc += "/chiso'_fu";
-                    }
-                    else if(time.hour == 1) {
-                        acc += "/cha'_su";
-                    }
-                    else if(time.hour >= 2) {
-                        acc += "/chisa'";
-                    }
                     acc += "/ro'funo,";
                 } else {
                     acc += ',';
-                    acc += _tts_number_in_language(time.minute, TTS_LANG_RU, false);
+                    acc += _tts_number_in_language(time.minute, TTS_LANG_RU, TTSNUM_NOMINATIVE_F);
+                    int min_ones = time.minute % 10;
+                    if(min_ones >= 5 || min_ones == 0 || ((time.minute / 10) % 10) == 1) {
+                        acc += "/minu'_tu";
+                    }
+                    else if(min_ones == 1) {
+                        acc += "/minu'ta";
+                    }
+                    else if(min_ones >= 2) {
+                        acc += "/minu'ti";
+                    }
                     acc += '.';
                 }
                 strncpy(hourBuf, acc.c_str(), sizeof(hourBuf));
@@ -519,12 +582,12 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
 
         case TTS_LANG_EN:
             {
-                std::string acc = _tts_number_in_language(time.hour, TTS_LANG_EN, false);
+                std::string acc = _tts_number_in_language(time.hour, TTS_LANG_EN, TTSNUM_NOMINATIVE);
                 if(time.minute == 0) {
                     acc += "/o/_kura'_ku,";
                 } else {
                     acc += ',';
-                    acc += _tts_number_in_language(time.minute, TTS_LANG_EN, false);
+                    acc += _tts_number_in_language(time.minute, TTS_LANG_EN, TTSNUM_NOMINATIVE);
                     acc += '.';
                 }
                 strncpy(hourBuf, acc.c_str(), sizeof(hourBuf));
@@ -548,7 +611,7 @@ YukkuriUtterance localized_utterance_for_date(const tk_date_t * date, spoken_lan
             {
                 std::string acc = _tts_days_ru[date->dayOfWeek];
                 acc += ',';
-                acc += _tts_number_in_language(date->day, TTS_LANG_RU, true);
+                acc += _tts_number_in_language(date->day, TTS_LANG_RU, TTSNUM_ORDINAL);
                 acc += ';';
                 acc += _tts_months_ru[date->month - 1];
                 acc += ',';
@@ -562,7 +625,7 @@ YukkuriUtterance localized_utterance_for_date(const tk_date_t * date, spoken_lan
                 acc += ',';
                 acc += _tts_months_en[date->month - 1];
                 acc += ';';
-                acc += _tts_number_in_language(date->day, TTS_LANG_EN, true);
+                acc += _tts_number_in_language(date->day, TTS_LANG_EN, TTSNUM_ORDINAL);
                 acc += ',';
                 strncpy(dateBuf, acc.c_str(), sizeof(dateBuf));
             }

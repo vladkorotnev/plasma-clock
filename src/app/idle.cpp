@@ -103,7 +103,7 @@ static int last_chimed_hour = 0;
 void sound_tick_tock() {
     tk_time_of_day_t now = get_current_time_precise();
     if(now.millisecond >= 250 && !tick_tock) {
-        if(!sequencer->is_sequencing()) {
+        if(!sequencer->is_sequencing() && (yukkuri == nullptr || !yukkuri->is_speaking())) {
             beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
         }
         tick_tock = true;
