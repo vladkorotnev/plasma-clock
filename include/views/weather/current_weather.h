@@ -16,7 +16,7 @@ private:
     const font_definition_t * small_font;
     StringScroll * bottom_line = nullptr;
     StringScroll * top_line = nullptr;
-    char bottom_text[128] = { 0 };
+    char bottom_text[192] = { 0 };
     char top_text[32] = { 0 };
     current_weather_t weather = { 0 };
     AniSpriteView * animation = nullptr;

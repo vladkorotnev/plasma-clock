@@ -33,7 +33,7 @@ typedef struct current_weather {
     int humidity_percent;
     weather_condition_t conditions;
     TickType_t last_updated;
-    char description[96];
+    char description[64];
 } current_weather_t;
 
 typedef struct forecast_weather {
