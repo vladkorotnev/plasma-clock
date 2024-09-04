@@ -251,6 +251,7 @@ static void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
+        render_bool("24-hour display:", PREFS_KEY_DISP_24_HRS);
         render_bool("Blink separators:", PREFS_KEY_BLINK_SEPARATORS);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
@@ -282,6 +283,9 @@ static void build() {
     GP.BREAK();
 
     GP.SPOILER_BEGIN("Display", GP_BLUE);
+        GP.LABEL("Display language (not in WebUI):");
+        GP.SELECT(PREFS_KEY_DISP_LANGUAGE, "English,Русский", prefs_get_int(PREFS_KEY_DISP_LANGUAGE));
+        GP.HR();
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
         GP.BREAK();
         render_int("Show next alarm countdown for [s]:", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS);
@@ -313,12 +317,17 @@ static void build() {
         GP.HR();
         GP.LABEL("Scroll speed:");
         GP.SELECT(PREFS_KEY_DISP_SCROLL_SPEED, "Slow,Medium,Fast,Sonic", prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED));
+        GP.HR();
+        render_bool("Use Fahrenheit:", PREFS_KEY_WEATHER_USE_FAHRENHEIT);
     GP.SPOILER_END();
     GP.BREAK();
 
 #if HAS(AQUESTALK)
     GP.SPOILER_BEGIN("Voice", GP_BLUE);
         render_string("License key:", PREFS_KEY_VOICE_LICENSE, true);
+        GP.HR();
+        GP.LABEL("Talking clock language:");
+        GP.SELECT(PREFS_KEY_TTS_LANGUAGE, "English,Русский,日本語", prefs_get_int(PREFS_KEY_TTS_LANGUAGE));
         GP.HR();
         render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
         render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
@@ -329,7 +338,7 @@ static void build() {
 
 #if HAS(TEMP_SENSOR)
     GP.SPOILER_BEGIN("Calibration", GP_BLUE);
-        render_int("Temperature offset:", PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET);
+        render_int("Temperature offset, Celsius:", PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET);
         GP.BREAK();
         render_int("Humidity offset:", PREFS_KEY_TEMP_SENSOR_HUM_OFFSET);
     GP.SPOILER_END();
@@ -452,7 +461,7 @@ static void build() {
         if(weather_get_current(&weather)) {
             GP.HR();
             GP.LABEL("Current weather:");
-            GP.LABEL(String(kelvin_to(weather.temperature_kelvin, CELSIUS)) + " C");
+            GP.LABEL(String(convert_temperature(KELVIN, weather.temperature_kelvin)) + " " + (char) preferred_temperature_unit());
             GP.LABEL(String(weather.humidity_percent) + " %");
             GP.LABEL(String(weather.pressure_hpa) + "hPa");
         }
@@ -525,6 +534,7 @@ void action() {
         save_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 0, 120);
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
+        save_bool(PREFS_KEY_DISP_24_HRS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);
         save_bool(PREFS_KEY_TICKING_SOUND);
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
@@ -548,6 +558,7 @@ void action() {
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
+        save_bool(PREFS_KEY_WEATHER_USE_FAHRENHEIT);
         save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
@@ -574,6 +585,8 @@ void action() {
         save_int(PREFS_KEY_VOICE_SPEED, 1, 200);
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR);
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE);
+        save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
+        save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;

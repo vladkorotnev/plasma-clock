@@ -31,6 +31,7 @@ static constexpr prefs_key_t PREFS_KEY_WEATHER_LON = "w_lon";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_OVERLAY = "w_ovl";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_APIKEY = "w_apikey";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_INTERVAL_MINUTES = "w_interval_m";
+static constexpr prefs_key_t PREFS_KEY_WEATHER_USE_FAHRENHEIT = "w_fahr";
 
 static constexpr prefs_key_t PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET = "t_calib";
 static constexpr prefs_key_t PREFS_KEY_TEMP_SENSOR_HUM_OFFSET = "h_calib";
@@ -47,6 +48,7 @@ typedef enum prefs_scroll_speed {
     SCROLL_SPEED_SONIC
 } prefs_scroll_speed_t;
 static constexpr prefs_key_t PREFS_KEY_DISP_SCROLL_SPEED = "s_scrl_spd";
+static constexpr prefs_key_t PREFS_KEY_DISP_24_HRS = "s_24h";
 
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";
@@ -95,6 +97,7 @@ static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_HOUR = "v_hrs";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_DATE = "v_date";
 
 static constexpr prefs_key_t PREFS_KEY_DISP_LANGUAGE = "d_lang";
+static constexpr prefs_key_t PREFS_KEY_TTS_LANGUAGE = "tts_lang";
 
 void prefs_force_save();
 

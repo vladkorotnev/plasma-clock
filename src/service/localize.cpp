@@ -7,6 +7,10 @@ display_language_t active_display_language() {
     return (display_language_t) prefs_get_int(PREFS_KEY_DISP_LANGUAGE);
 }
 
+spoken_language_t active_tts_language() {
+    return (spoken_language_t) prefs_get_int(PREFS_KEY_TTS_LANGUAGE);
+}
+
 const char * day_letters() {
     static const char en_letters[14] = {
         'S', 0,
@@ -41,7 +45,10 @@ const char * day_letters() {
 static const std::map<const std::string, const char*> english = {
     {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
 
-    {"WEATHER_FMT", "%s. Feels like %.01f\370C. Wind %.01f m/s. Pressure %i hPa."},
+    {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
+
+    {"Yes", "Yes"},
+    {"No", "No"},
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
@@ -74,6 +81,7 @@ static const std::map<const std::string, const char*> russian = {
 
     {"Uptime", "Время работы"},
 
+    {"24-hour display", "24-часовой формат"},
     {"Blink dots", "Мигающие точки"},
     {"Tick sound", "Тикание часов"},
     {"Ticking only when screen on", "Тикание только при включённом экране"},
@@ -85,6 +93,12 @@ static const std::map<const std::string, const char*> russian = {
     {"Speak hour", "Проговаривать время"},
     {"Speak date on first chime", "Проговаривать дату в первый час"},
     {"Voice speed", "Скорость голоса"},
+
+    {"Voice language", "Язык голоса"},
+    {"English", "Английский"},
+    {"Russian", "Русский"},
+    {"Japanese", "Японский"},
+
     {"Set time", "Настроить время"},
     {"Set date", "Настроить дату"},
     {"Use internet time", "Синхронизация времени с интернетом"},
@@ -114,6 +128,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Fast", "Быстро"},
     {"Sonic", "Совсем быстро"},
 
+    {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
     {"FPS counter", "Счётчик кадров в секунду"},
     {"Weather effects", "Эффекты погоды"},
 
@@ -122,7 +137,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Display power on", "При включении экрана"},
     {"Always", "Всегда"},
 
-    {"Temperature", "Температура"},
+    {"Temperature (\370C)", "Температура (\370C)"},
     {"Humidity", "Влажность"},
 
     {"OS Type", "Операционная система"},
@@ -132,7 +147,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Remote Control Server", "Удалённый доступ"},
     {"Serial MIDI Input", "Эмуляция синтезатора"},
 
-    {"WEATHER_FMT", "%s. Ощущается как %.01f\370C. Ветер %.01f м/с. Давление %i гПа."},
+    {"WEATHER_FMT", "%s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
     {"Loading...", "Загрузка..."},
     {"PoP, %", "Осадки, %"},
     {"P, hPa", "Давл., гПа"},
@@ -160,9 +175,9 @@ static const std::map<const std::string, const char*> russian = {
 #endif
 };
 
-const char * localized_string(const std::string key) {
+const char * localized_string(const std::string key, display_language_t l) {
     const std::map<const std::string, const char*> * lang = nullptr;
-    switch(active_display_language()) {
+    switch(l) {
         case DSPL_LANG_EN:
             lang = &english;
             break;
@@ -176,4 +191,388 @@ const char * localized_string(const std::string key) {
     } else {
         return key.c_str();
     }
+}
+
+const std::string _tts_number_in_language(int number, spoken_language_t lang, bool isOrdinal) {
+    if(number > 999) return "";
+
+    const std::string * minus;
+    const std::string * numbers;
+
+    switch(lang) {
+        case TTS_LANG_EN:
+            {
+                static const std::string en_minus = "ma'ina_su/";
+                minus = &en_minus;
+                static const std::string en_numbers[] = {
+                    "ziro",
+                    "wan",
+                    "tuu",
+                    "suri'-",
+                    "fo-",
+                    "fai_fu",
+                    "si_ku_su",
+                    "se'vunn",
+                    "ei_tu",
+                    "na'inn",
+                    "te'nn",
+                    "ire'vunn",
+                    "tue'ru_fu",
+                    "_fioruti'-n",
+                    "foruti'-n",
+                    "fi_futi'-n",
+                    "si_ku_suti'-n",
+                    "se'vunnti'-n",
+                    "eiti'-n",
+                    "na'inti'-n",
+                    "tue'nnti", // 20
+                    "sho'-ti", // 30
+                    "fo'-ti", // 40
+                    "fi'_futi", // 50,
+                    "si'_ku_suti", // 60
+                    "se'vunnti", // 70
+                    "e'iti", // 80
+                    "na'innti", // 90
+                    "ha'nndure_tu" // 100
+                };
+                static const std::string en_ordinals[] = {
+                    "ziro",
+                    "fyo'-_su_tu",
+                    "se'kann_tu",
+                    "sho'-_tu",
+                    "fo-_tu",
+                    "fi'_fu_tu",
+                    "si'_ku_su_tu",
+                    "se'vunn_tu",
+                    "ei_tu",
+                    "na'inn_tu",
+                    "te'nn_tu",
+                    "ire'vunn_tu",
+                    "tue'ru_fu_tu",
+                    "_fioruti'-n_tu",
+                    "foruti'-n_tu",
+                    "fi_futi'-n_tu",
+                    "si_ku_suti'-n_tu",
+                    "se'vunnti'-n_tu",
+                    "eiti'-n_tu",
+                    "na'inti'-n_tu",
+                    "tue'nnti", // 20
+                    "_sio'-ti", // 30
+                    "fo'-ti", // 40
+                    "fi'_futi", // 50,
+                    "si'_ku_suti", // 60
+                    "se'vunnti", // 70
+                    "e'iti", // 80
+                    "na'innti", // 90
+                    "ha'nndure_tu" // 100
+                };
+                numbers = isOrdinal ? en_ordinals : en_numbers;
+            }
+            break;
+
+        case TTS_LANG_RU:
+            {
+                static const std::string ru_minus = "mi'nu_su/";
+                minus = &ru_minus;
+                static const std::string ru_numbers[] = {
+                    "no'ri",
+                    "oji'nn",
+                    "dua'",
+                    "turi'",
+                    "cheti'ri",
+                    "pya'_tu",
+                    "she'_si_ti",
+                    "she'nn",
+                    "wo'shenn",
+                    "zye'bya_ti",
+                    "zye'sya_ti",
+                    "oji'nnaza_ti",
+                    "duena'za_ti",
+                    "turina'za_ti",
+                    "cheti'runaza_ti",
+                    "pya_tuna'za_ti",
+                    "she_suna'za_ti",
+                    "syemuna'za_ti",
+                    "vosyemuna'za_ti",
+                    "zyebyatuna'za_ti",
+                    "dua'za_ti",
+                    "turi'sa_ti", // 30
+                    "so'ra_ku", // 40
+                    "pi_tujyesia'_tu", // 50,
+                    "si'_sujyesia'_tu", // 60
+                    "sye'nnjyesia_ti", // 70
+                    "vo'syennjyese_ti", // 80
+                    "jyebyano'_suta", // 90
+                    "_suto'" // 100
+                };
+                static const std::string ru_ordinals[] = {
+                    "nurivo'ie",
+                    "pye'ruvoie",
+                    "_futoro'ie",
+                    "_turye'tie",
+                    "chi_tubyo'rutoie",
+                    "pya'toie",
+                    "she_suto'ie",
+                    "shejimo'ie",
+                    "wo_shimo'ie",
+                    "zyebya'toie",
+                    "zyesya'toie",
+                    "oji'nnazatoie",
+                    "duena'zatoie",
+                    "turina'zatoie",
+                    "cheti'runazatoie",
+                    "pya_tuna'zatoie",
+                    "she_suna'zatoie",
+                    "syemuna'zatoie",
+                    "vosyemuna'zatoie",
+                    "zyebyatuna'zatoie",
+                    "dua'za", // 20
+                    "turi'sa", // 30
+                    "so'ra", // 40
+                    "pi_tujyesia'", // 50,
+                    "si'_sujyesia'", // 60
+                    "sye'nnjyesia", // 70
+                    "vo'syennjyese", // 80
+                    "jyebyano'_suta", // 90
+                    "_suto'" // 100
+                };
+                numbers = isOrdinal ? ru_ordinals : ru_numbers;
+            }
+            break;
+
+        default:
+        case TTS_LANG_JA:
+            return "";
+    }
+    
+    std::string acc = "";
+    if(number < 0) {
+        acc += *minus;
+        number = -1*number;
+    }
+    int hundreds = (number / 100) % 10;
+    if(hundreds > 1) {
+        acc += numbers[hundreds] + '/' + numbers[28] /* "hundred" */;
+    }
+    int teens = (number % 100);
+    if(teens <= 20) { // cases 0..20
+        // disallow e.g. "one hundred zero"
+        if((hundreds == 0 && teens == 0) || teens > 0) {
+            if(acc.length() > 0) acc += '/';
+            if(hundreds > 0 && lang == TTS_LANG_EN) {
+                acc += "e'nn_tu/"; // "and"
+            }
+            acc += numbers[teens];
+            if(teens == 20 && isOrdinal) {
+                // twentieTH / двадцаТОЕ
+                acc += (lang == TTS_LANG_EN ? "_tu" : "toie");
+            }
+        } 
+    } else { // cases 21..
+        if(acc.length() > 0) acc += '/';
+        int decades = (number / 10) % 10;
+        int ones = number % 10;
+        acc += numbers[(decades - 2) + 20];
+        if(ones > 0) {
+            if(isOrdinal && lang == TTS_LANG_RU) {
+                if(decades == 2 || decades == 3 || decades == 7 || decades == 8) {
+                    // двадцаТЬ нное, тридцаТЬ нное, семьдесять нное, восемьдесять нное
+                    acc += "_ti";
+                }
+                else if (decades == 4) {
+                    // сороК нное
+                    acc += "_ku";
+                }
+                else if (decades == 5 || decades == 6) {
+                    // пятьдесяТ шестьдесяТ нное
+                    acc += "_tu";
+                }
+            }
+            acc += '/';
+            acc += numbers[ones];
+        } else if (isOrdinal) {
+            if(lang == TTS_LANG_RU) {
+                if(decades == 2 || decades == 3 || decades == 7 || decades == 8 || decades == 5 || decades == 6) {
+                    // двадцаТое, тридцаТое, семьдесятое, восемьдесятое, пятьдесятое, шестьдесятое
+                    acc += "toie";
+                }
+                else if (decades == 4) {
+                    // сороКОВОЕ
+                    acc += "kobo'ie";
+                }
+                else if (decades == 9) {
+                    // девяностоЕ
+                    acc += "ie";
+                }
+            } else {
+                // thirtieTH, fortieTH...
+                acc += "_tu";
+            }
+        }
+    }
+    return acc;
+}
+
+
+static const char * _tts_days_en[] = {
+    "sa'nndei", // Sun
+    "ma'nndei", // Mon
+    "chu'_sudei", // Tue
+    "ue'nn_sudei", // Wed
+    "syo'ru_sudei", // Thu
+    "_fura'idei", // Fri
+    "se'chudei", // Sat
+};
+static const char * _tts_days_ru[] = {
+    "bo_sukurise'nye", // Sun
+    "ponyeje'rini_ku", // Mon
+    "futo'runi_ku", // Tue
+    "_surida'", // Wed
+    "che_tuve'ru_ku", // Thu
+    "pya'_tunitsa", // Fri
+    "subbo'ta", // Sat
+};
+static const char * _tts_days_ja[] = {
+    "nitiyo-bi", // Sun
+    "getuyo-bi", // Mon
+    "kayo-bi", // Tue
+    "suiyo-bi", // Wed
+    "mokuyo-bi", // Thu
+    "kinyo-bi", // Fri
+    "doyo-bi", // Sat
+};
+
+static const char * _tts_months_en[] =  {
+    "ja'nyuari", // Jan
+    "fe'brueri", // Feb
+    "ma'_ti", // Mar
+    "e'_puriru", // Apr
+    "me'i", // May
+    "junn", // Jun
+    "jurai", // Jul
+    "o'-ga_su_tu", // Aug
+    "se_putenba", // Sep
+    "o_kuto'ba", // Oct
+    "nove'nnba", // Nov
+    "dise'nnba", // Dec
+};
+static const char * _tts_months_ru[] =  {
+    "yannbarya'", // Jan
+    "fevurarya'", // Feb
+    "ma'ruta", // Mar
+    "a_purye'rya", // Apr
+    "ma'ya", // May
+    "iyu'nya", // Jun
+    "iyu'rya", // Jul
+    "a'_fugu_suta", // Aug
+    "syennchaburya'", // Sep
+    "o_kutyaburya'", // Oct
+    "nayeburya'", // Nov
+    "jikaburya'", // Dec
+};
+
+
+
+YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_language_t lang) {
+    tk_time_of_day_t time = _time; // local copy for 12h conversion
+    
+    // NB: This will be returning a static utterance. 
+    // Assuming this is called roughly once an hour it's fine.
+    // Otherwise need to change logic to allocate dynamically and release appropriately which is a PITA!
+    static char hourBuf[128] = { 0 };
+    
+    if(!prefs_get_bool(PREFS_KEY_DISP_24_HRS)) {
+        convert_to_12h(&time);
+    }
+
+    switch(lang) {
+        case TTS_LANG_JA:
+            if(time.minute == 0) {
+                snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", time.hour);
+            } else {
+                snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", time.hour, time.minute);
+            }
+        break;
+
+        case TTS_LANG_RU:
+            {
+                std::string acc = _tts_number_in_language(time.hour, TTS_LANG_RU, false);
+                if(time.minute == 0) {
+                    if(time.hour == 0 || time.hour >= 5) {
+                        acc += "/chiso'_fu";
+                    }
+                    else if(time.hour == 1) {
+                        acc += "/cha'_su";
+                    }
+                    else if(time.hour >= 2) {
+                        acc += "/chisa'";
+                    }
+                    acc += "/ro'funo,";
+                } else {
+                    acc += ',';
+                    acc += _tts_number_in_language(time.minute, TTS_LANG_RU, false);
+                    acc += '.';
+                }
+                strncpy(hourBuf, acc.c_str(), sizeof(hourBuf));
+            }
+        break;
+
+        case TTS_LANG_EN:
+            {
+                std::string acc = _tts_number_in_language(time.hour, TTS_LANG_EN, false);
+                if(time.minute == 0) {
+                    acc += "/o/_kura'_ku,";
+                } else {
+                    acc += ',';
+                    acc += _tts_number_in_language(time.minute, TTS_LANG_EN, false);
+                    acc += '.';
+                }
+                strncpy(hourBuf, acc.c_str(), sizeof(hourBuf));
+            }
+        break;
+
+        default: break;
+    }
+
+    return YukkuriUtterance(hourBuf);
+}
+
+YukkuriUtterance localized_utterance_for_date(const tk_date_t * date, spoken_language_t lang) {
+    // NB: This will be returning a static utterance. 
+    // Assuming this is called roughly once an hour it's fine.
+    // Otherwise need to change logic to allocate dynamically and release appropriately which is a PITA!
+    static char dateBuf[128] = {0};
+    
+    switch(lang) {
+        case TTS_LANG_RU:
+            {
+                std::string acc = _tts_days_ru[date->dayOfWeek];
+                acc += ',';
+                acc += _tts_number_in_language(date->day, TTS_LANG_RU, true);
+                acc += ';';
+                acc += _tts_months_ru[date->month - 1];
+                acc += ',';
+                strncpy(dateBuf, acc.c_str(), sizeof(dateBuf));
+            }
+        break;
+
+        case TTS_LANG_EN:
+            {
+                std::string acc = _tts_days_en[date->dayOfWeek];
+                acc += ',';
+                acc += _tts_months_en[date->month - 1];
+                acc += ';';
+                acc += _tts_number_in_language(date->day, TTS_LANG_EN, true);
+                acc += ',';
+                strncpy(dateBuf, acc.c_str(), sizeof(dateBuf));
+            }
+        break;
+
+        case TTS_LANG_JA:
+        default:
+            snprintf(dateBuf, sizeof(dateBuf), "%s,<NUMK VAL=%i COUNTER=gatsu>;<NUMK VAL=%i COUNTER=nichi>,", _tts_days_ja[date->dayOfWeek], date->month, date->day);
+        break;
+    }
+
+    return YukkuriUtterance(dateBuf);
 }

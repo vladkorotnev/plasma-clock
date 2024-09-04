@@ -147,6 +147,7 @@ void Yukkuri::_start_next_utterance_if_needed() {
         int rslt = CAqTkPicoF_SetKoe((const uint8_t*)next.text, next.speed, next.pause);
         if(rslt) {
             ESP_LOGE(LOG_TAG, "ERROR(%i): [%s]", rslt, next.text);
+            cancel_current();
         } else {
             ESP_LOGI(LOG_TAG, "Start: [%s]", next.text);
             speaking = true;
@@ -156,4 +157,8 @@ void Yukkuri::_start_next_utterance_if_needed() {
         ESP_LOGV(LOG_TAG, "Utterance queue is now empty");
         _stop_speech();
     }
+}
+
+bool Yukkuri::is_speaking() {
+    return speaking;
 }

@@ -19,8 +19,6 @@ public:
 protected:
     bool _currentValue;
 private:
-    const char * on_str = localized_string("Yes");
-    const char * off_str = localized_string("No");
     key_id_t _button;
     StringScroll * label;
     std::function<void(bool)> _onChange;

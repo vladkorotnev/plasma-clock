@@ -71,6 +71,11 @@ void SimpleClock::step() {
     }
     phase = EASING_CURVE[phase];
 
+    if(!prefs_get_bool(PREFS_KEY_DISP_24_HRS)) {
+        convert_to_12h(&now);
+        convert_to_12h(&next_time);
+    }
+
     blink_separator = prefs_get_bool(PREFS_KEY_BLINK_SEPARATORS);
     separator = (blink_separator && phase != 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
 }

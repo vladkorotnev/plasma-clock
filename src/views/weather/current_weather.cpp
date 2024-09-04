@@ -15,7 +15,7 @@ CurrentWeatherView::CurrentWeatherView() {
     animation->x_offset = 0;
     animation->width = 16;
 
-    big_font = &xnu_font;
+    big_font = &keyrus0816_font;
     small_font = &keyrus0808_font;
 
     bottom_line = new StringScroll(small_font);
@@ -55,8 +55,8 @@ void CurrentWeatherView::prepare_for_new_weather() {
         animation->set_sprite(icon);
     }
 
-    snprintf(top_text, sizeof(top_text), "%.01f\370C %i%%", kelvin_to(weather.temperature_kelvin, CELSIUS), weather.humidity_percent);
-    snprintf(bottom_text, sizeof(bottom_text), localized_string("WEATHER_FMT"), weather.description, kelvin_to(weather.feels_like_kelvin, CELSIUS), weather.windspeed_mps, weather.pressure_hpa);
+    snprintf(top_text, sizeof(top_text), "%.01f\370%c %i%%", convert_temperature(KELVIN, weather.temperature_kelvin), preferred_temperature_unit(), weather.humidity_percent);
+    snprintf(bottom_text, sizeof(bottom_text), localized_string("WEATHER_FMT"), weather.description, convert_temperature(KELVIN, weather.feels_like_kelvin), preferred_temperature_unit(), weather.windspeed_mps, weather.pressure_hpa);
     top_line->set_string(top_text);
     bottom_line->set_string(bottom_text);
 }

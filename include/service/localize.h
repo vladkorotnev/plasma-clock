@@ -1,5 +1,7 @@
 #pragma once
 #include <string>
+#include <sound/yukkuri.h>
+#include <service/time.h>
 
 typedef enum display_language {
     DSPL_LANG_EN = 0,
@@ -13,5 +15,9 @@ typedef enum spoken_language {
 } spoken_language_t;
 
 display_language_t active_display_language();
-const char * localized_string(const std::string key);
+const char * localized_string(const std::string key, display_language_t lang = active_display_language());
 const char * day_letters();
+
+spoken_language_t active_tts_language();
+YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t time, spoken_language_t lang = active_tts_language());
+YukkuriUtterance localized_utterance_for_date(const tk_date_t * date, spoken_language_t lang = active_tts_language());

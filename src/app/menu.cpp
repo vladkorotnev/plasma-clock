@@ -37,6 +37,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     static MenuTimeSettingView * ts_view = nullptr;
     static MenuDateSettingView * ds_view = nullptr;
     static ListView * clock_menu = new ListView();
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour display"), PREFS_KEY_DISP_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Blink dots"), PREFS_KEY_BLINK_SEPARATORS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Tick sound"), PREFS_KEY_TICKING_SOUND));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Ticking only when screen on"), PREFS_KEY_NO_SOUND_WHEN_OFF));
@@ -49,6 +50,12 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuListSelectorPreferenceView(
+        localized_string("Voice language"), 
+        {localized_string("English"), localized_string("Russian"), localized_string("Japanese")},
+        PREFS_KEY_TTS_LANGUAGE,
+        normalActivationFunction
+    ));
 #endif
     clock_menu->add_view(new MenuActionItemView(localized_string("Set time"), [this]() {
         tk_time_of_day_t now = get_current_time_coarse();
@@ -96,6 +103,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
         screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Wordnik"), PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
         screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Foobar2000"), PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 1, normalActivationFunction));
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("Use Fahrenheit for temperature"), PREFS_KEY_WEATHER_USE_FAHRENHEIT));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Transition"), 
         {localized_string("Off"), localized_string("Wipe"), localized_string("Slide Left"), localized_string("Slide Right"), localized_string("Slide Up"), localized_string("Slide Down"), localized_string("(Randomize)")},
@@ -124,7 +132,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     ));
 
     static ListView * calibration_menu = new ListView();
-    calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
+    calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (\370C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Humidity"), PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
 
     static ListView * system_info = new ListView();

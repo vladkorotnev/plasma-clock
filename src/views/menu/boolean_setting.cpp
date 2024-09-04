@@ -29,6 +29,8 @@ void MenuBooleanSelectorView::step() {
 
 void MenuBooleanSelectorView::render(FantaManipulator *fb) {
     label->render(fb);
+    const char * on_str = localized_string("Yes");
+    const char * off_str = localized_string("No");
     fb->put_string(&keyrus0808_font, on_str, fb->get_width() - measure_string_width(&keyrus0808_font, off_str) - measure_string_width(&keyrus0808_font, on_str) - 16, 8, _currentValue ? TEXT_INVERTED : TEXT_NORMAL);
     fb->put_string(&keyrus0808_font, off_str, fb->get_width() - measure_string_width(&keyrus0808_font, off_str), 8, !_currentValue ? TEXT_INVERTED : TEXT_NORMAL);
 }

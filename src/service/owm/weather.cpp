@@ -209,14 +209,24 @@ const hourly_weather_t * weather_get_hourly(int hour) {
     return &forecast_hourly[hour];
 }
 
-float kelvin_to(float k, temperature_unit_t unit) {
+float convert_temperature(temperature_unit_t from, float inVal, temperature_unit_t unit) {
+    if(from == unit) return inVal;
+    
+    float k = 0;
+
+    switch(from) {
+        case KELVIN: k = inVal; break;
+        case CELSIUS: k = inVal + 273.15; break;
+        case FAHRENHEIT: k = (inVal - 32.0) * 5 / 9 + 273.15; break;
+    }
+
     switch(unit) {
         case KELVIN: return k;
         case CELSIUS: return k - 273.15;
-        case FAHRENHEIT: return kelvin_to(k, CELSIUS) * 9 / 5 + 32;
+        case FAHRENHEIT: return (k - 273.15) * 9 / 5 + 32;
     }
 
-    return k;
+    return 0.0; // unreachable
 }
 
 void weather_set_demo(current_weather_t * demo) {
@@ -230,4 +240,8 @@ void weather_set_demo(current_weather_t * demo) {
     cache.conditions = normalized_conditions(cache.conditions);
 
     xSemaphoreGive(cacheSemaphore);
+}
+
+temperature_unit_t preferred_temperature_unit() {
+    return prefs_get_bool(PREFS_KEY_WEATHER_USE_FAHRENHEIT) ? FAHRENHEIT : CELSIUS;
 }

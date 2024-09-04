@@ -7,6 +7,7 @@
 #include <service/owm/weather.h>
 #include <service/prefs.h>
 #include <service/foo_client.h>
+#include <service/localize.h>
 #include <views/idle_screens/simple_clock.h>
 #include <views/overlays/rain_ovl.h>
 #include <views/overlays/thunder_ovl.h>
@@ -135,22 +136,16 @@ void hourly_chime() {
                 _play_hourly_chime_if_enabled(first_chime);
             } else {
                 // Voice chime enabled, speak hour then play chime
-                static char hourBuf[64] = { 0 };
-                if(now.minute == 0) {
-                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", now.hour);
-                } else {
-                    snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", now.hour, now.minute);
-                }
-                YukkuriUtterance hourUtterance = YukkuriUtterance(hourBuf, [first_chime](bool) {
+                YukkuriUtterance hourUtterance = localized_utterance_for_time(now);
+                hourUtterance.callback = [first_chime](bool) {
                     _play_hourly_chime_if_enabled(first_chime);
-                });
+                };
 
                 if(first_chime && prefs_get_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE)) {
                     // Also need date
-                    static char dateBuf[64] = {0};
                     tk_date_t today = get_current_date();
-                    snprintf(dateBuf, sizeof(dateBuf), "<NUMK VAL=%i COUNTER=gatsu>;<NUMK VAL=%i COUNTER=nichi>", today.month, today.day);
-                    yukkuri->speak(dateBuf);
+                    YukkuriUtterance dateUtterance = localized_utterance_for_date(&today);
+                    yukkuri->speak(dateUtterance);
                 }
 
                 yukkuri->speak(hourUtterance);
@@ -375,12 +370,22 @@ void app_idle_process() {
     else if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) {
         push_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
     }
+#if HAS(AQUESTALK)
+    else if(hid_test_key_state(KEY_HEADPAT) == KEYSTATE_HIT && !yukkuri->is_speaking()) {
+        tk_date_t d = get_current_date();
+        YukkuriUtterance dateUtterance = localized_utterance_for_date(&d);
+        yukkuri->speak(dateUtterance);
+        YukkuriUtterance hourUtterance = localized_utterance_for_time(get_current_time_coarse());
+        yukkuri->speak(hourUtterance);
+    }
+#endif
     else {
         change_screen_if_needed();
         key_state_t anykey = hid_test_key_any(KEYMASK_ALL);
         touchArrows->active = anykey != KEYSTATE_RELEASED;
-        if(anykey != KEYSTATE_RELEASED) {
+        if(anykey == KEYSTATE_HIT) {
             sequencer->stop_sequence();
+            yukkuri->cancel_current();
         }
     }
 
