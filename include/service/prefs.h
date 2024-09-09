@@ -49,6 +49,7 @@ typedef enum prefs_scroll_speed {
 } prefs_scroll_speed_t;
 static constexpr prefs_key_t PREFS_KEY_DISP_SCROLL_SPEED = "s_scrl_spd";
 static constexpr prefs_key_t PREFS_KEY_DISP_24_HRS = "s_24h";
+static constexpr prefs_key_t PREFS_KEY_VOICE_24_HRS = "v_24h";
 
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_CLOCK_SECONDS = "s_clock_s";
 static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_INDOOR_SECONDS = "s_inside_s";

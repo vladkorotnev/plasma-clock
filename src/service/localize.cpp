@@ -81,7 +81,8 @@ static const std::map<const std::string, const char*> russian = {
 
     {"Uptime", "Время работы"},
 
-    {"24-hour display", "24-часовой формат"},
+    {"24-hour display", "24-часовой формат отображения"},
+    {"24-hour announcements", "24-часовой формат голоса"},
     {"Blink dots", "Мигающие точки"},
     {"Tick sound", "Тикание часов"},
     {"Ticking only when screen on", "Тикание только при включённом экране"},
@@ -531,22 +532,41 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
     // Assuming this is called roughly once an hour it's fine.
     // Otherwise need to change logic to allocate dynamically and release appropriately which is a PITA!
     static char hourBuf[128] = { 0 };
-    
-    if(!prefs_get_bool(PREFS_KEY_DISP_24_HRS)) {
-        convert_to_12h(&time);
+    bool is_12h = false;
+    bool is_pm = false;
+
+    if(!prefs_get_bool(PREFS_KEY_VOICE_24_HRS)) {
+        is_12h = true;
+        convert_to_12h(&time, &is_pm);
     }
 
     switch(lang) {
         case TTS_LANG_JA:
-            if(time.minute == 0) {
-                snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", time.hour);
+            if(time.hour == 12 && time.minute == 0) {
+                snprintf(hourBuf, sizeof(hourBuf), "sho'-go;de_su,");
             } else {
-                snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", time.hour, time.minute);
+                if(is_12h) {
+                    if(time.minute == 0) {
+                        snprintf(hourBuf, sizeof(hourBuf), "%s<NUMK VAL=%i COUNTER=ji>;de_su,", is_pm ? "go'go" : "gozenn", time.hour);
+                    } else {
+                        snprintf(hourBuf, sizeof(hourBuf), "%s<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", is_pm ? "go'go" : "gozenn", time.hour, time.minute);
+                    }
+                } else {
+                    if(time.minute == 0) {
+                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", time.hour);
+                    } else {
+                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", time.hour, time.minute);
+                    }
+                }
             }
         break;
 
         case TTS_LANG_RU:
-            {
+            if((time.hour == 12 && (!is_12h || is_pm)) && time.minute == 0) {
+                strncpy(hourBuf, "po'rujieni,", sizeof(hourBuf));
+            } else if((time.hour == 0 || (time.hour == 12 && !is_pm)) && time.minute == 0) {
+                strncpy(hourBuf, "po'runo_chi,", sizeof(hourBuf));
+            } else {
                 std::string acc = _tts_number_in_language(time.hour, TTS_LANG_RU, TTSNUM_NOMINATIVE_M);
                 int hr_ones = time.hour % 10;
                 if(hr_ones == 0 || hr_ones >= 5 || ((time.hour / 10) % 10) == 1) {
@@ -560,7 +580,19 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
                 }
                 
                 if(time.minute == 0) {
-                    acc += "/ro'funo,";
+                    if(is_12h) {
+                        if(time.hour < 4 && !is_pm) {
+                            acc += "/no'chi";
+                        } else if(time.hour < 12 && !is_pm) {
+                            acc += "/u_tura'";
+                        } else if(time.hour < 5 && is_pm) {
+                            acc += "/dunya'";
+                        } else if(time.hour > 6 && is_pm) {
+                            acc += "/bie'chira";
+                        }
+                    } else {
+                        acc += "/ro'funo,";
+                    }
                 } else {
                     acc += ',';
                     acc += _tts_number_in_language(time.minute, TTS_LANG_RU, TTSNUM_NOMINATIVE_F);
@@ -581,13 +613,24 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
         break;
 
         case TTS_LANG_EN:
-            {
+            if((time.hour == 12 && (!is_12h || is_pm)) && time.minute == 0) {
+                strncpy(hourBuf, "nu'-n,", sizeof(hourBuf));
+            } else if((time.hour == 0 || (time.hour == 12 && !is_pm)) && time.minute == 0) {
+                strncpy(hourBuf, "mi'dunai_tu,", sizeof(hourBuf));
+            } else {
                 std::string acc = _tts_number_in_language(time.hour, TTS_LANG_EN, TTSNUM_NOMINATIVE);
                 if(time.minute == 0) {
-                    acc += "/o/_kura'_ku,";
+                    if(!is_12h) {
+                        acc += "/o/_kura'_ku,";
+                    } else {
+                        acc += is_pm ? "/pi';e'n" : "/e'i;e'n";
+                    }
                 } else {
                     acc += ',';
                     acc += _tts_number_in_language(time.minute, TTS_LANG_EN, TTSNUM_NOMINATIVE);
+                    if(is_12h) {
+                        acc += is_pm ? "/pi';e'n" : "/e'i;e'n";
+                    }
                     acc += '.';
                 }
                 strncpy(hourBuf, acc.c_str(), sizeof(hourBuf));

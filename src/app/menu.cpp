@@ -48,6 +48,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime until"), PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
 #if HAS(AQUESTALK)
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_DISP_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
     clock_menu->add_view(new MenuListSelectorPreferenceView(

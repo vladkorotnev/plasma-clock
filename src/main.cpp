@@ -221,6 +221,10 @@ void setup() {
 
     seq->play_sequence(&pc98_pipo, SEQUENCER_NO_REPEAT);
 
+    // while(1) {
+    //     String s = Serial.readStringUntil('\n');
+    //     yukkuri->speak(s.c_str());
+    // }
 #if HAS(TOUCH_PLANE)
 // No beeper on non-touch because it will be annoying with physical buttons
     hid_set_key_beeper(beepola);

@@ -331,6 +331,7 @@ static void build() {
         GP.HR();
         render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
         render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
+        render_bool("24-hour announcements:", PREFS_KEY_VOICE_24_HRS);
         render_bool("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE);
     GP.SPOILER_END();
     GP.BREAK();
@@ -535,6 +536,7 @@ void action() {
         save_string(PREFS_KEY_WIFI_SSID);
         save_string(PREFS_KEY_WIFI_PASS);
         save_bool(PREFS_KEY_DISP_24_HRS);
+        save_bool(PREFS_KEY_VOICE_24_HRS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);
         save_bool(PREFS_KEY_TICKING_SOUND);
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
