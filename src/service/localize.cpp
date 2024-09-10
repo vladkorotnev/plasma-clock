@@ -585,9 +585,9 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
                             acc += "/no'chi";
                         } else if(time.hour < 12 && !is_pm) {
                             acc += "/u_tura'";
-                        } else if(time.hour < 5 && is_pm) {
+                        } else if(time.hour <= 5 && is_pm) {
                             acc += "/dunya'";
-                        } else if(time.hour > 6 && is_pm) {
+                        } else if(time.hour >= 6 && is_pm) {
                             acc += "/bie'chira";
                         }
                     } else {
