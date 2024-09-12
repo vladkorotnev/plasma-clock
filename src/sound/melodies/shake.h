@@ -429,6 +429,7 @@ static const melody_item_t shakeit_data[] = {
     {DELAY, 0, 192},
     {FREQ_SET, 4, 0},
     {DELAY, 0, 38},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
     {FREQ_SET, 0, 415},
     {DUTY_SET, 0, 8},
     {FREQ_SET, 1, 830},

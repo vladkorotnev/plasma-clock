@@ -39,7 +39,7 @@ class Event():
         self.arg = arg
 
     def __str__(self):
-        return f"    {{{self.kind}, {str(self.chan)}, {str(int(self.arg))}}},"
+        return f"    {{{self.kind}, {str(self.chan)}, {str(self.arg)}}},"
 
 class Comment():
     def __init__(self, s):
@@ -63,14 +63,14 @@ def prev_note_off_event(chan):
 for msg in mid:
     print(msg)
     if msg.time > 0.005:
-            evts.append(Event("DELAY", 0, msg.time * 1000))
+            evts.append(Event("DELAY", 0, int(msg.time * 1000)))
     if msg.type == "note_on" or msg.type == "note_off":
         if msg.type == "note_on" and msg.velocity > 0:
             existing_evt = prev_note_off_event(msg.channel)
             if existing_evt is not None:
-                existing_evt.arg = getPitch(msg.note)
+                existing_evt.arg = int(getPitch(msg.note))
             else:
-                evts.append(Event("FREQ_SET", msg.channel, getPitch(msg.note)))
+                evts.append(Event("FREQ_SET", msg.channel, int(getPitch(msg.note))))
         else:
             # note off
             evts.append(Event("FREQ_SET", msg.channel, 0))
@@ -82,9 +82,13 @@ for msg in mid:
         evts.append(Comment(msg.text))
         if msg.text == "LOOP":
             evts.append(Event("LOOP_POINT_SET", 0, 0))
+        elif msg.text == "HOOK":
+            evts.append(Event("HOOK_POINT_SET", 0, "HOOK_POINT_TYPE_START"))
+        elif msg.text == "HOOKEND":
+            evts.append(Event("HOOK_POINT_SET", 0, "HOOK_POINT_TYPE_END"))
     elif msg.type == "control_change":
         if msg.control == 2:
-            evts.append(Event("DUTY_SET", msg.channel, msg.value))
+            evts.append(Event("DUTY_SET", msg.channel, int(msg.value)))
         
 
 print("static const melody_item_t "+name+"_data[] = {")

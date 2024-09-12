@@ -1,5 +1,6 @@
 // Magome Togoshi, Shinji Orito - Gentle Jena (planetarian OST)
 static const melody_item_t gentle_jena_data[] = {
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
     {DUTY_SET, 0, 4},
     {DUTY_SET, 1, 6},
     
@@ -203,6 +204,7 @@ static const melody_item_t gentle_jena_data[] = {
     {DUTY_SET, 0, 4},
     {DUTY_SET, 1, 6},
     {DELAY, 0, 291},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
     /* Cont. */
     {FREQ_SET, 0, 932},
     {DELAY, 0, 12},

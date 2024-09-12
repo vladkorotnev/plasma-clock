@@ -1024,8 +1024,8 @@ static const melody_item_t kamippoina_data[] = {
     {FREQ_SET, 2, 0},
     {DELAY, 0, 824},
 
-
     /* GOTT IST TOTT */
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
     {SAMPLE_LOAD, 5, (int) &gott},
     {FREQ_SET, 0, 0},
     {FREQ_SET, 1, 0},
@@ -1419,6 +1419,7 @@ static const melody_item_t kamippoina_data[] = {
     {FREQ_SET, 2, 155},
     {FREQ_SET, 3, 77},
     {DELAY, 0, 413},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
     {FREQ_SET, 1, 0},
     {FREQ_SET, 2, 622},
     {FREQ_SET, 3, 0},

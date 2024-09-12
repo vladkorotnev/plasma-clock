@@ -135,34 +135,42 @@ void NewSequencer::wait_end_play() {
     xEventGroupWaitBits(wait_end_group, BIT_END_PLAY, pdFALSE, pdTRUE, portMAX_DELAY);
 }
 
-void NewSequencer::play_sequence(const melody_sequence_t * s, int repeat) {
+void NewSequencer::play_sequence(const melody_sequence_t * s, sequence_playback_flags_t f, int repeat) {
     repetitions = repeat;
     sequence = s;
+    flags = f;
     pointer = 0;
     loop_point = 0;
-    is_running = true;
+    for(int i = 0; i < CHANNELS; i++) {
+        voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, 0);
+        voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, 0);
+    }
+    if((f & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
+        find_hook();
+        pointer = loop_point;
+    }
     remaining_delay_samples = 0;
-    for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, 0);
     xEventGroupClearBits(wait_end_group, BIT_END_PLAY);
     process_steps_until_delay();
+    is_running = true;
 }
 
-void NewSequencer::process_steps_until_delay() {
-    if(!is_running) return;
-    if(pointer >= sequence->count) {
-        // End of Song condition
-        if(repetitions == -1 || repetitions > 0) {
-            if(repetitions > 0) repetitions--;
-            pointer = loop_point;
-            process_steps_until_delay();
-            return;
-        } else if(repetitions == 0) {
-            stop_sequence();
-            return;
-        }
+bool NewSequencer::end_of_song() {
+    // End of Song condition
+    if((flags & SEQUENCER_REPEAT_INDEFINITELY) != 0 || repetitions > 0) {
+        if(repetitions > 0) repetitions--;
+        pointer = loop_point;
+        process_steps_until_delay();
+        return true;
+    } else if(repetitions == 0) {
+        stop_sequence();
+        return true;
     }
 
-    const melody_item_t * cur_line = &sequence->array[pointer];
+    return false;
+}
+
+bool NewSequencer::process_step(const melody_item_t * cur_line) {
     switch(cur_line->command) {
         case FREQ_SET:
             voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, cur_line->argument1);
@@ -179,9 +187,45 @@ void NewSequencer::process_steps_until_delay() {
         case SAMPLE_LOAD:
             voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_SAMPLE_ADDR, cur_line->argument1);
             break;
+        case HOOK_POINT_SET:
+            if(cur_line->argument1 == HOOK_POINT_TYPE_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
+                if(end_of_song()) return true;
+            }
+            break;
         default:
             break;
     }
+
+    return false;
+}
+
+void NewSequencer::find_hook() {
+    while(pointer < sequence->count) {
+        const melody_item_t * cur_line = &sequence->array[pointer];
+        if(cur_line->command == HOOK_POINT_SET) {
+            if(cur_line->argument1 == HOOK_POINT_TYPE_START) {
+                loop_point = pointer + 1;
+                ESP_LOGI(LOG_TAG, "Hook found, starts at %i", loop_point);
+                break;
+            } else {
+                pointer++;
+            }
+        } else if(cur_line->command == DELAY || cur_line->command == LOOP_POINT_SET || cur_line->command == FREQ_SET) {
+            pointer++;
+        } else {
+            process_step(cur_line);
+            pointer++;
+        }
+    }
+}
+
+void NewSequencer::process_steps_until_delay() {
+    if(pointer >= sequence->count) {
+        if(end_of_song()) return;
+    }
+
+    const melody_item_t * cur_line = &sequence->array[pointer];
+    if(process_step(cur_line)) return;
 
     pointer++;
 

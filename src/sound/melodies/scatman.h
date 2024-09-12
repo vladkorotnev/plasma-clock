@@ -666,6 +666,7 @@ static const melody_item_t scatman_data[] = {
     {DELAY, 0, 47},
     {FREQ_SET, 3, 0},
     {DELAY, 0, 62},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
     {FREQ_SET, 1, 440},
     {FREQ_SET, 3, 65},
     {DELAY, 0, 7},

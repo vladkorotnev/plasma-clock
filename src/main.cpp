@@ -194,7 +194,7 @@ void bringup_hid() {
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
     bringup_sound();
-    seq->play_sequence(&pc98_pipo, SEQUENCER_NO_REPEAT);
+    seq->play_sequence(&pc98_pipo);
 
     con->clear();
 

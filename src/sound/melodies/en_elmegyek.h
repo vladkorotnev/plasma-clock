@@ -1,6 +1,5 @@
 // Omega - En Elmegyek
 static const melody_item_t en_elmegyek_data[] = {
-    {DELAY, 0, 250},
     {LOOP_POINT_SET, 0, 0},
     {DUTY_SET, 0, 13},
     {DUTY_SET, 1, 10},
@@ -298,6 +297,7 @@ static const melody_item_t en_elmegyek_data[] = {
     {FREQ_SET, 2, 0},
     {FREQ_SET, 3, 0},
     {DELAY, 0, 230},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
     {FREQ_SET, 1, 932},
     {DELAY, 0, 230},
     {FREQ_SET, 1, 0},

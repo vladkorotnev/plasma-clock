@@ -116,7 +116,7 @@ void _play_hourly_chime_if_enabled(bool first_chime) {
     if(!prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON)) return;
     int melody_no = first_chime ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
     const melody_sequence_t * melody = melody_from_no(melody_no);
-    sequencer->play_sequence(melody, SEQUENCER_NO_REPEAT);
+    sequencer->play_sequence(melody, SEQUENCER_PLAY_HOOK_ONLY);
 }
 
 void hourly_chime() {

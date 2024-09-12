@@ -57,6 +57,7 @@ static const melody_item_t like_the_wind_data[] = {
     {FREQ_SET, 0, 523},
     {DELAY, 0, 892},
     {FREQ_SET, 0, 0},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
     {DELAY, 0, 261},
     {FREQ_SET, 0, 783},
     {DELAY, 0, 199},

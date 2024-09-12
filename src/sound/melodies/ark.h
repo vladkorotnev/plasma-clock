@@ -231,6 +231,7 @@ static const melody_item_t ark_data[] = {
     {FREQ_SET, 1, 329},
     {FREQ_SET, 2, 415},
     {DELAY, 0, 882},
+    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
     {FREQ_SET, 0, 523},
     {FREQ_SET, 1, 261},
     {FREQ_SET, 2, 440},

@@ -13,6 +13,7 @@ protected:
 class DroppingDigitView: public Composable, DroppingDigits {
 public:
     int value;
+    bool sound;
     DroppingDigitView(unsigned int digits, int initialValue, Beeper * b = nullptr):
         DroppingDigits(),
         value(initialValue),
@@ -20,7 +21,8 @@ public:
         beeper(b),
         disp_value { value },
         phase { 0 },
-        dir { true } {
+        dir { true },
+        sound { true } {
             snprintf(fmt, 16, "%%0%dd", digits);
             snprintf(buf_old, 16, fmt, disp_value);
             snprintf(buf_new, 16, fmt, value);
@@ -71,7 +73,7 @@ public:
             }
         }
 
-        if(phase == 8 && beeper) {
+        if(phase == 8 && beeper && sound) {
             beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
         }
     }

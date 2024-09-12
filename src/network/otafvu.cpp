@@ -80,7 +80,7 @@ void OTAFVUManager::get_ready() {
     // Keep display on when updating
     power_mgmt_pause();
 
-    seq->play_sequence(tulula_fvu, SEQUENCER_NO_REPEAT);
+    seq->play_sequence(tulula_fvu);
 }
 
 void OTAFVUManager::shut_up_and_explode() {
@@ -88,7 +88,7 @@ void OTAFVUManager::shut_up_and_explode() {
     con->set_font(&keyrus0816_font);
     con->clear();
     con->print("OTAFVU Done!");
-    seq->play_sequence(oelutz_fvu, SEQUENCER_NO_REPEAT);
+    seq->play_sequence(oelutz_fvu);
     seq->wait_end_play();
     change_state(STATE_RESTART, TRANSITION_NONE);
 }
