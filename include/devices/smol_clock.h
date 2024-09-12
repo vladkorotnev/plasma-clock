@@ -9,8 +9,8 @@
 #define HAS_SERIAL_MIDI
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
-#define PRODUCT_NAME "microPIS-OS"
-#define PRODUCT_VERSION "3.5"
+#define PRODUCT_NAME "uPIS-OS"
+#define PRODUCT_VERSION "3.7"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_12;

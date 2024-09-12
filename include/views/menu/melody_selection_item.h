@@ -17,7 +17,7 @@ public:
             [this, onChange](int newMelodyNo) {
                 sequencer->stop_sequence();
                 if(newMelodyNo != all_chime_count) // Don't play the random one
-                    sequencer->play_sequence(melody_from_no(newMelodyNo), SEQUENCER_NO_REPEAT);
+                    sequencer->play_sequence(melody_from_no(newMelodyNo), SEQUENCER_PLAY_HOOK_ONLY);
                 onChange(newMelodyNo);
             } 
         ) {

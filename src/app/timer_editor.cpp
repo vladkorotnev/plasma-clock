@@ -2,8 +2,8 @@
 #include <state.h>
 #include <views/menu/time_setting.h>
 #include <service/prefs.h>
+#include <service/localize.h>
 #include <input/keys.h>
-
 
 class AppShimTimerEditor::TimerEditorMainScreen: public Composite {
 public:
@@ -34,7 +34,7 @@ public:
         sequencer = s;
         activation = _activation;
         if(beeper != nullptr) {
-            melodySelector = new MenuMelodySelectorPreferenceView(sequencer, "Timer Melody", PREFS_KEY_TIMER_MELODY, [_activation](bool isActive, Renderable * that) {
+            melodySelector = new MenuMelodySelectorPreferenceView(sequencer, localized_string("Melody"), PREFS_KEY_TIMER_MELODY, [_activation](bool isActive, Renderable * that) {
                 if(!isActive) {
                     _activation(false, that);
                 }
@@ -127,7 +127,12 @@ public:
             }
         }
 
-        if(hid_test_key_any() && sequencer) sequencer->stop_sequence();
+        if(hid_test_key_any() && sequencer && sequencer->is_sequencing()) { 
+            sequencer->stop_sequence();
+            secondView->sound = true;
+            minuteView->sound = true;
+            hourView->sound = true;
+        }
 
         Composite::step();
     }
@@ -138,7 +143,12 @@ public:
         if(hour == 0 && minute == 0 && second == 0) {
             isRunning = false;
             push_state(STATE_TIMER_EDITOR); // in case we are on a different screen
-            if(sequencer) sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY);
+            if(sequencer) { 
+                secondView->sound = false;
+                minuteView->sound = false;
+                hourView->sound = false;
+                sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY); 
+            }
             load_prefs();
         } else {
             add_sec(false);

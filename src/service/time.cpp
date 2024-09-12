@@ -199,3 +199,13 @@ bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
 bool operator>=(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
     return (a > b) || (a == b);
 }
+
+void convert_to_12h(tk_time_of_day_t * time, bool * out_pm) {
+    if(out_pm != nullptr) *out_pm = (time->hour >= 12);
+    if(time->hour > 12) {
+        time->hour -= 12;
+    }
+    else if(time->hour == 0) {
+        time->hour = 12;
+    }
+}

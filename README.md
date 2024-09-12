@@ -131,6 +131,7 @@ You can also read the quest I went through trying to get it to run "in real time
 * [Calvin Harris - Acceptable In The 80s](https://youtu.be/dOV5WXISM24?t=14): [MIDI](helper/chimes/inthe80s.mid)
 * [emon - shake it!](https://www.youtube.com/watch?v=WxexMGe83No): [MIDI](helper/chimes/shakeit.mid), [MP3 Recording](docs/rec/shakeit.mp3)
 * [Omega - Én elmegyek](https://www.youtube.com/watch?v=L74IyC1N43M): [MIDI](helper/chimes/en_elmegyek.mid) (thanks [lemuel_producer](https://www.fiverr.com/lemuel_producer) for the help!)
+* [John Scatman - Scatman (Ski-Ba-Bop-Dop-Bop)](https://www.youtube.com/watch?v=Hy8kmNEo1i8): [MIDI](helper/chimes/scatman.mid)
 
 ## Creating your own melodies
 

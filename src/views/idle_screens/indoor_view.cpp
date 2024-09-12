@@ -1,5 +1,6 @@
 #include <views/idle_screens/indoor_view.h>
 #include <rsrc/common_icons.h>
+#include <service/owm/weather.h>
 #include <fonts.h>
 
 AirSensorView::AirSensorView(SensorPool *s, sensor_id_t t, sensor_id_t h, const sprite_t * ic) {
@@ -28,14 +29,15 @@ void AirSensorView::render(FantaManipulator *fb) {
     sensor_info_t * temperature = sensors->get_info(temperature_id);
     if(temperature != nullptr && temperature->last_read != 0) {
         char buf[8];
-        snprintf(buf, 8, "%i.%i\370C", temperature->last_result/100, (temperature->last_result < 0 ? -1 : 1) * (temperature->last_result%100)/10);
+        float converted = convert_temperature(CELSIUS, temperature->last_result / 100.0);
+        snprintf(buf, 8, "%.1f\370%c", converted, preferred_temperature_unit());
         uint8_t t_width = measure_string_width(value_font, buf);
         uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
         fb->put_string(value_font, buf, t_left, 0);
     } else {
         uint8_t t_width = value_font->width*6;
         uint8_t t_left = (fb->get_width() - hum_left_margin + 16) / 2 - t_width / 2;
-        fb->put_string(value_font, "--.-\370C", t_left, 0);
+        fb->put_string(value_font, "--.-\370 ", t_left, 0);
     }
 }
 

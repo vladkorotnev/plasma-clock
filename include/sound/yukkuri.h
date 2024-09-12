@@ -32,6 +32,7 @@ public:
     bool speak(const char * text, YukkuriUtteranceCallback callback = [](bool){});
     void cancel_current();
     void cancel_all();
+    bool is_speaking();
 
     size_t fill_buffer(void* buffer, size_t length) override;
 private:
@@ -43,7 +44,7 @@ private:
     bool out_state = false;
     int out_phase = 0;
     static const int16_t HYST_ZERO_MARGIN = 1024;
-    static const int16_t HYST_ONE_MARGIN = 1300;
+    static const int16_t HYST_ONE_MARGIN = 1800;
 
     bool speaking = false;
     uint32_t workbuf[AQ_SIZE_WORKBUF];

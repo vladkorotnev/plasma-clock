@@ -96,13 +96,18 @@ bool NetworkManager::is_up() {
 }
 
 String NetworkManager::current_ip() {
-    return WiFi.localIP().toString();
+    if(WiFi.getMode() == WIFI_STA)
+        return WiFi.localIP().toString();
+    else if(WiFi.getMode() == WIFI_AP)
+        return WiFi.softAPIP().toString();
+    else
+        return "0.0.0.0";
 }
 
 void NetworkManager::ap_fallback() {
     WiFi.disconnect(false, true);
     WiFi.mode(WIFI_MODE_AP);
-    ssid = String("plasma_" + getChipId());
+    ssid = String("pisos_" + getChipId());
     ESP_LOGI(LOG_TAG, "Starting AP");
     WiFi.softAP(ssid);
 }

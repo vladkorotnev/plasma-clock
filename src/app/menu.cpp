@@ -5,10 +5,11 @@
 #include <network/netmgr.h>
 #include <rsrc/common_icons.h>
 #include <service/time.h>
+#include <service/localize.h>
 
 class UptimeView: public MenuInfoItemView {
 public:
-    UptimeView(): MenuInfoItemView("Uptime", "") {
+    UptimeView(): MenuInfoItemView(localized_string("Uptime"), "") {
         bottom_label->stopped = true;
     }
 
@@ -36,18 +37,28 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     static MenuTimeSettingView * ts_view = nullptr;
     static MenuDateSettingView * ds_view = nullptr;
     static ListView * clock_menu = new ListView();
-    clock_menu->add_view(new MenuBooleanSettingView("Blink dots", PREFS_KEY_BLINK_SEPARATORS));
-    clock_menu->add_view(new MenuBooleanSettingView("Tick sound", PREFS_KEY_TICKING_SOUND));
-    clock_menu->add_view(new MenuBooleanSettingView("Ticking only when screen on", PREFS_KEY_NO_SOUND_WHEN_OFF));
-    clock_menu->add_view(new MenuBooleanSettingView("Hourly chime", PREFS_KEY_HOURLY_CHIME_ON));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "First chime", PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, "Other chimes", PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
-    clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime from", PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
-    clock_menu->add_view(new MenuNumberSelectorPreferenceView("Chime until", PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
-    clock_menu->add_view(new MenuBooleanSettingView("Speak hour", PREFS_KEY_VOICE_ANNOUNCE_HOUR));
-    clock_menu->add_view(new MenuBooleanSettingView("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE));
-    clock_menu->add_view(new MenuNumberSelectorPreferenceView("Voice speed", PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
-    clock_menu->add_view(new MenuActionItemView("Set time", [this]() {
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour display"), PREFS_KEY_DISP_24_HRS));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Blink dots"), PREFS_KEY_BLINK_SEPARATORS));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Tick sound"), PREFS_KEY_TICKING_SOUND));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Ticking only when screen on"), PREFS_KEY_NO_SOUND_WHEN_OFF));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Hourly chime"), PREFS_KEY_HOURLY_CHIME_ON));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("First chime"), PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("Other chimes"), PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime from"), PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime until"), PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
+#if HAS(AQUESTALK)
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_DISP_24_HRS));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuListSelectorPreferenceView(
+        localized_string("Voice language"), 
+        {localized_string("English"), localized_string("Russian"), localized_string("Japanese")},
+        PREFS_KEY_TTS_LANGUAGE,
+        normalActivationFunction
+    ));
+#endif
+    clock_menu->add_view(new MenuActionItemView(localized_string("Set time"), [this]() {
         tk_time_of_day_t now = get_current_time_coarse();
         if(ts_view != nullptr) delete ts_view;
         ts_view = new MenuTimeSettingView(beeper, now.hour, now.minute, [this](int h, int m, int s) {
@@ -59,7 +70,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
         });
         push_renderable(ts_view, TRANSITION_SLIDE_HORIZONTAL_LEFT);
     }));
-    clock_menu->add_view(new MenuActionItemView("Set date", [this]() {
+    clock_menu->add_view(new MenuActionItemView(localized_string("Set date"), [this]() {
         tk_date_t today = get_current_date();
         if(ds_view != nullptr) delete ds_view;
         ds_view = new MenuDateSettingView(beeper, today.year, today.month, today.day, [this](int y, int m, int d) {
@@ -71,65 +82,77 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
         });
         push_renderable(ds_view, TRANSITION_SLIDE_HORIZONTAL_LEFT);
     }));
-    clock_menu->add_view(new MenuBooleanSettingView("Use internet time", PREFS_KEY_TIMESERVER_ENABLE));
-    clock_menu->add_view(new MenuInfoItemView("NTP/Timezone", "Please use the Web UI to configure."));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Use internet time"), PREFS_KEY_TIMESERVER_ENABLE));
+    clock_menu->add_view(new MenuInfoItemView(localized_string("NTP/Timezone"), localized_string("Please use the Web UI to configure.")));
 
     static ListView * display_menu = new ListView();
     static ListView * screen_times = new ListView();
-    display_menu->add_view(new MenuActionItemView("Screen Times", [this](){ push_submenu(screen_times); }));
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Clock", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600, 1, normalActivationFunction));
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Alarm countdown", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 0, 3600, 1, normalActivationFunction));
+    display_menu->add_view(new MenuActionItemView(localized_string("Screen Times"), [this](){ push_submenu(screen_times); }));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Clock"), PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Alarm countdown"), PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(TEMP_SENSOR)
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Thermometer", PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Thermometer"), PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
 #if HAS(SWITCHBOT_METER_INTEGRATION)
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Switchbot Meter", PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Switchbot Meter"), PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Current Weather", PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("2-day Forecast", PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 0, 3600, 1, normalActivationFunction));
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Hourly Precipitation % Graph", PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS, 0, 3600, 1, normalActivationFunction));
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Hourly Pressure Graph", PREFS_KEY_SCRN_TIME_PRESSURE_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Current Weather"), PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("2-day Forecast"), PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Hourly Precipitation % Graph"), PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Hourly Pressure Graph"), PREFS_KEY_SCRN_TIME_PRESSURE_SECONDS, 0, 3600, 1, normalActivationFunction));
 #if HAS(WORDNIK_API)
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Wordnik", PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Wordnik"), PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
-        screen_times->add_view(new MenuNumberSelectorPreferenceView("Foobar2000", PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 1, normalActivationFunction));
+        screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Foobar2000"), PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 1, normalActivationFunction));
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("Use Fahrenheit for temperature"), PREFS_KEY_WEATHER_USE_FAHRENHEIT));
     display_menu->add_view(new MenuListSelectorPreferenceView(
-        "Transition", 
-        {"(Off)", "Wipe", "Slide Left", "Slide Right", "Slide Up", "Slide Down", "(Randomize)"},
+        localized_string("Transition"), 
+        {localized_string("Off"), localized_string("Wipe"), localized_string("Slide Left"), localized_string("Slide Right"), localized_string("Slide Up"), localized_string("Slide Down"), localized_string("(Randomize)")},
         PREFS_KEY_TRANSITION_TYPE,
         normalActivationFunction
     ));
     display_menu->add_view(new MenuListSelectorPreferenceView(
-        "Scroll Speed", 
-        {"Slow", "Medium", "Fast", "Sonic"},
+        localized_string("Scroll Speed"), 
+        {localized_string("Slow"), localized_string("Medium"), localized_string("Fast"), localized_string("Sonic")},
         PREFS_KEY_DISP_SCROLL_SPEED,
         normalActivationFunction
     ));
-    display_menu->add_view(new MenuBooleanSettingView("FPS counter", PREFS_KEY_FPS_COUNTER));
-    display_menu->add_view(new MenuBooleanSettingView("Weather effects", PREFS_KEY_WEATHER_OVERLAY));
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("FPS counter"), PREFS_KEY_FPS_COUNTER));
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("Weather effects"), PREFS_KEY_WEATHER_OVERLAY));
     display_menu->add_view(new MenuListSelectorPreferenceView(
-        "WiFi signal",
-        {"Off", "Disconnected", "Display power on", "Always"},
+        localized_string("WiFi signal"),
+        {localized_string("Off"), localized_string("Disconnected"), localized_string("Display power on"), localized_string("Always")},
         PREFS_KEY_WIFI_ICON,
+        normalActivationFunction
+    ));
+    display_menu->add_view(new MenuListSelectorPreferenceView(
+        "Language / Язык", 
+        {"English", "Русский"},
+        PREFS_KEY_DISP_LANGUAGE,
         normalActivationFunction
     ));
 
     static ListView * calibration_menu = new ListView();
-    calibration_menu->add_view(new MenuNumberSelectorPreferenceView("Temperature", PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
-    calibration_menu->add_view(new MenuNumberSelectorPreferenceView("Humidity", PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
+    calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (\370C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
+    calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Humidity"), PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
 
     static ListView * system_info = new ListView();
-    system_info->add_view(new MenuInfoItemView("OS Type", PRODUCT_NAME));
-    system_info->add_view(new MenuInfoItemView("OS Version", PRODUCT_VERSION));
-    system_info->add_view(new MenuInfoItemView("WiFi Name", NetworkManager::network_name()));
+    system_info->add_view(new MenuInfoItemView(localized_string("OS Type"), PRODUCT_NAME));
+    system_info->add_view(new MenuInfoItemView(localized_string("OS Version"), PRODUCT_VERSION));
+    system_info->add_view(new MenuInfoItemView(localized_string("WiFi Name"), NetworkManager::network_name()));
     static char buf_ip[17] = { 0 };
     String tmp = NetworkManager::current_ip();
     strncpy(buf_ip, tmp.c_str(), 16);
-    system_info->add_view(new MenuInfoItemView("WiFi IP", buf_ip));
+    static char buf_mac[20] = { 0 };
+    uint8_t mac[6];
+    esp_efuse_mac_get_default(mac);
+    snprintf(buf_mac, 19, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    system_info->add_view(new MenuInfoItemView(localized_string("WiFi IP"), buf_ip));
+    system_info->add_view(new MenuInfoItemView(localized_string("MAC Address"), buf_mac));
     system_info->add_view(new UptimeView());
-    system_info->add_view(new MenuBooleanSettingView("Remote Control Server", PREFS_KEY_REMOTE_SERVER));
+    system_info->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
 #if HAS(SERIAL_MIDI)
-    system_info->add_view(new MenuBooleanSettingView("Serial MIDI Input", PREFS_KEY_SERIAL_MIDI));
+    system_info->add_view(new MenuBooleanSettingView(localized_string("Serial MIDI Input"), PREFS_KEY_SERIAL_MIDI));
 #endif
 
     static const uint8_t status_icns_data[] = {
@@ -191,25 +214,25 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
 #endif
 
     static ListView * settings_menu = new ListView();
-    settings_menu->add_view(new MenuActionItemView("Clock", [this](){ push_submenu(clock_menu); }, &clock_icns));
-    settings_menu->add_view(new MenuActionItemView("Display", [this](){ push_submenu(display_menu); }, &display_icns));
-    settings_menu->add_view(new MenuActionItemView("Offsets", [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
-    settings_menu->add_view(new MenuActionItemView("Status", [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));
-    settings_menu->add_view(new MenuInfoItemView("Notice", "Full settings are only available in the Web UI"));
-    settings_menu->add_view(new MenuActionItemView("Save & Restart", [this](){ 
+    settings_menu->add_view(new MenuActionItemView(localized_string("Clock"), [this](){ push_submenu(clock_menu); }, &clock_icns));
+    settings_menu->add_view(new MenuActionItemView(localized_string("Display"), [this](){ push_submenu(display_menu); }, &display_icns));
+    settings_menu->add_view(new MenuActionItemView(localized_string("Offsets"), [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
+    settings_menu->add_view(new MenuActionItemView(localized_string("Status"), [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));
+    settings_menu->add_view(new MenuInfoItemView(localized_string("Notice"), localized_string("FULL_SETTINGS_NOTICE")));
+    settings_menu->add_view(new MenuActionItemView(localized_string("Save & Restart"), [this](){
         prefs_force_save();
-        ESP.restart();
+        change_state(STATE_RESTART, TRANSITION_NONE);
     }, &good_icns));
 
-    main_menu->add_view(new MenuActionItemView("Clock", [](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
-    main_menu->add_view(new MenuActionItemView("Timer", [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
-    main_menu->add_view(new MenuActionItemView("Stopwatch", [](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
-    main_menu->add_view(new MenuActionItemView("Weather", []() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
-    main_menu->add_view(new MenuActionItemView("Alarm", [](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Clock"), [](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Timer"), [this](){ push_state(STATE_TIMER_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &hourglass_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Stopwatch"), [](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Weather"), []() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Alarm"), [](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
-    main_menu->add_view(new MenuActionItemView("Weighing", [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Weighing"), [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
 #endif
-    main_menu->add_view(new MenuActionItemView("Settings", [this](){ push_submenu(settings_menu); }, &wrench_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Settings"), [this](){ push_submenu(settings_menu); }, &wrench_icns));
 #if HAS(PLAYGROUND)
     main_menu->add_view(new MenuActionItemView("Test", []() { push_state(STATE_PLAYGROUND, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &good_icns));
 #endif

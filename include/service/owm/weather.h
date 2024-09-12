@@ -54,9 +54,9 @@ typedef struct hourly_weather {
 } hourly_weather_t;
 
 typedef enum temperature_unit {
-    KELVIN,
-    CELSIUS,
-    FAHRENHEIT
+    KELVIN = 'K',
+    CELSIUS = 'C',
+    FAHRENHEIT = 'F'
 } temperature_unit_t;
 
 /// @brief Start up the periodic weather update service
@@ -72,4 +72,6 @@ void weather_set_demo(current_weather_t *);
 const forecast_weather_t * weather_get_forecast(int day_from_now);
 const hourly_weather_t * weather_get_hourly(int hour_from_now);
 
-float kelvin_to(float, temperature_unit_t);
+temperature_unit_t preferred_temperature_unit();
+
+float convert_temperature(temperature_unit_t from, float, temperature_unit_t to = preferred_temperature_unit());

@@ -9,8 +9,14 @@ typedef enum melody_item_type {
     DELAY,
     LOOP_POINT_SET,
     SAMPLE_LOAD,
+    HOOK_POINT_SET,
     MAX_INVALID
 } melody_item_type_t;
+
+enum hook_point_type : uint8_t {
+    HOOK_POINT_TYPE_START = 0,
+    HOOK_POINT_TYPE_END
+};
 
 typedef struct melody_item {
     const melody_item_type_t command : 4;
@@ -23,8 +29,12 @@ typedef struct melody_sequence {
     size_t count;
 } melody_sequence_t;
 
-#define SEQUENCER_REPEAT_INDEFINITELY -1
-#define SEQUENCER_NO_REPEAT 0
+typedef enum sequence_playback_flags {
+    SEQUENCER_PLAY_NORMALLY = 0,
+    SEQUENCER_REPEAT_INDEFINITELY = (1 << 0),
+    SEQUENCER_PLAY_HOOK_ONLY = (1 << 1),
+    
+} sequence_playback_flags_t;
 
 class NewSequencer: public WaveGenerator {
 public:
@@ -33,7 +43,7 @@ public:
     static const int CHANNELS = TONE_CHANNELS + EXTRA_CHANNELS;
     NewSequencer();
     ~NewSequencer();
-    void play_sequence(const melody_sequence_t *, int repeat);
+    void play_sequence(const melody_sequence_t *, sequence_playback_flags_t flags = SEQUENCER_PLAY_NORMALLY, int repeat = 0);
     void stop_sequence();
     void wait_end_play();
     bool is_sequencing();
@@ -49,9 +59,13 @@ private:
     size_t loop_point;
     int repetitions;
     bool is_running;
+    sequence_playback_flags_t flags;
     EventGroupHandle_t wait_end_group;
     int remaining_delay_samples;
     void process_steps_until_delay();
+    bool process_step(const melody_item_t *);
+    bool end_of_song();
+    void find_hook();
 #if HAS(SERIAL_MIDI)
     TaskHandle_t hMidiTask;
 #endif
