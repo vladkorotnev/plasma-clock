@@ -59,6 +59,8 @@ private:
 
 
 AppShimWeighing::AppShimWeighing(SensorPool* s) {
+    wants_clear_surface = true;
+    
     carousel = new ViewMultiplexor();
     sensors = s;
     lastActivity = xTaskGetTickCount();
@@ -80,11 +82,6 @@ void AppShimWeighing::prepare() {
     Composite::prepare();
     lastActivity = xTaskGetTickCount();
     update_state(TRANSITION_NONE);
-}
-
-void AppShimWeighing::render(FantaManipulator* fb) {
-    fb->clear();
-    Composite::render(fb);
 }
 
 void AppShimWeighing::step() {

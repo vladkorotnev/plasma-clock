@@ -11,7 +11,6 @@ public:
     ~AppShimWeighing();
 
     void prepare();
-    void render(FantaManipulator*);
     void step();
 
 private:

@@ -9,7 +9,7 @@
 #define HAS_SERIAL_MIDI
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
-#define PRODUCT_NAME "microPIS-OS"
+#define PRODUCT_NAME "uPIS-OS"
 #define PRODUCT_VERSION "3.6"
 
 // ---- Connection to beeper ----

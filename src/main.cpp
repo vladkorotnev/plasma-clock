@@ -35,6 +35,7 @@
 #include <app/weighing.h>
 #include <app/weather.h>
 #include <app/playground.h>
+#include <app/bootscreen.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -182,10 +183,80 @@ void bringup_hid() {
         con->print("TP init err");
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     }
+    // No beeper on non-touch because it will be annoying with physical buttons
+    hid_set_key_beeper(beepola);
 #endif
 #if HAS(KEYPAD)
     keypad_start();
 #endif
+}
+
+void boot_task(void*) {
+    ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
+    bringup_sound();
+    seq->play_sequence(&pc98_pipo, SEQUENCER_NO_REPEAT);
+
+    con->clear();
+
+    con->print("WiFi init");
+    NetworkManager::startup();
+    while(!NetworkManager::is_up()) {
+        delay(1000);
+        con->write('.');
+    }
+
+    con->clear();
+
+    screenshooter = new Screenshooter(fb->manipulate());
+    if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
+        screenshooter->start_server(3939);
+        con->print("RC server up!");
+        delay(1000);
+    }
+    con->print(NetworkManager::network_name());
+    con->print("%i dBm", NetworkManager::rssi());
+    delay(2000);
+    con->print(NetworkManager::current_ip().c_str());
+    delay(2000);
+
+    ota = new OTAFVUManager(con, seq);
+
+    sensors = new SensorPool();
+
+    sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
+    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(250));
+    bringup_light_sensor();
+    bringup_motion_sensor();
+    bringup_temp_sensor();
+    bringup_switchbot_sensor();
+    bringup_hid();
+
+    timekeeping_begin();
+    weather_start();
+    wotd_start();
+    foo_client_begin();
+    power_mgmt_start(sensors, &display_driver, beepola);
+    admin_panel_prepare(sensors, beepola, screenshooter);
+
+    appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
+    appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
+    appHost->add_view(new AppShimMenu(beepola, seq), STATE_MENU);
+    appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
+    appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
+    appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
+    appHost->add_view(new AppShimWeather(), STATE_WEATHER);
+#if HAS(BALANCE_BOARD_INTEGRATION)
+    appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
+#endif
+#if HAS(PLAYGROUND)
+    appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
+#endif
+
+    change_state(startup_state, TRANSITION_WIPE);
+    alarm_init(sensors);
+
+    ESP_LOGI(LOG_TAG, "Shut up and explode!");
+    vTaskDelete(NULL);
 }
 
 void setup() {
@@ -210,92 +281,35 @@ void setup() {
 #endif
 
     fb = new DisplayFramebuffer(&display_driver);
-    screenshooter = new Screenshooter(fb->manipulate());
 
     con = new Console(&keyrus0808_font, fb);
     con->set_cursor(true);
     con->print("");
     
     con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
-    bringup_sound();
-
-    seq->play_sequence(&pc98_pipo, SEQUENCER_NO_REPEAT);
-
-    // while(1) {
-    //     String s = Serial.readStringUntil('\n');
-    //     yukkuri->speak(s.c_str());
-    // }
-#if HAS(TOUCH_PLANE)
-// No beeper on non-touch because it will be annoying with physical buttons
-    hid_set_key_beeper(beepola);
-#endif
-
-    con->clear();
-
-    con->print("WiFi init");
-    NetworkManager::startup();
-    while(!NetworkManager::is_up()) {
-        delay(1000);
-        con->write('.');
-    }
-
-    con->clear();
-    if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
-        screenshooter->start_server(3939);
-        con->print("RC server up!");
-        delay(1000);
-    }
-    con->print(NetworkManager::network_name());
-    con->print("%i dBm", NetworkManager::rssi());
-    delay(2000);
-    con->print(NetworkManager::current_ip().c_str());
-    delay(2000);
-
-    ota = new OTAFVUManager(con, seq);
-
-    sensors = new SensorPool();
-
-    sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
-    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(250));
-    bringup_light_sensor();
-    bringup_motion_sensor();
-    bringup_temp_sensor();
-    bringup_switchbot_sensor();
-    bringup_hid();
-
-    graph = fb->manipulate();
-
-    timekeeping_begin();
-    weather_start();
-    wotd_start();
-    foo_client_begin();
-    power_mgmt_start(sensors, &display_driver, beepola);
-    admin_panel_prepare(sensors, beepola, screenshooter);
-
-    con->set_active(false);
-    fb->clear();
 
     desktop = new ViewCompositor();
     appHost = new ViewMultiplexor();
     desktop->add_layer(appHost);
     desktop->add_layer(new FpsCounter(fb));
 
-    appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
-    appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(beepola, seq), STATE_MENU);
-    appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
-    appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
-    appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
-    appHost->add_view(new AppShimWeather(), STATE_WEATHER);
-#if HAS(BALANCE_BOARD_INTEGRATION)
-    appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
-#endif
-#if HAS(PLAYGROUND)
-    appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
-#endif
+    appHost->add_view(new Bootscreen(), STATE_BOOT);
+    appHost->add_view(new RebootScreen(), STATE_RESTART);
 
-    change_state(startup_state);
-    alarm_init(sensors);
+    graph = fb->manipulate();
+    con->set_active(false);
+    fb->clear();
+
+    TaskHandle_t bootTaskHandle;
+    xTaskCreate(
+        boot_task,
+        "BOOT",
+        4096,
+        nullptr,
+        configMAX_PRIORITIES - 2,
+        &bootTaskHandle
+    );
+    ESP_LOGI(LOG_TAG, "setup end.");
 }
 
 static TickType_t memory_last_print = 0;
@@ -326,4 +340,6 @@ void loop() {
         appHost->switch_to(_actual_current_state, _next_transition);
     }
     print_memory();
+
+    if(_actual_current_state == STATE_BOOT) taskYIELD();
 }

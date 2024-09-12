@@ -144,7 +144,8 @@ static const std::map<const std::string, const char*> russian = {
     {"OS Type", "Операционная система"},
     {"OS Version", "Версия системы"},
     {"WiFi Name", "Имя сети"},
-    {"WiFi IP", "Адрес в сети"},
+    {"WiFi IP", "IP-адрес"},
+    {"MAC Address", "MAC-адрес"},
     {"Remote Control Server", "Удалённый доступ"},
     {"Serial MIDI Input", "Эмуляция синтезатора"},
 
@@ -174,6 +175,8 @@ static const std::map<const std::string, const char*> russian = {
     {"BB_SCN", "Поиск..."},
     {"BB_SYNC_NOW", "Самое время нажать кнопку SYNC на Balance Board"},
 #endif
+
+    {"Restarting...", "Перезагрузка..."},
 };
 
 const char * localized_string(const std::string key, display_language_t l) {

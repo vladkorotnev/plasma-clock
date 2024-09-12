@@ -143,7 +143,12 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     static char buf_ip[17] = { 0 };
     String tmp = NetworkManager::current_ip();
     strncpy(buf_ip, tmp.c_str(), 16);
+    static char buf_mac[20] = { 0 };
+    uint8_t mac[6];
+    esp_efuse_mac_get_default(mac);
+    snprintf(buf_mac, 19, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     system_info->add_view(new MenuInfoItemView(localized_string("WiFi IP"), buf_ip));
+    system_info->add_view(new MenuInfoItemView(localized_string("MAC Address"), buf_mac));
     system_info->add_view(new UptimeView());
     system_info->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
 #if HAS(SERIAL_MIDI)
@@ -214,9 +219,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     settings_menu->add_view(new MenuActionItemView(localized_string("Offsets"), [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
     settings_menu->add_view(new MenuActionItemView(localized_string("Status"), [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));
     settings_menu->add_view(new MenuInfoItemView(localized_string("Notice"), localized_string("FULL_SETTINGS_NOTICE")));
-    settings_menu->add_view(new MenuActionItemView(localized_string("Save & Restart"), [this](){ 
+    settings_menu->add_view(new MenuActionItemView(localized_string("Save & Restart"), [this](){
         prefs_force_save();
-        ESP.restart();
+        change_state(STATE_RESTART, TRANSITION_NONE);
     }, &good_icns));
 
     main_menu->add_view(new MenuActionItemView(localized_string("Clock"), [](){ pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &clock_icns));

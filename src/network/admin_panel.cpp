@@ -13,6 +13,7 @@
 #include <GyverPortal.h>
 #include <Arduino.h>
 #include <os_config.h>
+#include <state.h>
 
 static char LOG_TAG[] = "ADMIN";
 static TaskHandle_t hTask = NULL;
@@ -605,7 +606,7 @@ void action() {
 
         if(ui.click(reboot_btn)) {
             prefs_force_save();
-            ESP.restart();
+            change_state(STATE_RESTART, TRANSITION_NONE);
         }
         return;
     }
@@ -680,7 +681,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
                     ESP_LOGI(LOG_TAG, "Upload aborted");
                     if(prefs_uploading) {
                         end_settings_write();
-                        ESP.restart();
+                        change_state(STATE_RESTART, TRANSITION_NONE);
                     }
                     break;
 
@@ -688,7 +689,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
                     ESP_LOGI(LOG_TAG, "End: Received %i bytes", u.totalSize);
                     if(prefs_uploading) {
                         end_settings_write();
-                        ESP.restart();
+                        change_state(STATE_RESTART, TRANSITION_NONE);
                     }
                     break;
             }

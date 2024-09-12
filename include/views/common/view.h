@@ -49,6 +49,9 @@ public:
         for(Composable *r: composables) r->prepare();
     }
     void render(FantaManipulator*fb) {
+        if(wants_clear_surface) {
+            fb->clear();
+        }
         for(Composable *r: composables) {
             if(r->hidden) continue;
             if(r->x_offset <= 0 && r->width < 0) {
@@ -72,6 +75,7 @@ public:
     }
 protected:
     std::vector<Composable*> composables = {};
+    bool wants_clear_surface = false;
 };
 
 /// @brief Do not override the user-specified display time

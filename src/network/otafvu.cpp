@@ -90,7 +90,7 @@ void OTAFVUManager::shut_up_and_explode() {
     con->print("OTAFVU Done!");
     seq->play_sequence(oelutz_fvu, SEQUENCER_NO_REPEAT);
     seq->wait_end_play();
-    ESP.restart();
+    change_state(STATE_RESTART, TRANSITION_NONE);
 }
 
 void OTAFVUManager::on_error(ota_error_t error) {
