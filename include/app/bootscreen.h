@@ -5,62 +5,6 @@
 #include <views/framework.h>
 #include <algorithm>
 
-class Swoopie: public Renderable {
-public:
-    Swoopie() {}
-
-    void prepare() override {
-        headPos = -5;
-        tailPos = headPos - minLength;
-        framecounter = 0;
-    }
-
-    void render(FantaManipulator* fb) override {
-        fb->line(0, y_offs, fb->get_width(), y_offs, false);
-        fb->line(headPos - 2, y_offs, tailPos + 2, y_offs);
-        fb->plot_pixel(headPos, y_offs, true);
-        fb->plot_pixel(tailPos, y_offs, true);
-
-        if(tailPos >= fb->get_width()) {
-            headPos = -5;
-            tailPos = headPos - minLength;
-            speed = 1;
-        } else {
-            if(headPos - tailPos < maxLength) {
-                headPos += speed;
-                if(framecounter % 3 == 0) tailPos += 1;
-            }
-            else if(headPos - tailPos == maxLength && headPos <= fb->get_width()) {
-                headPos += speed;
-                tailPos += speed;
-            }
-            else if(tailPos <= fb->get_width()) {
-                tailPos += speed;
-            }
-        }
-
-        framecounter++;
-        if(framecounter % 20 == 0) {
-            if(speed < 10 && headPos <= fb->get_width()) {
-                speed++;
-            }
-            else if(speed > 5 && tailPos <= fb->get_width()) {
-                speed--;
-            }
-        }
-    }
-
-private:
-    int y_offs = 12;
-
-    int headPos = -1;
-    int tailPos = -5;
-    int maxLength = 25;
-    int minLength = 2;
-    int speed = 1;
-    int framecounter = 0;
-};
-
 class ProtoBootscreen: public Composite {
 protected:
     ProtoBootscreen(const char * title) {
@@ -77,6 +21,61 @@ protected:
     }
 
 private:
+    class Swoopie: public Renderable {
+    public:
+        Swoopie() {}
+
+        void prepare() override {
+            headPos = -5;
+            tailPos = headPos - minLength;
+            framecounter = 0;
+        }
+
+        void render(FantaManipulator* fb) override {
+            fb->line(0, y_offs, fb->get_width(), y_offs, false);
+            fb->line(headPos - 2, y_offs, tailPos + 2, y_offs);
+            fb->plot_pixel(headPos, y_offs, true);
+            fb->plot_pixel(tailPos, y_offs, true);
+
+            if(tailPos >= fb->get_width()) {
+                headPos = -5;
+                tailPos = headPos - minLength;
+                speed = 1;
+            } else {
+                if(headPos - tailPos < maxLength) {
+                    headPos += speed;
+                    if(framecounter % 3 == 0) tailPos += 1;
+                }
+                else if(headPos - tailPos == maxLength && headPos <= fb->get_width()) {
+                    headPos += speed;
+                    tailPos += speed;
+                }
+                else if(tailPos <= fb->get_width()) {
+                    tailPos += speed;
+                }
+            }
+
+            framecounter++;
+            if(framecounter % 20 == 0) {
+                if(speed < 10 && headPos <= fb->get_width()) {
+                    speed++;
+                }
+                else if(speed > 5 && tailPos <= fb->get_width()) {
+                    speed--;
+                }
+            }
+        }
+
+    private:
+        int y_offs = 12;
+
+        int headPos = -1;
+        int tailPos = -5;
+        int maxLength = 25;
+        int minLength = 2;
+        int speed = 1;
+        int framecounter = 0;
+    };
     Swoopie * progBar;
     StringScroll * label;
 };
