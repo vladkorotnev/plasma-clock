@@ -93,6 +93,7 @@ const melody_sequence_t oelutz_fvu = MELODY_OF(oelutz_fvu_data);
 #include "melodies/shake.h"
 #include "melodies/en_elmegyek.h"
 #include "melodies/scatman.h"
+#include "melodies/yy.h"
 
 const melody_sequence_t all_chime_list[] = {
     just_beep,
@@ -126,6 +127,7 @@ const melody_sequence_t all_chime_list[] = {
     shakeit,
     en_elmegyek,
     scatman,
+    yy,
 };
 const int all_chime_count = sizeof(all_chime_list)/sizeof(melody_sequence_t);
 
@@ -162,5 +164,6 @@ const std::vector<const char *> all_chime_names = {
     "Shake It!",
     "En Elmegyek",
     "Scatman",
+    "YY",
     "(Randomize)"
 };

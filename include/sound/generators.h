@@ -71,7 +71,7 @@ private:
     const rle_sample_t * waveform;
     int playhead;
     int remaining_samples;
-    int skip_factor;
     int stretch_factor;
+    int frequency;
     void rewind();
 };

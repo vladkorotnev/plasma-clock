@@ -162,7 +162,6 @@ Sampler::Sampler():
     playhead { 0 },
     waveform { nullptr },
     remaining_samples { 0 },
-    skip_factor { 1 },
     stretch_factor { 1 },
     active { false },
     state { false }
@@ -171,7 +170,6 @@ Sampler::Sampler():
 void Sampler::load_sample(const rle_sample_t * s) {
     waveform = s;
     rewind();
-    skip_factor = 1;
     stretch_factor = 1;
 }
 
@@ -179,6 +177,11 @@ void Sampler::rewind() {
     if(waveform == nullptr || waveform->rle_data == nullptr || waveform->length == 0) return;
     playhead = 0;
     remaining_samples = waveform->rle_data[0];
+    while(remaining_samples == 0 && playhead < waveform->length) {
+        playhead++;
+        remaining_samples = waveform->rle_data[playhead];
+        state ^= 1;
+    }
 }
 
 void Sampler::set_parameter(Parameter p, int v) {
@@ -194,14 +197,10 @@ void Sampler::set_parameter(Parameter p, int v) {
                 active = false;
             }
             else {
-                if(v >= waveform->root_frequency) {
-                    stretch_factor = std::max(WaveOut::BAUD_RATE / waveform->sample_rate , 1);
-                    skip_factor = std::max(v / waveform->root_frequency, 1); // not handling the case where sample rate is > waveout rate
-                } 
-                else if(v < waveform->root_frequency) {
-                    stretch_factor = std::max(WaveOut::BAUD_RATE / waveform->sample_rate, 1) * std::max(waveform->root_frequency / v, 1);
-                    skip_factor = 1; // not handling the case where sample rate is > waveout rate
-                }
+                frequency = v;
+                // since the sample rate of the snippet is always lower than that of WaveOut
+                // we can only care about the stretch factor
+                stretch_factor = (WaveOut::BAUD_RATE / waveform->sample_rate) * waveform->root_frequency / v;
                 ESP_LOGV("SAMP", "New stretch = %i, skip = %i", stretch_factor, skip_factor);
                 active = true;
                 rewind();
@@ -222,7 +221,7 @@ int Sampler::get_parameter(Parameter p) {
         case PARAMETER_ACTIVE:
             return active;
         case PARAMETER_FREQUENCY:
-            return (waveform == nullptr) ? 0 : (waveform->root_frequency * skip_factor / stretch_factor);
+            return frequency;
         case PARAMETER_SAMPLE_ADDR:
             return (int) waveform;
         default:
@@ -248,13 +247,7 @@ size_t Sampler::generate_samples(void * buffer, size_t length, uint32_t want_sam
         }
 
         if(stretch_factor == 1 || (s > 0 && (s % stretch_factor) == 0)) {
-            if(skip_factor > remaining_samples) {
-                playhead = (playhead + std::max(skip_factor / 8, 1)) % waveform->length;
-                remaining_samples = waveform->rle_data[playhead] - ((skip_factor % 8) - remaining_samples);
-                state ^= 1;
-            } else {
-                remaining_samples -= skip_factor;
-            }
+            remaining_samples -= 1;
 
             if(remaining_samples == 0) {
                 playhead = (playhead + 1) % waveform->length;
