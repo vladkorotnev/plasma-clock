@@ -229,6 +229,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     main_menu->add_view(new MenuActionItemView(localized_string("Stopwatch"), [](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
     main_menu->add_view(new MenuActionItemView(localized_string("Weather"), []() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
     main_menu->add_view(new MenuActionItemView(localized_string("Alarm"), [](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Music Box"), [](){ push_state(STATE_MUSICBOX, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &music_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
     main_menu->add_view(new MenuActionItemView(localized_string("Weighing"), [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
 #endif

@@ -36,6 +36,7 @@
 #include <app/weather.h>
 #include <app/playground.h>
 #include <app/bootscreen.h>
+#include <app/musicbox.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 #include <views/common/list_view.h>
@@ -245,6 +246,7 @@ void boot_task(void*) {
     appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
     appHost->add_view(new AppShimWeather(), STATE_WEATHER);
+    appHost->add_view(new AppShimMusicbox(seq), STATE_MUSICBOX);
 #if HAS(BALANCE_BOARD_INTEGRATION)
     appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
 #endif

@@ -48,6 +48,19 @@ void SquareGenerator::set_parameter(Parameter p, int v) {
     }
 }
 
+int SquareGenerator::get_parameter(Parameter p) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            return active;
+        case PARAMETER_FREQUENCY:
+            return (wavelength == 0) ? 0 : (WaveOut::BAUD_RATE / wavelength);
+        case PARAMETER_DUTY:
+            return duty;
+        default:
+            return 0;
+    }
+}
+
 size_t SquareGenerator::generate_samples(void* buffer, size_t length, uint32_t want_samples_) {
     if(!active || wavelength == 0) return 0;
 
@@ -101,6 +114,17 @@ void NoiseGenerator::set_parameter(Parameter p, int v) {
             break;
 
         default: break;
+    }
+}
+
+int NoiseGenerator::get_parameter(Parameter p) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            return active;
+        case PARAMETER_FREQUENCY:
+            return (wavelength == 0) ? 0 : (WaveOut::BAUD_RATE / wavelength / 2);
+        default:
+            return 0;
     }
 }
 
@@ -190,6 +214,19 @@ void Sampler::set_parameter(Parameter p, int v) {
             break;
 
         default: break;
+    }
+}
+
+int Sampler::get_parameter(Parameter p) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            return active;
+        case PARAMETER_FREQUENCY:
+            return (waveform == nullptr) ? 0 : (waveform->root_frequency * skip_factor / stretch_factor);
+        case PARAMETER_SAMPLE_ADDR:
+            return (int) waveform;
+        default:
+            return 0;
     }
 }
 

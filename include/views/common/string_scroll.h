@@ -12,6 +12,7 @@ public:
     bool align_to_right;
     bool start_at_visible;
     int holdoff;
+    int reappear_delay;
     int left_margin;
     void set_string(const char*);
     void set_y_position(int);

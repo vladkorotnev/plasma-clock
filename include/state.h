@@ -13,6 +13,7 @@ typedef enum device_state {
     STATE_ALARMING,
     STATE_STOPWATCH,
     STATE_WEATHER,
+    STATE_MUSICBOX,
 #if HAS(BALANCE_BOARD_INTEGRATION)
     STATE_WEIGHING,
 #endif

@@ -41,6 +41,7 @@ public:
     static const int TONE_CHANNELS = 4;
     static const int EXTRA_CHANNELS = 2;
     static const int CHANNELS = TONE_CHANNELS + EXTRA_CHANNELS;
+    ToneGenerator * voices[CHANNELS] = { nullptr };
     NewSequencer();
     ~NewSequencer();
     void play_sequence(const melody_sequence_t *, sequence_playback_flags_t flags = SEQUENCER_PLAY_NORMALLY, int repeat = 0);
@@ -53,7 +54,6 @@ public:
 #endif
     
 private:
-    ToneGenerator * voices[CHANNELS] = { nullptr };
     const melody_sequence_t * sequence;
     size_t pointer;
     size_t loop_point;

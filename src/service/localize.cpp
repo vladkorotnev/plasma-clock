@@ -66,6 +66,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Weather", "Погода"},
     {"Alarm", "Будильник"},
     {"Weighing", "Весы"},
+    {"Music Box", "Музыка"},
     {"Settings", "Параметры"},
 
     {"Display", "Экран"},
