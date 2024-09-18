@@ -238,10 +238,16 @@ private:
             save_prefs();
             cursorPosition = CursorPosition::PLAY_PAUSE;
             xTimerStart(hTimer, 0);
+            secondView->sound = true;
+            minuteView->sound = false;
+            hourView->sound = false;
         } else {
             xTimerStop(hTimer, 0);
             // save time halfway through
             save_prefs();
+            secondView->sound = true;
+            minuteView->sound = true;
+            hourView->sound = true;
         }
     }
 };
