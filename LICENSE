@@ -1,5 +1,5 @@
-NB: This project uses some bitmap assets which might involve separate licenses.
-This license applies to the source code only.
+NB: This project uses some bitmap and sound assets which might involve separate licenses.
+This license applies to the source code only, minus the `src/sound/melodies` folder.
 
 ----
 
