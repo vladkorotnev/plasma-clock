@@ -3,6 +3,8 @@
 #include <sound/generators.h>
 #include <device_config.h>
 
+extern const rle_sample_t kick_sample;
+
 typedef enum melody_item_type {
     FREQ_SET, // or 0 to turn off
     DUTY_SET,

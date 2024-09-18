@@ -49,17 +49,23 @@ private:
     uint32_t rng;
 };
 
+typedef enum mixing_mode {
+    MIX_MODE_ADD,
+    MIX_MODE_XOR,
+} mixing_mode_t;
+
 typedef struct rle_sample {
     const uint16_t sample_rate;
     const uint16_t root_frequency;
     /// @brief RLE data of the PWM audio sample. First byte is number of 1 bits, second byte is number of 0 bits that follow, and so forth.
     const uint8_t* rle_data;
     const size_t length;
+    const mixing_mode_t mode;
 } rle_sample_t;
 
 class Sampler: public ToneGenerator {
 public:
-    Sampler();
+    Sampler(const rle_sample_t * sample = nullptr);
     void set_parameter(Parameter p, int v) override;
     size_t generate_samples(void* buffer, size_t length, uint32_t want_samples_) override;
     int get_parameter(Parameter p) override;

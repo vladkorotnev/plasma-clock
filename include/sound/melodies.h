@@ -7,7 +7,6 @@ extern const melody_sequence_t pc98_pipo;
 extern const melody_sequence_t tulula_fvu;
 extern const melody_sequence_t oelutz_fvu;
 
-
 extern const char * all_chime_names_csv;
 extern const std::vector<const char *> all_chime_names;
 extern const melody_sequence_t all_chime_list[];

@@ -4,9 +4,14 @@
 
 const melody_sequence_t * melody_from_no(int melody_no) {
     int no = std::min(melody_no, all_chime_count);
-    no  = std::max(no, 0);
-    if(no == all_chime_count) {
-        no = esp_random() % all_chime_count;
+    no  = std::max(no, -1);
+    if(no == all_chime_count || no == -1) {
+        static const int boring_melody_no = 4;
+        static int last_random_no = -1;
+        do {
+            no = boring_melody_no + (esp_random() % (all_chime_count - boring_melody_no));
+        } while(no == last_random_no);
+        last_random_no = no;
     }
     
     return &all_chime_list[no];
@@ -93,6 +98,9 @@ const melody_sequence_t oelutz_fvu = MELODY_OF(oelutz_fvu_data);
 #include "melodies/shake.h"
 #include "melodies/en_elmegyek.h"
 #include "melodies/scatman.h"
+#include "melodies/stasis.h"
+
+// WIP below
 #include "melodies/yy.h"
 
 const melody_sequence_t all_chime_list[] = {
@@ -127,11 +135,12 @@ const melody_sequence_t all_chime_list[] = {
     shakeit,
     en_elmegyek,
     scatman,
+    stasis,
     yy,
 };
 const int all_chime_count = sizeof(all_chime_list)/sizeof(melody_sequence_t);
 
-const char * all_chime_names_csv = "Just Beep,PC-98 Boot,Русь 28,Штрих-М,A.M. - Arise,Caramelldansen,BoA - Duvet,T-Square - Truth,Haruhi no Omoi,WAVE & DRAX - When Present Is Past,Hishoku no Sora,Bouken Desho Desho,Gentle Jena,Omega - Gammapolisz,Like The Wind (TMMS),NightRadio - Waiting Freqs,NightRadio - The Way,Dougal &amp; Gammer - Guitar Hero,Hachiya Nanashi - Shabon,Gate Of Steiner,deadballP - Towa ni tsuzuku gosenfu,Cream puff - Mermaid girl,Brisk &amp; Trixxy - Eye Opener,Hiroyuki Oshima - The Ark Awakes From The Sea Of Chaos,Skibidi Toilet (Timbaland - Give It To Me),PinocchioP - Kamippoina (God-ish),KOTOKO - Re-sublimity (Kannazuki no Miko),Calvin Harris - Acceptable In The 80s,Emon - Shake It,Omega - En Elmegyek,John Scatman - Scatman (Ski-Ba-Bop-Dop-Bop),Random";
+const char * all_chime_names_csv = "Just Beep,PC-98 Boot,Русь 28,Штрих-М,A.M. - Arise,Caramelldansen,BoA - Duvet,T-Square - Truth,Haruhi no Omoi,WAVE & DRAX - When Present Is Past,Hishoku no Sora,Bouken Desho Desho,Gentle Jena,Omega - Gammapolisz,Like The Wind (TMMS),NightRadio - Waiting Freqs,NightRadio - The Way,Dougal &amp; Gammer - Guitar Hero,Hachiya Nanashi - Shabon,Gate Of Steiner,deadballP - Towa ni tsuzuku gosenfu,Cream puff - Mermaid girl,Brisk &amp; Trixxy - Eye Opener,Hiroyuki Oshima - The Ark Awakes From The Sea Of Chaos,Skibidi Toilet (Timbaland - Give It To Me),PinocchioP - Kamippoina (God-ish),KOTOKO - Re-sublimity (Kannazuki no Miko),Calvin Harris - Acceptable In The 80s,Emon - Shake It,Omega - En Elmegyek,John Scatman - Scatman (Ski-Ba-Bop-Dop-Bop),Minamotoya - Stasis,23.exe - YY,Random";
 const std::vector<const char *> all_chime_names = {
     "Beep",
     "PC-98 Boot",
@@ -164,6 +173,7 @@ const std::vector<const char *> all_chime_names = {
     "Shake It!",
     "En Elmegyek",
     "Scatman",
+    "Stasis",
     "YY",
     "(Randomize)"
 };

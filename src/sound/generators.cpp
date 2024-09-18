@@ -158,14 +158,16 @@ size_t NoiseGenerator::generate_samples(void* buffer, size_t length, uint32_t wa
     return idx + 1;
 }
 
-Sampler::Sampler():
+Sampler::Sampler(const rle_sample_t * s):
     playhead { 0 },
     waveform { nullptr },
     remaining_samples { 0 },
     stretch_factor { 1 },
     active { false },
     state { false }
-{}
+{
+    if(s != nullptr) load_sample(s);
+}
 
 void Sampler::load_sample(const rle_sample_t * s) {
     waveform = s;
@@ -242,8 +244,21 @@ size_t Sampler::generate_samples(void * buffer, size_t length, uint32_t want_sam
         idx = s / 8;
         bit = 8 - (s % 8);
         
-        if(state) {
-            buff[idx] |= (1 << bit);
+        switch(waveform->mode) {
+            case MIX_MODE_ADD:
+                if(state) {
+                    buff[idx] |= (1 << bit);
+                }
+                break;
+
+            case MIX_MODE_XOR:
+                if(state) {
+                    buff[idx] ^= (1 << bit);
+                }
+                break;
+
+            default:
+                break;
         }
 
         if(stretch_factor == 1 || (s > 0 && (s % stretch_factor) == 0)) {

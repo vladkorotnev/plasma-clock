@@ -50,6 +50,11 @@ static const std::map<const std::string, const char*> english = {
     {"Yes", "Yes"},
     {"No", "No"},
 
+    {"SNOOZE", "SNOOZE"},
+    {"STOP", "STOP"},
+    {"HOLD", "HOLD"},
+    {"Only Once", "Only Once"},
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
     {"BB_CNCT_GUIDE", "\x1A to connect"},

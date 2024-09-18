@@ -96,11 +96,14 @@ void NewSequencer::midi_task() {
 
 #endif
 
+static const uint8_t kick_rle_data[] = {0, 7, 4, 2, 1, 24, 23, 30, 33, 26, 38, 38, 30, 41, 41, 52, 62, 50, 58, 64, 61, 70, 99, 92, 80, 119, 102, 119, 119, 142, 146, 117, 160, 119, 154, 5};
+const rle_sample_t kick_sample = { .sample_rate = 8000, .root_frequency = 524 /* C5 */, .rle_data = kick_rle_data, .length = 36, .mode = MIX_MODE_XOR };
+
 NewSequencer::NewSequencer() {
     // Ch 0, 1, 2, 3: tone
     for(int i = 0; i < TONE_CHANNELS; i++) voices[i] = new SquareGenerator();
     voices[4] = new NoiseGenerator(); // Ch4: Noise
-    voices[5] = new Sampler(); // Ch5: RLE PWM
+    voices[5] = new Sampler(&kick_sample); // Ch5: RLE PWM
     wait_end_group = xEventGroupCreate();
 
 #if HAS(SERIAL_MIDI)
@@ -127,7 +130,8 @@ bool NewSequencer::is_sequencing() {
 
 void NewSequencer::stop_sequence() {
     is_running = false;
-    for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+    for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::PARAMETER_ACTIVE, false);
+    voices[5]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, (int) &kick_sample);
     xEventGroupSetBits(wait_end_group, BIT_END_PLAY);
 }
 
@@ -142,9 +146,10 @@ void NewSequencer::play_sequence(const melody_sequence_t * s, sequence_playback_
     pointer = 0;
     loop_point = 0;
     for(int i = 0; i < CHANNELS; i++) {
-        voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, 0);
-        voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, 0);
+        voices[i]->set_parameter(ToneGenerator::PARAMETER_FREQUENCY, 0);
+        voices[i]->set_parameter(ToneGenerator::PARAMETER_DUTY, 0);
     }
+    voices[5]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, (int) &kick_sample);
     if((f & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
         find_hook();
         pointer = loop_point;
@@ -173,10 +178,10 @@ bool NewSequencer::end_of_song() {
 bool NewSequencer::process_step(const melody_item_t * cur_line) {
     switch(cur_line->command) {
         case FREQ_SET:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_FREQUENCY, cur_line->argument1);
             break;
         case DUTY_SET:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_DUTY, cur_line->argument1);
             break;
         case LOOP_POINT_SET:
             loop_point = pointer + 1;
@@ -185,7 +190,7 @@ bool NewSequencer::process_step(const melody_item_t * cur_line) {
             remaining_delay_samples = cur_line->argument1 * WaveOut::BAUD_RATE / 1000;
             break;
         case SAMPLE_LOAD:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_SAMPLE_ADDR, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, cur_line->argument1);
             break;
         case HOOK_POINT_SET:
             if(cur_line->argument1 == HOOK_POINT_TYPE_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
