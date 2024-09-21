@@ -10,9 +10,7 @@
 #include <input/touch_plane.h>
 #include <input/keypad.h>
 #include <input/hid_sensor.h>
-#include <sound/waveout.h>
 #include <sound/yukkuri.h>
-#include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
 #include <network/otafvu.h>
@@ -39,7 +37,6 @@
 #include <app/musicbox.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
-#include <views/common/list_view.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 

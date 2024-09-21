@@ -46,6 +46,7 @@ static const std::map<const std::string, const char*> english = {
     {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
 
     {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
+    {"Loading...", "Loading..."},
 
     {"Yes", "Yes"},
     {"No", "No"},
@@ -155,7 +156,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Remote Control Server", "Удалённый доступ"},
     {"Serial MIDI Input", "Эмуляция синтезатора"},
 
-    {"WEATHER_FMT", "%s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
+    {"WEATHER_FMT", "Сейчас %s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
     {"Loading...", "Загрузка..."},
     {"PoP, %", "Осадки, %"},
     {"P, hPa", "Давл., гПа"},
