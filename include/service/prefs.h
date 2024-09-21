@@ -65,6 +65,7 @@ static constexpr prefs_key_t PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS = "s_alm_s";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_ON = "h_chime_on";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_START_HOUR = "h_chime_start";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_STOP_HOUR = "h_chime_stop";
+static constexpr prefs_key_t PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL = "h_soviet";
 static constexpr prefs_key_t PREFS_KEY_HOURLY_CHIME_MELODY = "h_chime";
 static constexpr prefs_key_t PREFS_KEY_FIRST_CHIME_MELODY = "h_1stchime";
 

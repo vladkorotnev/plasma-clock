@@ -44,6 +44,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Hourly chime"), PREFS_KEY_HOURLY_CHIME_ON));
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("First chime"), PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("Other chimes"), PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Fake Soviet radio time signals"), PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime from"), PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime until"), PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
 #if HAS(AQUESTALK)

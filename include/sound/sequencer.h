@@ -23,7 +23,7 @@ enum hook_point_type : uint8_t {
 typedef struct melody_item {
     const melody_item_type_t command : 4;
     const uint8_t channel : 4;
-    const int argument1;
+    int argument1;
 } melody_item_t;
 
 typedef struct melody_sequence {

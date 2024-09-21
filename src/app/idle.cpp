@@ -124,6 +124,7 @@ void _play_hourly_chime_if_enabled(bool first_chime) {
 }
 
 void hourly_chime() {
+    if(sequencer->is_sequencing()) return;
     tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR);
     if(now.hour != last_chimed_hour) {
@@ -155,6 +156,33 @@ void hourly_chime() {
                 yukkuri->speak(hourUtterance);
             }
 #endif
+        }
+    } else {
+        if( now.hour >= first_hour
+           && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
+          && now.second == 55
+          && now.minute == 59
+          && prefs_get_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL)
+        ) {
+            // Reference: https://ru.wikipedia.org/wiki/Сигнал_проверки_времени#Сигналы_точного_времени_в_России
+            static melody_item_t precise_time_signal[] = {
+                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+            };
+            static const melody_sequence_t precise_time_signal_seq = {
+                .array = precise_time_signal,
+                .count = sizeof(precise_time_signal)/sizeof(melody_item_t)
+            };
+            static const unsigned last_delay_index = 21;
+
+            precise_time_signal[last_delay_index].argument1 =  (100 + 20*((now.hour + 1) % 24));
+            precise_time_signal[last_delay_index + 2].argument1 =  1000 - precise_time_signal[last_delay_index].argument1;
+
+            sequencer->play_sequence(&precise_time_signal_seq);
         }
     }
 }

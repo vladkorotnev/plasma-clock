@@ -258,6 +258,7 @@ static void build() {
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
         GP.HR();
         render_bool("Hourly chime:", PREFS_KEY_HOURLY_CHIME_ON);
+        render_bool("Fake Soviet radio time signals:", PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL);
         GP.BREAK();
         render_melody("First of the day:", PREFS_KEY_FIRST_CHIME_MELODY);
         render_melody("All others:", PREFS_KEY_HOURLY_CHIME_MELODY);
@@ -543,6 +544,7 @@ void action() {
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
         save_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23);
+        save_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL);
         save_melody(PREFS_KEY_FIRST_CHIME_MELODY);
         save_melody(PREFS_KEY_HOURLY_CHIME_MELODY);
         save_bool(PREFS_KEY_TIMESERVER_ENABLE);

@@ -94,6 +94,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Tick sound", "Тикание часов"},
     {"Ticking only when screen on", "Тикание только при включённом экране"},
     {"Hourly chime", "Ежечасный сигнал"},
+    {"Fake Soviet radio time signals", "Имитация сигналов точного времени радиоточки"},
     {"First chime", "Первый за день"},
     {"Other chimes", "Остальные"},
     {"Chime from", "Первый час"},
