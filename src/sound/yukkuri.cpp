@@ -90,9 +90,11 @@ bool Yukkuri::speak(YukkuriUtterance& utterance) {
         return true;
     } else {
         ESP_LOGE(LOG_TAG, "Cannot speak [%s]: no space in queue", utterance.text);
+        utterance.callback(false);
         return false;
     }
 #else
+    utterance.callback(false);
     return false;
 #endif
 }

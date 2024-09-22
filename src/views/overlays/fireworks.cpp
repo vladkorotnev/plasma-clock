@@ -7,7 +7,7 @@ FireworksOverlay::FireworksOverlay(Beeper * b, uint8_t w, uint8_t h):
     height(h),
     active(false),
     particles_array(nullptr),
-    sound(b)
+    beeper(b)
 {
 
 }
@@ -27,9 +27,6 @@ void FireworksOverlay::make_memory_if_needed() {
     if(particles_array == nullptr) {
         ESP_LOGE(LOG_TAG, "Failed to allocate memory");
     }
-}
-
-void FireworksOverlay::cleanup() {
 }
 
 void FireworksOverlay::render(FantaManipulator * fb) {
@@ -91,6 +88,15 @@ void FireworksOverlay::step() {
                         p->vy = std::max(-3, p->vy - 1);
                     }
                     else if((((rnd & 0xF0F1) % 16) == 1 && p->y < height / 2) || p->y < height / 3) {
+                        p->type = ARMED;
+                        p->phase = 0;
+                        p->vx = 0;
+                        p->vy = 0;
+                    }
+                    break;
+
+                case ARMED:
+                    if(p->phase >= 15 - (rnd % 10)) {
                         // EKUSUPUROOJONN!
                         unsigned debris_count = 16 + (rnd % 10);
                         unsigned debris_max = debris_count;
@@ -137,8 +143,8 @@ void FireworksOverlay::step() {
 
                 case EXPLODING:
                     if(p->phase == 1) {
-                        if(sound != nullptr && !did_sound) {
-                            sound->beep_blocking(CHANNEL_NOTICE, 100, 10);
+                        if(beeper != nullptr && !did_sound && sound) {
+                            beeper->beep_blocking(CHANNEL_NOTICE, 100, 10);
                             did_sound = true;
                         }
                     } else if(p->phase >= 16 && p->phase % (((rnd >> 4) & 0xF) + 2) == 0) {

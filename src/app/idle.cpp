@@ -104,14 +104,16 @@ static bool was_pmu_startled = false;
 
 static int last_chimed_hour = 0;
 
+static const int tick_tock_offset_ms = 250;
+
 void sound_tick_tock() {
     tk_time_of_day_t now = get_current_time_precise();
-    if(now.millisecond >= 250 && !tick_tock) {
+    if(now.millisecond >= tick_tock_offset_ms && !tick_tock) {
         if(!sequencer->is_sequencing() && (yukkuri == nullptr || !yukkuri->is_speaking())) {
             beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
         }
         tick_tock = true;
-    } else if (now.millisecond < 250 && tick_tock) {
+    } else if (now.millisecond < tick_tock_offset_ms && tick_tock) {
         tick_tock = false;
     }
 }
@@ -123,15 +125,50 @@ void _play_hourly_chime_if_enabled(bool first_chime) {
     sequencer->play_sequence(melody, SEQUENCER_PLAY_HOOK_ONLY);
 }
 
+void _play_precise_time_signal_if_enabled(const tk_time_of_day_t &now) {
+    if(!prefs_get_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL)) return;
+
+    // Reference: https://ru.wikipedia.org/wiki/Сигнал_проверки_времени#Сигналы_точного_времени_в_России
+    static melody_item_t precise_time_signal[] = {
+        {DELAY, 0, tick_tock_offset_ms}, // <- compensate for the delay in the ticking animation
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+    };
+    static const melody_sequence_t precise_time_signal_seq = {
+        .array = precise_time_signal,
+        .count = sizeof(precise_time_signal)/sizeof(melody_item_t)
+    };
+    static const unsigned last_delay_index = 22;
+
+    precise_time_signal[last_delay_index].argument1 =  (100 + 20*((now.hour + 1) % 24));
+    precise_time_signal[last_delay_index + 2].argument1 =  1000 - precise_time_signal[last_delay_index].argument1;
+
+    sequencer->play_sequence(&precise_time_signal_seq);
+}
+
 void hourly_chime() {
     if(sequencer->is_sequencing()) return;
     tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR);
+    int last_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR);
     if(now.hour != last_chimed_hour) {
         last_chimed_hour = now.hour;
+        if(now.hour == 0 && now.minute == 0) {
+            tk_date_t today = get_current_date();
+            if(today.day == 1 && today.month == 1 && today.year > 2000) {
+                push_state(STATE_NEW_YEAR, TRANSITION_SLIDE_VERTICAL_UP);
+                // New Year animation plays the melody, so no chime
+                return;
+            }
+        }
+
         bool first_chime = (now.hour == first_hour);
         if(  now.hour >= first_hour
-          && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
+          && now.hour <= last_hour
         ) {
 #if !HAS(AQUESTALK)
             _play_hourly_chime_if_enabled(first_chime);
@@ -158,31 +195,12 @@ void hourly_chime() {
 #endif
         }
     } else {
-        if( now.hour >= first_hour
-           && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
+        if( (now.hour + 1) >= first_hour
+           && (now.hour + 1) <= last_hour
           && now.second == 55
           && now.minute == 59
-          && prefs_get_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL)
         ) {
-            // Reference: https://ru.wikipedia.org/wiki/Сигнал_проверки_времени#Сигналы_точного_времени_в_России
-            static melody_item_t precise_time_signal[] = {
-                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
-                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
-                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
-                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
-                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
-                {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
-            };
-            static const melody_sequence_t precise_time_signal_seq = {
-                .array = precise_time_signal,
-                .count = sizeof(precise_time_signal)/sizeof(melody_item_t)
-            };
-            static const unsigned last_delay_index = 21;
-
-            precise_time_signal[last_delay_index].argument1 =  (100 + 20*((now.hour + 1) % 24));
-            precise_time_signal[last_delay_index + 2].argument1 =  1000 - precise_time_signal[last_delay_index].argument1;
-
-            sequencer->play_sequence(&precise_time_signal_seq);
+            _play_precise_time_signal_if_enabled(now);
         }
     }
 }
@@ -440,6 +458,8 @@ void app_idle_process() {
                 firework->min_delay = pdMS_TO_TICKS(500);
                 firework->max_delay = pdMS_TO_TICKS(3000);
             }
+        } else {
+            firework->set_active(false);
         }
 
         current_weather_t w;

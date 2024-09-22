@@ -35,6 +35,7 @@
 #include <app/playground.h>
 #include <app/bootscreen.h>
 #include <app/musicbox.h>
+#include <app/new_year.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 
@@ -250,6 +251,7 @@ void boot_task(void*) {
 #if HAS(PLAYGROUND)
     appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
 #endif
+    appHost->add_view(new NewYearAppShim(beepola, seq, yukkuri), STATE_NEW_YEAR);
 
     change_state(startup_state, TRANSITION_WIPE);
     alarm_init(sensors);

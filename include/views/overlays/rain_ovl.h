@@ -1,5 +1,6 @@
 #pragma once
 #include <graphics/fanta_manipulator.h>
+#include <graphics/framebuffer.h>
 #include <views/common/view.h>
 
 typedef struct __attribute__((__packed__)) rain_particle {
@@ -12,7 +13,7 @@ typedef struct __attribute__((__packed__)) rain_particle {
 /// @brief A particle system view resembling rainfall or snowfall
 class RainOverlay: public Renderable {
 public:
-    RainOverlay(int width, int height);
+    RainOverlay(int width = DisplayFramebuffer::width, int height = DisplayFramebuffer::height);
     void render(FantaManipulator*);
     void step();
 

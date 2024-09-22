@@ -18,6 +18,7 @@ typedef enum device_state {
     STATE_WEIGHING,
 #endif
 
+    STATE_NEW_YEAR,
     STATE_OTAFVU,
 #if HAS(PLAYGROUND)
     STATE_PLAYGROUND,
