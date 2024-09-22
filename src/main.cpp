@@ -307,7 +307,7 @@ void setup() {
         "BOOT",
         4096,
         nullptr,
-        configMAX_PRIORITIES - 2,
+        configMAX_PRIORITIES - 1,
         &bootTaskHandle
     );
     ESP_LOGI(LOG_TAG, "setup end.");
