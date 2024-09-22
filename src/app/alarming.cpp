@@ -235,17 +235,11 @@ void app_alarming_process() {
                     return;
                 }
                 else if(hid_test_key_state(KEY_HEADPAT)) {
-                    // Headpat on touchscreen devices snoozes right away
-                    #if HAS(TOUCH_PLANE)
-                        begin_snoozing();
-                    #else
-                    // Headpat on other devices turns off
                     arrows->left = false;
                     arrows->top = false;
                     arrows->bottom = false;
                     arrows->right = false;
-                    state = STOP_HOLD_COUNTDOWN;
-                    #endif
+                    state = (snooze_minutes > 0) ? SNOOZE_HOLD_COUNTDOWN : STOP_HOLD_COUNTDOWN;
                 }
 
                 if(maxDur > 0) {
