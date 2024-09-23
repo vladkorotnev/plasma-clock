@@ -78,11 +78,11 @@ for msg in mid:
     elif msg.type == "marker":
         evts.append(Comment(msg.text))
         if msg.text == "LOOP":
-            evts.append(Event("LOOP_POINT_SET", 0, 0))
+            evts.append(Event("LOOP_POINT_SET", 0, "LOOP_POINT_TYPE_LOOP"))
         elif msg.text == "HOOK":
-            evts.append(Event("HOOK_POINT_SET", 0, "HOOK_POINT_TYPE_START"))
+            evts.append(Event("LOOP_POINT_SET", 0, "LOOP_POINT_TYPE_HOOK_START"))
         elif msg.text == "HOOKEND":
-            evts.append(Event("HOOK_POINT_SET", 0, "HOOK_POINT_TYPE_END"))
+            evts.append(Event("HOOK_POINT_SET", 0, "LOOP_POINT_TYPE_HOOK_END"))
         elif msg.text.startswith("SAMPLE="):
             evts.append(Event("SAMPLE_LOAD", 5, "(int) &" + msg.text[len("SAMPLE=")::]))
     elif msg.type == "control_change":

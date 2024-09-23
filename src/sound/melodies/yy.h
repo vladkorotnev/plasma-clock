@@ -787,9 +787,9 @@ static const melody_item_t yy_data[] = {
     {DELAY, 0, 60},
     {FREQ_SET, 0, 659},
     /* LOOP */
-    {LOOP_POINT_SET, 0, 0},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_LOOP},
     /* HOOK */
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_START},
     {FREQ_SET, 4, 2794},
     {DELAY, 0, 182},
     {FREQ_SET, 4, 0},
@@ -1140,7 +1140,7 @@ static const melody_item_t yy_data[] = {
     {DELAY, 0, 304},
     {FREQ_SET, 0, 0},
     /* HOOKEND */
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     {FREQ_SET, 1, 131},
     {FREQ_SET, 4, 988},
     {DELAY, 0, 60},

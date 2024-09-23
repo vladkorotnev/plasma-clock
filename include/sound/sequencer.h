@@ -11,19 +11,18 @@ typedef enum melody_item_type {
     DELAY,
     LOOP_POINT_SET,
     SAMPLE_LOAD,
-    HOOK_POINT_SET,
-    MAX_INVALID
 } melody_item_type_t;
 
-enum hook_point_type : uint8_t {
-    HOOK_POINT_TYPE_START = 0,
-    HOOK_POINT_TYPE_END
+enum loop_point_type : uint8_t {
+    LOOP_POINT_TYPE_LOOP = 0,
+    LOOP_POINT_TYPE_HOOK_START,
+    LOOP_POINT_TYPE_HOOK_END
 };
 
 typedef struct melody_item {
     const melody_item_type_t command : 4;
     const uint8_t channel : 4;
-    int argument1;
+    int argument;
 } melody_item_t;
 
 typedef struct melody_sequence {

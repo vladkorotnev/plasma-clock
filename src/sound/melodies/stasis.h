@@ -73,7 +73,7 @@ static const melody_item_t stasis_data[] = {
     {FREQ_SET, 5, 0},
     {DELAY, 0, 116},
     /* HOOK */
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_START},
     {FREQ_SET, 0, 622},
     {DUTY_SET, 0, 5},
     {FREQ_SET, 5, 2489},
@@ -85,7 +85,7 @@ static const melody_item_t stasis_data[] = {
     {FREQ_SET, 5, 0},
     {DELAY, 0, 116},
     /* LOOP */
-    {LOOP_POINT_SET, 0, 0},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_LOOP},
     {FREQ_SET, 0, 1244},
     {FREQ_SET, 1, 52},
     {FREQ_SET, 2, 311},
@@ -834,7 +834,7 @@ static const melody_item_t stasis_data[] = {
     {FREQ_SET, 1, 98},
     {DELAY, 0, 145},
     /* HOOKEND */
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     {FREQ_SET, 1, 0},
     {FREQ_SET, 5, 2489},
     {DELAY, 0, 58},

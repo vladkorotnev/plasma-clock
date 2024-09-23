@@ -178,24 +178,25 @@ bool NewSequencer::end_of_song() {
 bool NewSequencer::process_step(const melody_item_t * cur_line) {
     switch(cur_line->command) {
         case FREQ_SET:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_FREQUENCY, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_FREQUENCY, cur_line->argument);
             break;
         case DUTY_SET:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_DUTY, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_DUTY, cur_line->argument);
             break;
         case LOOP_POINT_SET:
-            loop_point = pointer + 1;
-            break;
-        case DELAY:
-            remaining_delay_samples = cur_line->argument1 * WaveOut::BAUD_RATE / 1000;
-            break;
-        case SAMPLE_LOAD:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, cur_line->argument1);
-            break;
-        case HOOK_POINT_SET:
-            if(cur_line->argument1 == HOOK_POINT_TYPE_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
+            if(cur_line->argument == LOOP_POINT_TYPE_HOOK_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
                 if(end_of_song()) return true;
             }
+            else if(cur_line->argument == LOOP_POINT_TYPE_LOOP) {
+                loop_point = pointer + 1;
+            }
+            break;
+        case DELAY:
+            remaining_delay_samples = cur_line->argument * WaveOut::BAUD_RATE / 1000;
+            break;
+        case SAMPLE_LOAD:
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, cur_line->argument);
+            break;
             break;
         default:
             break;
@@ -207,8 +208,8 @@ bool NewSequencer::process_step(const melody_item_t * cur_line) {
 void NewSequencer::find_hook() {
     while(pointer < sequence->count) {
         const melody_item_t * cur_line = &sequence->array[pointer];
-        if(cur_line->command == HOOK_POINT_SET) {
-            if(cur_line->argument1 == HOOK_POINT_TYPE_START) {
+        if(cur_line->command == LOOP_POINT_SET) {
+            if(cur_line->argument == LOOP_POINT_TYPE_HOOK_START) {
                 loop_point = pointer + 1;
                 ESP_LOGI(LOG_TAG, "Hook found, starts at %i", loop_point);
                 break;

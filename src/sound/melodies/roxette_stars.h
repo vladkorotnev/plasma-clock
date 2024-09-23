@@ -205,7 +205,7 @@ static const melody_item_t roxette_stars_data[] = {
     {DELAY, 0, 52},
     {FREQ_SET, 0, 0},
     /* LOOP */
-    {LOOP_POINT_SET, 0, 0},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_LOOP},
     {FREQ_SET, 1, 988},
     {FREQ_SET, 2, 123},
     {FREQ_SET, 5, 3136},
@@ -1672,7 +1672,7 @@ static const melody_item_t roxette_stars_data[] = {
     {DELAY, 0, 112},
     {FREQ_SET, 0, 587},
     /* HOOK */
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_START},
     {FREQ_SET, 1, 293},
     {FREQ_SET, 2, 98},
     {FREQ_SET, 5, 3136},
@@ -2030,7 +2030,7 @@ static const melody_item_t roxette_stars_data[] = {
     {FREQ_SET, 2, 110},
     {DELAY, 0, 112},
     /* HOOKEND */
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     {FREQ_SET, 2, 110},
     {FREQ_SET, 4, 784},
     {DELAY, 0, 112},

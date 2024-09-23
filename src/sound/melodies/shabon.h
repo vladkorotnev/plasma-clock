@@ -99,7 +99,7 @@ static const melody_item_t syabon_data[] = {
     {DELAY, 0, 127},
     {FREQ_SET, 0, 0},
     {DELAY, 0, 508},
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     {FREQ_SET, 0, 0},
     {DELAY, 0, 127},
     {FREQ_SET, 0, 739},

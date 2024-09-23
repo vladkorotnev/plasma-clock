@@ -19,7 +19,7 @@ static const melody_item_t guitar_hero_data[] = {
     {FREQ_SET, 0, 1864},
     {DELAY, 0, 86},
 
-    {LOOP_POINT_SET, 0, 0},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_LOOP},
     {FREQ_SET, 0, 1661},
     {DELAY, 0, 80},
     {FREQ_SET, 0, 0},
@@ -516,7 +516,7 @@ static const melody_item_t guitar_hero_data[] = {
     {DELAY, 0, 80},
     {FREQ_SET, 0, 0},
     {DELAY, 0, 5},
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     /* BRIDGE */
     {FREQ_SET, 0, 830},
     {DELAY, 0, 341},

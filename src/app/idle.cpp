@@ -144,8 +144,8 @@ void _play_precise_time_signal_if_enabled(const tk_time_of_day_t &now) {
     };
     static const unsigned last_delay_index = 22;
 
-    precise_time_signal[last_delay_index].argument1 =  (100 + 20*((now.hour + 1) % 24));
-    precise_time_signal[last_delay_index + 2].argument1 =  1000 - precise_time_signal[last_delay_index].argument1;
+    precise_time_signal[last_delay_index].argument =  (100 + 20*((now.hour + 1) % 24));
+    precise_time_signal[last_delay_index + 2].argument =  1000 - precise_time_signal[last_delay_index].argument;
 
     sequencer->play_sequence(&precise_time_signal_seq);
 }

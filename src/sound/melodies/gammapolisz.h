@@ -95,7 +95,7 @@ static const melody_item_t gammapolisz_data[] = {
     {FREQ_SET, 1, 195},
     {DELAY, 0, 653},
     {FREQ_SET, 1, 0},
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     {DELAY, 0, 146},
     {FREQ_SET, 0, 659},
     {DELAY, 0, 6},

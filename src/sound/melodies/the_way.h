@@ -47,7 +47,7 @@ static const melody_item_t the_way_data[] = {
     {FREQ_SET, 0, 932},
     {DELAY, 0, 1908},
     {FREQ_SET, 0, 0},
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_START},
     {DELAY, 0, 12},
     {FREQ_SET, 0, 1864},
     {DELAY, 0, 240},

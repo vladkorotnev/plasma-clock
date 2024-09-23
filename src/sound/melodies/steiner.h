@@ -126,7 +126,7 @@ static const melody_item_t steiner_data[] = {
     {DELAY, 0, 576},
     {FREQ_SET, 0, 1479},
     {DELAY, 0, 384},
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_START},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_START},
     {FREQ_SET, 0, 1661},
     {DELAY, 0, 576},
     {FREQ_SET, 0, 1479},

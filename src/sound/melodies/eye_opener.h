@@ -137,7 +137,7 @@ static const melody_item_t eye_opener_data[] = {
     {DELAY, 0, 176},
     {FREQ_SET, 0, 523},
     {DELAY, 0, 529},
-    {HOOK_POINT_SET, 0, HOOK_POINT_TYPE_END},
+    {LOOP_POINT_SET, 0, LOOP_POINT_TYPE_HOOK_END},
     {FREQ_SET, 0, 1318},
     /* RIFF */
     {DELAY, 0, 174},
