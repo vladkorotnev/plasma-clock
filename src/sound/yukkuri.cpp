@@ -64,26 +64,37 @@ size_t Yukkuri::fill_buffer(void* buffer, size_t length) {
         }
 
         if(out_phase == 0) {
-            if(pcm_buf[pcm_playhead] != 0) {
-                // I tried a LUT here but it's too slow, AQTK starts dropping words and outright segfaulting
-                // This seems to be sufficiently fast, sufficiently precise and overall good enough
-                int32_t sample = (std::max((int32_t)-8192, std::min((int32_t)8192, (int32_t) pcm_buf[pcm_playhead] / 3)) + 8192) * 12 / 16384;
-                out_ones = (sample % 12);
-                out_zeros = 11 - out_ones;
+            if(old_style_resampling) {
+                if(out_state && pcm_buf[pcm_playhead] <= HYST_ZERO_MARGIN) {
+                    out_state = false;
+                }
+                else if(!out_state && pcm_buf[pcm_playhead] >= HYST_ONE_MARGIN) {
+                    out_state = true;
+                }
             } else {
-                out_zeros = 11;
-                out_ones = 0;
+                if(pcm_buf[pcm_playhead] != 0) {
+                    // I tried a LUT here but it's too slow, AQTK starts dropping words and outright segfaulting
+                    // This seems to be sufficiently fast, sufficiently precise and overall good enough
+                    int32_t sample = (std::max((int32_t)-8192, std::min((int32_t)8192, (int32_t) pcm_buf[pcm_playhead] / 3)) + 8192) * 12 / 16384;
+                    out_ones = (sample % 12);
+                    out_zeros = 11 - out_ones;
+                } else {
+                    out_zeros = 11;
+                    out_ones = 0;
+                }
             }
         }
 
-        if(out_ones == 0) {
-            out_state = false;
-        }
-        else if(out_zeros == 0) {
-            out_state = true;
-        }
-        else if(out_phase % ((out_state ? out_zeros : out_ones)) == 0) {
-            out_state ^= 1;
+        if(!old_style_resampling) {
+            if(out_ones == 0) {
+                out_state = false;
+            }
+            else if(out_zeros == 0) {
+                out_state = true;
+            }
+            else if(out_phase % ((out_state ? out_zeros : out_ones)) == 0) {
+                out_state ^= 1;
+            }
         }
 
         idx = s / 8;
@@ -167,6 +178,7 @@ void Yukkuri::_start_next_utterance_if_needed() {
             next.speed = prefs_get_int(PREFS_KEY_VOICE_SPEED);
             if(next.speed == 0) next.speed = 100;
         }
+        old_style_resampling = (prefs_get_int(PREFS_KEY_VOICE_MODE_RESAMPLING) == 1);
         xSemaphoreTake(aqtkSemaphore, portMAX_DELAY);
         int rslt = CAqTkPicoF_SetKoe((const uint8_t*)next.text, next.speed, next.pause);
         xSemaphoreGive(aqtkSemaphore);

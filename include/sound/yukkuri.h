@@ -38,8 +38,11 @@ public:
 private:
     static const uint8_t QUEUE_MAX_LENGTH = 4;
     static const int STRETCH_FACTOR = WaveOut::BAUD_RATE / 8000; //<- 8kHz from AquesTalk Pico
+    static const int16_t HYST_ZERO_MARGIN = 1024;
+    static const int16_t HYST_ONE_MARGIN = 1800;
 
     bool ready = false;
+    bool old_style_resampling = false;
     
     bool out_state = false;
     uint16_t out_zeros = 0;

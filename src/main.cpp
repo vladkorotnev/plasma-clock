@@ -239,7 +239,7 @@ void boot_task(void*) {
 
     appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(beepola, seq), STATE_MENU);
+    appHost->add_view(new AppShimMenu(beepola, seq, yukkuri), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);

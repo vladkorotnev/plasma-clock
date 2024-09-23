@@ -28,9 +28,9 @@ private:
 
 class MenuNumberSelectorPreferenceView: public MenuNumberSelectorView {
 public:
-    MenuNumberSelectorPreferenceView(const char * title, prefs_key_t prefs_key, int min, int max, int step, std::function<void(bool, Renderable*)> onActivated):
+    MenuNumberSelectorPreferenceView(const char * title, prefs_key_t prefs_key, int min, int max, int step, std::function<void(bool, Renderable*)> onActivated, std::function<void(int)> onAfterChanged = [](int){}):
         key(prefs_key),
-        MenuNumberSelectorView(title, min, max, step, prefs_get_int(prefs_key), onActivated, [this](int newVal) { prefs_set_int(key, newVal); }) {}
+        MenuNumberSelectorView(title, min, max, step, prefs_get_int(prefs_key), onActivated, [this, onAfterChanged](int newVal) { prefs_set_int(key, newVal); onAfterChanged(newVal); }) {}
 
     void step() {
         currentValue = prefs_get_int(key);

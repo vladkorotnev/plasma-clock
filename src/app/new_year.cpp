@@ -41,7 +41,8 @@ NewYearAppShim::NewYearAppShim(Beeper *b, NewSequencer *s, Yukkuri *y):
     fireworks { nullptr },
     snow { nullptr },
     utterance_localized { nullptr },
-    allocated { false }
+    allocated { false },
+    Composite() 
 {
     wants_clear_surface = true;
 }

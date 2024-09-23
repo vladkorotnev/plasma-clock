@@ -24,8 +24,9 @@ private:
     char buf[16];
 };
 
-AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShimNavMenu() {
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
+    yukkuri = y;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
         if(isActive) push_renderable(instance, TRANSITION_NONE);
         else pop_renderable(TRANSITION_NONE);
@@ -48,15 +49,48 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime from"), PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime until"), PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
 #if HAS(AQUESTALK)
+
+    std::function<void(int)> yukkuriTestFunction = [y](int) {
+        if(y->is_speaking()) {
+            y->cancel_current();
+        }
+
+        const char * test_utterance;
+        switch(active_tts_language()) {
+            case TTS_LANG_JA:
+                test_utterance = "te'suto-,te'suto-.";
+                break;
+
+            case TTS_LANG_RU:
+                test_utterance = "_purabie'ruka.ra'_su,dua',turi'.";
+                break;
+
+            case TTS_LANG_EN:
+            default:
+                test_utterance = "te'_sutinngu.wan,tuu.";
+                break;
+        }
+
+        y->speak(test_utterance);
+    };
+
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_VOICE_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
-    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction, yukkuriTestFunction));
     clock_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Voice language"), 
         {localized_string("English"), localized_string("Russian"), localized_string("Japanese")},
         PREFS_KEY_TTS_LANGUAGE,
-        normalActivationFunction
+        normalActivationFunction,
+        yukkuriTestFunction
+    ));
+    clock_menu->add_view(new MenuListSelectorPreferenceView(
+        localized_string("Voice mode"), 
+        {localized_string("Clear"), localized_string("Loud")},
+        PREFS_KEY_VOICE_MODE_RESAMPLING,
+        normalActivationFunction,
+        yukkuriTestFunction
     ));
 #endif
     clock_menu->add_view(new MenuActionItemView(localized_string("Set time"), [this]() {
