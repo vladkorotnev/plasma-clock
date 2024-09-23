@@ -3,18 +3,26 @@
 
 static char LOG_TAG[] = "AQTK";
 
+static SemaphoreHandle_t aqtkSemaphore = NULL;
+
 Yukkuri::Yukkuri(const char * license, uint16_t frame_length) {
     #if HAS(AQUESTALK)
+        if(aqtkSemaphore == NULL) {
+            aqtkSemaphore = xSemaphoreCreateBinary();
+            xSemaphoreGive(aqtkSemaphore);
+        }
         uint8_t mac[6];
         esp_efuse_mac_get_default(mac);
         ESP_LOGI(LOG_TAG, "MAC = %02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         ESP_LOGI(LOG_TAG, "License: %s", license == nullptr ? "TRIAL" : license);
+        memset(workbuf, 0, AQ_SIZE_WORKBUF);
+        xSemaphoreTake(aqtkSemaphore, portMAX_DELAY);
         uint8_t rslt = CAqTkPicoF_Init(workbuf, frame_length, license);
+        xSemaphoreGive(aqtkSemaphore);
         if(rslt) {
             ESP_LOGE(LOG_TAG, "Init error (%i)", rslt);
         } else {
-            pcm_buf_size = frame_length;
-            pcm_buf = (int16_t*) calloc(sizeof(int16_t), pcm_buf_size);
+            pcm_buf = (int16_t*) calloc(sizeof(int16_t), frame_length);
             ready = true;
             ESP_LOGI(LOG_TAG, "Init OK");
         }
@@ -38,30 +46,44 @@ size_t Yukkuri::fill_buffer(void* buffer, size_t length) {
             pcm_playhead++;
             if(pcm_playhead >= pcm_buf_length) {
                 // We finished the whole PCM buffer, generate a new one
+                pcm_buf_length = 0;
+                xSemaphoreTake(aqtkSemaphore, portMAX_DELAY);
                 int rslt = CAqTkPicoF_SyntheFrame((int16_t*)pcm_buf, &pcm_buf_length);
-                if(rslt || pcm_buf_length == 0) {
-                    // No samples were generated, end of phrase
+                xSemaphoreGive(aqtkSemaphore);
+                if(rslt) {
+                    // End of phrase
+                    ESP_LOGE(LOG_TAG, "CAqTkPicoF_SyntheFrame rslt=%i, buf_len = %i", rslt, pcm_buf_length);
                     _finish_current();
-                    break; // <- if there is another phrase it will start on the next buffer fill
-                } else {
-                    pcm_playhead = 0;
-                    out_phase = 0;
-                    if(out_state && pcm_buf[pcm_playhead] <= HYST_ZERO_MARGIN) {
-                        out_state = false;
-                    }
-                    else if(!out_state && pcm_buf[pcm_playhead] >= HYST_ONE_MARGIN) {
-                        out_state = true;
-                    }
+                    if(pcm_buf_length == 0) break;
                 }
+                pcm_playhead = 0;
+                out_phase = 0;
             } else {
                 out_phase = 0;
-                if(out_state && pcm_buf[pcm_playhead] <= HYST_ZERO_MARGIN) {
-                    out_state = false;
-                }
-                else if(!out_state && pcm_buf[pcm_playhead] >= HYST_ONE_MARGIN) {
-                    out_state = true;
-                }
             }
+        }
+
+        if(out_phase == 0) {
+            if(pcm_buf[pcm_playhead] != 0) {
+                // I tried a LUT here but it's too slow, AQTK starts dropping words and outright segfaulting
+                // This seems to be sufficiently fast, sufficiently precise and overall good enough
+                int32_t sample = (std::max((int32_t)-8192, std::min((int32_t)8192, (int32_t) pcm_buf[pcm_playhead] / 3)) + 8192) * 12 / 16384;
+                out_ones = (sample % 12);
+                out_zeros = 11 - out_ones;
+            } else {
+                out_zeros = 11;
+                out_ones = 0;
+            }
+        }
+
+        if(out_ones == 0) {
+            out_state = false;
+        }
+        else if(out_zeros == 0) {
+            out_state = true;
+        }
+        else if(out_phase % ((out_state ? out_zeros : out_ones)) == 0) {
+            out_state ^= 1;
         }
 
         idx = s / 8;
@@ -126,7 +148,6 @@ void Yukkuri::cancel_all() {
 
 void Yukkuri::_finish_current() {
     if(queue.size() > 0) {
-        ESP_LOGV(LOG_TAG, "Finish: [%s]", queue.front().text);
         queue.front().callback(true);
         queue.pop();
     }
@@ -146,7 +167,9 @@ void Yukkuri::_start_next_utterance_if_needed() {
             next.speed = prefs_get_int(PREFS_KEY_VOICE_SPEED);
             if(next.speed == 0) next.speed = 100;
         }
+        xSemaphoreTake(aqtkSemaphore, portMAX_DELAY);
         int rslt = CAqTkPicoF_SetKoe((const uint8_t*)next.text, next.speed, next.pause);
+        xSemaphoreGive(aqtkSemaphore);
         if(rslt) {
             ESP_LOGE(LOG_TAG, "ERROR(%i): [%s]", rslt, next.text);
             cancel_current();

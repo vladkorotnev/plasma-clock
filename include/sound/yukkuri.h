@@ -42,14 +42,13 @@ private:
     bool ready = false;
     
     bool out_state = false;
+    uint16_t out_zeros = 0;
+    uint16_t out_ones = 0;
     int out_phase = 0;
-    static const int16_t HYST_ZERO_MARGIN = 1024;
-    static const int16_t HYST_ONE_MARGIN = 1800;
 
     bool speaking = false;
     uint32_t workbuf[AQ_SIZE_WORKBUF];
 
-    uint16_t pcm_buf_size = 0;
     uint16_t pcm_buf_length = 0;
     uint16_t pcm_playhead = 0;
     int16_t * pcm_buf = nullptr;
