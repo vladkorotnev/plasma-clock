@@ -5,3 +5,4 @@ captures/
 .vscode/
 /lib/nonfree-aquestalk/aquestalk.h
 /lib/nonfree-aquestalk/*.a
+/data/music/*.pomf

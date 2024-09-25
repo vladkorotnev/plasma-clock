@@ -97,7 +97,7 @@ void NewSequencer::midi_task() {
 #endif
 
 static const uint8_t kick_rle_data[] = {0, 7, 4, 2, 1, 24, 23, 30, 33, 26, 38, 38, 30, 41, 41, 52, 62, 50, 58, 64, 61, 70, 99, 92, 80, 119, 102, 119, 119, 142, 146, 117, 160, 119, 154, 5};
-const rle_sample_t kick_sample = { .sample_rate = 8000, .root_frequency = 524 /* C5 */, .rle_data = kick_rle_data, .length = 36, .mode = MIX_MODE_XOR };
+const rle_sample_t kick_sample = { .sample_rate = 8000, .root_frequency = 524 /* C5 */, .length = 36, .mode = MIX_MODE_XOR, .rle_data = kick_rle_data };
 
 NewSequencer::NewSequencer() {
     // Ch 0, 1, 2, 3: tone

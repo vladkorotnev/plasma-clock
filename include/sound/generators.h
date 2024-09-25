@@ -57,10 +57,10 @@ typedef enum mixing_mode {
 typedef struct rle_sample {
     const uint16_t sample_rate;
     const uint16_t root_frequency;
-    /// @brief RLE data of the PWM audio sample. First byte is number of 1 bits, second byte is number of 0 bits that follow, and so forth.
-    const uint8_t* rle_data;
     const size_t length;
     const mixing_mode_t mode;
+    /// @brief RLE data of the PWM audio sample. First byte is number of 1 bits, second byte is number of 0 bits that follow, and so forth.
+    const uint8_t* rle_data;
 } rle_sample_t;
 
 class Sampler: public ToneGenerator {
