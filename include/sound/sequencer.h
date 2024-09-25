@@ -5,7 +5,7 @@
 
 extern const rle_sample_t kick_sample;
 
-typedef enum melody_item_type {
+typedef enum melody_item_type : uint8_t {
     FREQ_SET, // or 0 to turn off
     DUTY_SET,
     DELAY,
@@ -19,7 +19,7 @@ enum loop_point_type : uint8_t {
     LOOP_POINT_TYPE_HOOK_END
 };
 
-typedef struct melody_item {
+typedef struct __attribute__((packed)) melody_item {
     const melody_item_type_t command : 4;
     const uint8_t channel : 4;
     int argument;

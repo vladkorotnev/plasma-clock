@@ -3,7 +3,7 @@
 #include <graphics/framebuffer.h>
 #include <views/common/view.h>
 
-typedef struct __attribute__((__packed__)) rain_particle {
+typedef struct __attribute__((packed)) rain_particle {
     uint8_t x;
     uint8_t y;
     int8_t vx;

@@ -331,6 +331,9 @@ static void build() {
         GP.LABEL("Talking clock language:");
         GP.SELECT(PREFS_KEY_TTS_LANGUAGE, "English,Русский,日本語", prefs_get_int(PREFS_KEY_TTS_LANGUAGE));
         GP.HR();
+        GP.LABEL("Voice mode:");
+        GP.SELECT(PREFS_KEY_VOICE_MODE_RESAMPLING, "Clear,Loud", prefs_get_int(PREFS_KEY_VOICE_MODE_RESAMPLING));
+        GP.HR();
         render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
         render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
         render_bool("24-hour announcements:", PREFS_KEY_VOICE_24_HRS);
@@ -592,6 +595,7 @@ void action() {
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE);
         save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
         save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
+        save_int(PREFS_KEY_VOICE_MODE_RESAMPLING, 0, 1);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;

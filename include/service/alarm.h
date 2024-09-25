@@ -8,7 +8,7 @@
 
 #define ALARM_ON_DAY(a,d) (((a).days & ALARM_DAY_OF_WEEK((d))) != 0)
 
-typedef struct __attribute__((__packed__)) alarm_setting {
+typedef struct __attribute__((packed)) alarm_setting {
     bool enabled : 1;
     /// @brief LSB is Sunday, B1 is Monday, and so on
     uint8_t days : 7;
