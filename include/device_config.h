@@ -34,6 +34,10 @@
 #include <devices/big_clock.h>
 #endif
 
+#ifdef DEVICE_MINIPISOS
+#include <devices/mid_clock.h>
+#endif
+
 #ifdef DEVICE_MICROPISOS
 #include <devices/smol_clock.h>
 #endif
