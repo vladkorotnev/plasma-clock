@@ -5,7 +5,6 @@
 class Screenshooter {
 public:
     Screenshooter(FantaManipulator *);
-    bool capture_png(const uint8_t ** pngDataBufOut, size_t * pngDataLenOut);
     void start_server(uint16_t port);
     void stop_server();
 

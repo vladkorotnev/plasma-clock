@@ -241,7 +241,7 @@ void boot_task(void*) {
     wotd_start();
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
-    admin_panel_prepare(sensors, beepola, screenshooter);
+    admin_panel_prepare(sensors, beepola);
 
     appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);

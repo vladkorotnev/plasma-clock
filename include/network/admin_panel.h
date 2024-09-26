@@ -4,4 +4,4 @@
 #include <graphics/screenshooter.h>
 
 /// Set up and start the web admin service.
-void admin_panel_prepare(SensorPool*, Beeper*, Screenshooter*);
+void admin_panel_prepare(SensorPool*, Beeper*);

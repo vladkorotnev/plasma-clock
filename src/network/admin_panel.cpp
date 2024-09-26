@@ -8,7 +8,6 @@
 #include <service/wordnik.h>
 #include <service/alarm.h>
 #include <views/transitions/transitions.h>
-#include <graphics/screenshooter.h>
 #include <input/keys.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
@@ -21,7 +20,6 @@ static TaskHandle_t hTask = NULL;
 static GyverPortal ui(&LittleFS);
 static SensorPool *sensors;
 static Beeper *beeper;
-static Screenshooter *screenshooter;
 static std::string all_chime_names_csv = "";
 
 extern "C" void AdminTaskFunction( void * pvParameter );
@@ -242,8 +240,6 @@ static void build() {
                 GP.BUTTON("rmc_down", "↓");
                 GP.TD();
         GP.TABLE_END();
-        GP.HR();
-        GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -644,26 +640,15 @@ void action() {
                 unmount_partition(hPart);
             }
         }
-        else if(ui.uri().endsWith("screen.png")) {
-            const uint8_t * outBuf = nullptr;
-            size_t outLen = 0;
-            if(screenshooter->capture_png(&outBuf, &outLen)) {
-                ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
-                free((void*)outBuf);
-            } else {
-                ui.server.send(500, "", "");
-            }
-        }
         else if(LittleFS.exists(ui.uri())) ui.sendFile(LittleFS.open(ui.uri(), "r"));
     }
 }
 
 bool prefs_uploading = false;
 
-void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
+void admin_panel_prepare(SensorPool* s, Beeper* b) {
     sensors = s;
     beeper = b;
-    screenshooter = ss;
     ui.attachBuild(build);
     ui.attach(action);
     ui.downloadAuto(false);
