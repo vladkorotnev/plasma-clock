@@ -194,10 +194,11 @@ void bringup_hid() {
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
     bringup_sound();
-    seq->play_sequence(&pc98_pipo);
-
     if (!LittleFS.begin(true, "/disk")) {
         ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
+        seq->play_sequence(&tulula_fvu);
+    } else {
+        seq->play_sequence(&pc98_pipo);
     }
 
     con->clear();

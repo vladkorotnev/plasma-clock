@@ -115,8 +115,13 @@ void PMTaskFunction( void * pvParameter )
         }
         #endif
 
+        // Apparently pdMS_TO_TICKS makes an overflow with large delays (tens of hours) when multiplying by 1000 then dividing by 1000.
+        // Since on the current platform 1ms = 1 tick, we omit that here to avoid precision loss.
+        // This static assert will explode should this ever change.
+        static_assert(configTICK_RATE_HZ == 1000, "The tick rate is not 1000Hz anymore. Do something about overflows in large delays.");
+        
         #if HAS(DISPLAY_BLANKING)
-        if(now - lastMotionTime >= pdMS_TO_TICKS(motionlessTimeOff) && !isDisplayOff && motionlessTimeOff != 0) {
+        if(now - lastMotionTime >= motionlessTimeOff && !isDisplayOff && motionlessTimeOff != 0) {
             // No motion for a while, turn off display, first only logically
             ESP_LOGI(LOG_TAG, "Blank display");
             display->set_show(false);
@@ -127,10 +132,13 @@ void PMTaskFunction( void * pvParameter )
         }
         #endif
 
-        if(now - lastMotionTime >= pdMS_TO_TICKS(motionlessTimeHvOff) && !isHvOff && motionlessTimeHvOff != 0) {
+        if(now - lastMotionTime >= motionlessTimeHvOff && !isHvOff && motionlessTimeHvOff != 0) {
             // No motion for a really long while, shut down the HV power supply
             ESP_LOGI(LOG_TAG, "Stop display");
             display->set_power(false);
+            if(noSoundWhenOff) {
+                beeper->set_channel_state(CHANNEL_AMBIANCE, false);
+            }
             isHvOff = true;
         }
 
