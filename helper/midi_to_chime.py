@@ -7,6 +7,7 @@ import freq_note_converter
 
 mid = MidiFile(argv[1])
 name = argv[2]
+long_name = argv[3]
 
 USE_TBL = True
 NOTE_TBL = [
@@ -59,7 +60,7 @@ def prev_note_off_event(chan):
 
 for msg in mid:
     print(msg)
-    if msg.time > 0:
+    if msg.time >= 0.01:
             evts.append(Event("DELAY", 0, int(msg.time * 1000)))
     if msg.type == "note_on" or msg.type == "note_off":
         if msg.type == "note_on" and msg.velocity > 0:
@@ -82,17 +83,23 @@ for msg in mid:
         elif msg.text == "HOOK":
             evts.append(Event("LOOP_POINT_SET", 0, "LOOP_POINT_TYPE_HOOK_START"))
         elif msg.text == "HOOKEND":
-            evts.append(Event("HOOK_POINT_SET", 0, "LOOP_POINT_TYPE_HOOK_END"))
+            evts.append(Event("LOOP_POINT_SET", 0, "LOOP_POINT_TYPE_HOOK_END"))
         elif msg.text.startswith("SAMPLE="):
             evts.append(Event("SAMPLE_LOAD", 5, "(int) &" + msg.text[len("SAMPLE=")::]))
     elif msg.type == "control_change":
         if msg.control == 2:
             evts.append(Event("DUTY_SET", msg.channel, int(msg.value)))
-        
 
-print("static const melody_item_t "+name+"_data[] = {")
+print('#include <sound/pomf.h>')     
+print('extern "C" const POMFHeader POMF_HEAD = {')
+print('    POMF_MAGIC_FILE,')
+print('    POMF_CURVER,')
+print('    "'+name+'",')
+print('    "'+long_name+'",')
+print('};')
+print('')
+print('extern "C" const melody_item_t POMF_TUNE[] = {')
 for e in evts:
     print(str(e))
 print("};")
-
-print("const melody_sequence_t "+name+" = MELODY_OF("+name+"_data);")
+print('')
