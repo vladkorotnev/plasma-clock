@@ -134,6 +134,8 @@ You can also read the quest I went through trying to get it to run "in real time
 * [John Scatman - Scatman (Ski-Ba-Bop-Dop-Bop)](https://www.youtube.com/watch?v=Hy8kmNEo1i8): [MIDI](helper/chimes/scatman.mid)
 * [Minamotoya feat. motoko - Stasis](https://tanoc.bandcamp.com/track/stasis): [MIDI](helper/chimes/stasis.mid), [MP3 Recording](docs/rec/stasis.mp3)
 * [Roxette — Stars](https://www.youtube.com/watch?v=uzZRdjXd2qw): [MIDI](helper/chimes/stars.mid), [MP3 Recording](docs/rec/stars.mp3)
+* [HIRO — Space Harrier](https://datadiscs.bandcamp.com/track/main-theme): [MIDI](helper/chimes/space_harrier.mid) (scale altered for 1-bit output range)
+* [A-ha — Take On Me](https://www.youtube.com/watch?v=djV11Xbc914): [MIDI](helper/chimes/takeonme.mid)
 
 ## Creating your own melodies
 
@@ -184,7 +186,7 @@ After that the client should expect a UDP packet from the clock with the format:
 
 ## System Requirements
 
-The basic configuration without any bluetooth functionality (no Switchbot or Balance Board integration) seems to work just fine on an ESP32 WROOM. However to be less limited by RAM size in further features I've decided to make WROVER the requirement, so further versions are not guaranteed to run on WROOM.
+An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA partition scheme, and ringtones have to be loaded from LittleFS into RAM. Since a lot of ringtones are several kilobytes in size, a WROOM is likely not enough.
 
 ## Predefined target devices
 
