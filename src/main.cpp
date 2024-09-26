@@ -228,7 +228,7 @@ void boot_task(void*) {
     sensors = new SensorPool();
 
     sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
-    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(250));
+    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(125));
     bringup_light_sensor();
     bringup_motion_sensor();
     bringup_temp_sensor();

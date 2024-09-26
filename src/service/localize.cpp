@@ -160,6 +160,8 @@ static const std::map<const std::string, const char*> russian = {
     {"Fast", "Быстро"},
     {"Sonic", "Соник"},
 
+    {"Blank display after (s)", "Пустой дисплей после (сек.)"},
+    {"Turn display off after (s)", "Выключить дисплей после (сек.)"},
     {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
     {"FPS counter", "Счётчик кадров в секунду"},
     {"Weather effects", "Эффекты погоды"},

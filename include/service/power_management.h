@@ -3,7 +3,7 @@
 #include <graphics/display_driver.h>
 #include <sound/beeper.h>
 
-#define PM_INTERVAL 500
+#define PM_INTERVAL 125
 #define PM_LIGHTNESS_THRESH_UP 1000
 #define PM_LIGHTNESS_THRESH_DOWN 700
 

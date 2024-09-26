@@ -445,18 +445,18 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
-    #if HAS(LIGHT_SENSOR) || HAS(MOTION_SENSOR)
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
         #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         render_int("Bright screen when over:", PREFS_KEY_LIGHTNESS_THRESH_UP);
         render_int("Dark screen when under:", PREFS_KEY_LIGHTNESS_THRESH_DOWN);
         GP.HR();
         #endif
+#if HAS(DISPLAY_BLANKING)
         render_int("Blank display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
-        render_int("Shut down display after more seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
+#endif
+        render_int("Turn off display after seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
     GP.SPOILER_END();
     GP.BREAK();
-    #endif
 
     GP.SPOILER_BEGIN("OpenWeatherMap", GP_BLUE);
         render_string("Latitude", PREFS_KEY_WEATHER_LAT);
@@ -579,8 +579,8 @@ void action() {
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
-        save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
-        save_int(PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 60, 21600);
+        save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 36000);
+        save_int(PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000);
         save_string(PREFS_KEY_WEATHER_APIKEY);
         save_string(PREFS_KEY_WEATHER_LAT);
         save_string(PREFS_KEY_WEATHER_LON);
