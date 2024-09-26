@@ -66,8 +66,7 @@ public:
 
     void render(FantaManipulator *fb) {
         cursorTimer++;
-        if(cursorTimer == 30) {
-            cursorTimer = 0;
+        if(cursorTimer % 30 == 0) {
             isShowingCursor = !isShowingCursor;
         }
 
@@ -91,6 +90,14 @@ public:
         if(isShowingCursor) {
             fb->rect(cursor_offset - 2, 0, cursor_offset + 2 * xnu_font.width + 1, 15, false);
         }
+
+        if(cursorTimer % 60 == 0 && sequencer->is_sequencing()) {
+            blinkState = !blinkState;
+        }
+
+        if(blinkState) fb->invert();
+
+        if(cursorTimer >= 179) cursorTimer = 0;
     }
 
     void step() {
@@ -138,6 +145,7 @@ public:
             secondView->sound = true;
             minuteView->sound = true;
             hourView->sound = true;
+            blinkState = false;
         }
 
         Composite::step();
@@ -153,6 +161,7 @@ public:
                 secondView->sound = false;
                 minuteView->sound = false;
                 hourView->sound = false;
+                blinkState = true;
                 mustRing = true; // rather than increasing timer stack size just use a flag to kick off the melody in a bigger thread
             }
             load_prefs();
@@ -178,6 +187,7 @@ private:
     CursorPosition cursorPosition;
     bool isShowingCursor;
     bool mustRing;
+    bool blinkState;
     TimerHandle_t hTimer;
 
     void load_prefs() {
