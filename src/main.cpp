@@ -335,19 +335,26 @@ static void print_memory() {
 }
 
 void loop() {
-    fb->wait_next_frame();
-    if(graph->lock()) {
-        desktop->render(graph);
-        graph->unlock();
-    }
-    desktop->step();
-    
-    // thread safe state change kind of thing
-    if(_actual_current_state != current_state) {
-        _actual_current_state = current_state;
-        appHost->switch_to(_actual_current_state, _next_transition);
-    }
-    print_memory();
+    if(_actual_current_state != STATE_OTAFVU) { // OTAFVU basically locks everything down until reboot
+        fb->wait_next_frame();
+        if(graph->lock()) {
+            desktop->render(graph);
+            graph->unlock();
+        }
+        desktop->step();
+        
+        // thread safe state change kind of thing
+        if(_actual_current_state != current_state) {
+            _actual_current_state = current_state;
+            appHost->switch_to(_actual_current_state, _next_transition);
+        }
+        print_memory();
 
-    if(_actual_current_state == STATE_BOOT) taskYIELD();
+        if(_actual_current_state == STATE_BOOT) taskYIELD();
+    } else {
+        if(_actual_current_state != current_state && current_state == STATE_RESTART) {
+            _actual_current_state = current_state;
+            appHost->switch_to(_actual_current_state, _next_transition);
+        }
+    }
 }

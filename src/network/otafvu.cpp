@@ -90,6 +90,7 @@ void OTAFVUManager::shut_up_and_explode() {
     con->print("OTAFVU Done!");
     seq->play_sequence(&oelutz_fvu);
     seq->wait_end_play();
+    con->set_active(false);
     change_state(STATE_RESTART, TRANSITION_NONE);
 }
 

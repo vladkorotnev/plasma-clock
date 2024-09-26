@@ -1,4 +1,5 @@
 #include "network/admin_panel.h"
+#include <LittleFS.h>
 #include <device_config.h>
 #include <network/netmgr.h>
 #include <backup.h>
@@ -17,7 +18,7 @@
 
 static char LOG_TAG[] = "ADMIN";
 static TaskHandle_t hTask = NULL;
-static GyverPortal ui;
+static GyverPortal ui(&LittleFS);
 static SensorPool *sensors;
 static Beeper *beeper;
 static Screenshooter *screenshooter;
@@ -213,10 +214,10 @@ static bool process_remote() {
 }
 
 static void build() {
-    GP.BUILD_BEGIN();
+    GP.BUILD_BEGIN_FILE();
     GP.PAGE_TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
-    GP.THEME(GP_DARK);
-    GP.JQ_SUPPORT();
+    GP.THEME_FILE("GP_DARK");
+    GP.JQ_SUPPORT_FILE();
 
     GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
 
@@ -242,7 +243,7 @@ static void build() {
                 GP.TD();
         GP.TABLE_END();
         GP.HR();
-        // GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
+        GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -515,6 +516,12 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+    // GP.SPOILER_BEGIN("Music Files", GP_BLUE);
+    //     GP.FILE_UPLOAD("music_upload", "Upload Music", ".pomf", GP_BLUE);
+    //     GP.FILE_MANAGER(&LittleFS, "/music");
+    // GP.SPOILER_END();
+    // GP.BREAK();
+
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
         render_bool("Serial MIDI input", PREFS_KEY_SERIAL_MIDI);
@@ -637,16 +644,17 @@ void action() {
                 unmount_partition(hPart);
             }
         }
-        // else if(ui.uri().endsWith("screen.png")) {
-        //     const uint8_t * outBuf = nullptr;
-        //     size_t outLen = 0;
-        //     if(screenshooter->capture_png(&outBuf, &outLen)) {
-        //         ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
-        //         free((void*)outBuf);
-        //     } else {
-        //         ui.server.send(500, "", "");
-        //     }
-        // }
+        else if(ui.uri().endsWith("screen.png")) {
+            const uint8_t * outBuf = nullptr;
+            size_t outLen = 0;
+            if(screenshooter->capture_png(&outBuf, &outLen)) {
+                ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
+                free((void*)outBuf);
+            } else {
+                ui.server.send(500, "", "");
+            }
+        }
+        else if(LittleFS.exists(ui.uri())) ui.sendFile(LittleFS.open(ui.uri(), "r"));
     }
 }
 
@@ -714,7 +722,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
     if(xTaskCreate(
         AdminTaskFunction,
         "ADM",
-        4096,
+        6000,
         nullptr,
         pisosTASK_PRIORITY_WEBADMIN,
         &hTask

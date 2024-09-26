@@ -57,6 +57,23 @@ static const std::map<const std::string, const char*> english = {
     {"Only Once", "Only Once"},
 
     {"(Randomize)", "(Randomize)"},
+    {"Clear", "Clear"},
+    {"Loud", "Loud"},
+    {"English", "English"},
+    {"Russian", "Русский"},
+    {"Japanese", "Japanese"},
+
+    {"Off", "Off"},
+    {"Wipe", "Wipe"},
+    {"Slide Left", "Slide Left"},
+    {"Slide Right", "Slide Right"},
+    {"Slide Up", "Slide Up"},
+    {"Slide Down", "Slide Down"},
+
+    {"Slow", "Slow"},
+    {"Medium", "Medium"},
+    {"Fast", "Fast"},
+    {"Sonic", "Sonic"},
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
@@ -141,7 +158,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Slow", "Медленно"},
     {"Medium", "Средне"},
     {"Fast", "Быстро"},
-    {"Sonic", "Совсем быстро"},
+    {"Sonic", "Соник"},
 
     {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
     {"FPS counter", "Счётчик кадров в секунду"},

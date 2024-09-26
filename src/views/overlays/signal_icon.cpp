@@ -40,7 +40,10 @@ SignalStrengthIcon::SignalStrengthIcon(SensorPool *s) {
 
 void SignalStrengthIcon::step() {
     prefs_wifi_icon_disp_t dispRule = (prefs_wifi_icon_disp_t)prefs_get_int(PREFS_KEY_WIFI_ICON);
-    if(dispRule == WIFI_ICON_DISP_NEVER) return;
+    if(dispRule == WIFI_ICON_DISP_NEVER) {
+        isShowing = false;
+        return;
+    }
 
     sensor_info_t * rssiInfo = sensors->get_info(VIRTSENSOR_ID_WIRELESS_RSSI);
     if(rssiInfo) {

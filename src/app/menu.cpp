@@ -58,16 +58,16 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
         const char * test_utterance;
         switch(active_tts_language()) {
             case TTS_LANG_JA:
-                test_utterance = "te'suto-,te'suto-.";
+                test_utterance = ".yukkuri_siteittene?";
                 break;
 
             case TTS_LANG_RU:
-                test_utterance = "_purabie'ruka.ra'_su,dua',turi'.";
+                test_utterance = ".pya'_tunitsa- vu;efi'rye;kapita'ru/sho'u;po'rye/chujye'_su pie'rubaya;turo'ika;iguroko'fu,fusutu'-jiyu-.";
                 break;
 
             case TTS_LANG_EN:
             default:
-                test_utterance = "te'_sutinngu.wan,tuu.";
+                test_utterance = ".a'iru/he'bu;ei;nanba'-;nain ei;nanba'-;si_ku_su/uizu;e'ku_su_tsura/so'-_su tuu/nanba'-;fo'-ti/fai_fu_su,ennda;ra'-ji;so'-da.";
                 break;
         }
 

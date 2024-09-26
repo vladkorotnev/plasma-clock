@@ -254,6 +254,7 @@ public:
         unload_samples();
     }
     const char * get_title() override { return title_; }
+    const char * get_long_title() override { return long_title_; }
     const melody_item_t * get_array() override { return array_; }
     int get_num_rows() override { return num_rows_; }
 
