@@ -8,7 +8,7 @@ public:
         MenuListSelectorView(
             title,
             all_chime_names,
-            melodyNo,
+            melodyNo % (all_chime_count + 1),
             [this, onActivated](bool active, Renderable* instance) {
                 if(!active && sequencer) sequencer->stop_sequence();
 
@@ -18,7 +18,7 @@ public:
                 sequencer->stop_sequence();
                 if(newMelodyNo != all_chime_count) // Don't play the random one
                     sequencer->play_sequence(melody_from_no(newMelodyNo), SEQUENCER_PLAY_HOOK_ONLY);
-                onChange(newMelodyNo);
+                onChange(newMelodyNo % (all_chime_count + 1));
             } 
         ) {
             sequencer = preview;

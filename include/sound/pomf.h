@@ -1,7 +1,6 @@
 #pragma once
 #include <stdint.h>
-#include <sound/generators.h>
-#include <sound/sequencer.h>
+#include <sound/types.h>
 
 /*
 .                           ____
@@ -29,28 +28,21 @@ Format in a nutshell:
             - if magic is 'tuNE':
                 - .size bytes of melody_item_t data
     ]
+    POMFChunk(size = 0, magic = ASCII 'eof ')
  */
 
 #define POMF_MAGIC_FILE 0x666D4F50 // 'POmf' little-endian
 #define POMF_MAGIC_SAMPLE 0x504D6173 // 'saMP'
 #define POMF_MAGIC_TRACK 0x454E7574 // 'tuNE'
+#define POMF_MAGIC_END 0x20666F65 // 'eof '
 
 #define POMF_CURVER_MAJ (1)
 #define POMF_CURVER_MIN (0)
 #define POMF_CURVER ((POMF_CURVER_MAJ << 8) | (POMF_CURVER_MIN))
 
-struct POMFChunk {
+struct POMFChunkHeader {
     const uint32_t magic;
     const uint32_t size;
-    union {
-        struct {
-            const rle_sample_t sample_header;
-            const uint8_t sample_data[];
-        } sample_chunk;
-        struct {
-            const melody_item_t event_data[];
-        } tune_chunk;
-    } data;
 };
 
 struct __attribute__((packed)) POMFHeader {

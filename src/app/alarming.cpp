@@ -41,8 +41,7 @@ static bool clock_inverting = false;
 static uint8_t snooze_hold_remain = 0;
 static int snooze_minutes = 0;
 static bool is_snoozing = false;
-static const melody_sequence_t * melody;
-
+static const alarm_setting_t * alarm_setting;
 static TickType_t startedAt;
 static TickType_t maxDur;
 
@@ -63,9 +62,9 @@ void app_alarming_prepare(NewSequencer* s) {
     framecount = 0;
     snooze_minutes = prefs_get_int(PREFS_KEY_ALARM_SNOOZE_MINUTES);
 
-    const alarm_setting_t * alarm = get_triggered_alarm();
-    if(alarm) {
-        melody = melody_from_no(alarm->melody_no);
+    alarm_setting = get_triggered_alarm();
+    if(alarm_setting) {
+        auto melody = melody_from_no(alarm_setting->melody_no);
         seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
     }
     power_mgmt_pause();
@@ -95,10 +94,10 @@ void app_alarming_draw(FantaManipulator* fb) {
 
                 if(framecount == 255) {
                     #if HAS(TOUCH_PLANE) || HAS(KEYPAD)
-                    arrows->left = true;
+                    arrows->left = (snooze_minutes > 0);
                     arrows->top = false;
                     arrows->bottom = false;
-                    arrows->right = false;
+                    arrows->right = (snooze_minutes == 0);
                     framecount = 0;
                     state = (snooze_minutes > 0) ? HINTING_SNOOZE : HINTING_STOP;
                     #else
@@ -278,7 +277,10 @@ void app_alarming_process() {
                 is_snoozing = false;
                 startedAt = xTaskGetTickCount();
                 state = BLINKERING;
-                seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
+                if(alarm_setting) {
+                    auto melody = melody_from_no(alarm_setting->melody_no);
+                    seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
+                }
             }
         break;
 

@@ -21,12 +21,12 @@ public:
 
 protected:
     int currentValue;
+    std::vector<const char*> items;
 private:
     StringScroll * label;
     StringScroll * value;
     std::function<void(int)> onChange;
     std::function<void(bool, Renderable*)> onActivated;
-    std::vector<const char*> items;
 };
 
 class MenuListSelectorPreferenceView: public MenuListSelectorView {

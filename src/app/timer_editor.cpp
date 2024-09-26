@@ -43,6 +43,7 @@ public:
         load_prefs();
         cursorTimer = 0;
         isRunning = false;
+        mustRing = false;
 
         hTimer = xTimerCreate(
             "TMR",
@@ -93,6 +94,11 @@ public:
     }
 
     void step() {
+        if(mustRing) {
+            sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY); 
+            mustRing = false;
+        }
+        
         if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) {
             if(cursorPosition == CursorPosition::HOUR || isRunning) {
                 // too much to left, leave
@@ -147,7 +153,7 @@ public:
                 secondView->sound = false;
                 minuteView->sound = false;
                 hourView->sound = false;
-                sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY); 
+                mustRing = true; // rather than increasing timer stack size just use a flag to kick off the melody in a bigger thread
             }
             load_prefs();
         } else {
@@ -171,6 +177,7 @@ private:
     uint8_t cursorTimer;
     CursorPosition cursorPosition;
     bool isShowingCursor;
+    bool mustRing;
     TimerHandle_t hTimer;
 
     void load_prefs() {

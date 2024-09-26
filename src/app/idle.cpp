@@ -121,7 +121,7 @@ void sound_tick_tock() {
 void _play_hourly_chime_if_enabled(bool first_chime) {
     if(!prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON)) return;
     int melody_no = first_chime ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
-    const melody_sequence_t * melody = melody_from_no(melody_no);
+    auto melody = melody_from_no(melody_no);
     sequencer->play_sequence(melody, SEQUENCER_PLAY_HOOK_ONLY);
 }
 
@@ -138,10 +138,7 @@ void _play_precise_time_signal_if_enabled(const tk_time_of_day_t &now) {
         {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
         {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
     };
-    static const melody_sequence_t precise_time_signal_seq = {
-        .array = precise_time_signal,
-        .count = sizeof(precise_time_signal)/sizeof(melody_item_t)
-    };
+    static StaticMelodySequence precise_time_signal_seq(precise_time_signal, sizeof(precise_time_signal)/sizeof(melody_item_t), "");
     static const unsigned last_delay_index = 22;
 
     precise_time_signal[last_delay_index].argument =  (100 + 20*((now.hour + 1) % 24));
@@ -299,8 +296,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
     current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
 
     clockView = new SimpleClock();
-    rain = new RainOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
-    thunder = new ThunderOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
+    rain = new RainOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height);
+    thunder = new ThunderOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height);
     firework = new FireworksOverlay(nullptr); // no firework sound on idle screen
     signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();

@@ -120,8 +120,8 @@ void AppShimMusicbox::load_and_play() {
         hint_framecounter = 0;
     }
     else {
-        const melody_sequence_t * melody = melody_from_no(trackNo);
-        hint_lbl->set_string(all_chime_names[trackNo]);
+        auto melody = melody_from_no(trackNo);
+        hint_lbl->set_string(melody->get_title());
         hint_lbl->x_offset = 0;
         seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
         hint_lbl->stopped = false;

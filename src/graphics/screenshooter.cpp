@@ -1,6 +1,6 @@
 #include <graphics/screenshooter.h>
 #include <esp32-hal-log.h>
-#include <PNGenc.h>
+// #include <PNGenc.h>
 #include <freertos/FreeRTOS.h>
 #include <input/keys.h>
 #include <graphics/framebuffer.h>
@@ -14,13 +14,13 @@ static char LOG_TAG[] = "SCAP";
 
 // Why PNGEnc won't expose this more memory-saving API by default I don't know
 
-extern int PNG_openRAM(PNGIMAGE *pPNG, uint8_t *pData, int iDataSize);
-extern int PNG_close(PNGIMAGE *pPNG);
-extern int PNG_encodeBegin(PNGIMAGE *pPNG, int iWidth, int iHeight, uint8_t ucPixelType, uint8_t ucBpp, uint8_t *pPalette, uint8_t ucCompLevel);
-extern void PNG_encodeEnd(PNGIMAGE *pPNG);
-extern int PNG_addLine(PNGIMAGE *, uint8_t *pPixels, int y);
-extern int PNG_setTransparentColor(PNGIMAGE *pPNG, uint32_t u32Color);
-extern int PNG_setAlphaPalette(PNGIMAGE *pPNG, uint8_t *pPalette);
+// extern int PNG_openRAM(PNGIMAGE *pPNG, uint8_t *pData, int iDataSize);
+// extern int PNG_close(PNGIMAGE *pPNG);
+// extern int PNG_encodeBegin(PNGIMAGE *pPNG, int iWidth, int iHeight, uint8_t ucPixelType, uint8_t ucBpp, uint8_t *pPalette, uint8_t ucCompLevel);
+// extern void PNG_encodeEnd(PNGIMAGE *pPNG);
+// extern int PNG_addLine(PNGIMAGE *, uint8_t *pPixels, int y);
+// extern int PNG_setTransparentColor(PNGIMAGE *pPNG, uint32_t u32Color);
+// extern int PNG_setAlphaPalette(PNGIMAGE *pPNG, uint8_t *pPalette);
 
 #define SS_REQ_MAGIC 0x3939
 #define SS_RES_MAGIC 0x8888
@@ -139,80 +139,80 @@ bool Screenshooter::capture_png(const uint8_t **outBufAddr, size_t* outBufLen) {
     static uint8_t ucPal[768] = {0,0,0,255,255,255};
     int rslt, y, x, w, h;
     size_t dataLen;
-    PNGIMAGE * tmp;
+    // PNGIMAGE * tmp;
 
-    tmp = (PNGIMAGE*) ps_malloc(sizeof(PNGIMAGE));
-    if(tmp == nullptr) {
-        ESP_LOGE(LOG_TAG, "Failed to allocate PNGIMAGE");
-        goto free_shit_and_bail;
-    }
+    // tmp = (PNGIMAGE*) ps_malloc(sizeof(PNGIMAGE));
+    // if(tmp == nullptr) {
+    //     ESP_LOGE(LOG_TAG, "Failed to allocate PNGIMAGE");
+    //     goto free_shit_and_bail;
+    // }
 
-    scratch = (uint8_t*) ps_malloc(scratch_size); // not gralloc here as this won't be rendered!
-    if(scratch == nullptr) {
-        ESP_LOGE(LOG_TAG, "Failure when allocating PNG scratch buffer");    
-        goto free_shit_and_bail;
-    }
+    // scratch = (uint8_t*) ps_malloc(scratch_size); // not gralloc here as this won't be rendered!
+    // if(scratch == nullptr) {
+    //     ESP_LOGE(LOG_TAG, "Failure when allocating PNG scratch buffer");    
+    //     goto free_shit_and_bail;
+    // }
 
-    line_scratch = (uint8_t*) ps_malloc(framebuffer->get_width());
-    if(line_scratch == nullptr) {
-        ESP_LOGE(LOG_TAG, "Failure when allocating line scratch buffer");    
-        goto free_shit_and_bail;
-    }
+    // line_scratch = (uint8_t*) ps_malloc(framebuffer->get_width());
+    // if(line_scratch == nullptr) {
+    //     ESP_LOGE(LOG_TAG, "Failure when allocating line scratch buffer");    
+    //     goto free_shit_and_bail;
+    // }
 
-    rslt = PNG_openRAM(tmp, scratch, scratch_size);
-    if(rslt != PNG_SUCCESS) {
-        ESP_LOGE(LOG_TAG, "Error %i initializing PNG encoder", rslt);
-        goto free_shit_and_bail;
-    }
+    // rslt = PNG_openRAM(tmp, scratch, scratch_size);
+    // if(rslt != PNG_SUCCESS) {
+    //     ESP_LOGE(LOG_TAG, "Error %i initializing PNG encoder", rslt);
+    //     goto free_shit_and_bail;
+    // }
 
-    w = framebuffer->get_width();
-    h = framebuffer->get_height();
+    // w = framebuffer->get_width();
+    // h = framebuffer->get_height();
 
-    rslt = PNG_encodeBegin(tmp, w, h, PNG_PIXEL_INDEXED, 8, ucPal, 3);
-    if(rslt != PNG_SUCCESS) {
-        ESP_LOGE(LOG_TAG, "Error %i initializing PNG encoder", rslt);
-        goto free_shit_and_bail;
-    }
+    // rslt = PNG_encodeBegin(tmp, w, h, PNG_PIXEL_INDEXED, 8, ucPal, 3);
+    // if(rslt != PNG_SUCCESS) {
+    //     ESP_LOGE(LOG_TAG, "Error %i initializing PNG encoder", rslt);
+    //     goto free_shit_and_bail;
+    // }
 
-    if(!framebuffer->lock()) {
-        ESP_LOGE(LOG_TAG, "Could not lock source buffer");
-        goto free_shit_and_bail;
-    }
+    // if(!framebuffer->lock()) {
+    //     ESP_LOGE(LOG_TAG, "Could not lock source buffer");
+    //     goto free_shit_and_bail;
+    // }
 
-    src_buf = (uint16_t*) framebuffer->get_fanta();
+    // src_buf = (uint16_t*) framebuffer->get_fanta();
 
-    for(y = 0; y < h && rslt == PNG_SUCCESS; y++) {
-        for(x = 0; x < w; x++) {
-            line_scratch[x] = ((src_buf[x] & (1 << y)) != 0) ? 1 : 0;
-        }
-        rslt = PNG_addLine(tmp, line_scratch, y);
-    }
+    // for(y = 0; y < h && rslt == PNG_SUCCESS; y++) {
+    //     for(x = 0; x < w; x++) {
+    //         line_scratch[x] = ((src_buf[x] & (1 << y)) != 0) ? 1 : 0;
+    //     }
+    //     rslt = PNG_addLine(tmp, line_scratch, y);
+    // }
 
-    framebuffer->unlock();
+    // framebuffer->unlock();
 
-    if(rslt != PNG_SUCCESS) {
-        ESP_LOGE(LOG_TAG, "Encoder failed");
-        goto free_shit_and_bail;
-    }
+    // if(rslt != PNG_SUCCESS) {
+    //     ESP_LOGE(LOG_TAG, "Encoder failed");
+    //     goto free_shit_and_bail;
+    // }
 
-    dataLen = PNG_close(tmp);
-    ESP_LOGI(LOG_TAG, "Encoded %i bytes", dataLen);
+    // dataLen = PNG_close(tmp);
+    // ESP_LOGI(LOG_TAG, "Encoded %i bytes", dataLen);
 
-    if(dataLen < scratch_size) {
-        scratch = (uint8_t*) realloc(scratch, dataLen);
-    }
+    // if(dataLen < scratch_size) {
+    //     scratch = (uint8_t*) realloc(scratch, dataLen);
+    // }
 
-    *outBufAddr = scratch;
-    *outBufLen = dataLen;
-    free(line_scratch);
-    free(tmp);
+    // *outBufAddr = scratch;
+    // *outBufLen = dataLen;
+    // free(line_scratch);
+    // free(tmp);
 
-    return true;
+    // return true;
 
 free_shit_and_bail:
     if(scratch != nullptr) free(scratch);
     if(line_scratch != nullptr) free(line_scratch);
-    if(tmp != nullptr) free(tmp);
+    // if(tmp != nullptr) free(tmp);
     *outBufLen = 0;
     return false;
 }

@@ -100,6 +100,8 @@ static const uint8_t kick_rle_data[] = {0, 7, 4, 2, 1, 24, 23, 30, 33, 26, 38, 3
 const rle_sample_t kick_sample = { .sample_rate = 8000, .root_frequency = 524 /* C5 */, .length = 36, .mode = MIX_MODE_XOR, .rle_data = kick_rle_data };
 
 NewSequencer::NewSequencer() {
+    num_rows = 0;
+    rows = nullptr;
     // Ch 0, 1, 2, 3: tone
     for(int i = 0; i < TONE_CHANNELS; i++) voices[i] = new SquareGenerator();
     voices[4] = new NoiseGenerator(); // Ch4: Noise
@@ -132,6 +134,9 @@ void NewSequencer::stop_sequence() {
     is_running = false;
     for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::PARAMETER_ACTIVE, false);
     voices[5]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, (int) &kick_sample);
+    sequence->unload();
+    num_rows = 0;
+    rows = nullptr;
     xEventGroupSetBits(wait_end_group, BIT_END_PLAY);
 }
 
@@ -139,9 +144,15 @@ void NewSequencer::wait_end_play() {
     xEventGroupWaitBits(wait_end_group, BIT_END_PLAY, pdFALSE, pdTRUE, portMAX_DELAY);
 }
 
-void NewSequencer::play_sequence(const melody_sequence_t * s, sequence_playback_flags_t f, int repeat) {
+void NewSequencer::play_sequence(MelodySequence * s, sequence_playback_flags_t f, int repeat) {
+    if(!s->load()) {
+        ESP_LOGE(LOG_TAG, "Failed to load sequence");
+        return;
+    }
     repetitions = repeat;
     sequence = s;
+    rows = s->get_array();
+    num_rows = s->get_num_rows();
     flags = f;
     pointer = 0;
     loop_point = 0;
@@ -197,7 +208,6 @@ bool NewSequencer::process_step(const melody_item_t * cur_line) {
         case SAMPLE_LOAD:
             voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, cur_line->argument);
             break;
-            break;
         default:
             break;
     }
@@ -206,8 +216,8 @@ bool NewSequencer::process_step(const melody_item_t * cur_line) {
 }
 
 void NewSequencer::find_hook() {
-    while(pointer < sequence->count) {
-        const melody_item_t * cur_line = &sequence->array[pointer];
+    while(pointer < num_rows) {
+        const melody_item_t * cur_line = &rows[pointer];
         if(cur_line->command == LOOP_POINT_SET) {
             if(cur_line->argument == LOOP_POINT_TYPE_HOOK_START) {
                 loop_point = pointer + 1;
@@ -226,11 +236,11 @@ void NewSequencer::find_hook() {
 }
 
 void NewSequencer::process_steps_until_delay() {
-    if(pointer >= sequence->count) {
+    if(pointer >= num_rows) {
         if(end_of_song()) return;
     }
 
-    const melody_item_t * cur_line = &sequence->array[pointer];
+    const melody_item_t * cur_line = &rows[pointer];
     if(process_step(cur_line)) return;
 
     pointer++;

@@ -16,7 +16,7 @@ def post_program_action(source, target, env):
             os.remove(os.path.join(OUTDIR, filename))
 
     for filename in os.listdir(music_path):
-        if filename.endswith(".o"):
+        if filename.endswith(".o") and not filename.startswith("_dummy"):
             filepath = os.path.join(music_path, filename)
             filename_base = os.path.basename(filename).split('.')[0]
             env.Execute(f"$PYTHONEXE {ELF2POMF} {filepath} {OUTDIR}/{filename_base}.pomf")

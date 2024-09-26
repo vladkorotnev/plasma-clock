@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <LittleFS.h>
 #include <device_config.h>
 #include <os_config.h>
 #include <display/display.h>
@@ -195,6 +196,10 @@ void boot_task(void*) {
     bringup_sound();
     seq->play_sequence(&pc98_pipo);
 
+    if (!LittleFS.begin(true, "/disk")) {
+        ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
+    }
+
     con->clear();
 
     con->print("WiFi init");
@@ -229,6 +234,7 @@ void boot_task(void*) {
     bringup_temp_sensor();
     bringup_switchbot_sensor();
     bringup_hid();
+    load_melodies_from_disk();
 
     timekeeping_begin();
     weather_start();
@@ -267,6 +273,7 @@ void setup() {
 #ifdef BOARD_HAS_PSRAM
     heap_caps_malloc_extmem_enable(16);
 #endif
+    ESP_LOGI(LOG_TAG, "Hello!");
 
     // The I2S driver messes up display pinmux, so it must initialize first
     WaveOut::init_I2S(HWCONF_BEEPER_GPIO);

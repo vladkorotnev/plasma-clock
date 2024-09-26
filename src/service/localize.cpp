@@ -56,6 +56,8 @@ static const std::map<const std::string, const char*> english = {
     {"HOLD", "HOLD"},
     {"Only Once", "Only Once"},
 
+    {"(Randomize)", "(Randomize)"},
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
     {"BB_CNCT_GUIDE", "\x1A to connect"},

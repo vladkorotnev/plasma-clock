@@ -566,7 +566,5 @@ static const melody_item_t abba_data[] = {
     {DELAY, 0, 11},
     {FREQ_SET, 0, 0},
 };
-const melody_sequence_t abba = {
-    .array = abba_data,
-    .count = sizeof(abba_data) / sizeof(melody_item_t)
-};
+
+static StaticMelodySequence abba(abba_data, sizeof(abba_data)/sizeof(melody_item_t), "");

@@ -77,4 +77,6 @@ for s in samples_indexed:
     outf.write(s['data'])
 outf.write(b'tuNE')
 size_le = (len(track_data)).to_bytes(4, byteorder = 'little')
+outf.write(size_le)
 outf.write(track_data)
+outf.write(b'eof \x00\x00\x00\x00')

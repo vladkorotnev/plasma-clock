@@ -21,6 +21,7 @@ static GyverPortal ui;
 static SensorPool *sensors;
 static Beeper *beeper;
 static Screenshooter *screenshooter;
+static std::string all_chime_names_csv = "";
 
 extern "C" void AdminTaskFunction( void * pvParameter );
 
@@ -82,7 +83,7 @@ static void save_string(prefs_key_t key) {
 
 static void render_melody(const char * title, prefs_key_t key) {
     GP.LABEL(title);
-    GP.SELECT(key, all_chime_names_csv, prefs_get_int(key));
+    GP.SELECT(key, all_chime_names_csv.c_str(), prefs_get_int(key));
 }
 
 static void save_melody(prefs_key_t key) {
@@ -151,7 +152,7 @@ static void render_alarms() {
             GP.BREAK();
         }
 
-        GP.SELECT(tmp + "melo", all_chime_names_csv, a.melody_no);
+        GP.SELECT(tmp + "melo", all_chime_names_csv.c_str(), a.melody_no);
     }
 
     GP.FORM_SEND("Save Alarms");
@@ -241,7 +242,7 @@ static void build() {
                 GP.TD();
         GP.TABLE_END();
         GP.HR();
-        GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
+        // GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -636,16 +637,16 @@ void action() {
                 unmount_partition(hPart);
             }
         }
-        else if(ui.uri().endsWith("screen.png")) {
-            const uint8_t * outBuf = nullptr;
-            size_t outLen = 0;
-            if(screenshooter->capture_png(&outBuf, &outLen)) {
-                ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
-                free((void*)outBuf);
-            } else {
-                ui.server.send(500, "", "");
-            }
-        }
+        // else if(ui.uri().endsWith("screen.png")) {
+        //     const uint8_t * outBuf = nullptr;
+        //     size_t outLen = 0;
+        //     if(screenshooter->capture_png(&outBuf, &outLen)) {
+        //         ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
+        //         free((void*)outBuf);
+        //     } else {
+        //         ui.server.send(500, "", "");
+        //     }
+        // }
     }
 }
 
@@ -662,6 +663,12 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
 #if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
     ui.enableAuth(ADMIN_LOGIN, ADMIN_PASS);
 #endif
+
+    all_chime_names_csv.reserve(all_chime_list.size() * 32);
+    for(int i = 0; i < all_chime_list.size(); i++) {
+        if(i > 0) all_chime_names_csv += ",";
+        all_chime_names_csv += all_chime_list[i]->get_long_title();
+    }
 
     // Due to a bug in GyverPortal, handle uploads on our own
     ui.server.on("/prefs_restore", HTTP_POST, []() {
