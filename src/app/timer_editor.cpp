@@ -44,6 +44,7 @@ public:
         cursorTimer = 0;
         isRunning = false;
         mustRing = false;
+        blinkState = false;
 
         hTimer = xTimerCreate(
             "TMR",

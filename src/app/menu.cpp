@@ -6,6 +6,7 @@
 #include <rsrc/common_icons.h>
 #include <service/time.h>
 #include <service/localize.h>
+#include <LittleFS.h>
 
 class UptimeView: public MenuInfoItemView {
 public:
@@ -22,6 +23,24 @@ public:
 
 private:
     char buf[16];
+};
+
+class DiskSpaceView: public MenuInfoItemView {
+public:
+    DiskSpaceView(): MenuInfoItemView(localized_string("Disk Space"), "") {
+    }
+
+    void prepare() override {
+        if(buf[0] == 0) {
+            // Having this as a static item view causes a deadlock on boot, so we need to set the value in runtime
+            snprintf(buf, 23, "%.02dK (%.02dK %s)", LittleFS.totalBytes() / 1024, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024, localized_string("free"));
+            bottom_label->set_string(buf);
+        }
+        MenuInfoItemView::prepare();
+    }
+
+private:
+    char buf[24] = { 0 };
 };
 
 AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {
@@ -188,6 +207,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
     snprintf(buf_mac, 19, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     system_info->add_view(new MenuInfoItemView(localized_string("WiFi IP"), buf_ip));
     system_info->add_view(new MenuInfoItemView(localized_string("MAC Address"), buf_mac));
+    system_info->add_view(new DiskSpaceView());
     system_info->add_view(new UptimeView());
     system_info->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
 #if HAS(SERIAL_MIDI)

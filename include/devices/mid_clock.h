@@ -10,11 +10,11 @@
 #define HAS_OUTPUT_WS0010
 #define HAS_TEMP_SENSOR
 #define HAS_KEYPAD
-// #define HAS_SERIAL_MIDI
+#define HAS_SERIAL_MIDI
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "uPIS-OS"
-#define PRODUCT_VERSION "3.9"
+#define PRODUCT_VERSION "4"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;

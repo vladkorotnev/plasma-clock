@@ -286,7 +286,7 @@ protected:
             free(long_title_);
             long_title_ = nullptr;
         }
-        ESP_LOGI(TAG, "Prefetch %s", path);
+        ESP_LOGV(TAG, "Prefetch %s", path);
         FILE * f = nullptr;
         POMFHeader head = { 0 };
         size_t r = 0;
@@ -384,15 +384,17 @@ void load_melodies_from_disk() {
     if (d) {
         while ((dir = readdir(d)) != NULL) {
             if(dir->d_type == DT_REG && strlen(dir->d_name) > 5 && !strcmp(dir->d_name + strlen(dir->d_name) - 5, ".pomf")) {
-                ESP_LOGI(LOG_TAG, "Found music file: %s", dir->d_name);
+                ESP_LOGV(LOG_TAG, "Found music file: %s", dir->d_name);
                 snprintf(pbuf, 63, "%s/%s", MUSIC_DIR, dir->d_name);
                 auto seq = new PomfMelodySequence(pbuf);
                 if(seq->valid()) {
-                    ESP_LOGI(LOG_TAG, "Title: %s", seq->get_title());
+                    ESP_LOGV(LOG_TAG, "Title: %s", seq->get_title());
                     all_chime_list.push_back(seq);
                 } else {
+                    ESP_LOGE(LOG_TAG, "File %s not valid", dir->d_name);
                     delete seq;
                 }
+                taskYIELD();
             }
         }
         closedir(d);

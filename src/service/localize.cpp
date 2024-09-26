@@ -179,6 +179,9 @@ static const std::map<const std::string, const char*> russian = {
     {"WiFi Name", "Имя сети"},
     {"WiFi IP", "IP-адрес"},
     {"MAC Address", "MAC-адрес"},
+    {"Disk Space", "Место на диске"},
+    {"System Memory", "Оперативная память"},
+    {"free", "свободно"},
     {"Remote Control Server", "Удалённый доступ"},
     {"Serial MIDI Input", "Эмуляция синтезатора"},
 
