@@ -21,6 +21,8 @@ NOTE_TBL = [
     3951,4186, 4435, 4699, 4978, 5274, 5588, 5920, 6272, 6644, 7040, 7458
 ]
 
+LAST_NOTE_NO=[0, 0, 0, 0, 0, 0]
+
 def getPitch(noteNo):
     global USE_TBL, NOTE_TBL
     if USE_TBL:
@@ -65,13 +67,15 @@ for msg in mid:
     if msg.type == "note_on" or msg.type == "note_off":
         if msg.type == "note_on" and msg.velocity > 0:
             existing_evt = prev_note_off_event(msg.channel)
+            LAST_NOTE_NO[msg.channel] = msg.note
             if existing_evt is not None:
                 existing_evt.arg = int(getPitch(msg.note))
             else:
                 evts.append(Event("FREQ_SET", msg.channel, int(getPitch(msg.note))))
         else:
-            # note off
-            evts.append(Event("FREQ_SET", msg.channel, 0))
+            if msg.note == LAST_NOTE_NO[msg.channel]:
+                # note off
+                evts.append(Event("FREQ_SET", msg.channel, 0))
     elif msg.type == "end_of_track":
         if ended:
             raise Exception("WTF, already ended")

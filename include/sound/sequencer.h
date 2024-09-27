@@ -44,5 +44,6 @@ private:
     void find_hook();
 #if HAS(SERIAL_MIDI)
     TaskHandle_t hMidiTask;
+    int lastNote[CHANNELS] = { 0 };
 #endif
 };

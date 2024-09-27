@@ -38,7 +38,7 @@ static void serMidiTask(void * pvParameters) {
     midiIo.turnThruOff();
     while(1) {
         if(midiIo.read()) {
-            ESP_LOGI(LOG_TAG, "MIDI recv");
+            ESP_LOGV(LOG_TAG, "MIDI recv");
             seq->midi_task();
         }
     }
@@ -50,10 +50,11 @@ void NewSequencer::midi_task() {
             { 
                 int ch = midiIo.getChannel() - 1;
                 if(ch < 0 || ch >= NewSequencer::CHANNELS) {
-                    ESP_LOGI(LOG_TAG, "Invalid channel %i", ch);
+                    ESP_LOGV(LOG_TAG, "Invalid channel %i", ch);
                     return;
                 }
                 int noteNo = midiIo.getData1();
+                lastNote[ch] = noteNo;
                 int velo = midiIo.getData2();
                 ESP_LOGV(LOG_TAG, "Midi Note On ch=%i, noteNo=%i, velo=%i, freq=%i", ch, noteNo, velo, sNotePitches[noteNo]/2);
                 voices[ch]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, velo > 0 ? sNotePitches[noteNo]/2 : 0);
@@ -64,11 +65,13 @@ void NewSequencer::midi_task() {
             {
                 int ch = midiIo.getChannel() - 1;
                 if(ch < 0 || ch >= NewSequencer::CHANNELS) {
-                    ESP_LOGI(LOG_TAG, "Invalid channel %i", ch);
+                    ESP_LOGV(LOG_TAG, "Invalid channel %i", ch);
                     return;
                 }
-                ESP_LOGV(LOG_TAG, "Midi Note Off ch=%i", ch);
-                voices[ch]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+                if(lastNote[ch] == midiIo.getData1()) {
+                    ESP_LOGV(LOG_TAG, "Midi Note Off ch=%i", ch);
+                    voices[ch]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+                }
             }
             break;
 
@@ -76,7 +79,7 @@ void NewSequencer::midi_task() {
             {
                 int ch = midiIo.getChannel() - 1;
                 if(ch < 0 || ch >= NewSequencer::CHANNELS) {
-                    ESP_LOGI(LOG_TAG, "Invalid channel %i", ch);
+                    ESP_LOGV(LOG_TAG, "Invalid channel %i", ch);
                     return;
                 }
                 int controlNo = midiIo.getData1();

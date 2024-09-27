@@ -33,7 +33,6 @@ static void wake_up(TickType_t now) {
     if(isDisplayOff) {
         ESP_LOGI(LOG_TAG, "Start display");
         display->set_show(true);
-        beeper->set_channel_state(CHANNEL_AMBIANCE, true);
         isDisplayOff = false;
         startled_sensor->trigger();
     }
@@ -51,6 +50,8 @@ static void wake_up(TickType_t now) {
         display->set_bright(isBright);
     #endif
     }
+
+    beeper->set_channel_state(CHANNEL_AMBIANCE, true);
 
     // cannot use getTickCount here, because then lastMotionTime will be in the future
     // and thus further conditions will think it's way off in the past (due to ticktype_t being unsigned)
