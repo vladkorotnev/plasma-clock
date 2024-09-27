@@ -4,12 +4,17 @@
 
 MenuListSelectorView::MenuListSelectorView(const char * title, std::vector<const char*> items_, int initialValue, std::function<void(bool, Renderable*)> onActivated_, std::function<void(int)> onChange_):
     label(new StringScroll(&keyrus0808_font, title)),
-    value(new StringScroll(&keyrus0808_font, items_[initialValue])),
+    value(new StringScroll(&keyrus0808_font)),
     currentValue(initialValue),
     items(items_),
     onChange(onChange_),
     onActivated(onActivated_),
     isActive(false) {
+        if(initialValue < items_.size()) {
+            value->set_string(items_[initialValue]);
+        } else if(items_.size() >= 1) {
+            value->set_string(items_[0]);
+        }
         value->set_y_position(keyrus0808_font.height);
         value->align_to_right = true;
         value->start_at_visible = true;
@@ -33,7 +38,7 @@ void MenuListSelectorView::step() {
     if(isActive) {
         if(hid_test_key_state_repetition(KEY_DOWN) == KEYSTATE_HIT) {
             currentValue++;
-            if(currentValue == items.size()) currentValue = 0;
+            if(currentValue >= items.size()) currentValue = 0;
             onChange(currentValue);
             value->set_string(items[currentValue]);
         } else if(hid_test_key_state_repetition(KEY_UP) == KEYSTATE_HIT) {
