@@ -40,7 +40,7 @@ public:
     }
 
 private:
-    char buf[24] = { 0 };
+    char buf[32] = { 0 };
 };
 
 AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {

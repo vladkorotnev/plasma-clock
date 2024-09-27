@@ -660,7 +660,10 @@ void admin_panel_prepare(SensorPool* s, Beeper* b) {
     all_chime_names_csv.reserve(all_chime_list.size() * 32);
     for(int i = 0; i < all_chime_list.size(); i++) {
         if(i > 0) all_chime_names_csv += ",";
-        all_chime_names_csv += all_chime_list[i]->get_long_title();
+        size_t loc = std::string::npos;
+        std::string tmp = std::string(all_chime_list[i]->get_long_title());
+        std::replace(tmp.begin(), tmp.end(), ',', '/');
+        all_chime_names_csv += tmp;
     }
 
     // Due to a bug in GyverPortal, handle uploads on our own

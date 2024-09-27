@@ -203,11 +203,11 @@ void boot_task(void*) {
 
     con->clear();
 
-    con->print("WiFi init");
+    // con->print("WiFi init");
     NetworkManager::startup();
     while(!NetworkManager::is_up()) {
-        delay(1000);
-        con->write('.');
+        delay(100);
+        // con->write('.');
     }
 
     con->clear();
@@ -215,14 +215,14 @@ void boot_task(void*) {
     screenshooter = new Screenshooter(fb->manipulate());
     if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
         screenshooter->start_server(3939);
-        con->print("RC server up!");
-        delay(1000);
+        // con->print("RC server up!");
+        // delay(1000);
     }
-    con->print(NetworkManager::network_name());
-    con->print("%i dBm", NetworkManager::rssi());
-    delay(2000);
-    con->print(NetworkManager::current_ip().c_str());
-    delay(2000);
+    // con->print(NetworkManager::network_name());
+    // con->print("%i dBm", NetworkManager::rssi());
+    // delay(2000);
+    // con->print(NetworkManager::current_ip().c_str());
+    // delay(2000);
 
     ota = new OTAFVUManager(con, seq);
 
@@ -350,8 +350,6 @@ void loop() {
             appHost->switch_to(_actual_current_state, _next_transition);
         }
         print_memory();
-
-        if(_actual_current_state == STATE_BOOT) taskYIELD();
     } else {
         if(_actual_current_state != current_state && current_state == STATE_RESTART) {
             _actual_current_state = current_state;
