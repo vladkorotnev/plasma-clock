@@ -43,6 +43,8 @@ public:
         load_prefs();
         cursorTimer = 0;
         isRunning = false;
+        mustRing = false;
+        blinkState = false;
 
         hTimer = xTimerCreate(
             "TMR",
@@ -65,8 +67,7 @@ public:
 
     void render(FantaManipulator *fb) {
         cursorTimer++;
-        if(cursorTimer == 30) {
-            cursorTimer = 0;
+        if(cursorTimer % 30 == 0) {
             isShowingCursor = !isShowingCursor;
         }
 
@@ -90,9 +91,22 @@ public:
         if(isShowingCursor) {
             fb->rect(cursor_offset - 2, 0, cursor_offset + 2 * xnu_font.width + 1, 15, false);
         }
+
+        if(cursorTimer % 60 == 0 && sequencer->is_sequencing()) {
+            blinkState = !blinkState;
+        }
+
+        if(blinkState) fb->invert();
+
+        if(cursorTimer >= 179) cursorTimer = 0;
     }
 
     void step() {
+        if(mustRing) {
+            sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY); 
+            mustRing = false;
+        }
+        
         if(hid_test_key_state(KEY_LEFT) == KEYSTATE_HIT) {
             if(cursorPosition == CursorPosition::HOUR || isRunning) {
                 // too much to left, leave
@@ -132,6 +146,7 @@ public:
             secondView->sound = true;
             minuteView->sound = true;
             hourView->sound = true;
+            blinkState = false;
         }
 
         Composite::step();
@@ -147,7 +162,8 @@ public:
                 secondView->sound = false;
                 minuteView->sound = false;
                 hourView->sound = false;
-                sequencer->play_sequence(melody_from_no(prefs_get_int(PREFS_KEY_TIMER_MELODY)), SEQUENCER_REPEAT_INDEFINITELY); 
+                blinkState = true;
+                mustRing = true; // rather than increasing timer stack size just use a flag to kick off the melody in a bigger thread
             }
             load_prefs();
         } else {
@@ -171,6 +187,8 @@ private:
     uint8_t cursorTimer;
     CursorPosition cursorPosition;
     bool isShowingCursor;
+    bool mustRing;
+    bool blinkState;
     TimerHandle_t hTimer;
 
     void load_prefs() {
@@ -238,10 +256,16 @@ private:
             save_prefs();
             cursorPosition = CursorPosition::PLAY_PAUSE;
             xTimerStart(hTimer, 0);
+            secondView->sound = true;
+            minuteView->sound = false;
+            hourView->sound = false;
         } else {
             xTimerStop(hTimer, 0);
             // save time halfway through
             save_prefs();
+            secondView->sound = true;
+            minuteView->sound = true;
+            hourView->sound = true;
         }
     }
 };

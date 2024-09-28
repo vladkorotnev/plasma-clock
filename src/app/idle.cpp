@@ -11,6 +11,7 @@
 #include <views/idle_screens/simple_clock.h>
 #include <views/overlays/rain_ovl.h>
 #include <views/overlays/thunder_ovl.h>
+#include <views/overlays/fireworks.h>
 #if HAS(TEMP_SENSOR) || HAS(SWITCHBOT_METER_INTEGRATION)
 #include <views/idle_screens/indoor_view.h>
 #endif
@@ -66,6 +67,7 @@ static Renderable * mainView;
 static SimpleClock * clockView;
 static NextAlarmView * nextAlarmView;
 
+static FireworksOverlay * firework;
 static RainOverlay * rain;
 static ThunderOverlay * thunder;
 static SignalStrengthIcon * signalIndicator;
@@ -98,16 +100,20 @@ static current_weather_t weather = { 0 };
 static bool tick_tock_enable = false;
 static bool tick_tock = false;
 
+static bool was_pmu_startled = false;
+
 static int last_chimed_hour = 0;
+
+static const int tick_tock_offset_ms = 250;
 
 void sound_tick_tock() {
     tk_time_of_day_t now = get_current_time_precise();
-    if(now.millisecond >= 250 && !tick_tock) {
+    if(now.millisecond >= tick_tock_offset_ms && !tick_tock) {
         if(!sequencer->is_sequencing() && (yukkuri == nullptr || !yukkuri->is_speaking())) {
             beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
         }
         tick_tock = true;
-    } else if (now.millisecond < 250 && tick_tock) {
+    } else if (now.millisecond < tick_tock_offset_ms && tick_tock) {
         tick_tock = false;
     }
 }
@@ -115,18 +121,51 @@ void sound_tick_tock() {
 void _play_hourly_chime_if_enabled(bool first_chime) {
     if(!prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON)) return;
     int melody_no = first_chime ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
-    const melody_sequence_t * melody = melody_from_no(melody_no);
+    auto melody = melody_from_no(melody_no);
     sequencer->play_sequence(melody, SEQUENCER_PLAY_HOOK_ONLY);
 }
 
+void _play_precise_time_signal_if_enabled(const tk_time_of_day_t &now) {
+    if(!prefs_get_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL)) return;
+
+    // Reference: https://ru.wikipedia.org/wiki/Сигнал_проверки_времени#Сигналы_точного_времени_в_России
+    static melody_item_t precise_time_signal[] = {
+        {DELAY, 0, tick_tock_offset_ms}, // <- compensate for the delay in the ticking animation
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+        {FREQ_SET, 0, 1000}, {DELAY, 0, 100}, {FREQ_SET, 0, 0}, {DELAY, 0, 900},
+    };
+    static StaticMelodySequence precise_time_signal_seq(precise_time_signal, sizeof(precise_time_signal)/sizeof(melody_item_t), "");
+    static const unsigned last_delay_index = 22;
+
+    precise_time_signal[last_delay_index].argument =  (100 + 20*((now.hour + 1) % 24));
+    precise_time_signal[last_delay_index + 2].argument =  1000 - precise_time_signal[last_delay_index].argument;
+
+    sequencer->play_sequence(&precise_time_signal_seq);
+}
+
 void hourly_chime() {
+    if(sequencer->is_sequencing()) return;
     tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR);
+    int last_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR);
     if(now.hour != last_chimed_hour) {
         last_chimed_hour = now.hour;
+        if(now.hour == 0 && now.minute == 0) {
+            tk_date_t today = get_current_date();
+            if(today.day == 1 && today.month == 1 && today.year > 2000) {
+                push_state(STATE_NEW_YEAR, TRANSITION_SLIDE_VERTICAL_UP);
+                // New Year animation plays the melody, so no chime
+                return;
+            }
+        }
+
         bool first_chime = (now.hour == first_hour);
         if(  now.hour >= first_hour
-          && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)
+          && now.hour <= last_hour
         ) {
 #if !HAS(AQUESTALK)
             _play_hourly_chime_if_enabled(first_chime);
@@ -151,6 +190,14 @@ void hourly_chime() {
                 yukkuri->speak(hourUtterance);
             }
 #endif
+        }
+    } else {
+        if( (now.hour + 1) >= first_hour
+           && (now.hour + 1) <= last_hour
+          && now.second == 55
+          && now.minute == 59
+        ) {
+            _play_precise_time_signal_if_enabled(now);
         }
     }
 }
@@ -249,8 +296,9 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
     current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
 
     clockView = new SimpleClock();
-    rain = new RainOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
-    thunder = new ThunderOverlay(HWCONF_DISPLAY_WIDTH_PX, HWCONF_DISPLAY_HEIGHT_PX);
+    rain = new RainOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height);
+    thunder = new ThunderOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height);
+    firework = new FireworksOverlay(nullptr); // no firework sound on idle screen
     signalIndicator = new SignalStrengthIcon(sensors);
     weatherView = new CurrentWeatherView();
     forecastView = new DailyForecastView();
@@ -266,8 +314,8 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
 
     // thunder hurts readability on other views, so keep it on clock only
     ScreenCompositor * thunderClock = new ScreenCompositor(clockView);
-    if(prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY))
-        thunderClock->add_layer(thunder);
+    thunderClock->add_layer(thunder);
+    thunderClock->add_layer(firework);
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
@@ -295,8 +343,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
     ViewCompositor * rainyClock = new ViewCompositor();
     rainyClock->add_layer(slideShow);
     rainyClock->add_layer(signalIndicator);
-    if(prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY))
-        rainyClock->add_layer(rain);
+    rainyClock->add_layer(rain);
     rainyClock->add_layer(touchArrows);
     mainView = rainyClock;
 
@@ -355,12 +402,6 @@ void app_idle_process() {
 
     mainView->step();
 
-    current_weather_t w;
-    if(weather_get_current(&w) && w.last_updated != weather.last_updated) {
-        memcpy(&weather, &w, sizeof(current_weather_t));
-        weather_overlay_update();
-    }
-
     if(hid_test_key_state_repetition(KEY_DOWN)) {
         go_to_next_screen(TRANSITION_SLIDE_VERTICAL_UP);
     }
@@ -393,6 +434,38 @@ void app_idle_process() {
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
 
+    if(!prefs_get_bool(PREFS_KEY_WEATHER_OVERLAY)) {
+        rain->set_intensity(0);
+        thunder->set_active(false);
+        firework->set_active(false);
+    } else {
+        tk_date_t today = get_current_date();
+        if(today.day <= 5 && today.month == 1 && today.year >= 2000) {
+            firework->set_active(true);
+            firework->intense = false;
+            if(today.day <= 1) {
+                firework->min_delay = pdMS_TO_TICKS(33);
+                firework->max_delay = pdMS_TO_TICKS(1700);
+            }
+            else if(today.day == 2) {
+                firework->min_delay = pdMS_TO_TICKS(250);
+                firework->max_delay = pdMS_TO_TICKS(2500);
+            }
+            else if(today.day >= 3) {
+                firework->min_delay = pdMS_TO_TICKS(500);
+                firework->max_delay = pdMS_TO_TICKS(3000);
+            }
+        } else {
+            firework->set_active(false);
+        }
+
+        current_weather_t w;
+        if(weather_get_current(&w) && w.last_updated != weather.last_updated) {
+            memcpy(&weather, &w, sizeof(current_weather_t));
+            weather_overlay_update();
+        }
+    }
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     if(sensor_info_t * info = sensors->get_info(SENSOR_ID_BALANCE_BOARD_STARTLED)) {
         if(info->last_result) {
@@ -400,4 +473,16 @@ void app_idle_process() {
         }
     }
 #endif
+
+    if(sensors->exists(VIRTSENSOR_ID_PMU_STARTLED)) {
+        bool pmu_startled = sensors->get_info(VIRTSENSOR_ID_PMU_STARTLED)->last_result != 0;
+        if(pmu_startled && !was_pmu_startled) {
+            // Screen was just turned on or something
+            // Return to the first active screen
+            lastScreenSwitch = xTaskGetTickCount();
+            curScreen = (MainViewId_t) (VIEW_MAX-1);
+            go_to_next_screen(TRANSITION_RANDOM);
+        }
+        was_pmu_startled = pmu_startled;
+    }
 }

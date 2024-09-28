@@ -6,6 +6,7 @@
 #include <rsrc/common_icons.h>
 #include <service/time.h>
 #include <service/localize.h>
+#include <LittleFS.h>
 
 class UptimeView: public MenuInfoItemView {
 public:
@@ -24,8 +25,27 @@ private:
     char buf[16];
 };
 
-AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShimNavMenu() {
+class DiskSpaceView: public MenuInfoItemView {
+public:
+    DiskSpaceView(): MenuInfoItemView(localized_string("Disk Space"), "") {
+    }
+
+    void prepare() override {
+        if(buf[0] == 0) {
+            // Having this as a static item view causes a deadlock on boot, so we need to set the value in runtime
+            snprintf(buf, 23, "%.02dK (%.02dK %s)", LittleFS.totalBytes() / 1024, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024, localized_string("free"));
+            bottom_label->set_string(buf);
+        }
+        MenuInfoItemView::prepare();
+    }
+
+private:
+    char buf[32] = { 0 };
+};
+
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
+    yukkuri = y;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
         if(isActive) push_renderable(instance, TRANSITION_NONE);
         else pop_renderable(TRANSITION_NONE);
@@ -44,18 +64,52 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Hourly chime"), PREFS_KEY_HOURLY_CHIME_ON));
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("First chime"), PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("Other chimes"), PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Fake Soviet radio time signals"), PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime from"), PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime until"), PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
 #if HAS(AQUESTALK)
+
+    std::function<void(int)> yukkuriTestFunction = [y](int) {
+        if(y->is_speaking()) {
+            y->cancel_current();
+        }
+
+        const char * test_utterance;
+        switch(active_tts_language()) {
+            case TTS_LANG_JA:
+                test_utterance = ".yukkuri_siteittene?";
+                break;
+
+            case TTS_LANG_RU:
+                test_utterance = ".pya'_tunitsa- vu;efi'rye;kapita'ru/sho'u;po'rye/chujye'_su pie'rubaya;turo'ika;iguroko'fu,fusutu'-jiyu-.";
+                break;
+
+            case TTS_LANG_EN:
+            default:
+                test_utterance = ".a'iru/he'bu;ei;nanba'-;nain ei;nanba'-;si_ku_su/uizu;e'ku_su_tsura/so'-_su tuu/nanba'-;fo'-ti/fai_fu_su,ennda;ra'-ji;so'-da.";
+                break;
+        }
+
+        y->speak(test_utterance);
+    };
+
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
-    clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_DISP_24_HRS));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_VOICE_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
-    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction));
+    clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction, yukkuriTestFunction));
     clock_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Voice language"), 
         {localized_string("English"), localized_string("Russian"), localized_string("Japanese")},
         PREFS_KEY_TTS_LANGUAGE,
-        normalActivationFunction
+        normalActivationFunction,
+        yukkuriTestFunction
+    ));
+    clock_menu->add_view(new MenuListSelectorPreferenceView(
+        localized_string("Voice mode"), 
+        {localized_string("Clear"), localized_string("Loud")},
+        PREFS_KEY_VOICE_MODE_RESAMPLING,
+        normalActivationFunction,
+        yukkuriTestFunction
     ));
 #endif
     clock_menu->add_view(new MenuActionItemView(localized_string("Set time"), [this]() {
@@ -104,6 +158,10 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
         screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Wordnik"), PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
         screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Foobar2000"), PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 1, normalActivationFunction));
+#if HAS(DISPLAY_BLANKING)
+    display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Blank display after (s)"), PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 21600, 1, normalActivationFunction));
+#endif
+    display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Turn display off after (s)"), PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000, 1, normalActivationFunction));
     display_menu->add_view(new MenuBooleanSettingView(localized_string("Use Fahrenheit for temperature"), PREFS_KEY_WEATHER_USE_FAHRENHEIT));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Transition"), 
@@ -149,6 +207,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     snprintf(buf_mac, 19, "%02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     system_info->add_view(new MenuInfoItemView(localized_string("WiFi IP"), buf_ip));
     system_info->add_view(new MenuInfoItemView(localized_string("MAC Address"), buf_mac));
+    system_info->add_view(new DiskSpaceView());
     system_info->add_view(new UptimeView());
     system_info->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
 #if HAS(SERIAL_MIDI)
@@ -229,6 +288,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s): ProtoShimNavMenu::ProtoShi
     main_menu->add_view(new MenuActionItemView(localized_string("Stopwatch"), [](){ push_state(STATE_STOPWATCH, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &stopwatch_icns));
     main_menu->add_view(new MenuActionItemView(localized_string("Weather"), []() { push_state(STATE_WEATHER, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weather_icns));
     main_menu->add_view(new MenuActionItemView(localized_string("Alarm"), [](){ push_state(STATE_ALARM_EDITOR, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &alarm_icns));
+    main_menu->add_view(new MenuActionItemView(localized_string("Music Box"), [](){ push_state(STATE_MUSICBOX, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &music_icns));
 #if HAS(BALANCE_BOARD_INTEGRATION)
     main_menu->add_view(new MenuActionItemView(localized_string("Weighing"), [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
 #endif

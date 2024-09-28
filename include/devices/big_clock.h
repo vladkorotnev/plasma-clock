@@ -5,6 +5,7 @@
 
 #define HAS_OUTPUT_MD_PLASMA
 #define HAS_VARYING_BRIGHTNESS
+#define HAS_DISPLAY_BLANKING
 #define HAS_LIGHT_SENSOR
 #define HAS_TEMP_SENSOR
 #define HAS_MOTION_SENSOR
@@ -12,7 +13,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "3.7"
+#define PRODUCT_VERSION "4"
 
 // ---- Connection to DISP BOARD ----
 const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {

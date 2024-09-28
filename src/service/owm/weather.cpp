@@ -100,7 +100,7 @@ void WeatherTaskFunction( void * pvParameter )
                     }
 
                     memset(&forecast_daily, 0, sizeof(forecast_daily));
-                    if(response.containsKey("daily")) {
+                    if(response["daily"].is<JsonArray>()) {
                         int day_idx = -1;
                         for(auto day: response["daily"].as<JsonArray>()) {
                             if(day_idx >= 0) {
@@ -119,7 +119,7 @@ void WeatherTaskFunction( void * pvParameter )
                     }
 
                     memset(&forecast_hourly, 0, sizeof(forecast_hourly));
-                    if(response.containsKey("hourly")) {
+                    if(response["hourly"].is<JsonArray>()) {
                         int hr_idx = 0;
                         for(auto hr: response["hourly"].as<JsonArray>()) {
                             forecast_hourly[hr_idx] = {
@@ -169,7 +169,7 @@ void weather_start() {
     if(xTaskCreate(
         WeatherTaskFunction,
         "OWM",
-        4096,
+        8192,
         nullptr,
         pisosTASK_PRIORITY_WEATHER,
         &hTask

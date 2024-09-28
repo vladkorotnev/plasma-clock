@@ -1,4 +1,5 @@
 #include "network/admin_panel.h"
+#include <LittleFS.h>
 #include <device_config.h>
 #include <network/netmgr.h>
 #include <backup.h>
@@ -7,7 +8,6 @@
 #include <service/wordnik.h>
 #include <service/alarm.h>
 #include <views/transitions/transitions.h>
-#include <graphics/screenshooter.h>
 #include <input/keys.h>
 #include <sound/melodies.h>
 #include <GyverPortal.h>
@@ -17,10 +17,10 @@
 
 static char LOG_TAG[] = "ADMIN";
 static TaskHandle_t hTask = NULL;
-static GyverPortal ui;
+static GyverPortal ui(&LittleFS);
 static SensorPool *sensors;
 static Beeper *beeper;
-static Screenshooter *screenshooter;
+static std::string all_chime_names_csv = "";
 
 extern "C" void AdminTaskFunction( void * pvParameter );
 
@@ -82,7 +82,7 @@ static void save_string(prefs_key_t key) {
 
 static void render_melody(const char * title, prefs_key_t key) {
     GP.LABEL(title);
-    GP.SELECT(key, all_chime_names_csv, prefs_get_int(key));
+    GP.SELECT(key, all_chime_names_csv.c_str(), prefs_get_int(key));
 }
 
 static void save_melody(prefs_key_t key) {
@@ -151,7 +151,7 @@ static void render_alarms() {
             GP.BREAK();
         }
 
-        GP.SELECT(tmp + "melo", all_chime_names_csv, a.melody_no);
+        GP.SELECT(tmp + "melo", all_chime_names_csv.c_str(), a.melody_no);
     }
 
     GP.FORM_SEND("Save Alarms");
@@ -212,10 +212,10 @@ static bool process_remote() {
 }
 
 static void build() {
-    GP.BUILD_BEGIN();
+    GP.BUILD_BEGIN_FILE();
     GP.PAGE_TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
-    GP.THEME(GP_DARK);
-    GP.JQ_SUPPORT();
+    GP.THEME_FILE("GP_DARK");
+    GP.JQ_SUPPORT_FILE();
 
     GP.TITLE(PRODUCT_NAME " Admin Panel " PRODUCT_VERSION);
 
@@ -240,8 +240,6 @@ static void build() {
                 GP.BUTTON("rmc_down", "↓");
                 GP.TD();
         GP.TABLE_END();
-        GP.HR();
-        GP.BUTTON_DOWNLOAD("screen.png", "Screenshot", GP_BLUE);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -258,6 +256,7 @@ static void build() {
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
         GP.HR();
         render_bool("Hourly chime:", PREFS_KEY_HOURLY_CHIME_ON);
+        render_bool("Fake Soviet radio time signals:", PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL);
         GP.BREAK();
         render_melody("First of the day:", PREFS_KEY_FIRST_CHIME_MELODY);
         render_melody("All others:", PREFS_KEY_HOURLY_CHIME_MELODY);
@@ -329,6 +328,9 @@ static void build() {
         GP.HR();
         GP.LABEL("Talking clock language:");
         GP.SELECT(PREFS_KEY_TTS_LANGUAGE, "English,Русский,日本語", prefs_get_int(PREFS_KEY_TTS_LANGUAGE));
+        GP.HR();
+        GP.LABEL("Voice mode:");
+        GP.SELECT(PREFS_KEY_VOICE_MODE_RESAMPLING, "Clear,Loud", prefs_get_int(PREFS_KEY_VOICE_MODE_RESAMPLING));
         GP.HR();
         render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
         render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
@@ -439,18 +441,18 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
-    #if HAS(LIGHT_SENSOR) || HAS(MOTION_SENSOR)
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
         #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         render_int("Bright screen when over:", PREFS_KEY_LIGHTNESS_THRESH_UP);
         render_int("Dark screen when under:", PREFS_KEY_LIGHTNESS_THRESH_DOWN);
         GP.HR();
         #endif
+#if HAS(DISPLAY_BLANKING)
         render_int("Blank display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
-        render_int("Shut down display after more seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
+#endif
+        render_int("Turn off display after seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
     GP.SPOILER_END();
     GP.BREAK();
-    #endif
 
     GP.SPOILER_BEGIN("OpenWeatherMap", GP_BLUE);
         render_string("Latitude", PREFS_KEY_WEATHER_LAT);
@@ -510,6 +512,12 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+    // GP.SPOILER_BEGIN("Music Files", GP_BLUE);
+    //     GP.FILE_UPLOAD("music_upload", "Upload Music", ".pomf", GP_BLUE);
+    //     GP.FILE_MANAGER(&LittleFS, "/music");
+    // GP.SPOILER_END();
+    // GP.BREAK();
+
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
         render_bool("Serial MIDI input", PREFS_KEY_SERIAL_MIDI);
@@ -543,6 +551,7 @@ void action() {
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
         save_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23);
+        save_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL);
         save_melody(PREFS_KEY_FIRST_CHIME_MELODY);
         save_melody(PREFS_KEY_HOURLY_CHIME_MELODY);
         save_bool(PREFS_KEY_TIMESERVER_ENABLE);
@@ -566,8 +575,8 @@ void action() {
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
-        save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 60, 21600);
-        save_int(PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 60, 21600);
+        save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 36000);
+        save_int(PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000);
         save_string(PREFS_KEY_WEATHER_APIKEY);
         save_string(PREFS_KEY_WEATHER_LAT);
         save_string(PREFS_KEY_WEATHER_LON);
@@ -590,6 +599,7 @@ void action() {
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE);
         save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
         save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
+        save_int(PREFS_KEY_VOICE_MODE_RESAMPLING, 0, 1);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;
@@ -630,25 +640,15 @@ void action() {
                 unmount_partition(hPart);
             }
         }
-        else if(ui.uri().endsWith("screen.png")) {
-            const uint8_t * outBuf = nullptr;
-            size_t outLen = 0;
-            if(screenshooter->capture_png(&outBuf, &outLen)) {
-                ui.server.send_P(200, png_mime, (const char*) outBuf, outLen);
-                free((void*)outBuf);
-            } else {
-                ui.server.send(500, "", "");
-            }
-        }
+        else if(LittleFS.exists(ui.uri())) ui.sendFile(LittleFS.open(ui.uri(), "r"));
     }
 }
 
 bool prefs_uploading = false;
 
-void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
+void admin_panel_prepare(SensorPool* s, Beeper* b) {
     sensors = s;
     beeper = b;
-    screenshooter = ss;
     ui.attachBuild(build);
     ui.attach(action);
     ui.downloadAuto(false);
@@ -656,6 +656,15 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
 #if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
     ui.enableAuth(ADMIN_LOGIN, ADMIN_PASS);
 #endif
+
+    all_chime_names_csv.reserve(all_chime_list.size() * 32);
+    for(int i = 0; i < all_chime_list.size(); i++) {
+        if(i > 0) all_chime_names_csv += ",";
+        size_t loc = std::string::npos;
+        std::string tmp = std::string(all_chime_list[i]->get_long_title());
+        std::replace(tmp.begin(), tmp.end(), ',', '/');
+        all_chime_names_csv += tmp;
+    }
 
     // Due to a bug in GyverPortal, handle uploads on our own
     ui.server.on("/prefs_restore", HTTP_POST, []() {
@@ -701,7 +710,7 @@ void admin_panel_prepare(SensorPool* s, Beeper* b, Screenshooter * ss) {
     if(xTaskCreate(
         AdminTaskFunction,
         "ADM",
-        4096,
+        6000,
         nullptr,
         pisosTASK_PRIORITY_WEBADMIN,
         &hTask

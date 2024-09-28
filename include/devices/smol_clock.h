@@ -10,7 +10,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "uPIS-OS"
-#define PRODUCT_VERSION "3.7"
+#define PRODUCT_VERSION "4"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_12;

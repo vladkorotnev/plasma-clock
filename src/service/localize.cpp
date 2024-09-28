@@ -46,9 +46,34 @@ static const std::map<const std::string, const char*> english = {
     {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
 
     {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
+    {"Loading...", "Loading..."},
 
     {"Yes", "Yes"},
     {"No", "No"},
+
+    {"SNOOZE", "SNOOZE"},
+    {"STOP", "STOP"},
+    {"HOLD", "HOLD"},
+    {"Only Once", "Only Once"},
+
+    {"(Randomize)", "(Randomize)"},
+    {"Clear", "Clear"},
+    {"Loud", "Loud"},
+    {"English", "English"},
+    {"Russian", "Русский"},
+    {"Japanese", "Japanese"},
+
+    {"Off", "Off"},
+    {"Wipe", "Wipe"},
+    {"Slide Left", "Slide Left"},
+    {"Slide Right", "Slide Right"},
+    {"Slide Up", "Slide Up"},
+    {"Slide Down", "Slide Down"},
+
+    {"Slow", "Slow"},
+    {"Medium", "Medium"},
+    {"Fast", "Fast"},
+    {"Sonic", "Sonic"},
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
@@ -66,6 +91,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Weather", "Погода"},
     {"Alarm", "Будильник"},
     {"Weighing", "Весы"},
+    {"Music Box", "Музыка"},
     {"Settings", "Параметры"},
 
     {"Display", "Экран"},
@@ -87,6 +113,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Tick sound", "Тикание часов"},
     {"Ticking only when screen on", "Тикание только при включённом экране"},
     {"Hourly chime", "Ежечасный сигнал"},
+    {"Fake Soviet radio time signals", "Имитация сигналов точного времени радиоточки"},
     {"First chime", "Первый за день"},
     {"Other chimes", "Остальные"},
     {"Chime from", "Первый час"},
@@ -94,6 +121,10 @@ static const std::map<const std::string, const char*> russian = {
     {"Speak hour", "Проговаривать время"},
     {"Speak date on first chime", "Проговаривать дату в первый час"},
     {"Voice speed", "Скорость голоса"},
+
+    {"Voice mode", "Режим голоса"},
+    {"Clear", "Чёткий"},
+    {"Loud", "Громкий"},
 
     {"Voice language", "Язык голоса"},
     {"English", "Английский"},
@@ -127,8 +158,10 @@ static const std::map<const std::string, const char*> russian = {
     {"Slow", "Медленно"},
     {"Medium", "Средне"},
     {"Fast", "Быстро"},
-    {"Sonic", "Совсем быстро"},
+    {"Sonic", "Соник"},
 
+    {"Blank display after (s)", "Пустой дисплей после (сек.)"},
+    {"Turn display off after (s)", "Выключить дисплей после (сек.)"},
     {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
     {"FPS counter", "Счётчик кадров в секунду"},
     {"Weather effects", "Эффекты погоды"},
@@ -146,10 +179,13 @@ static const std::map<const std::string, const char*> russian = {
     {"WiFi Name", "Имя сети"},
     {"WiFi IP", "IP-адрес"},
     {"MAC Address", "MAC-адрес"},
+    {"Disk Space", "Место на диске"},
+    {"System Memory", "Оперативная память"},
+    {"free", "свободно"},
     {"Remote Control Server", "Удалённый доступ"},
     {"Serial MIDI Input", "Эмуляция синтезатора"},
 
-    {"WEATHER_FMT", "%s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
+    {"WEATHER_FMT", "Сейчас %s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
     {"Loading...", "Загрузка..."},
     {"PoP, %", "Осадки, %"},
     {"P, hPa", "Давл., гПа"},

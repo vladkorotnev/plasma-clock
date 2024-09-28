@@ -1,20 +1,11 @@
 #include <views/idle_screens/fb2k.h>
 #include <service/foo_client.h>
 #include <fonts.h>
+#include <rsrc/common_icons.h>
 #include <esp32-hal-log.h>
 
 static char LOG_TAG[] = "FOO";
 
-static const uint8_t icn_music_data[] = {
-    // By PiiXL
-    // https://piiixl.itch.io/mega-1-bit-icons-bundle
-    0x00, 0x00, 0x00, 0x00, 0x00, 0x7c, 0x07, 0xfc, 0x07, 0xfc, 0x07, 0xc4, 0x04, 0x04, 0x04, 0x04, 
-    0x04, 0x04, 0x04, 0x3c, 0x3c, 0x74, 0x74, 0x64, 0x64, 0x38, 0x38, 0x00, 0x00, 0x00, 0x00, 0x00
-};
-
-static const sprite_t icn_music = {
-    .width = 16, .height = 16, .data = icn_music_data, .mask = nullptr, .format = SPRFMT_HORIZONTAL
-};
 
 Fb2kView::Fb2kView() {
     font = &keyrus0808_font;
@@ -35,7 +26,7 @@ Fb2kView::Fb2kView() {
     top_line->set_string(artist_buffer);
     add_composable(top_line);
 
-    icon = new SpriteView(&icn_music);
+    icon = new SpriteView(&music_icns);
     icon->width = 16;
     add_composable(icon);
 

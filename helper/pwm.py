@@ -46,7 +46,7 @@ while i < len(sdata):
     if curSample > max and curSample > 0:
         max = curSample
     if outf is not None:
-        outf.write(bytes([sts, sts]))
+        outf.write(bytes([sts]))
     if sts != last_sts:
         rle_buf.append(0)
         last_sts = sts
@@ -54,7 +54,7 @@ while i < len(sdata):
         rle_buf.append(0)
         rle_buf.append(0)
     rle_buf[-1] += 1
-    i += 2
+    i += 1
 
 print(f"static const uint8_t {sname}_rle_data[] = {{" + str(rle_buf)[1::][:-1:] + "};")
-print(f"static const rle_sample_t {sname} = {{ .sample_rate = 4000, .root_frequency = 524 /* C5 */, .rle_data = {sname}_rle_data, .length = {len(rle_buf)} }};")
+print(f"static const rle_sample_t {sname} = {{ .sample_rate = 8000, .root_frequency = 524 /* C5 */, .rle_data = {sname}_rle_data, .length = {len(rle_buf)}, .mode = MIX_MODE_ADD }};")

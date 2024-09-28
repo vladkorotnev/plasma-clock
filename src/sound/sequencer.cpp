@@ -38,7 +38,7 @@ static void serMidiTask(void * pvParameters) {
     midiIo.turnThruOff();
     while(1) {
         if(midiIo.read()) {
-            ESP_LOGI(LOG_TAG, "MIDI recv");
+            ESP_LOGV(LOG_TAG, "MIDI recv");
             seq->midi_task();
         }
     }
@@ -50,10 +50,11 @@ void NewSequencer::midi_task() {
             { 
                 int ch = midiIo.getChannel() - 1;
                 if(ch < 0 || ch >= NewSequencer::CHANNELS) {
-                    ESP_LOGI(LOG_TAG, "Invalid channel %i", ch);
+                    ESP_LOGV(LOG_TAG, "Invalid channel %i", ch);
                     return;
                 }
                 int noteNo = midiIo.getData1();
+                lastNote[ch] = noteNo;
                 int velo = midiIo.getData2();
                 ESP_LOGV(LOG_TAG, "Midi Note On ch=%i, noteNo=%i, velo=%i, freq=%i", ch, noteNo, velo, sNotePitches[noteNo]/2);
                 voices[ch]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, velo > 0 ? sNotePitches[noteNo]/2 : 0);
@@ -64,11 +65,13 @@ void NewSequencer::midi_task() {
             {
                 int ch = midiIo.getChannel() - 1;
                 if(ch < 0 || ch >= NewSequencer::CHANNELS) {
-                    ESP_LOGI(LOG_TAG, "Invalid channel %i", ch);
+                    ESP_LOGV(LOG_TAG, "Invalid channel %i", ch);
                     return;
                 }
-                ESP_LOGV(LOG_TAG, "Midi Note Off ch=%i", ch);
-                voices[ch]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+                if(lastNote[ch] == midiIo.getData1()) {
+                    ESP_LOGV(LOG_TAG, "Midi Note Off ch=%i", ch);
+                    voices[ch]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+                }
             }
             break;
 
@@ -76,7 +79,7 @@ void NewSequencer::midi_task() {
             {
                 int ch = midiIo.getChannel() - 1;
                 if(ch < 0 || ch >= NewSequencer::CHANNELS) {
-                    ESP_LOGI(LOG_TAG, "Invalid channel %i", ch);
+                    ESP_LOGV(LOG_TAG, "Invalid channel %i", ch);
                     return;
                 }
                 int controlNo = midiIo.getData1();
@@ -96,11 +99,16 @@ void NewSequencer::midi_task() {
 
 #endif
 
+static const uint8_t kick_rle_data[] = {0, 7, 4, 2, 1, 24, 23, 30, 33, 26, 38, 38, 30, 41, 41, 52, 62, 50, 58, 64, 61, 70, 99, 92, 80, 119, 102, 119, 119, 142, 146, 117, 160, 119, 154, 5};
+const rle_sample_t kick_sample = { .sample_rate = 8000, .root_frequency = 524 /* C5 */, .length = 36, .mode = MIX_MODE_XOR, .rle_data = kick_rle_data };
+
 NewSequencer::NewSequencer() {
+    num_rows = 0;
+    rows = nullptr;
     // Ch 0, 1, 2, 3: tone
     for(int i = 0; i < TONE_CHANNELS; i++) voices[i] = new SquareGenerator();
     voices[4] = new NoiseGenerator(); // Ch4: Noise
-    voices[5] = new Sampler(); // Ch5: RLE PWM
+    voices[5] = new Sampler(&kick_sample); // Ch5: RLE PWM
     wait_end_group = xEventGroupCreate();
 
 #if HAS(SERIAL_MIDI)
@@ -127,7 +135,11 @@ bool NewSequencer::is_sequencing() {
 
 void NewSequencer::stop_sequence() {
     is_running = false;
-    for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+    for(int i = 0; i < CHANNELS; i++) voices[i]->set_parameter(ToneGenerator::PARAMETER_ACTIVE, false);
+    voices[5]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, (int) &kick_sample);
+    sequence->unload();
+    num_rows = 0;
+    rows = nullptr;
     xEventGroupSetBits(wait_end_group, BIT_END_PLAY);
 }
 
@@ -135,16 +147,23 @@ void NewSequencer::wait_end_play() {
     xEventGroupWaitBits(wait_end_group, BIT_END_PLAY, pdFALSE, pdTRUE, portMAX_DELAY);
 }
 
-void NewSequencer::play_sequence(const melody_sequence_t * s, sequence_playback_flags_t f, int repeat) {
+void NewSequencer::play_sequence(MelodySequence * s, sequence_playback_flags_t f, int repeat) {
+    if(!s->load()) {
+        ESP_LOGE(LOG_TAG, "Failed to load sequence");
+        return;
+    }
     repetitions = repeat;
     sequence = s;
+    rows = s->get_array();
+    num_rows = s->get_num_rows();
     flags = f;
     pointer = 0;
     loop_point = 0;
     for(int i = 0; i < CHANNELS; i++) {
-        voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, 0);
-        voices[i]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, 0);
+        voices[i]->set_parameter(ToneGenerator::PARAMETER_FREQUENCY, 0);
+        voices[i]->set_parameter(ToneGenerator::PARAMETER_DUTY, 0);
     }
+    voices[5]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, (int) &kick_sample);
     if((f & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
         find_hook();
         pointer = loop_point;
@@ -173,24 +192,24 @@ bool NewSequencer::end_of_song() {
 bool NewSequencer::process_step(const melody_item_t * cur_line) {
     switch(cur_line->command) {
         case FREQ_SET:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_FREQUENCY, cur_line->argument);
             break;
         case DUTY_SET:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_DUTY, cur_line->argument1);
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_DUTY, cur_line->argument);
             break;
         case LOOP_POINT_SET:
-            loop_point = pointer + 1;
-            break;
-        case DELAY:
-            remaining_delay_samples = cur_line->argument1 * WaveOut::BAUD_RATE / 1000;
-            break;
-        case SAMPLE_LOAD:
-            voices[cur_line->channel]->set_parameter(ToneGenerator::Parameter::PARAMETER_SAMPLE_ADDR, cur_line->argument1);
-            break;
-        case HOOK_POINT_SET:
-            if(cur_line->argument1 == HOOK_POINT_TYPE_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
+            if(cur_line->argument == LOOP_POINT_TYPE_HOOK_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
                 if(end_of_song()) return true;
             }
+            else if(cur_line->argument == LOOP_POINT_TYPE_LOOP) {
+                loop_point = pointer + 1;
+            }
+            break;
+        case DELAY:
+            remaining_delay_samples = cur_line->argument * WaveOut::BAUD_RATE / 1000;
+            break;
+        case SAMPLE_LOAD:
+            voices[cur_line->channel]->set_parameter(ToneGenerator::PARAMETER_SAMPLE_ADDR, cur_line->argument);
             break;
         default:
             break;
@@ -200,10 +219,10 @@ bool NewSequencer::process_step(const melody_item_t * cur_line) {
 }
 
 void NewSequencer::find_hook() {
-    while(pointer < sequence->count) {
-        const melody_item_t * cur_line = &sequence->array[pointer];
-        if(cur_line->command == HOOK_POINT_SET) {
-            if(cur_line->argument1 == HOOK_POINT_TYPE_START) {
+    while(pointer < num_rows) {
+        const melody_item_t * cur_line = &rows[pointer];
+        if(cur_line->command == LOOP_POINT_SET) {
+            if(cur_line->argument == LOOP_POINT_TYPE_HOOK_START) {
                 loop_point = pointer + 1;
                 ESP_LOGI(LOG_TAG, "Hook found, starts at %i", loop_point);
                 break;
@@ -220,11 +239,11 @@ void NewSequencer::find_hook() {
 }
 
 void NewSequencer::process_steps_until_delay() {
-    if(pointer >= sequence->count) {
+    if(pointer >= num_rows) {
         if(end_of_song()) return;
     }
 
-    const melody_item_t * cur_line = &sequence->array[pointer];
+    const melody_item_t * cur_line = &rows[pointer];
     if(process_step(cur_line)) return;
 
     pointer++;

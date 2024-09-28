@@ -11,7 +11,6 @@ public:
             melodyNo,
             [this, onActivated](bool active, Renderable* instance) {
                 if(!active && sequencer) sequencer->stop_sequence();
-
                 onActivated(active, instance);
             },
             [this, onChange](int newMelodyNo) {

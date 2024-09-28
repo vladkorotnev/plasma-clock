@@ -6,18 +6,18 @@
 // ---- SOFTWARE FEATURE FLAGS
 
 // Enable the playground app for shits and giggles
-#define HAS_PLAYGROUND
+// #define HAS_PLAYGROUND
 
 // Enable the Wordnik API and Word Of The Day screen. UNSTABLE: Uses a lot of RAM for HTTPS.
 #define HAS_WORDNIK_API
 
 // Enable over-the-air firmware version upgrade. NB: Requires a new partition map, someday later
-// #define HAS_OTAFVU
+#define HAS_OTAFVU
 
-// Enable Switchbot Meter temperature probing. UNSTABLE: Uses NimBLE so a lot of RAM, disconnects over time.
+// DEPRECATED: Enable Switchbot Meter temperature probing. UNSTABLE: Uses NimBLE so a lot of RAM, disconnects over time.
 // #define HAS_SWITCHBOT_METER_INTEGRATION
 
-// Enable Wii Balance Board measuring. UNSTABLE: Uses Bluedroid (a FUCKTON of RAM), periodic disconnects or reboots without leaving a stack trace.
+// DEPRECATED: Enable Wii Balance Board measuring. UNSTABLE: Uses Bluedroid (a FUCKTON of RAM), periodic disconnects or reboots without leaving a stack trace.
 // #define HAS_BALANCE_BOARD_INTEGRATION
 
 // Enable the yukkuri voice talking clock
@@ -32,6 +32,10 @@
 
 #ifdef DEVICE_PLASMA_CLOCK
 #include <devices/big_clock.h>
+#endif
+
+#ifdef DEVICE_MINIPISOS
+#include <devices/mid_clock.h>
 #endif
 
 #ifdef DEVICE_MICROPISOS

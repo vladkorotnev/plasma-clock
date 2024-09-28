@@ -30,7 +30,6 @@ protected:
 
     void update_minmax_if_needed();
 
-private:
     StringScroll * hint_lbl;
     uint8_t cursor_framecounter = 0;
     uint8_t hint_framecounter = 0;

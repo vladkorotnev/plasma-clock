@@ -13,44 +13,18 @@ StringScroll::StringScroll(const font_definition_t * f, const char * s): Composa
     left_margin = 0;
     holdoff = 0;
     v_padding = 0;
+    reappear_delay = 0;
     backing_buffer = nullptr;
     mask_buffer = nullptr;
     stopped = false;
     set_string(s);
-
-    switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
-        case SCROLL_SPEED_SLOW:
-            // Slow
-            frame_divisor = 3;
-            increment = 1;
-            break;
-        case SCROLL_SPEED_NORMAL:
-            // Medium
-            frame_divisor = 2;
-            increment = 1;
-            break;
-        case SCROLL_SPEED_FAST:
-            // Fast
-            frame_divisor = 1;
-            increment = 1;
-            break;
-        case SCROLL_SPEED_SONIC:
-            // Sonic
-            frame_divisor = 2;
-            increment = 2;
-            break;
-
-        default:
-            frame_divisor = 2;
-            increment = 1;
-            break;
-    }
 }
 
 void StringScroll::set_string(const char * s) {
     string = s;
     if(backing_buffer != nullptr) {
         free(backing_buffer);
+        backing_buffer = nullptr;
     }
     if(mask_buffer != nullptr) {
         free(mask_buffer);
@@ -98,6 +72,33 @@ void StringScroll::set_string(const char * s) {
 void StringScroll::prepare() {
     position = INT_MAX;
     frame_counter = 0;
+    switch(prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED)) {
+        case SCROLL_SPEED_SLOW:
+            // Slow
+            frame_divisor = 3;
+            increment = 1;
+            break;
+        case SCROLL_SPEED_NORMAL:
+            // Medium
+            frame_divisor = 2;
+            increment = 1;
+            break;
+        case SCROLL_SPEED_FAST:
+            // Fast
+            frame_divisor = 1;
+            increment = 1;
+            break;
+        case SCROLL_SPEED_SONIC:
+            // Sonic
+            frame_divisor = 1;
+            increment = 2;
+            break;
+
+        default:
+            frame_divisor = 2;
+            increment = 1;
+            break;
+    }
 }
 
 void StringScroll::set_y_position(int y) {
@@ -133,6 +134,7 @@ void StringScroll::render(FantaManipulator * fb) {
             position += increment;
             if(position >= fb->get_width() + string_width) {
                 position = -1;
+                wait_frames = reappear_delay;
             } else if(position == fb->get_width() - left_margin) {
                 wait_frames = holdoff;
             }

@@ -48,6 +48,19 @@ void SquareGenerator::set_parameter(Parameter p, int v) {
     }
 }
 
+int SquareGenerator::get_parameter(Parameter p) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            return active;
+        case PARAMETER_FREQUENCY:
+            return (wavelength == 0) ? 0 : (WaveOut::BAUD_RATE / wavelength);
+        case PARAMETER_DUTY:
+            return duty;
+        default:
+            return 0;
+    }
+}
+
 size_t SquareGenerator::generate_samples(void* buffer, size_t length, uint32_t want_samples_) {
     if(!active || wavelength == 0) return 0;
 
@@ -104,6 +117,17 @@ void NoiseGenerator::set_parameter(Parameter p, int v) {
     }
 }
 
+int NoiseGenerator::get_parameter(Parameter p) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            return active;
+        case PARAMETER_FREQUENCY:
+            return (wavelength == 0) ? 0 : (WaveOut::BAUD_RATE / wavelength / 2);
+        default:
+            return 0;
+    }
+}
+
 size_t NoiseGenerator::generate_samples(void* buffer, size_t length, uint32_t want_samples_) {
     if(!active || wavelength == 0) return 0;
 
@@ -134,20 +158,20 @@ size_t NoiseGenerator::generate_samples(void* buffer, size_t length, uint32_t wa
     return idx + 1;
 }
 
-Sampler::Sampler():
+Sampler::Sampler(const rle_sample_t * s):
     playhead { 0 },
     waveform { nullptr },
     remaining_samples { 0 },
-    skip_factor { 1 },
     stretch_factor { 1 },
     active { false },
     state { false }
-{}
+{
+    if(s != nullptr) load_sample(s);
+}
 
 void Sampler::load_sample(const rle_sample_t * s) {
     waveform = s;
     rewind();
-    skip_factor = 1;
     stretch_factor = 1;
 }
 
@@ -155,6 +179,11 @@ void Sampler::rewind() {
     if(waveform == nullptr || waveform->rle_data == nullptr || waveform->length == 0) return;
     playhead = 0;
     remaining_samples = waveform->rle_data[0];
+    while(remaining_samples == 0 && playhead < waveform->length) {
+        playhead++;
+        remaining_samples = waveform->rle_data[playhead];
+        state ^= 1;
+    }
 }
 
 void Sampler::set_parameter(Parameter p, int v) {
@@ -170,14 +199,10 @@ void Sampler::set_parameter(Parameter p, int v) {
                 active = false;
             }
             else {
-                if(v >= waveform->root_frequency) {
-                    stretch_factor = std::max(WaveOut::BAUD_RATE / waveform->sample_rate , 1);
-                    skip_factor = std::max(v / waveform->root_frequency, 1); // not handling the case where sample rate is > waveout rate
-                } 
-                else if(v < waveform->root_frequency) {
-                    stretch_factor = std::max(WaveOut::BAUD_RATE / waveform->sample_rate, 1) * std::max(waveform->root_frequency / v, 1);
-                    skip_factor = 1; // not handling the case where sample rate is > waveout rate
-                }
+                frequency = v;
+                // since the sample rate of the snippet is always lower than that of WaveOut
+                // we can only care about the stretch factor
+                stretch_factor = (WaveOut::BAUD_RATE / waveform->sample_rate) * waveform->root_frequency / v;
                 ESP_LOGV("SAMP", "New stretch = %i, skip = %i", stretch_factor, skip_factor);
                 active = true;
                 rewind();
@@ -190,6 +215,19 @@ void Sampler::set_parameter(Parameter p, int v) {
             break;
 
         default: break;
+    }
+}
+
+int Sampler::get_parameter(Parameter p) {
+    switch(p) {
+        case PARAMETER_ACTIVE:
+            return active;
+        case PARAMETER_FREQUENCY:
+            return frequency;
+        case PARAMETER_SAMPLE_ADDR:
+            return (int) waveform;
+        default:
+            return 0;
     }
 }
 
@@ -206,18 +244,25 @@ size_t Sampler::generate_samples(void * buffer, size_t length, uint32_t want_sam
         idx = s / 8;
         bit = 8 - (s % 8);
         
-        if(state) {
-            buff[idx] |= (1 << bit);
+        switch(waveform->mode) {
+            case MIX_MODE_ADD:
+                if(state) {
+                    buff[idx] |= (1 << bit);
+                }
+                break;
+
+            case MIX_MODE_XOR:
+                if(state) {
+                    buff[idx] ^= (1 << bit);
+                }
+                break;
+
+            default:
+                break;
         }
 
         if(stretch_factor == 1 || (s > 0 && (s % stretch_factor) == 0)) {
-            if(skip_factor > remaining_samples) {
-                playhead = (playhead + std::max(skip_factor / 8, 1)) % waveform->length;
-                remaining_samples = waveform->rle_data[playhead] - ((skip_factor % 8) - remaining_samples);
-                state ^= 1;
-            } else {
-                remaining_samples -= skip_factor;
-            }
+            remaining_samples -= 1;
 
             if(remaining_samples == 0) {
                 playhead = (playhead + 1) % waveform->length;

@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <LittleFS.h>
 #include <device_config.h>
 #include <os_config.h>
 #include <display/display.h>
@@ -10,9 +11,7 @@
 #include <input/touch_plane.h>
 #include <input/keypad.h>
 #include <input/hid_sensor.h>
-#include <sound/waveout.h>
 #include <sound/yukkuri.h>
-#include <sound/sequencer.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
 #include <network/otafvu.h>
@@ -36,9 +35,10 @@
 #include <app/weather.h>
 #include <app/playground.h>
 #include <app/bootscreen.h>
+#include <app/musicbox.h>
+#include <app/new_year.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
-#include <views/common/list_view.h>
 
 static char LOG_TAG[] = "APL_MAIN";
 
@@ -194,15 +194,20 @@ void bringup_hid() {
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
     bringup_sound();
-    seq->play_sequence(&pc98_pipo);
+    if (!LittleFS.begin(true, "/disk")) {
+        ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
+        seq->play_sequence(&tulula_fvu);
+    } else {
+        seq->play_sequence(&pc98_pipo);
+    }
 
     con->clear();
 
-    con->print("WiFi init");
+    // con->print("WiFi init");
     NetworkManager::startup();
     while(!NetworkManager::is_up()) {
-        delay(1000);
-        con->write('.');
+        delay(100);
+        // con->write('.');
     }
 
     con->clear();
@@ -210,47 +215,50 @@ void boot_task(void*) {
     screenshooter = new Screenshooter(fb->manipulate());
     if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
         screenshooter->start_server(3939);
-        con->print("RC server up!");
-        delay(1000);
+        // con->print("RC server up!");
+        // delay(1000);
     }
-    con->print(NetworkManager::network_name());
-    con->print("%i dBm", NetworkManager::rssi());
-    delay(2000);
-    con->print(NetworkManager::current_ip().c_str());
-    delay(2000);
+    // con->print(NetworkManager::network_name());
+    // con->print("%i dBm", NetworkManager::rssi());
+    // delay(2000);
+    // con->print(NetworkManager::current_ip().c_str());
+    // delay(2000);
 
     ota = new OTAFVUManager(con, seq);
 
     sensors = new SensorPool();
 
     sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
-    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(250));
+    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(125));
     bringup_light_sensor();
     bringup_motion_sensor();
     bringup_temp_sensor();
     bringup_switchbot_sensor();
     bringup_hid();
+    load_melodies_from_disk();
 
     timekeeping_begin();
     weather_start();
     wotd_start();
     foo_client_begin();
     power_mgmt_start(sensors, &display_driver, beepola);
-    admin_panel_prepare(sensors, beepola, screenshooter);
+    admin_panel_prepare(sensors, beepola);
 
     appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(beepola, seq), STATE_MENU);
+    appHost->add_view(new AppShimMenu(beepola, seq, yukkuri), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
     appHost->add_view(new AppShimWeather(), STATE_WEATHER);
+    appHost->add_view(new AppShimMusicbox(seq), STATE_MUSICBOX);
 #if HAS(BALANCE_BOARD_INTEGRATION)
     appHost->add_view(new AppShimWeighing(sensors), STATE_WEIGHING);
 #endif
 #if HAS(PLAYGROUND)
     appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
 #endif
+    appHost->add_view(new NewYearAppShim(beepola, seq, yukkuri), STATE_NEW_YEAR);
 
     change_state(startup_state, TRANSITION_WIPE);
     alarm_init(sensors);
@@ -266,6 +274,7 @@ void setup() {
 #ifdef BOARD_HAS_PSRAM
     heap_caps_malloc_extmem_enable(16);
 #endif
+    ESP_LOGI(LOG_TAG, "Hello!");
 
     // The I2S driver messes up display pinmux, so it must initialize first
     WaveOut::init_I2S(HWCONF_BEEPER_GPIO);
@@ -306,7 +315,7 @@ void setup() {
         "BOOT",
         4096,
         nullptr,
-        configMAX_PRIORITIES - 2,
+        configMAX_PRIORITIES - 1,
         &bootTaskHandle
     );
     ESP_LOGI(LOG_TAG, "setup end.");
@@ -327,19 +336,24 @@ static void print_memory() {
 }
 
 void loop() {
-    fb->wait_next_frame();
-    if(graph->lock()) {
-        desktop->render(graph);
-        graph->unlock();
+    if(_actual_current_state != STATE_OTAFVU) { // OTAFVU basically locks everything down until reboot
+        fb->wait_next_frame();
+        if(graph->lock()) {
+            desktop->render(graph);
+            graph->unlock();
+        }
+        desktop->step();
+        
+        // thread safe state change kind of thing
+        if(_actual_current_state != current_state) {
+            _actual_current_state = current_state;
+            appHost->switch_to(_actual_current_state, _next_transition);
+        }
+        print_memory();
+    } else {
+        if(_actual_current_state != current_state && current_state == STATE_RESTART) {
+            _actual_current_state = current_state;
+            appHost->switch_to(_actual_current_state, _next_transition);
+        }
     }
-    desktop->step();
-    
-    // thread safe state change kind of thing
-    if(_actual_current_state != current_state) {
-        _actual_current_state = current_state;
-        appHost->switch_to(_actual_current_state, _next_transition);
-    }
-    print_memory();
-
-    if(_actual_current_state == STATE_BOOT) taskYIELD();
 }
