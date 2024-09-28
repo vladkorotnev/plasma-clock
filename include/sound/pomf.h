@@ -27,22 +27,32 @@ Format in a nutshell:
                 - rle_sample_t followed by .length bytes of sample data
             - if magic is 'tuNE':
                 - .size bytes of melody_item_t data
+            - if magic is 'saZZ' or 'tuZZ':
+                - contents of 'saMP' or 'tuNE' respectively, compressed with DEFLATE with a -15 bit window.
+                  `size` shows the length of the compressed data, `realsize` the length of the target buffer for uncompression.
     ]
     POMFChunk(size = 0, magic = ASCII 'eof ')
+
+Version history:
+    1.0: Initial version
+    1.1: Add primitive compression support (saZZ, tuZZ chunks)
  */
 
 #define POMF_MAGIC_FILE 0x666D4F50 // 'POmf' little-endian
 #define POMF_MAGIC_SAMPLE 0x504D6173 // 'saMP'
+#define POMF_MAGIC_SAMPLE_COMPRESSED 0x5A5A6173 // 'saZZ'
 #define POMF_MAGIC_TRACK 0x454E7574 // 'tuNE'
+#define POMF_MAGIC_TRACK_COMPRESSED 0x5A5A7574 // 'tuZZ'
 #define POMF_MAGIC_END 0x20666F65 // 'eof '
 
 #define POMF_CURVER_MAJ (1)
-#define POMF_CURVER_MIN (0)
+#define POMF_CURVER_MIN (1)
 #define POMF_CURVER ((POMF_CURVER_MAJ << 8) | (POMF_CURVER_MIN))
 
 struct POMFChunkHeader {
     const uint32_t magic;
     const uint32_t size;
+    const uint32_t realsize;
 };
 
 struct __attribute__((packed)) POMFHeader {

@@ -3,6 +3,22 @@
 from elftools.elf.elffile import ELFFile
 from sys import argv
 import pdb
+import zlib
+
+FS_BLKSZ = 4096
+
+def compress_bytes(data, level = 5):
+    assert(zlib.MAX_WBITS == 15)
+    compress = zlib.compressobj(
+        level,
+        zlib.DEFLATED,
+        -zlib.MAX_WBITS,
+        zlib.DEF_MEM_LEVEL,
+        0
+    )
+    rslt = compress.compress(data)
+    rslt += compress.flush()
+    return rslt
 
 INNAME=argv[1]
 OUTNAME=argv[2]
@@ -66,17 +82,42 @@ for (_ , s) in samples.items():
         track_data[offset + 3] = idx_le[3]
     cur_sample_index += 1
 
+def create_pomf(compressed):
+    global samples_indexed, track_data, header
+    out = bytearray(header)
+    for s in samples_indexed:
+        sdata = bytearray(s['header']) + bytearray(s['data'])
+        orig_size_le = len(sdata).to_bytes(4, byteorder = 'little')
+        if compressed:
+            sdata = compress_bytes(sdata)
+        size_le = len(sdata).to_bytes(4, byteorder = 'little')
+        out += (b'saZZ' if compressed else b'saMP')
+        out += (size_le)
+        out += (orig_size_le)
+        out += (sdata)
+    orig_size_le = (len(track_data)).to_bytes(4, byteorder = 'little')
+    if compressed:
+        track_data = compress_bytes(track_data)
+    size_le = (len(track_data)).to_bytes(4, byteorder = 'little')
+    out += (b'tuZZ' if compressed else b'tuNE')
+    out += (size_le)
+    out += (orig_size_le)
+    out += (track_data)
+    out += (b'eof EoF EOF ')
+    return out
+    
+uncomp = create_pomf(False)
+comp = create_pomf(True)
+
+sz_uncomp_blocks = len(uncomp) // FS_BLKSZ + 1
+sz_comp_blocks = len(comp) // FS_BLKSZ + 1
+
 outf = open(OUTNAME, 'wb')
 
-outf.write(header)
-for s in samples_indexed:
-    outf.write(b'saMP')
-    size_le = (len(s['header']) + len(s['data'])).to_bytes(4, byteorder = 'little')
-    outf.write(size_le)
-    outf.write(s['header'])
-    outf.write(s['data'])
-outf.write(b'tuNE')
-size_le = (len(track_data)).to_bytes(4, byteorder = 'little')
-outf.write(size_le)
-outf.write(track_data)
-outf.write(b'eof \x00\x00\x00\x00')
+if sz_comp_blocks < sz_uncomp_blocks:
+    print("Compression saves",(sz_uncomp_blocks - sz_comp_blocks),"of 4K FS blocks: from",sz_uncomp_blocks,"to",sz_comp_blocks)
+    outf.write(comp)
+else:
+    outf.write(uncomp)
+
+outf.close()

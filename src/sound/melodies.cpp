@@ -6,6 +6,7 @@
 #include <vector>
 #include <LittleFS.h>
 #include <dirent.h>
+#include <miniz_ext.h>
 
 static char LOG_TAG[] = "MUDB";
 
@@ -107,6 +108,7 @@ public:
         POMFChunkHeader chunk = { 0 };
         rle_sample_t * cur_samp = nullptr;
         size_t r = 0;
+        size_t total = 0;
         bool reading = true;
 
         f = fopen(path, "rb");
@@ -135,14 +137,19 @@ public:
         exists = true;
 
         do {
-            r = fread(&chunk, 1, sizeof(POMFChunkHeader), f);
-            if(r != sizeof(POMFChunkHeader)) {
+            total = 0;
+            while(total < sizeof(POMFChunkHeader) && r > 0) {
+                r = fread(((void*)&chunk) + total, 1, sizeof(POMFChunkHeader) - total, f);
+                total += r;
+            }
+            if(total != sizeof(POMFChunkHeader)) {
                 ESP_LOGE(TAG, "ChunkHead read error, wanted %i bytes, got %i", sizeof(POMFChunkHeader), r);
                 goto bail;
             }
 
             switch(chunk.magic) {
                 case POMF_MAGIC_SAMPLE:
+                case POMF_MAGIC_SAMPLE_COMPRESSED:
                     cur_samp = (rle_sample_t*) malloc(sizeof(rle_sample_t));
                     if(cur_samp == nullptr) {
                         ESP_LOGE(TAG, "OOM allocating sample header");
@@ -155,7 +162,7 @@ public:
                             reading = false;
                             goto bail;
                         }
-                        size_t total = 0;
+                        total = 0;
                         while(total < chunk.size && r > 0) {
                             r = fread(((void*)cur_samp) + total, 1, chunk.size - total, f);
                             total += r;
@@ -166,6 +173,14 @@ public:
                             goto bail;
                         } else {
                             ESP_LOGV(TAG, "saMP read %i bytes", total);
+                            if(chunk.magic == POMF_MAGIC_SAMPLE_COMPRESSED) {
+                                cur_samp = (rle_sample_t*) decompress_emplace(cur_samp, chunk.size, chunk.realsize);
+                                if(cur_samp == nullptr) {
+                                    reading = false;
+                                    goto bail;
+                                }
+                                ESP_LOGV(TAG, "saZZ decompressed to %i bytes", chunk.realsize);
+                            }
                             // Fix the data pointer to point after the header
                             cur_samp->rle_data = (const uint8_t *) &cur_samp[1];
                             ESP_LOGI(TAG, "saMP @ 0x%x: SR=%i, root=%i, len=%i, mode=%i, data=0x%x", cur_samp, cur_samp->sample_rate, cur_samp->root_frequency, cur_samp->length, cur_samp->mode, cur_samp->rle_data);
@@ -175,6 +190,7 @@ public:
                     }
                     break;
                 case POMF_MAGIC_TRACK:
+                case POMF_MAGIC_TRACK_COMPRESSED:
                     if(array_ != nullptr) {
                         ESP_LOGE(TAG, "Multiple tuNE chunks, wtf!!");
                         reading = false;
@@ -186,7 +202,7 @@ public:
                             reading = false;
                             goto bail;
                         }
-                        size_t total = 0;
+                        total = 0;
                         while(total < chunk.size && r > 0) {
                             r = fread(((void*)array_) + total, 1, chunk.size - total, f);
                             total += r;
@@ -196,6 +212,16 @@ public:
                             reading = false;
                             goto bail;
                         } else {
+                            if(chunk.magic == POMF_MAGIC_TRACK_COMPRESSED) {
+                                array_ = (melody_item_t*) decompress_emplace((void*) array_, chunk.size, chunk.realsize);
+                                if(array_ == nullptr) {
+                                    reading = false;
+                                    goto bail;
+                                } else {
+                                    total = chunk.realsize;
+                                    ESP_LOGV(TAG, "tuZZ decompressed to %i bytes", chunk.realsize);
+                                }
+                            }
                             num_rows_ = total / sizeof(melody_item_t);
                             ESP_LOGV(TAG, "tuNE read %i rows in %i bytes", num_rows_, total);
                             for(int i = 0; i < num_rows_; i++) {
@@ -268,6 +294,27 @@ protected:
     melody_item_t * array_ = nullptr;
     std::vector<rle_sample_t *> samples = {};
     int num_rows_ = 0;
+
+    void * decompress_emplace(void * compressed_data, uint32_t src_size, uint32_t decomp_size) {
+        unsigned long dst_sz = decomp_size;
+        void * dest = malloc(dst_sz);
+        if(dest == nullptr) {
+            ESP_LOGE(TAG, "OOM allocating decompression buffer of %i bytes", dst_sz);
+            return nullptr;
+        }
+
+        int rslt = mz_uncompress((unsigned char*)dest, &dst_sz, (unsigned char*) compressed_data, src_size);
+        
+        free(compressed_data);
+
+        if(rslt != MZ_OK) {
+            free(dest);
+            ESP_LOGE(TAG, "Decompress error %i: %s", rslt, mz_error(rslt));
+            return nullptr;
+        }
+
+        return dest; 
+    }
 
     void unload_samples() {
         for(auto i: samples) {
