@@ -313,11 +313,12 @@ void setup() {
     xTaskCreate(
         boot_task,
         "BOOT",
-        4096,
+        6000,
         nullptr,
         configMAX_PRIORITIES - 1,
         &bootTaskHandle
     );
+    vTaskResume(bootTaskHandle);
     ESP_LOGI(LOG_TAG, "setup end.");
 }
 

@@ -62,7 +62,10 @@ def prev_note_off_event(chan):
 
 for msg in mid:
     print(msg)
-    if msg.time >= 0.01:
+    if msg.time > 0:
+        if len(evts) > 0 and evts[-1].kind == "DELAY":
+            evts[-1].arg += int(msg.time * 1000)
+        else:
             evts.append(Event("DELAY", 0, int(msg.time * 1000)))
     if msg.type == "note_on" or msg.type == "note_off":
         if msg.type == "note_on" and msg.velocity > 0:

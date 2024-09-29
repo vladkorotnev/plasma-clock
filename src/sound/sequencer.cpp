@@ -41,6 +41,7 @@ static void serMidiTask(void * pvParameters) {
             ESP_LOGV(LOG_TAG, "MIDI recv");
             seq->midi_task();
         }
+        taskYIELD();
     }
 }
 
