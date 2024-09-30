@@ -120,10 +120,11 @@ void Ws0010OledDriver::reset() {
 
 void Ws0010OledDriver::set_show(bool show) {
     taskENTER_CRITICAL(&_spinlock);
+    show_state = show;
     set_is_command(true);
     set_databus(0b00001000 | (show ? 0b111 : 0)); // cursor and blink always off
     pulse_clock();
-    delayMicroseconds(400);
+    delayMicroseconds(10);
     taskEXIT_CRITICAL(&_spinlock);
 }
 
@@ -161,8 +162,11 @@ void Ws0010OledDriver::write_stride(uint8_t stride) {
 
 void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
     taskENTER_CRITICAL(&_spinlock);
+#ifndef WS0010_NO_BFI
+    bool show_backup = show_state;
+    set_show(false);
+#endif
     // First write even (top row), then odd (bottom row)
-
     for(int i = 0; i < count - 1; i += 2) {
         if(i >= 200) continue; // TODO: support physical screen resolutions
         write_stride(strides[i]);
@@ -171,6 +175,9 @@ void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
         if(i >= 200) continue; // TODO: support physical screen resolutions
         write_stride(strides[i]);
     }
+#ifndef WS0010_NO_BFI
+    set_show(show_backup);
+#endif
     taskEXIT_CRITICAL(&_spinlock);
 }
 
