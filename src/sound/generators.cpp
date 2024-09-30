@@ -202,8 +202,8 @@ void Sampler::set_parameter(Parameter p, int v) {
                 frequency = v;
                 // since the sample rate of the snippet is always lower than that of WaveOut
                 // we can only care about the stretch factor
-                stretch_factor = (WaveOut::BAUD_RATE / waveform->sample_rate) * waveform->root_frequency / v;
-                ESP_LOGV("SAMP", "New stretch = %i, skip = %i", stretch_factor, skip_factor);
+                stretch_factor = std::max(1, (WaveOut::BAUD_RATE / waveform->sample_rate) * waveform->root_frequency / v);
+                ESP_LOGV("SAMP", "New stretch = %i", stretch_factor);
                 active = true;
                 rewind();
             }

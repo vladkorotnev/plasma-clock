@@ -191,6 +191,7 @@ void bringup_hid() {
 #endif
 }
 
+static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
     bringup_sound();
@@ -264,6 +265,7 @@ void boot_task(void*) {
     alarm_init(sensors);
 
     ESP_LOGI(LOG_TAG, "Shut up and explode!");
+    bootTaskHandle = NULL;
     vTaskDelete(NULL);
 }
 
@@ -271,6 +273,7 @@ void setup() {
     vTaskPrioritySet(NULL, configMAX_PRIORITIES - 2);
     // Set up serial for logs
     Serial.begin(115200);
+    while(!Serial);
 #ifdef BOARD_HAS_PSRAM
     heap_caps_malloc_extmem_enable(16);
 #endif
@@ -309,16 +312,17 @@ void setup() {
     con->set_active(false);
     fb->clear();
 
-    TaskHandle_t bootTaskHandle;
-    xTaskCreate(
+    if(xTaskCreate(
         boot_task,
         "BOOT",
         6000,
         nullptr,
         configMAX_PRIORITIES - 1,
         &bootTaskHandle
-    );
-    vTaskResume(bootTaskHandle);
+    ) == pdFALSE) {
+        ESP_LOGE(LOG_TAG, "Boot task creation failure");
+        ESP.restart();
+    }
     ESP_LOGI(LOG_TAG, "setup end.");
 }
 
