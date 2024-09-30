@@ -1,5 +1,6 @@
 #pragma once
 #include <views/framework.h>
+#include <sound/beeper.h>
 
 class FireworksOverlay: public Renderable {
 public:

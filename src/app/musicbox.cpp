@@ -9,17 +9,22 @@
 AppShimMusicbox::AppShimMusicbox(NewSequencer * s): 
     rain { new RainOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height) },
     thunder { new ThunderOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height) },
+    fireworks { new FireworksOverlay(nullptr) },
     seq { s },
     WeatherChartCommon()
 {
     add_subrenderable(rain);
     add_subrenderable(thunder);
+    add_subrenderable(fireworks);
 
     rain->set_intensity(0);
     rain->set_gravity(2, true);
     rain->set_windspeed(0, false);
 
     thunder->set_active(false);
+
+    fireworks->set_active(false);
+    fireworks->intense = true;
 
     show_minimum = false;
     show_maximum = false;
@@ -58,6 +63,7 @@ void AppShimMusicbox::step() {
         }
     }
 
+    fireworks->set_active(thunder_decision > 10);
     thunder->set_active(thunder_decision > 8);
     rain->set_intensity(thunder_decision / 2);
 
