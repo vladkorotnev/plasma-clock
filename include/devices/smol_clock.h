@@ -7,6 +7,7 @@
 #define HAS_TEMP_SENSOR
 #define HAS_TOUCH_PLANE
 #define HAS_SERIAL_MIDI
+#define HAS_VARYING_BRIGHTNESS
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "uPIS-OS"

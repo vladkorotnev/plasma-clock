@@ -287,6 +287,14 @@ static void build() {
         GP.LABEL("Display language (not in WebUI):");
         GP.SELECT(PREFS_KEY_DISP_LANGUAGE, "English,Русский", prefs_get_int(PREFS_KEY_DISP_LANGUAGE));
         GP.HR();
+        GP.LABEL("Display brightness:");
+        GP.SELECT(PREFS_KEY_BRIGHTNESS_MODE,
+        "Dim,Bright"
+#if HAS(LIGHT_SENSOR)
+        ",Automatic"
+#endif
+        , prefs_get_int(PREFS_KEY_BRIGHTNESS_MODE));
+        GP.HR();
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
         GP.BREAK();
         render_int("Show next alarm countdown for [s]:", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS);
@@ -572,6 +580,7 @@ void action() {
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
+        save_int(PREFS_KEY_BRIGHTNESS_MODE, 0, BRIGHTNESS_MAX_INVALID - 1);
         save_bool(PREFS_KEY_WEATHER_USE_FAHRENHEIT);
         save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);

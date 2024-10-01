@@ -9,7 +9,7 @@
 
 class AppShimMenu: public ProtoShimNavMenu {
 public:
-    AppShimMenu(Beeper*, NewSequencer*, Yukkuri*, DisplayDriver*dd);
+    AppShimMenu(Beeper*, NewSequencer*, Yukkuri*);
 
     void prepare();
     void step();

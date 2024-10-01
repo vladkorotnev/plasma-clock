@@ -203,7 +203,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 ### Display (at least one required)
 
 * Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display//md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
-* Winstar WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`)
+* Winstar WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming.
 
 ### Speaker (at least one required)
 

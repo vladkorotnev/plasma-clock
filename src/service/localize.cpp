@@ -75,6 +75,10 @@ static const std::map<const std::string, const char*> english = {
     {"Fast", "Fast"},
     {"Sonic", "Sonic"},
 
+    {"Dim", "Dim"},
+    {"Bright", "Bright"},
+    {"Automatic", "Automatic"},
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
     {"BB_CNCT_GUIDE", "\x1A to connect"},
@@ -160,6 +164,11 @@ static const std::map<const std::string, const char*> russian = {
     {"Medium", "Средне"},
     {"Fast", "Быстро"},
     {"Sonic", "Соник"},
+
+    {"Brightness", "Яркость"},
+    {"Dim", "Темно"},
+    {"Bright", "Ярко"},
+    {"Automatic", "Авто"},
 
     {"Blank display after (s)", "Пустой дисплей после (сек.)"},
     {"Turn display off after (s)", "Выключить дисплей после (сек.)"},
