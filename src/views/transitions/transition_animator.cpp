@@ -25,11 +25,11 @@ void TransitionAnimationCoordinator::prepare() {
     if(viewB != nullptr) viewB->prepare();
 }
 
-void TransitionAnimationCoordinator::render_backing_views()  {
+void TransitionAnimationCoordinator::render_backing_views(RenderPlane p)  {
     backingA->clear();
     backingB->clear();
-    if(viewA != nullptr) viewA->render(backingA);
-    if(viewB != nullptr) viewB->render(backingB);
+    if(viewA != nullptr) viewA->render_plane(backingA, RPLANE_NEUTRAL);
+    if(viewB != nullptr) viewB->render_plane(backingB, RPLANE_NEUTRAL);
 }
 
 bool TransitionAnimationCoordinator::is_completed() {
@@ -57,8 +57,8 @@ void TransitionAnimationCoordinator::rewind() {
     completed = false;
 }
 
-void TransitionAnimationCoordinator::render(FantaManipulator *fb) {
-    if(transition == nullptr) { return; }
-    render_backing_views();
+void TransitionAnimationCoordinator::render_plane(FantaManipulator *fb, RenderPlane p) {
+    if(transition == nullptr || p != RPLANE_NEUTRAL) { return; }
+    render_backing_views(p);
     completed = transition->render(fb, this);
 }

@@ -13,10 +13,18 @@ public:
     AmPmLabel() {}
     bool is_pm = false;
 
-    void render(FantaManipulator *fb) override {
+    void render_plane(FantaManipulator *fb, RenderPlane p) override {
         Composite::render(fb);
-        fb->put_sprite(is_pm ? &spr_p : &spr_a, 0, is_pm ? 7 : 2);
-        fb->put_sprite(&spr_m, spr_a.width, is_pm ? 7 : 2);
+        if(p == RPLANE_HIGHLIGHT_MASK) {
+            fb->put_sprite(&spr_p, 0, 7);
+            fb->put_sprite(&spr_m, spr_a.width, 7);
+            fb->put_sprite(&spr_a, 0, 2);
+            fb->put_sprite(&spr_m, spr_a.width, 2);
+        }
+        else {
+            fb->put_sprite(is_pm ? &spr_p : &spr_a, 0, is_pm ? 7 : 2);
+            fb->put_sprite(&spr_m, spr_a.width, is_pm ? 7 : 2);
+        }
     }
 
 private:
@@ -147,11 +155,11 @@ void SimpleClock::step() {
 
     blink_separator = prefs_get_bool(PREFS_KEY_BLINK_SEPARATORS);
     show_seconds = prefs_get_bool(PREFS_KEY_SHOW_SECONDS);
-    separator = (blink_separator && phase != 0) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
+    separator = (blink_separator && phase <= 7) ? CLOCK_SEPARATOR_OFF : CLOCK_SEPARATOR;
     Screen::step();
 }
 
-void SimpleClock::render(FantaManipulator *framebuffer) {
+void SimpleClock::render_plane(FantaManipulator *framebuffer, RenderPlane p) {
     int char_count = show_seconds ? 8 : 5; // XX:XX:XX
     int text_width = char_count * font->width;
     int left_offset = framebuffer->get_width() / 2 - text_width / 2;
@@ -160,17 +168,21 @@ void SimpleClock::render(FantaManipulator *framebuffer) {
     draw_dropping_number(framebuffer, now.hour, next_time.hour, phase, left_offset);
     left_offset += 2 * font->width;
     
-    framebuffer->put_glyph(font, separator, left_offset, 0);
+    if(p == RPLANE_HIGHLIGHT_MASK || phase >= 11) {
+        framebuffer->put_glyph(font, separator, left_offset, 0);
+    }
     left_offset += font->width;
 
     draw_dropping_number(framebuffer, now.minute, next_time.minute, phase, left_offset);
     left_offset += 2 * font->width;
     
     if(show_seconds) {
-        framebuffer->put_glyph(font, separator, left_offset, 0);
+        if(p == RPLANE_HIGHLIGHT_MASK || phase >= 11) {
+            framebuffer->put_glyph(font, separator, left_offset, 0);
+        }
         left_offset += font->width;
         draw_dropping_number(framebuffer, now.second, next_time.second, phase, left_offset);
     }
 
-    Screen::render(framebuffer);
+    Screen::render_plane(framebuffer, p);
 }

@@ -18,9 +18,6 @@ public:
     DisplayFramebuffer(DisplayDriver * display);
     ~DisplayFramebuffer();
 
-    /// @brief Clears the display
-    void clear();
-
     /// @brief Halt execution of the current task until the next frame was fully output to the display controller
     void wait_next_frame();
     /// @brief Output the backing buffer to the display controller, if it was altered since the last transmission
@@ -33,15 +30,15 @@ public:
 
     /// @brief Manipulate the graphics in the backing buffer
     /// @return A pointer to the manipulator, owned by the caller
-    FantaManipulator * manipulate();
+    FantaManipulator * manipulate(RenderPlane plane);
 
 private:
-    uint8_t buffer[BUFFER_SIZE];
+    uint8_t buffer[RPLANE_MAX_INVALID][BUFFER_SIZE];
     SemaphoreHandle_t buffer_semaphore;
     EventGroupHandle_t vsync_group;
     TaskHandle_t hTask;
     DisplayDriver * display;
-    FantaManipulator * shared_manipulator;
+    FantaManipulator * shared_manipulators[RPLANE_MAX_INVALID];
     bool is_dirty;
 
     void setup_task();

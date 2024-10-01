@@ -7,7 +7,7 @@ public:
     /// @brief Reset the display controller
     virtual void reset() {}
     /// @brief Send an array of half-columns to the display controller
-    virtual void write_fanta(const uint8_t * strides, size_t count) {}
+    virtual void write_fanta(const uint8_t * strides, size_t count_per_plane, uint8_t planes) {}
 
     /// @brief Enable or disable the display power
     virtual void set_power(bool on) {}

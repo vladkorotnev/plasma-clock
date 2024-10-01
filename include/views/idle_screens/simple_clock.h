@@ -9,7 +9,7 @@
 class SimpleClock: public Screen, DroppingDigits {
 public:
     SimpleClock();
-    void render(FantaManipulator*);
+    void render_plane(FantaManipulator*, RenderPlane);
     void step();
 private:
     class AmPmLabel;

@@ -29,7 +29,7 @@ public:
 
     void prepare();
     void step();
-    void render(FantaManipulator *);
+    void render_plane(FantaManipulator *, RenderPlane) override;
 
     fanta_buffer_t backingBufferA;
     fanta_buffer_t backingBufferB;
@@ -45,5 +45,5 @@ private:
     bool completed = true;
     Transition *transition;
 
-    void render_backing_views();
+    void render_backing_views(RenderPlane);
 };

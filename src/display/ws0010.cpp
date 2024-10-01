@@ -165,12 +165,7 @@ void Ws0010OledDriver::write_stride(uint8_t stride) {
     pulse_clock();
 }
 
-void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
-    taskENTER_CRITICAL(&_spinlock);
-#ifndef WS0010_NO_BFI
-    bool show_backup = show_state;
-    set_show(false);
-#endif
+void Ws0010OledDriver::write_frame_unchecked(const uint8_t * strides, size_t count) {
     // First write even (top row), then odd (bottom row)
     for(int i = 0; i < count - 1; i += 2) {
         if(i >= 200) continue;
@@ -180,9 +175,30 @@ void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
         if(i >= 200) continue;
         write_stride(strides[i]);
     }
+}
+
+void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count, uint8_t planes) {
+    taskENTER_CRITICAL(&_spinlock);
+#ifndef WS0010_NO_BFI
+    bool show_backup = show_state;
+    set_show(false);
+#endif
+    int plane_no = planes - 1;
+    write_frame_unchecked(&strides[plane_no * count], count);
+#ifndef WS0010_NO_BFI
+    set_show(show_backup);
+#endif
+    if(planes > 1) {
+        delayMicroseconds(WS0010_BFI_DIMMER_DURATION_US);
+#ifndef WS0010_NO_BFI
+        set_show(false);
+#endif
+        plane_no--;
+        write_frame_unchecked(&strides[plane_no * count], count);
+    }
 #ifndef WS0010_NO_BFI
     if(is_dim) {
-        delayMicroseconds(WS0010_BFI_DIMMER_DURATION_US);
+        delayMicroseconds(WS0010_BFI_DIMMER_DURATION_US / 2);
     }
     set_show(show_backup);
 #endif

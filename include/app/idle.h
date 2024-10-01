@@ -7,7 +7,7 @@
 #include <sound/yukkuri.h>
 
 void app_idle_prepare(SensorPool*, Beeper*, NewSequencer*, Yukkuri*);
-void app_idle_draw(FantaManipulator*);
+void app_idle_draw(FantaManipulator*, RenderPlane rp);
 void app_idle_process();
 
 class AppShimIdle: public Renderable {
@@ -16,8 +16,8 @@ public:
         app_idle_prepare(sp, b, s, y);
     }
 
-    void render(FantaManipulator*fb) {
-        app_idle_draw(fb);
+    void render_plane(FantaManipulator*fb, RenderPlane rp) override {
+        app_idle_draw(fb, rp);
     }
 
     void step() {

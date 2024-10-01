@@ -78,9 +78,9 @@ void ViewMultiplexor::prepare() {
     if(r != nullptr) r->prepare();
 }
 
-void ViewMultiplexor::render(FantaManipulator * fb) {
+void ViewMultiplexor::render_plane(FantaManipulator * fb, RenderPlane plane) {
     Renderable *r = current_renderable();
-    if(r != nullptr) r->render(fb);
+    if(r != nullptr) r->render_plane(fb, plane);
 }
 
 void ViewMultiplexor::step() {

@@ -31,7 +31,7 @@ public:
     void set_bright(bool bright);
 
     /// @brief Send an array of half-columns to the display controller
-    void write_fanta(const uint8_t * strides, size_t count);
+    void write_fanta(const uint8_t * strides, size_t count, uint8_t planes) override;
 
 private:
     gpio_num_t databus_gpios[8];
@@ -47,5 +47,6 @@ private:
     inline void pulse_clock();
     void write_string(const char *);
     void write_stride(uint8_t stride);
+    void write_frame_unchecked(const uint8_t *, size_t);
 };
 #endif

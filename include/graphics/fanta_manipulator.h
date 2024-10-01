@@ -4,6 +4,13 @@
 #include <freertos/FreeRTOS.h>
 #include <freertos/semphr.h>
 
+enum RenderPlane: uint8_t {
+    RPLANE_NEUTRAL = 0,
+    RPLANE_HIGHLIGHT_MASK,
+
+    RPLANE_MAX_INVALID
+};
+
 // Why Fanta?
 // Well if a normally stored (LTR in a byte, top-to-bottom within an array) graphical thingamajiggalo is called a "Sprite",
 // then why can't a weirdly oriented one prepared to be drawn on an orange display be called a "Fanta"?

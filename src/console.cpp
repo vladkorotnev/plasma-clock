@@ -55,7 +55,7 @@ void Console::task() {
     if(xQueueReceive(hQueue, &next_line, pdMS_TO_TICKS( 500 )) == pdTRUE) {
         // Output next line
         if(active) {
-            FantaManipulator * m = disp->manipulate();
+            FantaManipulator * m = disp->manipulate(RPLANE_NEUTRAL);
 
             if(m->lock()) {
                 if(cursor_enable && cursor_state) {
@@ -92,7 +92,7 @@ void Console::task() {
 
     if(cursor_enable && active) {
         cursor_state = !cursor_state;
-        FantaManipulator * m = disp->manipulate();
+        FantaManipulator * m = disp->manipulate(RPLANE_NEUTRAL);
         if(m->lock()) {
             m->put_glyph(font, cursor_state ? font->cursor_character : CURSOR_OFF, cursor_x, cursor_y);
             m->unlock();
@@ -101,7 +101,7 @@ void Console::task() {
 }
 
 void Console::clear() {
-    disp->clear();
+    disp->manipulate(RPLANE_NEUTRAL)->clear();
     cursor_x = 0;
     cursor_y = 0;
 }
@@ -110,7 +110,7 @@ void Console::set_cursor(bool enable) {
     if(enable && !cursor_enable) {
         cursor_state = true;
         if(active) {
-            FantaManipulator * m = disp->manipulate();
+            FantaManipulator * m = disp->manipulate(RPLANE_NEUTRAL);
             if(m->lock()) {
                 m->put_glyph(font, font->cursor_character, cursor_x, cursor_y);
                 m->unlock();
@@ -118,7 +118,7 @@ void Console::set_cursor(bool enable) {
         }
     } else if(!enable && cursor_enable) {
         if(active) {
-            FantaManipulator * m = disp->manipulate();
+            FantaManipulator * m = disp->manipulate(RPLANE_NEUTRAL);
             if(m->lock()) {
                 m->put_glyph(font, CURSOR_OFF, cursor_x, cursor_y);
                 m->unlock();

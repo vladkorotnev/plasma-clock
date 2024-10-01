@@ -223,7 +223,7 @@ void boot_task(void*) {
         // con->write('.');
     }
 
-    screenshooter = new Screenshooter(fb->manipulate());
+    screenshooter = new Screenshooter(fb->manipulate(RPLANE_NEUTRAL));
     if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
         screenshooter->start_server(3939);
         ESP_LOGI(LOG_TAG, "RC Server ready");
@@ -326,9 +326,8 @@ void setup() {
     appHost->add_view(new Bootscreen(), STATE_BOOT);
     appHost->add_view(new RebootScreen(), STATE_RESTART);
 
-    graph = fb->manipulate();
+    graph = fb->manipulate(RPLANE_NEUTRAL);
     con->set_active(false);
-    fb->clear();
 
     if(xTaskCreate(
         boot_task,
@@ -370,7 +369,9 @@ void loop() {
     if(_actual_current_state != STATE_OTAFVU) { // OTAFVU basically locks everything down until reboot
         fb->wait_next_frame();
         if(graph->lock()) {
-            desktop->render(graph);
+            for(int i = 0; i < RPLANE_MAX_INVALID; i++) {
+                desktop->render_plane(fb->manipulate((RenderPlane)i), (RenderPlane)i);
+            }
             graph->unlock();
         }
         desktop->step();

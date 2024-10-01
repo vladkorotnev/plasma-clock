@@ -10,7 +10,7 @@ public:
     void add_layer(Renderable*);
     
     void prepare();
-    void render(FantaManipulator*);
+    void render_plane(FantaManipulator*, RenderPlane);
     void step();
     void cleanup();
 private:
@@ -30,7 +30,7 @@ public:
     }
 
     void prepare() { ViewCompositor::prepare(); }
-    void render(FantaManipulator *fb) { ViewCompositor::render(fb); }
+    void render_plane(FantaManipulator *fb, RenderPlane p) { ViewCompositor::render_plane(fb, p); }
     void step() { ViewCompositor::step(); }
     void cleanup() { ViewCompositor::cleanup(); }
 

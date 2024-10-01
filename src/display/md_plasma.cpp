@@ -107,8 +107,8 @@ void MorioDenkiPlasmaDriver::write_column(uint16_t column) {
     write_stride((column >> 8) & 0xFF);
 }
 
-void MorioDenkiPlasmaDriver::write_fanta(const uint8_t * strides, size_t count) {
-    // Native pixel format, so just write as is
+void MorioDenkiPlasmaDriver::write_fanta(const uint8_t * strides, size_t count, uint8_t planes) {
+    // Native pixel format, so just write just one plane as is
     for(int i = 0; i < count; i++) {
         write_stride(strides[i]);
     }

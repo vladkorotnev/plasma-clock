@@ -19,9 +19,9 @@ DisplayFramebuffer::DisplayFramebuffer(DisplayDriver * disp) {
     vsync_group = xEventGroupCreate();
     xSemaphoreGive(buffer_semaphore);
     is_dirty = false;
-    shared_manipulator = new FantaManipulator(buffer, BUFFER_SIZE, width, height, buffer_semaphore, &is_dirty);
+    for(int i = 0; i < RPLANE_MAX_INVALID; i++)
+        shared_manipulators[i] = new FantaManipulator(&buffer[i][0], BUFFER_SIZE, width, height, buffer_semaphore, &is_dirty);
     setup_task();
-    clear();
 }
 
 DisplayFramebuffer::~DisplayFramebuffer() {
@@ -93,13 +93,9 @@ void DisplayFramebuffer::wait_next_frame() {
     xEventGroupWaitBits(vsync_group, EVT_BIT_ENDED_DRAWING, false, true, portMAX_DELAY);
 }
 
-void DisplayFramebuffer::clear() {
-    shared_manipulator->clear();
-}
-
 void DisplayFramebuffer::write_all() {
     LOCK_BUFFER_OR_DIE;
-    display->write_fanta(buffer, BUFFER_SIZE);
+    display->write_fanta((uint8_t*)buffer, BUFFER_SIZE, RPLANE_MAX_INVALID);
     is_dirty = false;
     UNLOCK_BUFFER;
     xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);
@@ -110,6 +106,6 @@ void DisplayFramebuffer::write_all_if_needed() {
     else xEventGroupSetBits(vsync_group, EVT_BIT_ENDED_DRAWING);
 }
 
-FantaManipulator* DisplayFramebuffer::manipulate() {
-    return shared_manipulator;
+FantaManipulator* DisplayFramebuffer::manipulate(RenderPlane plane) {
+    return shared_manipulators[plane];
 }

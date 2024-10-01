@@ -390,9 +390,9 @@ void change_screen_if_needed() {
     }
 }
 
-void app_idle_draw(FantaManipulator* graph) {
+void app_idle_draw(FantaManipulator* graph, RenderPlane rp) {
     graph->clear();
-    mainView->render(graph);
+    mainView->render_plane(graph, rp);
 }
 
 void app_idle_process() {

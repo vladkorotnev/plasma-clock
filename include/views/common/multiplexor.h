@@ -18,7 +18,7 @@ public:
     Renderable * get_view(view_id_t);
 
     void prepare();
-    void render(FantaManipulator*);
+    void render_plane(FantaManipulator*, RenderPlane) override;
     void step();
     void cleanup();
 protected:
