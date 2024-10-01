@@ -43,7 +43,7 @@ private:
     char buf[32] = { 0 };
 };
 
-AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, DisplayDriver*dd): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     yukkuri = y;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
@@ -58,6 +58,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
     static MenuDateSettingView * ds_view = nullptr;
     static ListView * clock_menu = new ListView();
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour display"), PREFS_KEY_DISP_24_HRS));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Show seconds"), PREFS_KEY_SHOW_SECONDS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Blink dots"), PREFS_KEY_BLINK_SEPARATORS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Tick sound"), PREFS_KEY_TICKING_SOUND));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Ticking only when screen on"), PREFS_KEY_NO_SOUND_WHEN_OFF));
@@ -296,6 +297,8 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
 #if HAS(PLAYGROUND)
     main_menu->add_view(new MenuActionItemView("Test", []() { push_state(STATE_PLAYGROUND, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &good_icns));
 #endif
+// TEST
+    main_menu->add_view(new MenuBooleanSelectorView("Dimmer Test", true, [dd](bool bright) { dd->set_bright(bright); }));
 }   
 
 void AppShimMenu::prepare() {

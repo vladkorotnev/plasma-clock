@@ -19,6 +19,7 @@ public:
         night_temp->stopped = true;
         night_temp->set_y_position(8);
         night_temp->x_offset = 17;
+        night_temp->gray = true;
         
         date = new StringScroll(&fps_counter_font);
         date->render_mode = TEXT_OUTLINED | TEXT_NO_BACKGROUND;

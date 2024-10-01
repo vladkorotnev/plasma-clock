@@ -6,6 +6,10 @@
 #include <esp32-hal-gpio.h>
 #include <esp_err.h>
 
+#ifndef WS0010_BFI_DIMMER_DURATION_US
+#define WS0010_BFI_DIMMER_DURATION_US 6000 //<- experimentally found value for roughly 50% brightness @ 3V3 supply
+#endif
+
 static char LOG_TAG[] = "Winstar0010";
 static portMUX_TYPE _spinlock = portMUX_INITIALIZER_UNLOCKED;
 
@@ -20,6 +24,7 @@ Ws0010OledDriver::Ws0010OledDriver(
     rs_gpio = rs;
     en_gpio = en;
     is_writing_ddram = false;
+    is_dim = false;
     ddram_ptr = 0;
 }
 
@@ -168,17 +173,25 @@ void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
 #endif
     // First write even (top row), then odd (bottom row)
     for(int i = 0; i < count - 1; i += 2) {
-        if(i >= 200) continue; // TODO: support physical screen resolutions
+        if(i >= 200) continue;
         write_stride(strides[i]);
     }
     for(int i = 1; i < count; i += 2) {
-        if(i >= 200) continue; // TODO: support physical screen resolutions
+        if(i >= 200) continue;
         write_stride(strides[i]);
     }
 #ifndef WS0010_NO_BFI
+    if(is_dim) {
+        delayMicroseconds(WS0010_BFI_DIMMER_DURATION_US);
+    }
     set_show(show_backup);
 #endif
     taskEXIT_CRITICAL(&_spinlock);
+}
+
+void Ws0010OledDriver::set_bright(bool bright) {
+    ESP_LOGI(LOG_TAG, "BFI dimming is now %s", bright ? "OFF":"ON");
+    is_dim = !bright;
 }
 
 #endif

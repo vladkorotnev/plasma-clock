@@ -49,7 +49,7 @@ static key_state_t min_state_of_mask(key_bitmask_t keys, bool peek = false) {
             if(pressed_keycombos.count(keys) == 0) {
                 if(!peek) {
                     pressed_keycombos.insert(keys);
-                    if(beepola != nullptr) beepola->beep_blocking(CHANNEL_NOTICE, 1000, 10);
+                    if(beepola != nullptr) beepola->beep(CHANNEL_NOTICE, 1000, 10);
                 }
                 return KEYSTATE_HIT;
             } else {

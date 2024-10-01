@@ -144,7 +144,7 @@ void FireworksOverlay::step() {
                 case EXPLODING:
                     if(p->phase == 1) {
                         if(beeper != nullptr && !did_sound && sound) {
-                            beeper->beep_blocking(CHANNEL_NOTICE, 100, 10);
+                            beeper->beep(CHANNEL_NOTICE, 100, 10);
                             did_sound = true;
                         }
                     } else if(p->phase >= 16 && p->phase % (((rnd >> 4) & 0xF) + 2) == 0) {

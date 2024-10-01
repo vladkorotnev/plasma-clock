@@ -11,6 +11,9 @@
 #define HAS_MOTION_SENSOR
 #define HAS_KEYPAD
 
+//      ↓ Looks like shite on the plasma display
+#define COMPOSABLE_NO_EVENODD
+
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
 #define PRODUCT_VERSION "4"

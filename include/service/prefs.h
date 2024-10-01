@@ -17,6 +17,7 @@ typedef enum prefs_wifi_icon_disp {
 static constexpr prefs_key_t PREFS_KEY_WIFI_ICON = "net_icon";
 
 static constexpr prefs_key_t PREFS_KEY_BLINK_SEPARATORS = "blink_separator";
+static constexpr prefs_key_t PREFS_KEY_SHOW_SECONDS = "show_seconds";
 static constexpr prefs_key_t PREFS_KEY_TICKING_SOUND = "ticking_sound";
 static constexpr prefs_key_t PREFS_KEY_NO_SOUND_WHEN_OFF = "no_tick_off";
 

@@ -27,10 +27,8 @@ public:
     /// @brief Show or hide the display contents, while keeping the scanning active
     void set_show(bool show);
 
-#if HAS(VARYING_BRIGHTNESS)
-#warning WS0010 does not support brightness controls
-    void set_bright(bool bright) { }
-#endif
+    /// @brief Enable or disable virtual dimming (using BFI, might flicker depending on FPS stability)
+    void set_bright(bool bright);
 
     /// @brief Send an array of half-columns to the display controller
     void write_fanta(const uint8_t * strides, size_t count);
@@ -41,6 +39,7 @@ private:
     gpio_num_t en_gpio;
     bool is_writing_ddram;
     bool show_state;
+    bool is_dim = false;
     uint8_t ddram_ptr;
 
     inline void set_databus(uint8_t data);

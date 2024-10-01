@@ -39,6 +39,7 @@ size_t Beeper::fill_buffer(void* buffer, size_t length_) {
     samples += generated*8;
     if(duration_samples > 0 && duration_samples <= samples) {
         voice->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
+        active_channel = -1;
     }
     return generated;
 }
@@ -65,11 +66,17 @@ void Beeper::beep_blocking(beeper_channel_t ch, uint freq, uint len, uint16_t du
     if(active_channel > ch) return;
     if(!is_channel_enabled(ch)) return;
 
+    beep(ch, freq, len, duty);
+    vTaskDelay(len);
+}
+
+void Beeper::beep(beeper_channel_t ch, uint freq, uint len, uint16_t duty) {
+    if(active_channel > ch) return;
+    if(!is_channel_enabled(ch)) return;
+
     if(active_channel < ch) active_channel = ch;
     
     samples = 0;
     duration_samples = len * (WaveOut::BAUD_RATE / 1000);
     voice->set_parameter(ToneGenerator::Parameter::PARAMETER_FREQUENCY, freq);
-    vTaskDelay(len);
-    active_channel = -1;
 }

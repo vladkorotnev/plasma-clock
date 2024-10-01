@@ -43,7 +43,7 @@ static void save_bool(prefs_key_t key) {
     bool temp = false;
     if(ui.clickBool(key, temp)) {
         prefs_set_bool(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+        beeper->beep(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -59,7 +59,7 @@ static void save_int(prefs_key_t key, int min, int max) {
         temp = std::min(temp, max);
         temp = std::max(temp, min);
         prefs_set_int(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+        beeper->beep(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -76,7 +76,7 @@ static void save_string(prefs_key_t key) {
     String temp;
     if(ui.clickString(key, temp)) {
         prefs_set_string(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+        beeper->beep(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -182,7 +182,7 @@ static bool save_alarms() {
 
         set_alarm(i, a);
     }
-    beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+    beeper->beep(CHANNEL_NOTICE, 1000, 50);
     return true;
 }
 
@@ -251,6 +251,7 @@ static void build() {
 
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
         render_bool("24-hour display:", PREFS_KEY_DISP_24_HRS);
+        render_bool("Show seconds:", PREFS_KEY_SHOW_SECONDS);
         render_bool("Blink separators:", PREFS_KEY_BLINK_SEPARATORS);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
@@ -547,6 +548,7 @@ void action() {
         save_bool(PREFS_KEY_DISP_24_HRS);
         save_bool(PREFS_KEY_VOICE_24_HRS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);
+        save_bool(PREFS_KEY_SHOW_SECONDS);
         save_bool(PREFS_KEY_TICKING_SOUND);
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);

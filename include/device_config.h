@@ -23,6 +23,9 @@
 // Enable the yukkuri voice talking clock
 #define HAS_AQUESTALK
 
+// Disable the faux brightness reduction for some UI elements by drawing them only every other frame
+// #define COMPOSABLE_NO_EVENODD
+
 // ---- HARDWARE
 
 #ifdef ESP32

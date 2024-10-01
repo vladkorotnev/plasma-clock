@@ -106,12 +106,15 @@ void bringup_sound() {
 
     WaveOut::set_output_callback(pisosWAVE_CHANNEL_BEEPER, beepola->get_callback());
     WaveOut::set_output_callback(pisosWAVE_CHANNEL_SEQUENCER, seq->get_callback());
+
+    ESP_LOGI(LOG_TAG, "Sound subsystem ready");
 }
 
 void bringup_light_sensor() {
 #if HAS(LIGHT_SENSOR)
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
     con->print("L sensor OK");
+    ESP_LOGI(LOG_TAG, "Light sensor ready");
 #endif
 }
 
@@ -119,6 +122,7 @@ void bringup_motion_sensor() {
 #if HAS(MOTION_SENSOR)
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
     con->print("M sensor OK");
+    ESP_LOGI(LOG_TAG, "Motion sensor ready");
 #endif
 }
 
@@ -133,6 +137,8 @@ void bringup_temp_sensor() {
     } else {
         con->print("T sensor OK");
     }
+    ESP_LOGI(LOG_TAG, "Temperature sensor ready");
+
     delay(1000);
     if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("H sens err");
@@ -140,6 +146,7 @@ void bringup_temp_sensor() {
     } else {
         con->print("H sensor OK");
     }
+    ESP_LOGI(LOG_TAG, "Humidity sensor ready");
 #endif
 }
 
@@ -171,6 +178,8 @@ void bringup_switchbot_sensor() {
                     sensors->short_circuit(SENSOR_ID_AMBIENT_TEMPERATURE, SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
                 }
             }
+
+            ESP_LOGI(LOG_TAG, "WoSensor ready");
         }
     }
 #endif
@@ -185,9 +194,11 @@ void bringup_hid() {
     }
     // No beeper on non-touch because it will be annoying with physical buttons
     hid_set_key_beeper(beepola);
+    ESP_LOGI(LOG_TAG, "Touchpad ready");
 #endif
 #if HAS(KEYPAD)
     keypad_start();
+    ESP_LOGI(LOG_TAG, "Keypad ready");
 #endif
 }
 
@@ -199,23 +210,23 @@ void boot_task(void*) {
         ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
         seq->play_sequence(&tulula_fvu);
     } else {
+        ESP_LOGI(LOG_TAG, "File system mounted");
         seq->play_sequence(&pc98_pipo);
     }
 
-    con->clear();
-
     // con->print("WiFi init");
     NetworkManager::startup();
+    ESP_LOGI(LOG_TAG, "NetMgr started");
     while(!NetworkManager::is_up()) {
-        delay(100);
+        delay(1000);
+        ESP_LOGI(LOG_TAG, "Waiting for NetMgr...");
         // con->write('.');
     }
-
-    con->clear();
 
     screenshooter = new Screenshooter(fb->manipulate());
     if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
         screenshooter->start_server(3939);
+        ESP_LOGI(LOG_TAG, "RC Server ready");
         // con->print("RC server up!");
         // delay(1000);
     }
@@ -226,8 +237,10 @@ void boot_task(void*) {
     // delay(2000);
 
     ota = new OTAFVUManager(con, seq);
+    ESP_LOGI(LOG_TAG, "OTAFVUMgr ready");
 
     sensors = new SensorPool();
+    ESP_LOGI(LOG_TAG, "Creating sensor pool");
 
     sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
     sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(125));
@@ -236,8 +249,11 @@ void boot_task(void*) {
     bringup_temp_sensor();
     bringup_switchbot_sensor();
     bringup_hid();
+
+    ESP_LOGI(LOG_TAG, "Loading music database");
     load_melodies_from_disk();
 
+    ESP_LOGI(LOG_TAG, "Starting services...");
     timekeeping_begin();
     weather_start();
     wotd_start();
@@ -245,9 +261,10 @@ void boot_task(void*) {
     power_mgmt_start(sensors, &display_driver, beepola);
     admin_panel_prepare(sensors, beepola);
 
+    ESP_LOGI(LOG_TAG, "Constructing desktop");
     appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(beepola, seq, yukkuri), STATE_MENU);
+    appHost->add_view(new AppShimMenu(beepola, seq, yukkuri, &display_driver), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);
@@ -261,6 +278,7 @@ void boot_task(void*) {
 #endif
     appHost->add_view(new NewYearAppShim(beepola, seq, yukkuri), STATE_NEW_YEAR);
 
+    ESP_LOGI(LOG_TAG, "Finishing up");
     change_state(startup_state, TRANSITION_WIPE);
     alarm_init(sensors);
 
@@ -315,7 +333,7 @@ void setup() {
     if(xTaskCreate(
         boot_task,
         "BOOT",
-        6000,
+        8192,
         nullptr,
         configMAX_PRIORITIES - 1,
         &bootTaskHandle
@@ -340,7 +358,15 @@ static void print_memory() {
     }
 }
 
+bool bumTheDog = false;
 void loop() {
+    if(!bumTheDog) {
+        disableLoopWDT();
+        disableCore0WDT();
+        disableCore1WDT();
+        bumTheDog = true;
+    }
+    
     if(_actual_current_state != STATE_OTAFVU) { // OTAFVU basically locks everything down until reboot
         fb->wait_next_frame();
         if(graph->lock()) {

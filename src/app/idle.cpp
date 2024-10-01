@@ -110,7 +110,7 @@ void sound_tick_tock() {
     tk_time_of_day_t now = get_current_time_precise();
     if(now.millisecond >= tick_tock_offset_ms && !tick_tock) {
         if(!sequencer->is_sequencing() && (yukkuri == nullptr || !yukkuri->is_speaking())) {
-            beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
+            beepola->beep(CHANNEL_AMBIANCE, 100, 10);
         }
         tick_tock = true;
     } else if (now.millisecond < tick_tock_offset_ms && tick_tock) {

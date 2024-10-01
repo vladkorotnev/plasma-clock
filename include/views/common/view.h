@@ -1,5 +1,6 @@
 #pragma once
 #include <graphics/fanta_manipulator.h>
+#include <device_config.h>
 #include <vector>
 
 /// @brief A renderable view
@@ -20,6 +21,7 @@ public:
     int x_offset = 0;
     int width = -1;
     bool hidden = false;
+    bool gray = false;
 };
 
 class ClipView: public Composable {
@@ -54,6 +56,9 @@ public:
         }
         for(Composable *r: composables) {
             if(r->hidden) continue;
+#ifndef COMPOSABLE_NO_EVENODD
+            if(r->gray && !even_odd) continue;
+#endif
             if(r->x_offset <= 0 && r->width < 0) {
                 r->render(fb);
             } else if(r->width > 0) {
@@ -66,6 +71,7 @@ public:
                 delete temp;
             }
         }
+        even_odd ^= 1;
     }
     void step() {
         for(Composable *r: composables) r->step();
@@ -76,6 +82,8 @@ public:
 protected:
     std::vector<Composable*> composables = {};
     bool wants_clear_surface = false;
+private:
+    bool even_odd = false;
 };
 
 /// @brief Do not override the user-specified display time

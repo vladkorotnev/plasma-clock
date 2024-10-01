@@ -48,7 +48,8 @@ void FbTaskFunc( void * pvParameter )
 {
     ESP_LOGV(LOG_TAG, "Running task");
     DisplayFramebuffer * fb = static_cast<DisplayFramebuffer*> ( pvParameter );
-
+    TickType_t now = xTaskGetTickCount();
+    TickType_t interval = pdMS_TO_TICKS(1000 / DESIRED_FPS);
     while(1) {
         fb->write_all_if_needed();
 #ifdef PDFB_PERF_LOGS
@@ -62,7 +63,6 @@ void FbTaskFunc( void * pvParameter )
             max_frametime = 0;
         }
 
-        TickType_t now = xTaskGetTickCount();
         TickType_t frametime = now - last_draw_at;
         if(frametime > max_frametime) max_frametime = frametime;
         avg_frametime += frametime;
@@ -70,7 +70,7 @@ void FbTaskFunc( void * pvParameter )
         last_draw_at = now;
 #endif
 
-        vTaskDelay(pdMS_TO_TICKS(1000 / DESIRED_FPS));
+        xTaskDelayUntil(&now, interval);
     }
 }
 
