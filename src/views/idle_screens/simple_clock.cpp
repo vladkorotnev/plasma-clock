@@ -15,31 +15,43 @@ public:
 
     void render(FantaManipulator *fb) override {
         Composite::render(fb);
-        fb->put_sprite(is_pm ? &spr_p : &spr_a, 0, is_pm ? 7 : 2);
-        fb->put_sprite(&spr_m, spr_a.width, is_pm ? 7 : 2);
+        if(is_pm) {
+            show_pm(fb);
+        } else {
+            show_am(fb);
+        }
     }
 
 private:
+    void show_am(FantaManipulator*fb) {
+        fb->put_sprite(&spr_a, 0, 2);
+        fb->put_sprite(&spr_m, spr_a.width, 2);
+    }
+    void show_pm(FantaManipulator*fb) {
+        fb->put_sprite(&spr_p, 0, 7);
+        fb->put_sprite(&spr_m, spr_a.width, 7);
+    }
+
     const uint8_t letter_a_data[5] = {
-        0b0111,
-        0b1001,
-        0b1111,
-        0b1001,
-        0b1001,
+        0b01110,
+        0b10010,
+        0b11110,
+        0b10010,
+        0b10010,
     };
     const uint8_t letter_p_data[5] = {
-        0b1110,
-        0b1001,
-        0b1110,
-        0b1000,
-        0b1000,
+        0b11100,
+        0b10010,
+        0b11100,
+        0b10000,
+        0b10000,
     };
     const uint8_t letter_m_data[5] = {
-        0b1111,
-        0b1011,
-        0b1001,
-        0b1001,
-        0b1001,
+        0b10001,
+        0b11011,
+        0b10101,
+        0b10101,
+        0b10001,
     };
     const sprite_t spr_a = {
         .width = 5,
@@ -62,7 +74,6 @@ private:
         .mask = nullptr,
         .format = SPRFMT_HORIZONTAL
     };
-
 };
 
 SimpleClock::SimpleClock(): DroppingDigits() {

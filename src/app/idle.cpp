@@ -55,8 +55,6 @@ static int screen_times_ms[VIEW_MAX] = {0};
 
 int current_screen_time_ms = 0;
 
-static bool did_prepare = false;
-
 static Beeper * beepola;
 static NewSequencer * sequencer;
 static Yukkuri * yukkuri = nullptr;
@@ -251,10 +249,7 @@ void weather_overlay_update() {
     }
 }
 
-void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
-    if(did_prepare) return;
-
-    did_prepare = true;
+void app_idle_init(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
     beepola = b;
     sequencer = seq;
     sensors = s;
@@ -348,6 +343,10 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
     mainView = rainyClock;
 
     mainView->prepare();
+}
+
+void app_idle_prepare() {
+    lastScreenSwitch = xTaskGetTickCount();
 }
 
 void update_screen_specific_time() {

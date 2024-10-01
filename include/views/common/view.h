@@ -71,7 +71,9 @@ public:
                 delete temp;
             }
         }
+#ifndef COMPOSABLE_NO_EVENODD
         even_odd ^= 1;
+#endif
     }
     void step() {
         for(Composable *r: composables) r->step();
@@ -82,7 +84,6 @@ public:
 protected:
     std::vector<Composable*> composables = {};
     bool wants_clear_surface = false;
-private:
     bool even_odd = false;
 };
 
