@@ -194,7 +194,7 @@ void power_mgmt_pause() {
     vTaskSuspend(hTask);
     display->set_power(true);
 #if HAS(VARYING_BRIGHTNESS)
-    display->set_bright(prefs_get_int(PREFS_KEY_BRIGHTNESS_MODE) != BRIGHTNESS_AUTOMATIC);
+    display->set_bright(true);
 #endif
     display->set_show(true);
     beeper->set_channel_state(CHANNEL_AMBIANCE, true);

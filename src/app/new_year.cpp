@@ -6,6 +6,7 @@
 #include <fonts.h>
 #include <Arduino.h>
 #include <algorithm>
+#include <service/power_management.h>
 
 static char LOG_TAG[] = "APL_NY";
 const unsigned bg_left_margin = 28;
@@ -98,6 +99,7 @@ void NewYearAppShim::prepare() {
     Composite::prepare();
     start_time = xTaskGetTickCount();
     phase = INTRO;
+    power_mgmt_pause();
     sequencer->play_sequence(&abba);
 }
 
@@ -166,4 +168,9 @@ void NewYearAppShim::step() {
             }
             break;
     }
+}
+
+void NewYearAppShim::cleanup() {
+    Composite::cleanup();
+    power_mgmt_resume();
 }
