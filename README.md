@@ -139,6 +139,7 @@ You can also read the quest I went through trying to get it to run "in real time
 * [Ennio Morricone - My Name Is Nobody](https://www.youtube.com/watch?v=srSpyXwz-MQ): [MIDI](helper/chimes/mynameisnobody.mid)
 * [PPK - ResuRection (ППК - Воскрешение)](https://www.youtube.com/watch?v=KvOR2E_hZsw): [MIDI](helper/chimes/ppk.mid)
 * [Owl City - Fireflies](https://www.youtube.com/watch?v=psuRGfAaju4): [MIDI](helper/chimes/fireflies.mid)
+* [Ado - Odo](https://www.youtube.com/watch?v=YnSW8ian29w): [MIDI](helper/chimes/odo.mid)
 
 ## Creating your own melodies
 
