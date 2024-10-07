@@ -568,6 +568,7 @@ void action() {
         save_string(PREFS_KEY_TIMESERVER);
         save_string(PREFS_KEY_TIMEZONE);
         save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);
+        save_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600);

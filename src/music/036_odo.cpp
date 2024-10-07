@@ -2,8 +2,8 @@
 extern "C" const POMFHeader POMF_HEAD = {
     POMF_MAGIC_FILE,
     POMF_CURVER,
-    "Ado/Giga/TeddyLoid - Odo",
     "Odo",
+    "Ado/Giga/TeddyLoid - Odo",
 };
 
 extern "C" const melody_item_t POMF_TUNE[] = {

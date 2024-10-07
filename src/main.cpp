@@ -134,6 +134,7 @@ void bringup_temp_sensor() {
     if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("T sens err");
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+        return;
     } else {
         con->print("T sensor OK");
     }

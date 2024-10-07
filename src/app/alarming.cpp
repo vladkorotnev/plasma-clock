@@ -252,7 +252,7 @@ void app_alarming_process() {
         break;
 
         case SNOOZE_HOLD_COUNTDOWN:
-            if(!hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN) && snooze_hold_remain > 0) {
+            if(!hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN | KEY_HEADPAT) && snooze_hold_remain > 0) {
                 state = HINTING_SNOOZE; // fail to hold
                 framecount = 0;
             } else if(snooze_hold_remain == 0) {
