@@ -287,6 +287,7 @@ static void build() {
         GP.LABEL("Display language (not in WebUI):");
         GP.SELECT(PREFS_KEY_DISP_LANGUAGE, "English,Русский", prefs_get_int(PREFS_KEY_DISP_LANGUAGE));
         GP.HR();
+#if HAS(VARYING_BRIGHTNESS)
         GP.LABEL("Display brightness:");
         GP.SELECT(PREFS_KEY_BRIGHTNESS_MODE,
         "Dim,Bright"
@@ -295,6 +296,7 @@ static void build() {
 #endif
         , prefs_get_int(PREFS_KEY_BRIGHTNESS_MODE));
         GP.HR();
+#endif
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
         GP.BREAK();
         render_int("Show next alarm countdown for [s]:", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS);
@@ -328,6 +330,8 @@ static void build() {
         GP.SELECT(PREFS_KEY_DISP_SCROLL_SPEED, "Slow,Medium,Fast,Sonic", prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED));
         GP.HR();
         render_bool("Use Fahrenheit:", PREFS_KEY_WEATHER_USE_FAHRENHEIT);
+        GP.HR();
+        render_bool("Keypress beep:", PREFS_KEY_BUTTON_BEEP);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -583,6 +587,7 @@ void action() {
         save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
         save_int(PREFS_KEY_BRIGHTNESS_MODE, 0, BRIGHTNESS_MAX_INVALID - 1);
         save_bool(PREFS_KEY_WEATHER_USE_FAHRENHEIT);
+        save_bool(PREFS_KEY_BUTTON_BEEP);
         save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);

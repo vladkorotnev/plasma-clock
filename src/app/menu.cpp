@@ -177,6 +177,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
     ));
 #endif
     display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Turn display off after (s)"), PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000, 1, normalActivationFunction));
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("Keypress beep"), PREFS_KEY_BUTTON_BEEP, [b](bool newValue) {
+        hid_set_key_beeper(newValue ? b : nullptr);
+    }));
     display_menu->add_view(new MenuBooleanSettingView(localized_string("Use Fahrenheit for temperature"), PREFS_KEY_WEATHER_USE_FAHRENHEIT));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Transition"), 
@@ -205,9 +208,11 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
         normalActivationFunction
     ));
 
+#if HAS(TEMP_SENSOR)
     static ListView * calibration_menu = new ListView();
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (\370C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Humidity"), PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
+#endif
 
     static ListView * system_info = new ListView();
     system_info->add_view(new MenuInfoItemView(localized_string("OS Type"), PRODUCT_NAME));
@@ -290,7 +295,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
     static ListView * settings_menu = new ListView();
     settings_menu->add_view(new MenuActionItemView(localized_string("Clock"), [this](){ push_submenu(clock_menu); }, &clock_icns));
     settings_menu->add_view(new MenuActionItemView(localized_string("Display"), [this](){ push_submenu(display_menu); }, &display_icns));
+#if HAS(TEMP_SENSOR)
     settings_menu->add_view(new MenuActionItemView(localized_string("Offsets"), [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
+#endif
     settings_menu->add_view(new MenuActionItemView(localized_string("Status"), [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));
     settings_menu->add_view(new MenuInfoItemView(localized_string("Notice"), localized_string("FULL_SETTINGS_NOTICE")));
     settings_menu->add_view(new MenuActionItemView(localized_string("Save & Restart"), [this](){

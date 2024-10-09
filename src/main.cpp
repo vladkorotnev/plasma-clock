@@ -193,15 +193,17 @@ void bringup_hid() {
         con->print("TP init err");
         beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
     }
-    // No beeper on non-touch because it will be annoying with physical buttons
-    hid_set_key_beeper(beepola);
     ESP_LOGI(LOG_TAG, "Touchpad ready");
 #endif
 #if HAS(KEYPAD)
     keypad_start();
     ESP_LOGI(LOG_TAG, "Keypad ready");
 #endif
+    if(prefs_get_bool(PREFS_KEY_BUTTON_BEEP)) {
+        hid_set_key_beeper(beepola);
+    }
 }
+#include <esp_phy_init.h>
 
 static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {

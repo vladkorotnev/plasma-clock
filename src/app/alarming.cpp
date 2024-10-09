@@ -219,8 +219,8 @@ void app_alarming_process() {
             {
                 if(hid_test_key_any(KEY_LEFT | KEY_UP | KEY_DOWN) && snooze_minutes > 0) {
                     arrows->left = true;
-                    arrows->top = true;
-                    arrows->bottom = true;
+                    arrows->top = false;
+                    arrows->bottom = false;
                     arrows->right = false;
                     state = SNOOZE_HOLD_COUNTDOWN;
                     return;
@@ -235,7 +235,7 @@ void app_alarming_process() {
                 }
                 else if(hid_test_key_state(KEY_HEADPAT)) {
                     arrows->left = false;
-                    arrows->top = false;
+                    arrows->top = true;
                     arrows->bottom = false;
                     arrows->right = false;
                     state = (snooze_minutes > 0) ? SNOOZE_HOLD_COUNTDOWN : STOP_HOLD_COUNTDOWN;

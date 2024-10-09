@@ -7,7 +7,7 @@
 #include <esp_err.h>
 
 #ifndef WS0010_BFI_DIMMER_DURATION_US
-#define WS0010_BFI_DIMMER_DURATION_US 6000 //<- experimentally found value for roughly 50% brightness @ 3V3 supply
+#define WS0010_BFI_DIMMER_DURATION_US 6600 //<- experimentally found value for roughly 50% brightness @ 5v supply
 #endif
 
 static char LOG_TAG[] = "Winstar0010";
@@ -129,7 +129,7 @@ void Ws0010OledDriver::set_show(bool show) {
     set_is_command(true);
     set_databus(0b00001000 | (show ? 0b111 : 0)); // cursor and blink always off
     pulse_clock();
-    delayMicroseconds(10);
+    delayMicroseconds(5);
     taskEXIT_CRITICAL(&_spinlock);
 }
 

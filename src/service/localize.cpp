@@ -175,6 +175,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
     {"FPS counter", "Счётчик кадров в секунду"},
     {"Weather effects", "Эффекты погоды"},
+    {"Keypress beep", "Звук клавиш"},
 
     {"WiFi signal", "Уровень сигнала WiFi"},
     {"Disconnected", "Когда нет связи"},
@@ -225,7 +226,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Restarting...", "Перезагрузка..."},
 };
 
-const char * localized_string(const std::string key, display_language_t l) {
+const char * localized_string(const char* key, display_language_t l) {
     const std::map<const std::string, const char*> * lang = nullptr;
     switch(l) {
         case DSPL_LANG_EN:
@@ -239,7 +240,7 @@ const char * localized_string(const std::string key, display_language_t l) {
     if(lang->count(key)) {
         return lang->at(key);
     } else {
-        return key.c_str();
+        return key;
     }
 }
 

@@ -26,9 +26,17 @@ private:
 
 class MenuBooleanSettingView: public MenuBooleanSelectorView {
 public:
-    MenuBooleanSettingView(const char * title, prefs_key_t prefs_key, key_id_t button = KEY_RIGHT) :
+    MenuBooleanSettingView(const char * title, prefs_key_t prefs_key, std::function<void(bool)> onAfterChange = [](bool){}, key_id_t button = KEY_RIGHT) :
         key(prefs_key),
-        MenuBooleanSelectorView(title, prefs_get_bool(prefs_key), [this](bool value) { prefs_set_bool(key, value); }, button)
+        MenuBooleanSelectorView(
+            title, 
+            prefs_get_bool(prefs_key), 
+            [this, onAfterChange](bool value) { 
+                prefs_set_bool(key, value);
+                onAfterChange(value);
+            }, 
+            button
+        )
     {
     }
 

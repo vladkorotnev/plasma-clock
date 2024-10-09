@@ -11,8 +11,8 @@ class AppShimMenu: public ProtoShimNavMenu {
 public:
     AppShimMenu(Beeper*, NewSequencer*, Yukkuri*);
 
-    void prepare();
-    void step();
+    void prepare() override;
+    void step() override;
 
     void pop_renderable(transition_type_t = TRANSITION_SLIDE_HORIZONTAL_RIGHT);
 

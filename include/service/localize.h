@@ -15,7 +15,7 @@ typedef enum spoken_language {
 } spoken_language_t;
 
 display_language_t active_display_language();
-const char * localized_string(const std::string key, display_language_t lang = active_display_language());
+const char * localized_string(const char* key, display_language_t lang = active_display_language());
 const char * day_letters();
 
 spoken_language_t active_tts_language();
