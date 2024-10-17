@@ -4,7 +4,7 @@
 #include <esp32-hal-log.h>
 #include <unordered_set>
 
-const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(50);
+const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(16);
 const TickType_t KEYHOLD_THRESHOLD_TIME = pdMS_TO_TICKS(1000);
 const TickType_t KEYHOLD_REPETITION_TIME = pdMS_TO_TICKS(500);
 const TickType_t KEYHOLD_REPETITION_SPEEDUP_TIME = pdMS_TO_TICKS(3000);
@@ -14,6 +14,7 @@ static std::unordered_set<key_bitmask_t> pressed_keycombos = {};
 static TickType_t keypress_started_at[KEY_MAX_INVALID] = { 0 };
 static TickType_t keypress_repeated_at[KEY_MAX_INVALID] = { 0 };
 static Beeper * beepola = nullptr;
+static TimerSensor * hid_state_sensor = nullptr;
 
 void hid_set_key_beeper(Beeper* b) {
     beepola = b;
@@ -65,6 +66,7 @@ void hid_set_key_state(key_id_t key, bool state) {
         keypress_started_at[key] = xTaskGetTickCount();
         keypress_repeated_at[key] = xTaskGetTickCount();
         active_keys |= KEY_ID_TO_BIT(key);
+        if(hid_state_sensor) hid_state_sensor->trigger();
     } else if(!state && (active_keys & KEY_ID_TO_BIT(key)) != 0) {
         active_keys &= ~KEY_ID_TO_BIT(key);
     }
@@ -110,4 +112,13 @@ key_state_t hid_test_key_state_repetition(key_id_t key) {
             break;
         default: return KEYSTATE_RELEASED;
     }
+}
+
+
+PoolableSensor * hid_get_state_sensor() {
+    if(hid_state_sensor == nullptr) {
+        hid_state_sensor = new TimerSensor(pdMS_TO_TICKS(3000));
+    }
+
+    return hid_state_sensor;
 }

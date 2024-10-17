@@ -10,7 +10,6 @@
 #include <sensor/sensors.h>
 #include <input/touch_plane.h>
 #include <input/keypad.h>
-#include <input/hid_sensor.h>
 #include <sound/yukkuri.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -202,8 +201,8 @@ void bringup_hid() {
     if(prefs_get_bool(PREFS_KEY_BUTTON_BEEP)) {
         hid_set_key_beeper(beepola);
     }
+    sensors->add(VIRTSENSOR_ID_HID_STARTLED, hid_get_state_sensor(), pdMS_TO_TICKS(100));
 }
-#include <esp_phy_init.h>
 
 static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {
@@ -246,7 +245,6 @@ void boot_task(void*) {
     ESP_LOGI(LOG_TAG, "Creating sensor pool");
 
     sensors->add(VIRTSENSOR_ID_WIRELESS_RSSI, new RssiSensor(), pdMS_TO_TICKS(500));
-    sensors->add(VIRTSENSOR_ID_HID_STARTLED, new HidActivitySensor(), pdMS_TO_TICKS(125));
     bringup_light_sensor();
     bringup_motion_sensor();
     bringup_temp_sensor();

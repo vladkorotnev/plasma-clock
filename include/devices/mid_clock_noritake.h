@@ -6,14 +6,17 @@
 // Clock made around the PCB designed in 2024/09 labeled
 // 'uPIS-OS Devkit / Genjitsu Labs 2024'
 // 'microPIS-OS CPU BD V1.0 2024-09-16'
+//
+// !! Using the Noritake Itron GU112X16G-7000 display
 
-#define HAS_OUTPUT_WS0010
+#define HAS_OUTPUT_GU7000
 #define HAS_TEMP_SENSOR
 #define HAS_KEYPAD
 #define HAS_SERIAL_MIDI
+#define HAS_VARYING_BRIGHTNESS
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
-#define PRODUCT_NAME "uPIS-OS"
+#define PRODUCT_NAME "PIS-OS"
 #define PRODUCT_VERSION "4"
 
 // ---- Connection to beeper ----
@@ -25,7 +28,7 @@ const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
 const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
 
 // ---- Connection to display ----
-const gpio_num_t HWCONF_WS0010_DATABUS_GPIOS[] = {
+const gpio_num_t HWCONF_GU7000_DATABUS_GPIOS[] = {
     GPIO_NUM_5,  
     GPIO_NUM_0,  
     GPIO_NUM_23,
@@ -35,10 +38,10 @@ const gpio_num_t HWCONF_WS0010_DATABUS_GPIOS[] = {
     GPIO_NUM_4, 
     GPIO_NUM_21 
 };
-const gpio_num_t HWCONF_WS0010_RS_GPIO = GPIO_NUM_19; 
-const gpio_num_t HWCONF_WS0010_EN_GPIO = GPIO_NUM_18;
+const gpio_num_t HWCONF_GU7000_WR_GPIO = GPIO_NUM_18;
+const gpio_num_t HWCONF_GU7000_BUSY_GPIO = GPIO_NUM_19;
 
-#define HWCONF_DISPLAY_WIDTH_PX 100
+#define HWCONF_DISPLAY_WIDTH_PX 112
 #define HWCONF_DISPLAY_HEIGHT_PX 16
 
 // ---- Connection of buttons ----

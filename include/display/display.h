@@ -5,6 +5,8 @@
 #include <display/md_plasma.h>
 #elif HAS(OUTPUT_WS0010)
 #include <display/ws0010.h>
+#elif HAS(OUTPUT_GU7000)
+#include <display/gu7000.h>
 #endif
 
 #if HAS(OUTPUT_MD_PLASMA)
@@ -22,6 +24,12 @@ static Ws0010OledDriver display_driver(
     HWCONF_WS0010_RS_GPIO,
     HWCONF_WS0010_EN_GPIO
 );
+#elif HAS(OUTPUT_GU7000)
+static ItronGU7000Driver display_driver(
+    HWCONF_GU7000_DATABUS_GPIOS,
+    HWCONF_GU7000_WR_GPIO,
+    HWCONF_GU7000_BUSY_GPIO
+);
 #else
-#error Output type not selected
+#error Display module type not selected
 #endif

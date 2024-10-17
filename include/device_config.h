@@ -41,6 +41,10 @@
 #include <devices/mid_clock.h>
 #endif
 
+#ifdef DEVICE_MINIPISOS_VFD
+#include <devices/mid_clock_noritake.h>
+#endif
+
 // ---- DEPENDENCY RULES
 #if !HAS(BLUETOOTH_LE)
     #if HAS(SWITCHBOT_METER_INTEGRATION)
