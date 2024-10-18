@@ -411,7 +411,7 @@ void app_idle_process() {
         push_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
     }
 #if HAS(AQUESTALK)
-    else if(hid_test_key_state(KEY_HEADPAT) == KEYSTATE_HIT && !yukkuri->is_speaking()) {
+    else if(hid_test_key_state(KEY_HEADPAT) == KEYSTATE_HIT && !yukkuri->is_speaking() && prefs_get_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT)) {
         tk_date_t d = get_current_date();
         YukkuriUtterance dateUtterance = localized_utterance_for_date(&d);
         yukkuri->speak(dateUtterance);

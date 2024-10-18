@@ -94,7 +94,8 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
         y->speak(test_utterance);
     };
 
-    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak every hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak on headpat"), PREFS_KEY_VOICE_SPEAK_ON_HEADPAT));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_VOICE_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction, yukkuriTestFunction));

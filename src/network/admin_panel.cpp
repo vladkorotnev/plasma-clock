@@ -347,6 +347,7 @@ static void build() {
         GP.HR();
         render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
         render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
+        render_bool("Speak time on headpat", PREFS_KEY_VOICE_SPEAK_ON_HEADPAT);
         render_bool("24-hour announcements:", PREFS_KEY_VOICE_24_HRS);
         render_bool("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE);
     GP.SPOILER_END();
@@ -614,6 +615,7 @@ void action() {
         save_int(PREFS_KEY_VOICE_SPEED, 1, 200);
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR);
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE);
+        save_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT);
         save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
         save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
         save_int(PREFS_KEY_VOICE_MODE_RESAMPLING, 0, 1);

@@ -109,6 +109,7 @@ static constexpr prefs_key_t PREFS_KEY_VOICE_SPEED = "v_spd";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_HOUR = "v_hrs";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_DATE = "v_date";
 static constexpr prefs_key_t PREFS_KEY_VOICE_MODE_RESAMPLING = "v_samp";
+static constexpr prefs_key_t PREFS_KEY_VOICE_SPEAK_ON_HEADPAT = "v_headp";
 
 static constexpr prefs_key_t PREFS_KEY_DISP_LANGUAGE = "d_lang";
 static constexpr prefs_key_t PREFS_KEY_TTS_LANGUAGE = "tts_lang";

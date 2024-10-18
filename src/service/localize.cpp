@@ -123,7 +123,8 @@ static const std::map<const std::string, const char*> russian = {
     {"Other chimes", "Остальные"},
     {"Chime from", "Первый час"},
     {"Chime until", "Последний час"},
-    {"Speak hour", "Проговаривать время"},
+    {"Speak every hour", "Проговаривать время каждый час"},
+    {"Speak on headpat", "Сказать время при нажатии на верхнюю кнопку"},
     {"Speak date on first chime", "Проговаривать дату в первый час"},
     {"Voice speed", "Скорость голоса"},
 

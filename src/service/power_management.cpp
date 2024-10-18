@@ -49,6 +49,7 @@ static void wake_up(TickType_t now) {
     #if HAS(VARYING_BRIGHTNESS)
         display->set_bright(isBright);
     #endif
+        startled_sensor->trigger();
     }
 
     beeper->set_channel_state(CHANNEL_AMBIANCE, true);
