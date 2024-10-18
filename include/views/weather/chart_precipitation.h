@@ -46,7 +46,7 @@ private:
         cursor_index = -1;
         tk_time_of_day_t now = get_current_time_coarse();
         int p = 0;
-        for(int i = 0; i < 24; i++) {
+        for(int i = 0; i < HWCONF_DISPLAY_WIDTH_PX/4; i++) {
             const hourly_weather_t * f = weather_get_hourly(i);
             if(f != nullptr) {
                 for(int x = 0; x < 4; x++) {

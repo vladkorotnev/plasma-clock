@@ -14,7 +14,7 @@
 #define COMPOSABLE_NO_EVENODD
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
-#define PRODUCT_NAME "PIS-OS"
+#define PRODUCT_NAME "wPIS-OS"
 #define PRODUCT_VERSION "4"
 
 // ---- Connection to beeper ----
@@ -24,9 +24,6 @@ const uint8_t HWCONF_BEEPER_PWM_CHANNEL = 0;
 // ---- Connection to temperature sensor ----
 const gpio_num_t HWCONF_I2C_SDA_GPIO = GPIO_NUM_26;
 const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
-
-// ---- Connection to light sensors ----
-const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
 
 // ---- Connection to display ----
 const gpio_num_t HWCONF_GU7000_DATABUS_GPIOS[] = {
@@ -42,7 +39,10 @@ const gpio_num_t HWCONF_GU7000_DATABUS_GPIOS[] = {
 const gpio_num_t HWCONF_GU7000_WR_GPIO = GPIO_NUM_18;
 const gpio_num_t HWCONF_GU7000_BUSY_GPIO = GPIO_NUM_19;
 
-#define HWCONF_DISPLAY_WIDTH_PX 112
+// ---- Connection to light sensors ----
+const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
+
+#define HWCONF_DISPLAY_WIDTH_PX 140
 #define HWCONF_DISPLAY_HEIGHT_PX 16
 
 // ---- Connection of buttons ----

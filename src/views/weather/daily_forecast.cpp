@@ -78,7 +78,7 @@ DailyForecastView::DailyForecastView(bool ctl) {
 
     rightView = new Column();
     rightView->width = 48;
-    rightView->x_offset = rightView->width + 4;
+    rightView->x_offset = std::max(rightView->width + 4, HWCONF_DISPLAY_WIDTH_PX/2);
 
     add_composable(leftView);
     add_composable(rightView);

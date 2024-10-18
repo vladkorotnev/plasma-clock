@@ -7,6 +7,7 @@
 #include <esp_err.h>
 
 static char LOG_TAG[] = "GU7000";
+static portMUX_TYPE _spinlock = portMUX_INITIALIZER_UNLOCKED;
 
 ItronGU7000Driver::ItronGU7000Driver(
     const gpio_num_t databus[8],
@@ -83,11 +84,15 @@ void ItronGU7000Driver::pulse_clock() {
 }
 
 void ItronGU7000Driver::write_string(const char * s) {
+    taskENTER_CRITICAL(&_spinlock);
+
     int len = strlen(s);
     for(int i = 0; i < len; i++) {
         set_databus(s[i]);
         pulse_clock();
     }
+
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void ItronGU7000Driver::reset() {
@@ -119,14 +124,20 @@ void ItronGU7000Driver::set_show(bool show) {
 }
 
 void ItronGU7000Driver::set_power(bool power) {
+    taskENTER_CRITICAL(&_spinlock);
+
     write_string("\x1F\x28\x61\x40");
     set_databus(power ? 0x1 : 0x0);
     pulse_clock();
+
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void ItronGU7000Driver::clear() {
+    taskENTER_CRITICAL(&_spinlock);
     set_databus(0x0c);
     pulse_clock();
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 inline uint8_t flipByte(uint8_t c){
@@ -140,6 +151,8 @@ inline uint8_t flipByte(uint8_t c){
 }
 
 void ItronGU7000Driver::write_fanta(const uint8_t * strides, size_t count) {
+    taskENTER_CRITICAL(&_spinlock);
+
     write_string("\x1F\x24"); // cursor move to 0
     set_databus(0);
     pulse_clock(); pulse_clock(); pulse_clock(); pulse_clock();
@@ -161,12 +174,17 @@ void ItronGU7000Driver::write_fanta(const uint8_t * strides, size_t count) {
         pulse_clock();
     }
 
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void ItronGU7000Driver::set_bright(bool bright) {
+    taskENTER_CRITICAL(&_spinlock);
+    
     char brightness = bright ? 6 : 2; // range 1..8, 25% and 75% in this case
     write_string("\x1F\x58");
     set_databus(brightness); pulse_clock();
+
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 #endif
