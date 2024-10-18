@@ -92,7 +92,11 @@ const char * NetworkManager::network_name() {
 
 bool NetworkManager::is_up() {
     return (WiFi.getMode() == WIFI_STA && WiFi.status() == WL_CONNECTED && has_ip)
-        || (WiFi.getMode() == WIFI_AP && (WiFi.getStatusBits() & AP_STARTED_BIT != 0));
+        || is_softAP();
+}
+
+bool NetworkManager::is_softAP() {
+    return (WiFi.getMode() == WIFI_AP && (WiFi.getStatusBits() & AP_STARTED_BIT != 0));
 }
 
 String NetworkManager::current_ip() {

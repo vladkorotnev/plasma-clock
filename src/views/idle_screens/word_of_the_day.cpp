@@ -57,7 +57,6 @@ WordOfTheDayView::WordOfTheDayView() {
     top_line->x_offset = animation->width;
     top_line->set_y_position(0);
     top_line->set_string(word_buffer);
-    top_line->stopped = true;
     add_composable(top_line);
 
     bottom_line = new StringScroll(font);
@@ -81,6 +80,14 @@ void WordOfTheDayView::prepare() {
         ESP_LOGI(LOG_TAG, "New word of the day");
         top_line->set_string(word_buffer);
         bottom_line->set_string(definition_buffer);
+
+        int width = std::max(top_line->string_width, bottom_line->string_width);
+        if(top_line->string_width > HWCONF_DISPLAY_WIDTH_PX - top_line->x_offset) {
+            top_line->string_width = width;
+        }
+        if(bottom_line->string_width > HWCONF_DISPLAY_WIDTH_PX - bottom_line->x_offset) {
+            bottom_line->string_width = width;
+        }
     }
 
     Screen::prepare();
