@@ -60,6 +60,7 @@ static OTAFVUManager * ota;
 static Beeper * beepola;
 static NewSequencer * seq;
 static Yukkuri * yukkuri = nullptr;
+static AmbientLightSensor * als = nullptr;
 
 void change_state(device_state_t to, transition_type_t transition) {
     if(to == STATE_OTAFVU) {
@@ -111,7 +112,8 @@ void bringup_sound() {
 
 void bringup_light_sensor() {
 #if HAS(LIGHT_SENSOR)
-    sensors->add(SENSOR_ID_AMBIENT_LIGHT, new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO), pdMS_TO_TICKS(250));
+    als = new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO);
+    sensors->add(SENSOR_ID_AMBIENT_LIGHT, als, pdMS_TO_TICKS(250));
     con->print("L sensor OK");
     ESP_LOGI(LOG_TAG, "Light sensor ready");
 #endif
@@ -265,7 +267,7 @@ void boot_task(void*) {
     ESP_LOGI(LOG_TAG, "Constructing desktop");
     appHost->add_view(new AppShimIdle(sensors, beepola, seq, yukkuri), STATE_IDLE);
     appHost->add_view(new AppShimAlarming(seq), STATE_ALARMING);
-    appHost->add_view(new AppShimMenu(beepola, seq, yukkuri), STATE_MENU);
+    appHost->add_view(new AppShimMenu(beepola, seq, yukkuri, als), STATE_MENU);
     appHost->add_view(new AppShimAlarmEditor(beepola, seq), STATE_ALARM_EDITOR);
     appHost->add_view(new AppShimTimerEditor(beepola, seq), STATE_TIMER_EDITOR);
     appHost->add_view(new AppShimStopwatch(beepola), STATE_STOPWATCH);

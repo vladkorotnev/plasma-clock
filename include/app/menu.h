@@ -6,10 +6,11 @@
 #include <sound/sequencer.h>
 #include <sound/yukkuri.h>
 #include <sensor/sensor.h>
+#include <sensor/light.h>
 
 class AppShimMenu: public ProtoShimNavMenu {
 public:
-    AppShimMenu(Beeper*, NewSequencer*, Yukkuri*);
+    AppShimMenu(Beeper*, NewSequencer*, Yukkuri*, AmbientLightSensor*);
 
     void prepare() override;
     void step() override;

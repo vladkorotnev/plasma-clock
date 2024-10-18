@@ -33,7 +33,7 @@ public:
     void prepare() override {
         if(buf[0] == 0) {
             // Having this as a static item view causes a deadlock on boot, so we need to set the value in runtime
-            snprintf(buf, 23, "%.02dK (%.02dK %s)", LittleFS.totalBytes() / 1024, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024, localized_string("free"));
+            snprintf(buf, 31, "%.02dK (%.02dK %s)", LittleFS.totalBytes() / 1024, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024, localized_string("free"));
             bottom_label->set_string(buf);
         }
         MenuInfoItemView::prepare();
@@ -43,7 +43,75 @@ private:
     char buf[32] = { 0 };
 };
 
-AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {
+#if HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)
+class LightSensorCalibrationView: public Composite {
+public:
+    LightSensorCalibrationView(const char * title, prefs_key_t key, AmbientLightSensor * lightSensor) {
+        top_label = new StringScroll(&keyrus0808_font, title);
+        top_label->start_at_visible = true;
+        top_label->holdoff = 100;
+        add_composable(top_label);
+        sensor = lightSensor;
+        prefs_key = key;
+        wants_clear_surface = true;
+    }
+
+    void prepare() override {
+        set_value = prefs_get_int(prefs_key);
+        Composite::prepare();
+    }
+
+    void render(FantaManipulator *fb) override {
+        Composite::render(fb);
+
+        int steps_per_division = (max_value - min_value) / (fb->get_width() - 3);
+        int set_val_px = (set_value - min_value) / steps_per_division;
+        int cur_val_px = (cur_value - min_value) / steps_per_division;
+        
+        // Backdrop
+        fb->rect(0, 9, fb->get_width() - 2, 14, false);
+
+        // Filled line for the pointer
+        fb->line(cur_val_px + 1, 9, cur_val_px + 1, 14);
+
+        // Two dots on the outline for the current setting
+        fb->plot_pixel(set_val_px + 1, 8, true);
+        fb->plot_pixel(set_val_px + 1, 15, true);
+        // and a blinking line
+        if(cursor_visible) {
+            fb->line(set_val_px + 1, 9, set_val_px + 1, 14);
+        }
+    }
+
+    void step() {
+        cur_value = sensor->read();
+
+        if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
+            set_value = cur_value;
+            prefs_set_int(prefs_key, set_value);
+        }
+
+        cursor_counter ++;
+        if(cursor_counter == 30) {
+            cursor_visible ^= 1;
+            cursor_counter = 0;
+        }
+    }
+
+private:
+    AmbientLightSensor * sensor = nullptr;
+    StringScroll * top_label = nullptr;
+    prefs_key_t prefs_key = nullptr;
+    int cur_value = 0;
+    int min_value = 0;
+    int max_value = 4096;
+    int set_value = 0;
+    bool cursor_visible = false;
+    uint8_t cursor_counter = 0;
+};
+#endif
+
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSensor *als): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     yukkuri = y;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
@@ -209,10 +277,20 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
         normalActivationFunction
     ));
 
-#if HAS(TEMP_SENSOR)
+#if (HAS(TEMP_SENSOR) || (HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)))
     static ListView * calibration_menu = new ListView();
+    #if HAS(TEMP_SENSOR)
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (\370C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Humidity"), PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
+    #endif
+    #if HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)
+    calibration_menu->add_view(new LightSensorCalibrationView(
+        localized_string("Display dimming threshold"), PREFS_KEY_LIGHTNESS_THRESH_DOWN, als
+    ));
+    calibration_menu->add_view(new LightSensorCalibrationView(
+        localized_string("Display brightening threshold"), PREFS_KEY_LIGHTNESS_THRESH_UP, als
+    ));
+    #endif
 #endif
 
     static ListView * system_info = new ListView();

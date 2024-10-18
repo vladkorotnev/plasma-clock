@@ -185,6 +185,8 @@ static const std::map<const std::string, const char*> russian = {
 
     {"Temperature (\370C)", "Температура (\370C)"},
     {"Humidity", "Влажность"},
+    {"Display dimming threshold", "Нижний порог освещённости"},
+    {"Display brightening threshold", "Верхний порог освещённости"},
 
     {"OS Type", "Операционная система"},
     {"OS Version", "Версия системы"},
