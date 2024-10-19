@@ -374,7 +374,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     static ListView * settings_menu = new ListView();
     settings_menu->add_view(new MenuActionItemView(localized_string("Clock"), [this](){ push_submenu(clock_menu); }, &clock_icns));
     settings_menu->add_view(new MenuActionItemView(localized_string("Display"), [this](){ push_submenu(display_menu); }, &display_icns));
-#if HAS(TEMP_SENSOR)
+#if (HAS(TEMP_SENSOR) || (HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)))
     settings_menu->add_view(new MenuActionItemView(localized_string("Offsets"), [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
 #endif
     settings_menu->add_view(new MenuActionItemView(localized_string("Status"), [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));

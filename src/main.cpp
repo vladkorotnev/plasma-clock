@@ -121,7 +121,7 @@ void bringup_light_sensor() {
 
 void bringup_motion_sensor() {
 #if HAS(MOTION_SENSOR)
-    sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(1000));
+    sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(250));
     con->print("M sensor OK");
     ESP_LOGI(LOG_TAG, "Motion sensor ready");
 #endif

@@ -109,6 +109,7 @@ void ItronGU7000Driver::reset() {
     write_string("\x1F\x43"); set_databus(0); pulse_clock();
 
     clear(); 
+    write_string("\x1F\x58\x01");
     write_string("uPIS-OS Noritake GU7000 Init");
 
     vTaskDelay(pdMS_TO_TICKS(1000));
