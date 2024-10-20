@@ -140,6 +140,7 @@ You can also read the quest I went through trying to get it to run "in real time
 * [PPK - ResuRection (ППК - Воскрешение)](https://www.youtube.com/watch?v=KvOR2E_hZsw): [MIDI](helper/chimes/ppk.mid)
 * [Owl City - Fireflies](https://www.youtube.com/watch?v=psuRGfAaju4): [MIDI](helper/chimes/fireflies.mid)
 * [Ado - Odo](https://www.youtube.com/watch?v=YnSW8ian29w): [MIDI](helper/chimes/odo.mid)
+* [ZUN - Legend of Hourai](https://www.youtube.com/watch?v=d2_tY7cl818): [MIDI](helper/chimes/hourai_sou1.mid) based on work by sou1
 
 ## Creating your own melodies
 
