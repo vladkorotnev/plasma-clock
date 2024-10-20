@@ -2,7 +2,7 @@ name: Build production version
 
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
 
 jobs:
   build-everything:
@@ -13,23 +13,33 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          submodules: recursive
       - name: Prepare environment
         uses: ./.github/actions/prepare_pio
+      - name: Download AquesTalk
+        run: |
+          wget https://www.a-quest.com/archive/package/aquestalk-esp32_0243.zip -O /tmp/aquestalk.zip
+          unzip /tmp/aquestalk.zip -d /tmp
+          mv /tmp/aquestalk-esp32/src/esp32/libaquestalk.a ./lib/nonfree-aquestalk/libaquestalk.a
+          mv /tmp/aquestalk-esp32/src/aquestalk.h ./lib/nonfree-aquestalk/aquestalk.h
+      - name: Create env file
+        run: cp ./.env.example ./.env
       - name: Build all targets
         run: pio run
         continue-on-error: true # TODO make this more graceful
       - name: Upload firmware images
         uses: actions/upload-artifact@v4
         with:
-          name: filesystem
           path: ./.pio/build/*/firmware.bin
+          name: firmwares.zip
           if-no-files-found: error
       - name: Delete WIP tunes
-        run: rm ./music/wip_*.pomf
+        run: rm ./data/music/wip_*.pomf
       - name: Create LittleFS image
         run: pio run --target buildfs --environment music-pomf
       - name: Upload filesystem image
         uses: actions/upload-artifact@v4
         with:
           path: ./.pio/build/music-pomf/littlefs.bin
+          name: filesystem.zip
           if-no-files-found: error

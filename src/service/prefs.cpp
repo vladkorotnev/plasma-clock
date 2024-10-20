@@ -35,6 +35,12 @@ inline void init_store_if_needed() {
                 prefs_set_int(PREFS_KEY_HOURLY_CHIME_MELODY, 2);
                 prefs_set_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT, true);
                 prefs_set_bool(PREFS_KEY_WEATHER_OVERLAY, true);
+                #ifdef WORDNIK_API_KEY
+                prefs_set_string(PREFS_KEY_WORDNIK_APIKEY, String(WORDNIK_API_KEY));
+                #endif
+                #ifdef WEATHER_API_KEY
+                prefs_set_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
+                #endif
 
                 prefs_set_bool(PREFS_KEY_INITIAL_SETTING_DONE, true);
             }
