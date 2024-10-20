@@ -1,0 +1,35 @@
+name: Build production version
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build-everything:
+    runs-on: ubuntu-latest
+    name: Build All Binaries
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Prepare environment
+        uses: ./.github/actions/prepare_pio
+      - name: Build all targets
+        run: pio run
+        continue-on-error: true # TODO make this more graceful
+      - name: Upload firmware images
+        uses: actions/upload-artifact@v4
+        with:
+          name: filesystem
+          path: ./.pio/build/*/firmware.bin
+          if-no-files-found: error
+      - name: Delete WIP tunes
+        run: rm ./music/wip_*.pomf
+      - name: Create LittleFS image
+        run: pio run --target buildfs --environment music-pomf
+      - name: Upload filesystem image
+        uses: actions/upload-artifact@v4
+        with:
+          path: ./.pio/build/music-pomf/littlefs.bin
+          if-no-files-found: error
