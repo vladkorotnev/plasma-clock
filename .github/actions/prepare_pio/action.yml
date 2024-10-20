@@ -1,0 +1,19 @@
+name: Prepare PIO environment
+
+on: [workflow_call]
+
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/pip
+          ~/.platformio/.cache
+        key: pisos-pio
+    - uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    - name: Install PlatformIO Core
+      shell: bash
+      run: pip install --upgrade platformio
