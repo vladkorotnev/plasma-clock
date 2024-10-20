@@ -23,6 +23,7 @@
 #include <views/idle_screens/word_of_the_day.h>
 #include <views/idle_screens/fb2k.h>
 #include <views/idle_screens/next_alarm.h>
+#include <views/idle_screens/softap.h>
 #include <views/overlays/signal_icon.h>
 #include <views/overlays/touch_arrows_ovl.h>
 #include <input/keys.h>
@@ -32,6 +33,7 @@ static char LOG_TAG[] = "APL_IDLE";
 
 typedef enum MainViewId: uint16_t {
     VIEW_CLOCK = 0,
+    VIEW_SOFTAP,
     VIEW_NEXT_ALARM,
 #if HAS(TEMP_SENSOR)
     VIEW_INDOOR_WEATHER,
@@ -54,8 +56,6 @@ typedef enum MainViewId: uint16_t {
 static int screen_times_ms[VIEW_MAX] = {0};
 
 int current_screen_time_ms = 0;
-
-static bool did_prepare = false;
 
 static Beeper * beepola;
 static NewSequencer * sequencer;
@@ -81,6 +81,7 @@ static IndoorView * indoorView;
 static WoSensorView * remoteWeatherView;
 #endif
 
+static SoftApInfoView * softApView;
 static CurrentWeatherView * weatherView;
 static DailyForecastView * forecastView;
 static WeatherPrecipitationChart * precipitationView;
@@ -110,7 +111,7 @@ void sound_tick_tock() {
     tk_time_of_day_t now = get_current_time_precise();
     if(now.millisecond >= tick_tock_offset_ms && !tick_tock) {
         if(!sequencer->is_sequencing() && (yukkuri == nullptr || !yukkuri->is_speaking())) {
-            beepola->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
+            beepola->beep(CHANNEL_AMBIANCE, 100, 10);
         }
         tick_tock = true;
     } else if (now.millisecond < tick_tock_offset_ms && tick_tock) {
@@ -251,10 +252,7 @@ void weather_overlay_update() {
     }
 }
 
-void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
-    if(did_prepare) return;
-
-    did_prepare = true;
+void app_idle_init(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
     beepola = b;
     sequencer = seq;
     sensors = s;
@@ -265,6 +263,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
 
     tick_tock_enable = prefs_get_bool(PREFS_KEY_TICKING_SOUND);
 
+    screen_times_ms[VIEW_SOFTAP] = 30000;
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
     screen_times_ms[VIEW_NEXT_ALARM] = prefs_get_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS) * 1000;
 #if HAS(TEMP_SENSOR)
@@ -284,16 +283,16 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
 
     bool has_at_least_one_screen = false;
     for(int i = 0; i < VIEW_MAX; i++) {
-        if(screen_times_ms[i] != 0) {
+        if(screen_times_ms[i] != 0 && i != VIEW_SOFTAP) {
             has_at_least_one_screen = true;
             break;
         }
     }
     if(!has_at_least_one_screen) {
-        screen_times_ms[VIEW_CLOCK] = 3600000;
+        screen_times_ms[VIEW_CLOCK] = 10000;
     }
 
-    current_screen_time_ms = screen_times_ms[VIEW_CLOCK];
+    current_screen_time_ms = screen_times_ms[0];
 
     clockView = new SimpleClock();
     rain = new RainOverlay(DisplayFramebuffer::width, DisplayFramebuffer::height);
@@ -306,6 +305,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
     pressureView = new WeatherPressureChart();
     fb2kView = new Fb2kView();
     nextAlarmView = new NextAlarmView();
+    softApView = new SoftApInfoView();
 
     touchArrows = new TouchArrowOverlay();
     touchArrows->bottom = true;
@@ -319,6 +319,7 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
 
     slideShow = new ViewMultiplexor();
     slideShow->add_view(thunderClock, VIEW_CLOCK);
+    slideShow->add_view(softApView, VIEW_SOFTAP);
     slideShow->add_view(nextAlarmView, VIEW_NEXT_ALARM);
 #if HAS(TEMP_SENSOR)
     indoorView = new IndoorView(sensors);
@@ -348,6 +349,10 @@ void app_idle_prepare(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts)
     mainView = rainyClock;
 
     mainView->prepare();
+}
+
+void app_idle_prepare() {
+    lastScreenSwitch = xTaskGetTickCount();
 }
 
 void update_screen_specific_time() {
@@ -412,7 +417,7 @@ void app_idle_process() {
         push_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
     }
 #if HAS(AQUESTALK)
-    else if(hid_test_key_state(KEY_HEADPAT) == KEYSTATE_HIT && !yukkuri->is_speaking()) {
+    else if(hid_test_key_state(KEY_HEADPAT) == KEYSTATE_HIT && !yukkuri->is_speaking() && prefs_get_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT)) {
         tk_date_t d = get_current_date();
         YukkuriUtterance dateUtterance = localized_utterance_for_date(&d);
         yukkuri->speak(dateUtterance);

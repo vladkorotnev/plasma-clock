@@ -19,6 +19,7 @@ public:
         night_temp->stopped = true;
         night_temp->set_y_position(8);
         night_temp->x_offset = 17;
+        night_temp->gray = true;
         
         date = new StringScroll(&fps_counter_font);
         date->render_mode = TEXT_OUTLINED | TEXT_NO_BACKGROUND;
@@ -77,7 +78,7 @@ DailyForecastView::DailyForecastView(bool ctl) {
 
     rightView = new Column();
     rightView->width = 48;
-    rightView->x_offset = rightView->width + 4;
+    rightView->x_offset = std::max(rightView->width + 4, HWCONF_DISPLAY_WIDTH_PX/2);
 
     add_composable(leftView);
     add_composable(rightView);

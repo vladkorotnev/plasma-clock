@@ -49,6 +49,7 @@ static void wake_up(TickType_t now) {
     #if HAS(VARYING_BRIGHTNESS)
         display->set_bright(isBright);
     #endif
+        startled_sensor->trigger();
     }
 
     beeper->set_channel_state(CHANNEL_AMBIANCE, true);
@@ -78,23 +79,43 @@ void PMTaskFunction( void * pvParameter )
         lightnessThreshUp = prefs_get_int(PREFS_KEY_LIGHTNESS_THRESH_UP);
         now = xTaskGetTickCount();
 
-        #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
-        // Adjust dimmer according to ambient light
-        sensor_info_t * light_info = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
-        if(light_info != nullptr) {
-            int current_lightness = light_info->last_result;
-            if(current_lightness > lightnessThreshUp && current_lightness > lastLightness && !isBright) {
-                ESP_LOGI(LOG_TAG, "Changing to bright mode");
-                isBright = true;
-                display->set_bright(true);
-            } 
-            else if(current_lightness < lightnessThreshDown && current_lightness < lastLightness && isBright) {
-                ESP_LOGI(LOG_TAG, "Changing to dim mode");
-                isBright = false;
+        #if HAS(VARYING_BRIGHTNESS)
+        switch(prefs_get_int(PREFS_KEY_BRIGHTNESS_MODE)) {
+            case BRIGHTNESS_FIXED_LOW:
+            if(isBright) {
                 display->set_bright(false);
+                isBright = false;
             }
+            break;
 
-            lastLightness = light_info->last_result;
+            case BRIGHTNESS_FIXED_HIGH:
+            if(!isBright) {
+                display->set_bright(true);
+                isBright = true;
+            }
+            break;
+
+            case BRIGHTNESS_AUTOMATIC:
+            {
+                // Adjust dimmer according to ambient light
+                sensor_info_t * light_info = sensors->get_info(SENSOR_ID_AMBIENT_LIGHT);
+                if(light_info != nullptr) {
+                    int current_lightness = light_info->last_result;
+                    if(current_lightness > lightnessThreshUp && current_lightness > lastLightness && !isBright) {
+                        ESP_LOGI(LOG_TAG, "Changing to bright mode");
+                        isBright = true;
+                        display->set_bright(true);
+                    } 
+                    else if(current_lightness < lightnessThreshDown && current_lightness < lastLightness && isBright) {
+                        ESP_LOGI(LOG_TAG, "Changing to dim mode");
+                        isBright = false;
+                        display->set_bright(false);
+                    }
+
+                    lastLightness = light_info->last_result;
+                }
+            }
+            break;
         }
         #endif
 
@@ -189,5 +210,7 @@ void power_mgmt_resume() {
     display->set_bright(isBright);
 #endif
     display->set_show(!isDisplayOff);
-    beeper->set_channel_state(CHANNEL_AMBIANCE, !isDisplayOff);
+    if(noSoundWhenOff) {
+        beeper->set_channel_state(CHANNEL_AMBIANCE, !isDisplayOff);
+    }
 }

@@ -140,8 +140,11 @@ public:
                 cursorPosition = (CursorPosition) (((int) cursorPosition) + 1);
             }
         }
+        else if(hid_test_key_state(KEY_HEADPAT) == KEYSTATE_HIT && !sequencer->is_sequencing()) {
+            start_stop();
+        }
 
-        if(hid_test_key_any() && sequencer && sequencer->is_sequencing()) { 
+        if(hid_test_key_any() && sequencer->is_sequencing()) { 
             sequencer->stop_sequence();
             secondView->sound = true;
             minuteView->sound = true;

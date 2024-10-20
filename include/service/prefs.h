@@ -16,7 +16,18 @@ typedef enum prefs_wifi_icon_disp {
 } prefs_wifi_icon_disp_t;
 static constexpr prefs_key_t PREFS_KEY_WIFI_ICON = "net_icon";
 
+typedef enum prefs_brightness_mode {
+    BRIGHTNESS_FIXED_LOW,
+    BRIGHTNESS_FIXED_HIGH,
+    BRIGHTNESS_AUTOMATIC,
+    BRIGHTNESS_MAX_INVALID
+} prefs_brightness_mode_t;
+static constexpr prefs_key_t PREFS_KEY_BRIGHTNESS_MODE = "disp_bri";
+
+static constexpr prefs_key_t PREFS_KEY_BUTTON_BEEP = "btn_beep";
+
 static constexpr prefs_key_t PREFS_KEY_BLINK_SEPARATORS = "blink_separator";
+static constexpr prefs_key_t PREFS_KEY_SHOW_SECONDS = "show_seconds";
 static constexpr prefs_key_t PREFS_KEY_TICKING_SOUND = "ticking_sound";
 static constexpr prefs_key_t PREFS_KEY_NO_SOUND_WHEN_OFF = "no_tick_off";
 
@@ -98,6 +109,7 @@ static constexpr prefs_key_t PREFS_KEY_VOICE_SPEED = "v_spd";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_HOUR = "v_hrs";
 static constexpr prefs_key_t PREFS_KEY_VOICE_ANNOUNCE_DATE = "v_date";
 static constexpr prefs_key_t PREFS_KEY_VOICE_MODE_RESAMPLING = "v_samp";
+static constexpr prefs_key_t PREFS_KEY_VOICE_SPEAK_ON_HEADPAT = "v_headp";
 
 static constexpr prefs_key_t PREFS_KEY_DISP_LANGUAGE = "d_lang";
 static constexpr prefs_key_t PREFS_KEY_TTS_LANGUAGE = "tts_lang";

@@ -1,4 +1,5 @@
 #pragma once
+#include <views/overlays/fireworks.h>
 #include <views/overlays/rain_ovl.h>
 #include <views/overlays/thunder_ovl.h>
 #include <sound/sequencer.h>
@@ -18,6 +19,7 @@ private:
     NewSequencer * seq;
     RainOverlay * rain;
     ThunderOverlay * thunder;
+    FireworksOverlay * fireworks;
     int decay = 2;
     int rise = 4;
     int min_freq = 250;

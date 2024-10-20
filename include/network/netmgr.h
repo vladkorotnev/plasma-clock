@@ -9,6 +9,7 @@ public:
     static void startup();
     /// @brief Whether the network service is initialized and connected or hosting an ad-hoc network 
     static bool is_up();
+    static bool is_softAP();
 
     /// @brief Current IP address string 
     static String current_ip();

@@ -74,7 +74,7 @@ public:
         }
 
         if(phase == 8 && beeper && sound) {
-            beeper->beep_blocking(CHANNEL_AMBIANCE, 100, 10);
+            beeper->beep(CHANNEL_AMBIANCE, 100, 10);
         }
     }
 

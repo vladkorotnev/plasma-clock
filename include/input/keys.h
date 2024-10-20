@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <sound/beeper.h>
+#include <sensor/sensor.h>
 
 typedef enum key_id {
     KEY_UP = (1 << 0),
@@ -32,3 +33,4 @@ key_state_t hid_test_key_all(key_bitmask_t keys);
 key_state_t hid_test_key_any(key_bitmask_t keys = KEYMASK_ALL);
 key_state_t hid_peek_key_any(key_bitmask_t keys = KEYMASK_ALL);
 key_state_t hid_test_key_state_repetition(key_id_t key);
+PoolableSensor * hid_get_state_sensor();

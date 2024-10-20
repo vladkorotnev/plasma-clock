@@ -11,6 +11,7 @@ public:
     void prepare() override;
     void render(FantaManipulator*) override;
     void step() override;
+    void cleanup() override;
 
 private:
     enum DemoPhase {

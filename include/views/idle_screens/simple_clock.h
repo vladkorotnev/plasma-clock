@@ -12,9 +12,12 @@ public:
     void render(FantaManipulator*);
     void step();
 private:
+    class AmPmLabel;
     tk_time_of_day_t now;
     tk_time_of_day_t next_time;
     int phase;
     char separator;
     bool blink_separator;
+    bool show_seconds;
+    AmPmLabel * pm_label;
 };

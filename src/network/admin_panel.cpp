@@ -43,7 +43,7 @@ static void save_bool(prefs_key_t key) {
     bool temp = false;
     if(ui.clickBool(key, temp)) {
         prefs_set_bool(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+        beeper->beep(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -59,7 +59,7 @@ static void save_int(prefs_key_t key, int min, int max) {
         temp = std::min(temp, max);
         temp = std::max(temp, min);
         prefs_set_int(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+        beeper->beep(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -76,7 +76,7 @@ static void save_string(prefs_key_t key) {
     String temp;
     if(ui.clickString(key, temp)) {
         prefs_set_string(key, temp);
-        beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+        beeper->beep(CHANNEL_NOTICE, 1000, 50);
     }
 }
 
@@ -182,7 +182,7 @@ static bool save_alarms() {
 
         set_alarm(i, a);
     }
-    beeper->beep_blocking(CHANNEL_NOTICE, 1000, 50);
+    beeper->beep(CHANNEL_NOTICE, 1000, 50);
     return true;
 }
 
@@ -251,6 +251,7 @@ static void build() {
 
     GP.SPOILER_BEGIN("Clock", GP_BLUE);
         render_bool("24-hour display:", PREFS_KEY_DISP_24_HRS);
+        render_bool("Show seconds:", PREFS_KEY_SHOW_SECONDS);
         render_bool("Blink separators:", PREFS_KEY_BLINK_SEPARATORS);
         render_bool("Ticking sound:", PREFS_KEY_TICKING_SOUND);
         render_bool("Only when screen is on:", PREFS_KEY_NO_SOUND_WHEN_OFF);
@@ -286,6 +287,16 @@ static void build() {
         GP.LABEL("Display language (not in WebUI):");
         GP.SELECT(PREFS_KEY_DISP_LANGUAGE, "English,Русский", prefs_get_int(PREFS_KEY_DISP_LANGUAGE));
         GP.HR();
+#if HAS(VARYING_BRIGHTNESS)
+        GP.LABEL("Display brightness:");
+        GP.SELECT(PREFS_KEY_BRIGHTNESS_MODE,
+        "Dim,Bright"
+#if HAS(LIGHT_SENSOR)
+        ",Automatic"
+#endif
+        , prefs_get_int(PREFS_KEY_BRIGHTNESS_MODE));
+        GP.HR();
+#endif
         render_int("Show clock for [s]:", PREFS_KEY_SCRN_TIME_CLOCK_SECONDS);
         GP.BREAK();
         render_int("Show next alarm countdown for [s]:", PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS);
@@ -319,6 +330,8 @@ static void build() {
         GP.SELECT(PREFS_KEY_DISP_SCROLL_SPEED, "Slow,Medium,Fast,Sonic", prefs_get_int(PREFS_KEY_DISP_SCROLL_SPEED));
         GP.HR();
         render_bool("Use Fahrenheit:", PREFS_KEY_WEATHER_USE_FAHRENHEIT);
+        GP.HR();
+        render_bool("Keypress beep:", PREFS_KEY_BUTTON_BEEP);
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -334,6 +347,7 @@ static void build() {
         GP.HR();
         render_int("Speed [1~200]%:", PREFS_KEY_VOICE_SPEED);
         render_bool("Speak hour on chime", PREFS_KEY_VOICE_ANNOUNCE_HOUR);
+        render_bool("Speak time on headpat", PREFS_KEY_VOICE_SPEAK_ON_HEADPAT);
         render_bool("24-hour announcements:", PREFS_KEY_VOICE_24_HRS);
         render_bool("Speak date on first chime", PREFS_KEY_VOICE_ANNOUNCE_DATE);
     GP.SPOILER_END();
@@ -547,6 +561,7 @@ void action() {
         save_bool(PREFS_KEY_DISP_24_HRS);
         save_bool(PREFS_KEY_VOICE_24_HRS);
         save_bool(PREFS_KEY_BLINK_SEPARATORS);
+        save_bool(PREFS_KEY_SHOW_SECONDS);
         save_bool(PREFS_KEY_TICKING_SOUND);
         save_bool(PREFS_KEY_HOURLY_CHIME_ON);
         save_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23);
@@ -558,6 +573,7 @@ void action() {
         save_string(PREFS_KEY_TIMESERVER);
         save_string(PREFS_KEY_TIMEZONE);
         save_int(PREFS_KEY_TIME_SYNC_INTERVAL_SEC, 600, 21600);
+        save_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 0, 3600);
         save_int(PREFS_KEY_SCRN_TIME_REMOTE_WEATHER_SECONDS, 0, 3600);
@@ -570,7 +586,9 @@ void action() {
         save_bool(PREFS_KEY_NO_SOUND_WHEN_OFF);
         save_int(PREFS_KEY_TRANSITION_TYPE, TRANSITION_NONE, TRANSITION_RANDOM);
         save_int(PREFS_KEY_DISP_SCROLL_SPEED, 0, 4);
+        save_int(PREFS_KEY_BRIGHTNESS_MODE, 0, BRIGHTNESS_MAX_INVALID - 1);
         save_bool(PREFS_KEY_WEATHER_USE_FAHRENHEIT);
+        save_bool(PREFS_KEY_BUTTON_BEEP);
         save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
@@ -597,6 +615,7 @@ void action() {
         save_int(PREFS_KEY_VOICE_SPEED, 1, 200);
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR);
         save_bool(PREFS_KEY_VOICE_ANNOUNCE_DATE);
+        save_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT);
         save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
         save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
         save_int(PREFS_KEY_VOICE_MODE_RESAMPLING, 0, 1);

@@ -33,7 +33,7 @@ public:
     void prepare() override {
         if(buf[0] == 0) {
             // Having this as a static item view causes a deadlock on boot, so we need to set the value in runtime
-            snprintf(buf, 23, "%.02dK (%.02dK %s)", LittleFS.totalBytes() / 1024, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024, localized_string("free"));
+            snprintf(buf, 31, "%.02dK (%.02dK %s)", LittleFS.totalBytes() / 1024, (LittleFS.totalBytes() - LittleFS.usedBytes()) / 1024, localized_string("free"));
             bottom_label->set_string(buf);
         }
         MenuInfoItemView::prepare();
@@ -43,7 +43,75 @@ private:
     char buf[32] = { 0 };
 };
 
-AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMenu::ProtoShimNavMenu() {
+#if HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)
+class LightSensorCalibrationView: public Composite {
+public:
+    LightSensorCalibrationView(const char * title, prefs_key_t key, AmbientLightSensor * lightSensor) {
+        top_label = new StringScroll(&keyrus0808_font, title);
+        top_label->start_at_visible = true;
+        top_label->holdoff = 100;
+        add_composable(top_label);
+        sensor = lightSensor;
+        prefs_key = key;
+        wants_clear_surface = true;
+    }
+
+    void prepare() override {
+        set_value = prefs_get_int(prefs_key);
+        Composite::prepare();
+    }
+
+    void render(FantaManipulator *fb) override {
+        Composite::render(fb);
+
+        int steps_per_division = (max_value - min_value) / (fb->get_width() - 3);
+        int set_val_px = (set_value - min_value) / steps_per_division;
+        int cur_val_px = (cur_value - min_value) / steps_per_division;
+        
+        // Backdrop
+        fb->rect(0, 9, fb->get_width() - 2, 14, false);
+
+        // Filled line for the pointer
+        fb->line(cur_val_px + 1, 9, cur_val_px + 1, 14);
+
+        // Two dots on the outline for the current setting
+        fb->plot_pixel(set_val_px + 1, 8, true);
+        fb->plot_pixel(set_val_px + 1, 15, true);
+        // and a blinking line
+        if(cursor_visible) {
+            fb->line(set_val_px + 1, 9, set_val_px + 1, 14);
+        }
+    }
+
+    void step() {
+        cur_value = sensor->read();
+
+        if(hid_test_key_state(KEY_RIGHT) == KEYSTATE_HIT) {
+            set_value = cur_value;
+            prefs_set_int(prefs_key, set_value);
+        }
+
+        cursor_counter ++;
+        if(cursor_counter == 30) {
+            cursor_visible ^= 1;
+            cursor_counter = 0;
+        }
+    }
+
+private:
+    AmbientLightSensor * sensor = nullptr;
+    StringScroll * top_label = nullptr;
+    prefs_key_t prefs_key = nullptr;
+    int cur_value = 0;
+    int min_value = 0;
+    int max_value = 4096;
+    int set_value = 0;
+    bool cursor_visible = false;
+    uint8_t cursor_counter = 0;
+};
+#endif
+
+AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSensor *als): ProtoShimNavMenu::ProtoShimNavMenu() {
     beeper = b;
     yukkuri = y;
     std::function<void(bool, Renderable*)> normalActivationFunction = [this](bool isActive, Renderable* instance) {
@@ -58,6 +126,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
     static MenuDateSettingView * ds_view = nullptr;
     static ListView * clock_menu = new ListView();
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour display"), PREFS_KEY_DISP_24_HRS));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Show seconds"), PREFS_KEY_SHOW_SECONDS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Blink dots"), PREFS_KEY_BLINK_SEPARATORS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Tick sound"), PREFS_KEY_TICKING_SOUND));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Ticking only when screen on"), PREFS_KEY_NO_SOUND_WHEN_OFF));
@@ -93,7 +162,8 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
         y->speak(test_utterance);
     };
 
-    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak every hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak on headpat"), PREFS_KEY_VOICE_SPEAK_ON_HEADPAT));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_VOICE_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Voice speed"), PREFS_KEY_VOICE_SPEED, 10, 200, 1, normalActivationFunction, yukkuriTestFunction));
@@ -161,7 +231,24 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
 #if HAS(DISPLAY_BLANKING)
     display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Blank display after (s)"), PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 21600, 1, normalActivationFunction));
 #endif
+#if HAS(VARYING_BRIGHTNESS)
+    display_menu->add_view(new MenuListSelectorPreferenceView(
+        localized_string("Brightness"),
+        {
+            localized_string("Dim"),
+            localized_string("Bright"),
+#if HAS(LIGHT_SENSOR)
+            localized_string("Automatic"),
+#endif
+        },
+        PREFS_KEY_BRIGHTNESS_MODE,
+        normalActivationFunction
+    ));
+#endif
     display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Turn display off after (s)"), PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000, 1, normalActivationFunction));
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("Keypress beep"), PREFS_KEY_BUTTON_BEEP, [b](bool newValue) {
+        hid_set_key_beeper(newValue ? b : nullptr);
+    }));
     display_menu->add_view(new MenuBooleanSettingView(localized_string("Use Fahrenheit for temperature"), PREFS_KEY_WEATHER_USE_FAHRENHEIT));
     display_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Transition"), 
@@ -190,9 +277,21 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
         normalActivationFunction
     ));
 
+#if (HAS(TEMP_SENSOR) || (HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)))
     static ListView * calibration_menu = new ListView();
+    #if HAS(TEMP_SENSOR)
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (\370C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Humidity"), PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
+    #endif
+    #if HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)
+    calibration_menu->add_view(new LightSensorCalibrationView(
+        localized_string("Display dimming threshold"), PREFS_KEY_LIGHTNESS_THRESH_DOWN, als
+    ));
+    calibration_menu->add_view(new LightSensorCalibrationView(
+        localized_string("Display brightening threshold"), PREFS_KEY_LIGHTNESS_THRESH_UP, als
+    ));
+    #endif
+#endif
 
     static ListView * system_info = new ListView();
     system_info->add_view(new MenuInfoItemView(localized_string("OS Type"), PRODUCT_NAME));
@@ -275,7 +374,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y): ProtoShimNavMe
     static ListView * settings_menu = new ListView();
     settings_menu->add_view(new MenuActionItemView(localized_string("Clock"), [this](){ push_submenu(clock_menu); }, &clock_icns));
     settings_menu->add_view(new MenuActionItemView(localized_string("Display"), [this](){ push_submenu(display_menu); }, &display_icns));
+#if (HAS(TEMP_SENSOR) || (HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)))
     settings_menu->add_view(new MenuActionItemView(localized_string("Offsets"), [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
+#endif
     settings_menu->add_view(new MenuActionItemView(localized_string("Status"), [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));
     settings_menu->add_view(new MenuInfoItemView(localized_string("Notice"), localized_string("FULL_SETTINGS_NOTICE")));
     settings_menu->add_view(new MenuActionItemView(localized_string("Save & Restart"), [this](){

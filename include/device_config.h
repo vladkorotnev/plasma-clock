@@ -23,6 +23,9 @@
 // Enable the yukkuri voice talking clock
 #define HAS_AQUESTALK
 
+// Disable the faux brightness reduction for some UI elements by drawing them only every other frame
+// #define COMPOSABLE_NO_EVENODD
+
 // ---- HARDWARE
 
 #ifdef ESP32
@@ -38,8 +41,12 @@
 #include <devices/mid_clock.h>
 #endif
 
-#ifdef DEVICE_MICROPISOS
-#include <devices/smol_clock.h>
+#ifdef DEVICE_MINIPISOS_VFD
+#include <devices/mid_clock_noritake.h>
+#endif
+
+#ifdef DEVICE_MINIPISOS_VFD_WIDE
+#include <devices/mid_clock_noritake_wide.h>
 #endif
 
 // ---- DEPENDENCY RULES

@@ -1,10 +1,13 @@
 #include "service/prefs.h"
 #include <Preferences.h>
 #include "nvs_flash.h"
+#include <device_config.h>
 
 static char LOG_TAG[] = "PREF";
 static Preferences * store = nullptr;
 static constexpr const char * STORE_DOMAIN = "pisos_prefs";
+
+static constexpr prefs_key_t PREFS_KEY_INITIAL_SETTING_DONE = "init";
 
 inline void init_store_if_needed() {
     if(store == nullptr) {
@@ -12,7 +15,29 @@ inline void init_store_if_needed() {
         store = new Preferences();
         nvs_flash_init(); // <- sometimes language settings are being checked before Arduino finished initializing, so we need to bring NVS up on our own
         if(!store->begin(STORE_DOMAIN)) {
+            delete store;
             store = nullptr;
+        } else {
+            if(!prefs_get_bool(PREFS_KEY_INITIAL_SETTING_DONE)) {
+                // Write some sane settings for some of the keys
+                prefs_set_int(PREFS_KEY_ALARM_SNOOZE_MINUTES, 10);
+                #if HAS(LIGHT_SENSOR)
+                    prefs_set_int(PREFS_KEY_BRIGHTNESS_MODE, BRIGHTNESS_AUTOMATIC);
+                #endif
+                prefs_set_int(PREFS_KEY_VOICE_SPEED, 100);
+                prefs_set_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL, true);
+                prefs_set_bool(PREFS_KEY_HOURLY_CHIME_ON, true);
+                prefs_set_bool(PREFS_KEY_TICKING_SOUND, true);
+                prefs_set_bool(PREFS_KEY_HOURLY_CHIME_ON, true);
+                prefs_set_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 9);
+                prefs_set_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 21);
+                prefs_set_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 60);
+                prefs_set_int(PREFS_KEY_HOURLY_CHIME_MELODY, 2);
+                prefs_set_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT, true);
+                prefs_set_bool(PREFS_KEY_WEATHER_OVERLAY, true);
+
+                prefs_set_bool(PREFS_KEY_INITIAL_SETTING_DONE, true);
+            }
         }
     }
 }

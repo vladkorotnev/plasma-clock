@@ -83,7 +83,11 @@ void NetworkManager::connect(const char * name, const char * pw) {
     has_ip = false;
     WiFi.disconnect(false, true);
     WiFi.mode(WIFI_MODE_STA);
-    WiFi.begin(ssid, pass);
+    wl_status_t rslt = WiFi.begin(ssid, pass);
+    if(rslt != WL_CONNECTED) {
+        ESP_LOGI(LOG_TAG, "WiFi connection error (%i): fallback to SoftAP");
+        ap_fallback();
+    }
 }
 
 const char * NetworkManager::network_name() {
@@ -92,7 +96,11 @@ const char * NetworkManager::network_name() {
 
 bool NetworkManager::is_up() {
     return (WiFi.getMode() == WIFI_STA && WiFi.status() == WL_CONNECTED && has_ip)
-        || (WiFi.getMode() == WIFI_AP && (WiFi.getStatusBits() & AP_STARTED_BIT != 0));
+        || is_softAP();
+}
+
+bool NetworkManager::is_softAP() {
+    return (WiFi.getMode() == WIFI_AP && (WiFi.getStatusBits() & AP_STARTED_BIT != 0));
 }
 
 String NetworkManager::current_ip() {
@@ -113,5 +121,5 @@ void NetworkManager::ap_fallback() {
 }
 
 int NetworkManager::rssi() {
-    return WiFi.RSSI();
+    return is_softAP ? 1 : WiFi.RSSI();
 }

@@ -75,6 +75,10 @@ static const std::map<const std::string, const char*> english = {
     {"Fast", "Fast"},
     {"Sonic", "Sonic"},
 
+    {"Dim", "Dim"},
+    {"Bright", "Bright"},
+    {"Automatic", "Automatic"},
+
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
     {"BB_CNCT_GUIDE", "\x1A to connect"},
@@ -109,6 +113,7 @@ static const std::map<const std::string, const char*> russian = {
 
     {"24-hour display", "24-часовой формат отображения"},
     {"24-hour announcements", "24-часовой формат голоса"},
+    {"Show seconds", "Показывать секунды"},
     {"Blink dots", "Мигающие точки"},
     {"Tick sound", "Тикание часов"},
     {"Ticking only when screen on", "Тикание только при включённом экране"},
@@ -118,7 +123,8 @@ static const std::map<const std::string, const char*> russian = {
     {"Other chimes", "Остальные"},
     {"Chime from", "Первый час"},
     {"Chime until", "Последний час"},
-    {"Speak hour", "Проговаривать время"},
+    {"Speak every hour", "Проговаривать время каждый час"},
+    {"Speak on headpat", "Сказать время при нажатии на верхнюю кнопку"},
     {"Speak date on first chime", "Проговаривать дату в первый час"},
     {"Voice speed", "Скорость голоса"},
 
@@ -160,11 +166,17 @@ static const std::map<const std::string, const char*> russian = {
     {"Fast", "Быстро"},
     {"Sonic", "Соник"},
 
+    {"Brightness", "Яркость"},
+    {"Dim", "Темно"},
+    {"Bright", "Ярко"},
+    {"Automatic", "Авто"},
+
     {"Blank display after (s)", "Пустой дисплей после (сек.)"},
     {"Turn display off after (s)", "Выключить дисплей после (сек.)"},
     {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
     {"FPS counter", "Счётчик кадров в секунду"},
     {"Weather effects", "Эффекты погоды"},
+    {"Keypress beep", "Звук клавиш"},
 
     {"WiFi signal", "Уровень сигнала WiFi"},
     {"Disconnected", "Когда нет связи"},
@@ -173,6 +185,8 @@ static const std::map<const std::string, const char*> russian = {
 
     {"Temperature (\370C)", "Температура (\370C)"},
     {"Humidity", "Влажность"},
+    {"Display dimming threshold", "Нижний порог освещённости"},
+    {"Display brightening threshold", "Верхний порог освещённости"},
 
     {"OS Type", "Операционная система"},
     {"OS Version", "Версия системы"},
@@ -215,7 +229,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Restarting...", "Перезагрузка..."},
 };
 
-const char * localized_string(const std::string key, display_language_t l) {
+const char * localized_string(const char* key, display_language_t l) {
     const std::map<const std::string, const char*> * lang = nullptr;
     switch(l) {
         case DSPL_LANG_EN:
@@ -229,7 +243,7 @@ const char * localized_string(const std::string key, display_language_t l) {
     if(lang->count(key)) {
         return lang->at(key);
     } else {
-        return key.c_str();
+        return key;
     }
 }
 
@@ -624,9 +638,9 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
                             acc += "/no'chi";
                         } else if(time.hour < 12 && !is_pm) {
                             acc += "/u_tura'";
-                        } else if(time.hour <= 5 && is_pm) {
+                        } else if(time.hour <= 4 && is_pm) {
                             acc += "/dunya'";
-                        } else if(time.hour >= 6 && is_pm) {
+                        } else if(time.hour >= 5 && is_pm) {
                             acc += "/bie'chira";
                         }
                     } else {

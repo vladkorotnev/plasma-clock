@@ -3,14 +3,10 @@
 
 static char LOG_TAG[] = "AQTK";
 
-static SemaphoreHandle_t aqtkSemaphore = NULL;
-
 Yukkuri::Yukkuri(const char * license, uint16_t frame_length) {
     #if HAS(AQUESTALK)
-        if(aqtkSemaphore == NULL) {
-            aqtkSemaphore = xSemaphoreCreateBinary();
-            xSemaphoreGive(aqtkSemaphore);
-        }
+        aqtkSemaphore = xSemaphoreCreateBinary();
+        xSemaphoreGive(aqtkSemaphore);
         uint8_t mac[6];
         esp_efuse_mac_get_default(mac);
         ESP_LOGI(LOG_TAG, "MAC = %02X:%02X:%02X:%02X:%02X:%02X", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);

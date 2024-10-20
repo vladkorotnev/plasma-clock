@@ -41,6 +41,7 @@ static void serMidiTask(void * pvParameters) {
             ESP_LOGV(LOG_TAG, "MIDI recv");
             seq->midi_task();
         }
+        taskYIELD();
     }
 }
 
@@ -239,6 +240,8 @@ void NewSequencer::find_hook() {
 }
 
 void NewSequencer::process_steps_until_delay() {
+    if(num_rows == 0) return;
+    
     if(pointer >= num_rows) {
         if(end_of_song()) return;
     }

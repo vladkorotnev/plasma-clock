@@ -60,4 +60,6 @@ private:
     void _finish_current();
     void _start_next_utterance_if_needed();
     void _stop_speech();
+
+    SemaphoreHandle_t aqtkSemaphore = NULL;
 };
