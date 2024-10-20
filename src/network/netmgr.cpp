@@ -121,5 +121,5 @@ void NetworkManager::ap_fallback() {
 }
 
 int NetworkManager::rssi() {
-    return WiFi.RSSI();
+    return is_softAP ? 1 : WiFi.RSSI();
 }

@@ -1,6 +1,5 @@
 #include "views/overlays/signal_icon.h"
 #include <service/prefs.h>
-#include <network/netmgr.h>
 
 #define RSSI_LOWEST_DBM -90
 
