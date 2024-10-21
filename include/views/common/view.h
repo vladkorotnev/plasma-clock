@@ -91,11 +91,15 @@ protected:
 const int DISP_TIME_NO_OVERRIDE = -1;
 /// @brief Skip this screen if possible.
 const int DISP_TIME_DONT_SHOW = 0;
+/// @brief Switch to this screen immediately and stay here if possible.
+const int DISP_TIME_ATTENTION = INT32_MAX;
 
 class DisplayTimeable {
 public:
     /// @brief Return the desired display time to stay on-screen for longer than the user-specified setting.
-    /// Return DISP_TIME_NO_OVERRIDE to not override anything. Return DISP_TIME_DONT_SHOW to avoid display if possible (but still be prepared to render!).
+    /// Return `DISP_TIME_NO_OVERRIDE` to not override anything.
+    /// Return `DISP_TIME_DONT_SHOW` to avoid display if possible (but still be prepared to render for the transition or something!)
+    /// Return `DISP_TIME_ATTENTION` to demand switching to the screen instantly. The request may or may not be fulfilled.
     virtual int desired_display_time() { return DISP_TIME_NO_OVERRIDE; }
 };
 

@@ -68,7 +68,12 @@ void Fb2kView::step() {
 
 int Fb2kView::desired_display_time() {
     if(foo_is_playing()) {
-        return DISP_TIME_NO_OVERRIDE;
+        if(foo_last_recv() != last_update) {
+            ESP_LOGV(LOG_TAG, "Requesting attention");
+            return DISP_TIME_ATTENTION;
+        } else {
+            return DISP_TIME_NO_OVERRIDE;
+        }
     } else {
         return DISP_TIME_DONT_SHOW;
     }

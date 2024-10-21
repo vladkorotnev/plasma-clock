@@ -389,6 +389,21 @@ void go_to_prev_screen(transition_type_t transition) {
 
 void change_screen_if_needed() {
     TickType_t now = xTaskGetTickCount();
+
+    // Check if any enabled screen is requesting attention
+    for(int id = 0; id < VIEW_MAX; id++) {
+        int specificTime = ((Screen*)slideShow->get_view(id))->desired_display_time();
+        if(specificTime == DISP_TIME_ATTENTION && id != curScreen && screen_times_ms[id] != 0) {
+            // Switch to the screen wanting attention
+            ESP_LOGI(LOG_TAG, "View with ID=%i wants user attention", id);
+            curScreen = (MainViewId_t) id;
+            slideShow->switch_to(curScreen, (transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
+            lastScreenSwitch = now;
+            update_screen_specific_time();
+            return;
+        }
+    }
+
     update_screen_specific_time();
     if(now - lastScreenSwitch >= pdMS_TO_TICKS(current_screen_time_ms)) {
         go_to_next_screen((transition_type_t) prefs_get_int(PREFS_KEY_TRANSITION_TYPE));
