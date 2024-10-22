@@ -7,28 +7,6 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 
 ![](docs/img/hero.jpg)
 
-## A remark on the Morio Denki Plasma Display
-
-**This display uses high voltage, which could be lethal!!**
-
-The display comes from a bus or a train, supposedly. 
-
-It has the following labels on the PCBs:
-
-* Morio Denki 6M06056 (the 8085-based control board I wasn't able to get running)
-* MD 16101DS-CONT82 06 (the actual framebuffer/drive board)
-* MD-24T-ADT (2) 8201 (the boards on the plasma tube itself)
-
-Despite using a standard "HDD" Molex 4-pin connector for the drive board power, it expects +160V on the pin where normally +12V would be supplied. Take care not to mix up the power supplies. (Plugging in +12V into the plasma board doesn't seem to damage it. Plugging in +160V into an HDD, on the other hand...)
-
-More detailed info is available in the following articles:
-
-* На русском: https://habr.com/ru/companies/timeweb/articles/808805/
-* 日本語で: https://elchika.com/article/b9f39c29-64aa-42ab-8f73-e6e27a72bd0e/
-* Demo video: https://youtu.be/D4MiHmhhjeQ
-
-You can also read the quest I went through trying to get it to run "in real time" at [EEVBlog Forums](https://www.eevblog.com/forum/repair/trying-to-figure-out-if-a-vfd-displaydriver-is-broken-(74-series-logic)/).
-
 ## Available widgets
 
 * Clock
@@ -197,8 +175,10 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 ## Predefined target devices
 
-* `DEVICE_PLASMA_CLOCK`: a [clock](https://youtu.be/D4MiHmhhjeQ) that I built around a plasma screen from an old Japanese bus/train.
-* `DEVICE_MICROPISOS`: a portable devkit for PIS-OS, using a 100x16 OLED from WinStar.
+* `DEVICE_PLASMA_CLOCK`: a [clock](https://youtu.be/D4MiHmhhjeQ) that I built around a plasma screen from an old Japanese bus/train. [Definition file](include/devices/big_clock.h)
+* `DEVICE_MINIPISOS`: a portable devkit for PIS-OS, using a 100x16 OLED from WinStar. [Definition file](include/devices/mid_clock.h)
+* `DEVICE_MINIPISOS_VFD`: same hardware as above, but using a Noritake ITRON GU-112x16-7000 VFD display. [Definition file](include/devices/mid_clock_noritake.h)
+* `DEVICE_MINIPISOS_VFD_WIDE`: same as above, but for a GU-140x12-7000. [Definiton file](include/devices/mid_clock_noritake_wide.h)
 
 ## Supported hardware and feature-flags
 
@@ -206,6 +186,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 * Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display//md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
 * Winstar WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming.
+* Noritake ITRON GU-NNNx16-7000 series graphic VFDs in 8-bit parallel mode ([driver](src/display/gu7000.cpp), feature flag `HAS_OUTPUT_GU7000`)
 
 ### Speaker (at least one required)
 
@@ -243,6 +224,29 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 ### Others
 
 * Wii Balance Board. Set feature flag `HAS_BALANCE_BOARD_INTEGRATION`. [Driver](src/service/balance_board.cpp), based upon [code by Sasaki Takeru](https://github.com/takeru/Wiimote/tree/d81319c62ac5931da868cc289386a6d4880a4b15), requires WROVER module
+
+## A remark on the Morio Denki Plasma Display
+
+**This display uses high voltage, which could be lethal!!**
+
+The display comes from a bus or a train, supposedly. 
+
+It has the following labels on the PCBs:
+
+* Morio Denki 6M06056 (the 8085-based control board I wasn't able to get running)
+* MD 16101DS-CONT82 06 (the actual framebuffer/drive board)
+* MD-24T-ADT (2) 8201 (the boards on the plasma tube itself)
+
+Despite using a standard "HDD" Molex 4-pin connector for the drive board power, it expects +160V on the pin where normally +12V would be supplied. Take care not to mix up the power supplies. (Plugging in +12V into the plasma board doesn't seem to damage it. Plugging in +160V into an HDD, on the other hand...)
+
+More detailed info is available in the following articles:
+
+* На русском: https://habr.com/ru/companies/timeweb/articles/808805/
+* 日本語で: https://elchika.com/article/b9f39c29-64aa-42ab-8f73-e6e27a72bd0e/
+* Demo video: https://youtu.be/D4MiHmhhjeQ
+
+You can also read the quest I went through trying to get it to run "in real time" at [EEVBlog Forums](https://www.eevblog.com/forum/repair/trying-to-figure-out-if-a-vfd-displaydriver-is-broken-(74-series-logic)/).
+
 
 ----
 

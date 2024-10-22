@@ -4,6 +4,7 @@
 #include <input/keypad.h>
 
 #define HAS_OUTPUT_GU7000
+#define HAS_MOTION_SENSOR
 #define HAS_TEMP_SENSOR
 #define HAS_KEYPAD
 #define HAS_SERIAL_MIDI
@@ -27,6 +28,7 @@ const gpio_num_t HWCONF_I2C_SCL_GPIO = GPIO_NUM_25;
 
 // ---- Connection to light sensors ----
 const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
+const gpio_num_t HWCONF_MOTION_GPIO = GPIO_NUM_39;
 
 // ---- Connection to display ----
 const gpio_num_t HWCONF_GU7000_DATABUS_GPIOS[] = {
