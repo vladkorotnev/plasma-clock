@@ -10,7 +10,9 @@
 #define HAS_OUTPUT_WS0010
 #define HAS_TEMP_SENSOR
 #define HAS_KEYPAD
-#define HAS_SERIAL_MIDI
+#define HAS_VARYING_BRIGHTNESS
+#define HAS_LIGHT_SENSOR
+#define HAS_MOTION_SENSOR
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "uPIS-OS"
@@ -37,6 +39,10 @@ const gpio_num_t HWCONF_WS0010_DATABUS_GPIOS[] = {
 };
 const gpio_num_t HWCONF_WS0010_RS_GPIO = GPIO_NUM_19; 
 const gpio_num_t HWCONF_WS0010_EN_GPIO = GPIO_NUM_18;
+
+// ---- Connection to light sensors ----
+const gpio_num_t HWCONF_MOTION_GPIO = GPIO_NUM_39;
+const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
 
 #define HWCONF_DISPLAY_WIDTH_PX 100
 #define HWCONF_DISPLAY_HEIGHT_PX 16

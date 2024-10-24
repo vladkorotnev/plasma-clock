@@ -6,6 +6,8 @@
 #include <esp32-hal-gpio.h>
 #include <esp_err.h>
 
+#define WS0010_NO_BFI
+
 #ifndef WS0010_BFI_DIMMER_DURATION_US
 #define WS0010_BFI_DIMMER_DURATION_US 6600 //<- experimentally found value for roughly 50% brightness @ 5v supply
 #endif
@@ -24,7 +26,9 @@ Ws0010OledDriver::Ws0010OledDriver(
     rs_gpio = rs;
     en_gpio = en;
     is_writing_ddram = false;
-    is_dim = false;
+    show_state = false;
+    bright_state = false;
+    power_state = false;
     ddram_ptr = 0;
 }
 
@@ -117,29 +121,20 @@ void Ws0010OledDriver::reset() {
     delayMicroseconds(400);
     delay(200);
 
-    write_string("uPIS-OS init");
+    write_string("uPIS-OS WS0010 init");
     delay(500);
 
     taskEXIT_CRITICAL(&_spinlock);
 }
 
 void Ws0010OledDriver::set_show(bool show) {
-    taskENTER_CRITICAL(&_spinlock);
     show_state = show;
-    set_is_command(true);
-    set_databus(0b00001000 | (show ? 0b111 : 0)); // cursor and blink always off
-    pulse_clock();
-    delayMicroseconds(5);
-    taskEXIT_CRITICAL(&_spinlock);
+    _set_pmu_internal();
 }
 
 void Ws0010OledDriver::set_power(bool power) {
-    taskENTER_CRITICAL(&_spinlock);
-    set_is_command(true);
-    set_databus(0b00011000 | (power ? 0b111 : 0b011)); // G/C always set to GRAPHIC
-    pulse_clock();
-    delayMicroseconds(400);
-    taskEXIT_CRITICAL(&_spinlock);
+    power_state = power;
+    _set_pmu_internal();
 }
 
 void Ws0010OledDriver::clear() {
@@ -168,8 +163,11 @@ void Ws0010OledDriver::write_stride(uint8_t stride) {
 void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
     taskENTER_CRITICAL(&_spinlock);
 #ifndef WS0010_NO_BFI
-    bool show_backup = show_state;
-    set_show(false);
+    if(power_state && show_state) {
+        set_is_command(true);
+        set_databus(0b00001000 | 0b000); // cursor and blink always off
+        pulse_clock();
+    }
 #endif
     // First write even (top row), then odd (bottom row)
     for(int i = 0; i < count - 1; i += 2) {
@@ -181,17 +179,38 @@ void Ws0010OledDriver::write_fanta(const uint8_t * strides, size_t count) {
         write_stride(strides[i]);
     }
 #ifndef WS0010_NO_BFI
-    if(is_dim) {
-        delayMicroseconds(WS0010_BFI_DIMMER_DURATION_US);
+    if(power_state && show_state) {
+        set_is_command(true);
+        set_databus(0b00001000 | 0b111); // cursor and blink always off
+        pulse_clock();
     }
-    set_show(show_backup);
 #endif
     taskEXIT_CRITICAL(&_spinlock);
 }
 
 void Ws0010OledDriver::set_bright(bool bright) {
-    ESP_LOGI(LOG_TAG, "BFI dimming is now %s", bright ? "OFF":"ON");
-    is_dim = !bright;
+    bright_state = bright;
+    _set_pmu_internal();
+}
+
+// The power management of the WS0010 running at 5V is somewhat wacky, so the set_bright and set_show and set_power commands don't really match up with
+// the real stuff that the controller does
+void Ws0010OledDriver::_set_pmu_internal() {
+    taskENTER_CRITICAL(&_spinlock);
+    bool actual_bright = bright_state;
+    bool actual_show = (show_state && power_state);
+
+    set_is_command(true);
+    set_databus(0b00011000 | (actual_bright ? 0b111 : 0b011)); // G/C always set to GRAPHIC
+    pulse_clock();
+    delayMicroseconds(10);
+
+    set_is_command(true);
+    set_databus(0b00001000 | (actual_show ? 0b111 : 0b000)); // cursor and blink always off
+    pulse_clock();
+    delayMicroseconds(5);
+
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 #endif

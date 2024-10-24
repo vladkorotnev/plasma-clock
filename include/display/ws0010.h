@@ -38,8 +38,6 @@ private:
     gpio_num_t rs_gpio;
     gpio_num_t en_gpio;
     bool is_writing_ddram;
-    bool show_state;
-    bool is_dim = false;
     uint8_t ddram_ptr;
 
     inline void set_databus(uint8_t data);
@@ -47,5 +45,10 @@ private:
     inline void pulse_clock();
     void write_string(const char *);
     void write_stride(uint8_t stride);
+
+    bool show_state;
+    bool bright_state;
+    bool power_state;
+    void _set_pmu_internal();
 };
 #endif
