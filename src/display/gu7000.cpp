@@ -59,11 +59,9 @@ void ItronGU7000Driver::initialize() {
 }
 
 void ItronGU7000Driver::wait_shit_through() {
-    delayMicroseconds(2);
     while(gpio_get_level(busy_gpio)) {
         delayMicroseconds(2);
     }
-    delayMicroseconds(2); // min 1.5us before next bus cycle
 }
 
 void ItronGU7000Driver::set_databus(uint8_t data) {
