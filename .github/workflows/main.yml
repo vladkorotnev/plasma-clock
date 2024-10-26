@@ -8,12 +8,18 @@ jobs:
   build-everything:
     runs-on: ubuntu-latest
     name: Build All Binaries
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
+      - name: Set up Git identity
+        run: |
+          git config --local user.name "Leønid Yakubovič"
+          git config --local user.email "sueydisnilyu@example.com"
       - name: Prepare environment
         uses: ./.github/actions/prepare_pio
       - name: Download AquesTalk
@@ -48,11 +54,22 @@ jobs:
       - name: Switch to public branch
         run: git checkout pub
       - name: Merge changes from main
-        run: git merge main
+        run: git merge main --strategy-option theirs
       - name: Move things to FVUDATA for publishing
-        run: ./helper/ci/create_fvudata.sh
+        run: |
+          git rm -r ./webroot/fvudata/*
+          ./helper/ci/create_fvudata.sh
       - name: Add FVUDATA stuff into git and push
         run: |
+          cp ./CNAME ./webroot/CNAME
           git add -f ./webroot/fvudata/*
-          git commit -m "Publish firmwares at $(git rev-parse --short HEAD)"
+          git commit -m "ci: Publish firmwares at $(git rev-parse --short HEAD)"
           git push --force -u origin pub
+      # Thanks to yet another weird limitation of Github Actions, we need to duplicate this action here
+      # https://github.com/orgs/community/discussions/25702
+      # Remove when a better solution is found
+      - name: Publish webroot via GitHub Pages
+        uses: rayluo/github-pages-overwriter@v1.3
+        with:
+          source-directory: webroot
+          target-branch: gh-pages

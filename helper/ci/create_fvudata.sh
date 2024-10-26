@@ -8,7 +8,7 @@ target_dir="./webroot/fvudata"
 # Create the target directory if it doesn't exist
 mkdir -p "$target_dir"
 
-cp "./.pio/build/music-pomf/littlefs.bin" "$target_dir/fs.bin"
+cp "./.pio/build/music-pomf/littlefs.bin" "$target_dir/fs.fvu"
 cp "./data/FS_VER" "$target_dir/fs_ver.txt"
 
 # Iterate over each entry in the source directory
@@ -24,10 +24,8 @@ for entry in "$source_dir"/*; do
             folder_name=$(basename "$entry")
             
             # Copy and rename firmware.bin to the target directory
-            cp "$firmware_file" "$target_dir/$folder_name.bin"
-            echo "Copied $firmware_file to $target_dir/$folder_name.bin"
-        else
-            echo "No firmware.bin found in $entry"
+            cp "$firmware_file" "$target_dir/$folder_name.avu"
+            echo "Copied $firmware_file to $target_dir/$folder_name.avu"
         fi
     fi
 done

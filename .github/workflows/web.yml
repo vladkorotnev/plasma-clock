@@ -5,7 +5,8 @@ name: Publish web
 
 on:
   push:
-    branches: ['pub']
+      branches: ['pub']
+  workflow_dispatch: null
 
 jobs:
   publish:
@@ -19,6 +20,8 @@ jobs:
         with:
           fetch-depth: 0
           submodules: recursive
+      - name: Copy CNAME
+        run: cp ./CNAME ./webroot/CNAME
       - name: Publish webroot via GitHub Pages
         uses: rayluo/github-pages-overwriter@v1.3
         with:
