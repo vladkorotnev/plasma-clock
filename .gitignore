@@ -7,3 +7,4 @@ captures/
 /lib/nonfree-aquestalk/*.a
 /data/music/wip*.pomf
 /data/music/WIP*.pomf
+/webroot/fvudata/*
