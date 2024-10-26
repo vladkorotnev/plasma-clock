@@ -1,0 +1,26 @@
+name: Publish web
+
+# Thanks to github's weird limitations on which branches and/or folders are usable for the pages,
+# we need this workaround for `./webroot` to be the actual web root of the project
+
+on:
+  push:
+    branches: ['pub']
+
+jobs:
+  publish:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    name: Publish web pages
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          submodules: recursive
+      - name: Publish webroot via GitHub Pages
+        uses: rayluo/github-pages-overwriter@v1.3
+        with:
+          source-directory: webroot
+          target-branch: gh-pages
