@@ -8,12 +8,18 @@ jobs:
   build-everything:
     runs-on: ubuntu-latest
     name: Build All Binaries
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
+      - name: Set up Git identity
+        run: |
+          git config user.name "Leønid Yakubovič"
+          git config user.email "sueydisnilyu@example.com"
       - name: Prepare environment
         uses: ./.github/actions/prepare_pio
       - name: Download AquesTalk
