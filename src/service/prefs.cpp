@@ -43,6 +43,9 @@ inline void init_store_if_needed() {
                 #endif
                 #ifdef FVU_SERVER_URL
                     prefs_set_string(PREFS_KEY_FVU_SERVER, String(FVU_SERVER_URL));
+                    prefs_set_bool(PREFS_KEY_FVU_AUTO_CHECK, true);
+                    prefs_set_bool(PREFS_KEY_FVU_AUTO_INSTALL, true);
+                    prefs_set_int(PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES, 240);
                 #endif
                 #if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
                     prefs_set_string(PREFS_KEY_ADMIN_ID, String(ADMIN_LOGIN));

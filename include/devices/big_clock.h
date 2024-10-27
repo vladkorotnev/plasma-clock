@@ -3,6 +3,7 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
+#define HAS_OTAFVU
 #define HAS_OUTPUT_MD_PLASMA
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_DISPLAY_BLANKING
@@ -16,7 +17,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "4"
+#define PRODUCT_VERSION "5"
 
 // ---- Connection to DISP BOARD ----
 const gpio_num_t HWCONF_PLASMA_DATABUS_GPIOS[] = {

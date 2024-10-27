@@ -61,7 +61,7 @@ void WordnikTaskFunction( void * pvParameter )
             client.setInsecure();
             ESP_LOGV(LOG_TAG, "Query: %s", url);
             int response = http.GET();
-            if(response == 200) {
+            if(response == HTTP_CODE_OK) {
                 EXT_RAM_ATTR static JsonDocument response;
 
                 DeserializationError error = deserializeJson(response, http.getStream());

@@ -1,6 +1,10 @@
 #ifndef FEATUREFLAG_H_
 #define FEATUREFLAG_H_
 
+#ifndef FS_MOUNTPOINT
+#define FS_MOUNTPOINT "/disk"
+#endif
+
 #define HAS(x) defined(HAS_##x)
 
 // ---- SOFTWARE FEATURE FLAGS
@@ -12,7 +16,7 @@
 #define HAS_WORDNIK_API
 
 // Enable over-the-air firmware version upgrade
-#define HAS_OTAFVU
+// #define HAS_OTAFVU
 
 // Enable HTTP firmware upgrade
 #define HAS_HTTPFVU

@@ -72,7 +72,7 @@ void WeatherTaskFunction( void * pvParameter )
         http.begin(client, url);
         ESP_LOGV(LOG_TAG, "Query: %s", url);
         int response = http.GET();
-        if(response == 200) {
+        if(response == HTTP_CODE_OK) {
             JsonDocument response;
 
             DeserializationError error = deserializeJson(response, http.getStream());

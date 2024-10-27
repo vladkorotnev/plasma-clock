@@ -115,6 +115,9 @@ static constexpr prefs_key_t PREFS_KEY_DISP_LANGUAGE = "d_lang";
 static constexpr prefs_key_t PREFS_KEY_TTS_LANGUAGE = "tts_lang";
 
 static constexpr prefs_key_t PREFS_KEY_FVU_SERVER = "fvu_srv";
+static constexpr prefs_key_t PREFS_KEY_FVU_AUTO_CHECK = "fvu_chk";
+static constexpr prefs_key_t PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES = "fvu_chk_i_min";
+static constexpr prefs_key_t PREFS_KEY_FVU_AUTO_INSTALL = "fvu_ainst";
 static constexpr prefs_key_t PREFS_KEY_ADMIN_ID = "adm_id";
 static constexpr prefs_key_t PREFS_KEY_ADMIN_PASS = "adm_pass";
 

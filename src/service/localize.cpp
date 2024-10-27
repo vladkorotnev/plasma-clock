@@ -163,6 +163,7 @@ static const std::map<const std::string, const char*> russian = {
 
     {"OS Type", "Операционная система"},
     {"OS Version", "Версия системы"},
+    {"OS Build", "Сборка системы"},
     {"WiFi Name", "Имя сети"},
     {"WiFi IP", "IP-адрес"},
     {"MAC Address", "MAC-адрес"},
@@ -197,6 +198,23 @@ static const std::map<const std::string, const char*> russian = {
 
     {"BB_SCN", "Поиск..."},
     {"BB_SYNC_NOW", "Самое время нажать кнопку SYNC на Balance Board"},
+#endif
+
+#if HAS(HTTPFVU)
+    {"New Firmware Available!", "Доступна новая версия!"},
+    {"Press \x1A to install", "Нажми \x1A для установки"},
+
+    {"Periodically check for updates", "Автоматически проверять наличие обновлений"},
+    {"Automatically download and install updates", "Автоматически устанавливать доступные обновления"},
+    {"Check interval (minutes)", "Интервал проверки (минут)"},
+    {"Check for updates now", "Проверить обновления"},
+
+    {"Checking for update", "Поиск новой версии"},
+    {"Downloading firmware", "Загрузка программы"},
+    {"Downloading filesystem", "Загрузка файловой системы"},
+    {"Update failed", "Не удалось!"},
+    {"Update successful", "Обновление успешно!"},
+    {"No new version", "Новой версии нет"},
 #endif
 
     {"Restarting...", "Перезагрузка..."},

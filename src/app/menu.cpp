@@ -1,5 +1,6 @@
 #include <app/menu.h>
 #include <service/prefs.h>
+#include <service/httpfvu.h>
 #include <state.h>
 #include <views/menu/menu.h>
 #include <network/netmgr.h>
@@ -296,6 +297,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     static ListView * system_info = new ListView();
     system_info->add_view(new MenuInfoItemView(localized_string("OS Type"), PRODUCT_NAME));
     system_info->add_view(new MenuInfoItemView(localized_string("OS Version"), PRODUCT_VERSION));
+    system_info->add_view(new MenuInfoItemView(localized_string("OS Build"), get_current_version_info().fs_current));
     system_info->add_view(new MenuInfoItemView(localized_string("WiFi Name"), NetworkManager::network_name()));
     static char buf_ip[17] = { 0 };
     String tmp = NetworkManager::current_ip();
@@ -313,6 +315,14 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     service_settings->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
 #if HAS(SERIAL_MIDI)
     service_settings->add_view(new MenuBooleanSettingView(localized_string("Serial MIDI Input"), PREFS_KEY_SERIAL_MIDI));
+#endif
+#if HAS(HTTPFVU)
+    service_settings->add_view(new MenuBooleanSettingView(localized_string("Periodically check for updates"), PREFS_KEY_FVU_AUTO_CHECK));
+    service_settings->add_view(new MenuNumberSelectorPreferenceView(localized_string("Check interval (minutes)"), PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES, 1, 60 * 24, 1, normalActivationFunction));
+    service_settings->add_view(new MenuBooleanSettingView(localized_string("Automatically download and install updates"), PREFS_KEY_FVU_AUTO_INSTALL));
+    service_settings->add_view(new MenuActionItemView(localized_string("Check for updates now"), []() {
+        push_state(STATE_HTTPFVU, TRANSITION_SLIDE_HORIZONTAL_LEFT);
+    }));
 #endif
     service_settings->add_view(new MenuActionItemView(localized_string("Reset Webadmin Password"), []() {
         prefs_set_string(PREFS_KEY_ADMIN_PASS, "");
