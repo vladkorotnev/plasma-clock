@@ -81,8 +81,9 @@ void WeatherTaskFunction( void * pvParameter )
                 ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
                 isFailure = true;
             } else {
-                if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+                if(!xSemaphoreTake(cacheSemaphore, pdMS_TO_TICKS(2000))) {
                     ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
+                    isFailure = true;
                 } else {
                     if(!is_demoing) {
                         cache.conditions = normalized_conditions(response["current"]["weather"][0]["id"]);
@@ -196,7 +197,7 @@ void weather_stop() {
 bool weather_get_current(current_weather_t * dst) {
     if(dst == nullptr) return false;
 
-    if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+    if(!xSemaphoreTake(cacheSemaphore, pdMS_TO_TICKS(1000))) {
         ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
         return false;
     }
@@ -238,7 +239,7 @@ float convert_temperature(temperature_unit_t from, float inVal, temperature_unit
 }
 
 void weather_set_demo(current_weather_t * demo) {
-    if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+    if(!xSemaphoreTake(cacheSemaphore, pdMS_TO_TICKS(1000))) {
         ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
         return;
     }

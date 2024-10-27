@@ -54,6 +54,8 @@ HttpFvuApp::HttpFvuApp(NewSequencer *s) {
     
     progBar = new Swoopie();
     label = new StringScroll(&keyrus0808_font);
+    label->start_at_visible = true;
+    label->holdoff = 100;
     sequencer = s;
     _oldState = FVUAPP_INIT;
     appState = FVUAPP_INIT;

@@ -90,7 +90,7 @@ void DisplayFramebuffer::setup_task() {
 
 void DisplayFramebuffer::wait_next_frame() {
     xEventGroupClearBits(vsync_group, EVT_BIT_ENDED_DRAWING);
-    xEventGroupWaitBits(vsync_group, EVT_BIT_ENDED_DRAWING, false, true, portMAX_DELAY);
+    xEventGroupWaitBits(vsync_group, EVT_BIT_ENDED_DRAWING, false, true, pdMS_TO_TICKS(1000));
 }
 
 void DisplayFramebuffer::clear() {
