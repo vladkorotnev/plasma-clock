@@ -7,6 +7,7 @@ class HttpFvuApp: public Composite {
 public:
     HttpFvuApp(NewSequencer *s);
     void prepare() override;
+    void cleanup() override;
     void step() override;
     void work_task();
 private:

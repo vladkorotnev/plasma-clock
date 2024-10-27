@@ -37,7 +37,7 @@ void load_fs_ver() {
         fs_ver_str[sz] = 0;
 
         // Trim newlines at the end
-        for(int i = strlen(fs_ver_str); i >= 0 && (fs_ver_str[i] == '\n' || fs_ver_str[i] == '\r'); i--) {
+        for(int i = strlen(fs_ver_str) - 1; i >= 0 && (fs_ver_str[i] == '\n' || fs_ver_str[i] == '\r'); i--) {
             fs_ver_str[i] = 0;
         }
 
@@ -82,7 +82,7 @@ void load_remote_fs_ver() {
         cur_version.fs_new = dst;
         strncpy(dst, ver.c_str(), len);
         dst[len] = 0;
-        for(int i = strlen(dst); i >= 0 && (dst[i] == '\n' || dst[i] == '\r'); i--) {
+        for(int i = strlen(dst) - 1; i >= 0 && (dst[i] == '\n' || dst[i] == '\r'); i--) {
             dst[i] = 0;
         }
         ESP_LOGI(LOG_TAG, "Remote FS version: %s", dst);
@@ -95,7 +95,7 @@ void load_remote_fs_ver() {
 void download_fs(httpfvu_progress_cb_t progress_callback) {
     Update.onProgress([progress_callback](size_t done, size_t total) {
         if(!Update.hasError()) {
-            if(done == total || (done % 1024) == 0) {
+            if(done == total || (done % 10240) == 0) {
                 ESP_LOGI(LOG_TAG, "FS Download: %i of %i bytes", done, total);
             }
             progress_callback(false, false, done, total);
@@ -152,7 +152,7 @@ void download_fs(httpfvu_progress_cb_t progress_callback) {
 void download_app(httpfvu_progress_cb_t progress_callback) {
     Update.onProgress([progress_callback](size_t done, size_t total) {
         if(!Update.hasError()) {
-            if(done == total || (done % 1024) == 0) {
+            if(done == total || (done % 10240) == 0) {
                 ESP_LOGI(LOG_TAG, "APP Download: %i of %i bytes", done, total);
             }
             progress_callback(false, false, done, total);

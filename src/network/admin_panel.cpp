@@ -535,9 +535,12 @@ static void build() {
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
         render_bool("Serial MIDI input", PREFS_KEY_SERIAL_MIDI);
-        #if HAS(HTTPFVU)
-        render_string("Firmware Update Server", PREFS_KEY_FVU_SERVER);
-        #endif
+#if HAS(HTTPFVU)
+        render_bool("Check for updates automatically", PREFS_KEY_FVU_AUTO_CHECK);
+        render_bool("Install updates automatically", PREFS_KEY_FVU_AUTO_INSTALL);
+        render_int("Update check interval, minutes", PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES);
+        render_string("Firmware update server", PREFS_KEY_FVU_SERVER);
+#endif
         render_string("Webadmin login", PREFS_KEY_ADMIN_ID);
         render_string("Webadmin password", PREFS_KEY_ADMIN_PASS);
         GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
@@ -624,6 +627,9 @@ void action() {
         save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
         save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
         save_int(PREFS_KEY_VOICE_MODE_RESAMPLING, 0, 1);
+        save_bool(PREFS_KEY_FVU_AUTO_CHECK);
+        save_bool(PREFS_KEY_FVU_AUTO_INSTALL);
+        save_int(PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES, 1, 60 * 24);
         save_string(PREFS_KEY_FVU_SERVER);
         save_string(PREFS_KEY_ADMIN_ID);
         save_string(PREFS_KEY_ADMIN_PASS);

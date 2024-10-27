@@ -72,11 +72,12 @@ void HttpFvuApp::prepare() {
     progBar->value = -1;
     delayCounter = 0;
     if(is_auto_entry) {
-        is_auto_entry = false;
         appState = FVUAPP_INSTALLING_APP;
     } else {
         appState = FVUAPP_CHECKING;
     }
+
+    if(hCheckerTask != NULL) vTaskSuspend(hCheckerTask);
 
     if(hWorkTask == NULL) {
         if(!xTaskCreate(
@@ -94,6 +95,11 @@ void HttpFvuApp::prepare() {
 #endif
 }
 
+void HttpFvuApp::cleanup() {
+    Composite::cleanup();
+    if(hCheckerTask != NULL && appState != FVUAPP_SUCCESS) vTaskResume(hCheckerTask);
+}
+
 void HttpFvuApp::step() {
     Composite::step();
 
@@ -103,6 +109,10 @@ void HttpFvuApp::step() {
                 label->set_string(localized_string("Checking for update"));
                 break;
             case FVUAPP_INSTALLING_APP:
+                if(is_auto_entry) {
+                    sequencer->play_sequence(&tulula_fvu);
+                }
+                is_auto_entry = false;
                 label->set_string(localized_string("Downloading firmware"));
                 break;
             case FVUAPP_INSTALLING_FS:
