@@ -184,9 +184,10 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 ### Display (at least one required)
 
-* Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display//md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
-* Winstar WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming.
-* Noritake ITRON GU-NNNx16-7000 series graphic VFDs in 8-bit parallel mode ([driver](src/display/gu7000.cpp), feature flag `HAS_OUTPUT_GU7000`)
+* Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display/md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
+* Winstar (sometimes sold as Vishay) WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming. Datasheet backup: [Controller](docs/reference/datasheet/winstar/WS0010.pdf), [display](docs/reference/datasheet/winstar/WEG010016ALPP5N00000.pdf)
+* Noritake ITRON GU-NNNx16-7000 series graphic VFDs in 8-bit parallel mode ([driver](src/display/gu7000.cpp), feature flag `HAS_OUTPUT_GU7000`). Datasheet backup before the bundled CDR got completely rotten: [140x16-7000](docs/reference/datasheet/noritake_itron/s-gu140x16g-7000_j04.pdf), [140x16-7100](docs/reference/datasheet/noritake_itron/s-gu140x16g-7100_j00.pdf), [112x16](docs/reference/datasheet/noritake_itron/s-gu112x16g-7000_j04.pdf)
+* *Planned:* [Akizuki Denshi K-875](https://akizukidenshi.com/img/contents/kairo/%E3%83%87%E3%83%BC%E3%82%BF/%E8%A1%A8%E7%A4%BA%E8%A3%85%E7%BD%AE/LED%E9%9B%BB%E5%85%89%E6%8E%B2%E7%A4%BA.pdf) ×4 for a 128x16 display (I couldn't resist not scooping some up in the Outlet Sale for 200 yen apiece). [Datasheet backup](docs/reference/datasheet/akizuki/LED電光掲示.pdf)
 
 ### Speaker (at least one required)
 
@@ -202,6 +203,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 * `HAS_BLUETOOTH_LE`: automatically set on ESP32. Required for Switchbot-over-BLE. Uses Arduino-BLE and increases firmware size significantly.
 * `HAS_OTAFVU`: OTA updates via ArduinoOTA. Currently disabled due to partition size constraints from the above.
 * `HAS_SERIAL_MIDI`: Enable receiving MIDI data over serial. Makes the CPU a tad bit hotter so probably do not include this feature flag in production builds, unless you really want a MIDI powered alarm clock for some reason.
+* `HAS_HTTPFVU`: OTA updates via HTTP from this repository's main branch. HTTPS is omitted for performance reasons, and the security is instead ensured using the highly secure [Ostrich algorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm).
 
 ### Thermal sensors
 
