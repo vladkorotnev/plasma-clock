@@ -3,7 +3,7 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
-#define HAS_OTAFVU
+// #define HAS_OTAFVU
 #define HAS_OUTPUT_GU7000
 #define HAS_MOTION_SENSOR
 #define HAS_TEMP_SENSOR
