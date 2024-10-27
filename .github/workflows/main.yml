@@ -62,8 +62,11 @@ jobs:
           git add -f ./webroot/fvudata/*
           git commit -m "ci: Publish firmwares at $(git rev-parse --short HEAD)"
           git push --force -u origin pub
-      # Thanks to yet another weird limitation of Github Actions, we need to run the upcoming workflow manually
+      # Thanks to yet another weird limitation of Github Actions, we need to duplicate this action here
       # https://github.com/orgs/community/discussions/25702
       # Remove when a better solution is found
-      - name: Publish webroot
-        run: gh workflow run web.yml --ref pub
+      - name: Publish webroot via GitHub Pages
+        uses: rayluo/github-pages-overwriter@v1.3
+        with:
+          source-directory: webroot
+          target-branch: gh-pages
