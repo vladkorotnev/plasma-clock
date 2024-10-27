@@ -44,40 +44,9 @@ const char * day_letters() {
 
 static const std::map<const std::string, const char*> english = {
     {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
-
     {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
-    {"Loading...", "Loading..."},
-
-    {"Yes", "Yes"},
-    {"No", "No"},
-
-    {"SNOOZE", "SNOOZE"},
-    {"STOP", "STOP"},
-    {"HOLD", "HOLD"},
-    {"Only Once", "Only Once"},
-
-    {"(Randomize)", "(Randomize)"},
-    {"Clear", "Clear"},
-    {"Loud", "Loud"},
-    {"English", "English"},
     {"Russian", "Русский"},
     {"Japanese", "Japanese"},
-
-    {"Off", "Off"},
-    {"Wipe", "Wipe"},
-    {"Slide Left", "Slide Left"},
-    {"Slide Right", "Slide Right"},
-    {"Slide Up", "Slide Up"},
-    {"Slide Down", "Slide Down"},
-
-    {"Slow", "Slow"},
-    {"Medium", "Medium"},
-    {"Fast", "Fast"},
-    {"Sonic", "Sonic"},
-
-    {"Dim", "Dim"},
-    {"Bright", "Bright"},
-    {"Automatic", "Automatic"},
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
@@ -100,8 +69,12 @@ static const std::map<const std::string, const char*> russian = {
 
     {"Display", "Экран"},
     {"Offsets", "Калибровка"},
+    {"System", "Система"},
     {"Status", "Состояние"},
     {"Save & Restart", "Сохранить и перезагрузить"},
+
+    {"Reset Webadmin Password", "Сброс пароля вебморды"},
+    {"Press \x1A", "Нажми \x1A"},
 
     {"Notice", "Внимание"},
     {"FULL_SETTINGS_NOTICE", "Больше настроек доступно в вебморде через браузер"},
@@ -190,6 +163,7 @@ static const std::map<const std::string, const char*> russian = {
 
     {"OS Type", "Операционная система"},
     {"OS Version", "Версия системы"},
+    {"OS Build", "Сборка системы"},
     {"WiFi Name", "Имя сети"},
     {"WiFi IP", "IP-адрес"},
     {"MAC Address", "MAC-адрес"},
@@ -214,7 +188,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Snooze time", "Поспать ещё, минут"},
     {"Max beeping time, minutes", "Пищать не дольше чем, минут"},
 
-    {"SNOOZE", "СПАТЬ"},
+    {"SNOOZE", "СПЛЮ ЕЩЁ"},
     {"STOP", "ВСТАЮ"},
     {"HOLD", "ДЕРЖИ"},
 
@@ -224,6 +198,23 @@ static const std::map<const std::string, const char*> russian = {
 
     {"BB_SCN", "Поиск..."},
     {"BB_SYNC_NOW", "Самое время нажать кнопку SYNC на Balance Board"},
+#endif
+
+#if HAS(HTTPFVU)
+    {"New Firmware Available!", "Доступна новая версия!"},
+    {"Press \x1A to install", "Нажми \x1A для установки"},
+
+    {"Periodically check for updates", "Автоматически проверять наличие обновлений"},
+    {"Automatically download and install updates", "Автоматически устанавливать доступные обновления"},
+    {"Check interval (minutes)", "Интервал проверки (минут)"},
+    {"Check for updates now", "Проверить обновления"},
+
+    {"Checking for update", "Поиск новой версии"},
+    {"Downloading firmware", "Загрузка программы"},
+    {"Downloading filesystem", "Загрузка файловой системы"},
+    {"Update failed", "Не удалось!"},
+    {"Update successful", "Обновление успешно!"},
+    {"No new version", "Новой версии нет"},
 #endif
 
     {"Restarting...", "Перезагрузка..."},

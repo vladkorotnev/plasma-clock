@@ -535,6 +535,14 @@ static void build() {
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
         render_bool("Serial MIDI input", PREFS_KEY_SERIAL_MIDI);
+#if HAS(HTTPFVU)
+        render_bool("Check for updates automatically", PREFS_KEY_FVU_AUTO_CHECK);
+        render_bool("Install updates automatically", PREFS_KEY_FVU_AUTO_INSTALL);
+        render_int("Update check interval, minutes", PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES);
+        render_string("Firmware update server", PREFS_KEY_FVU_SERVER);
+#endif
+        render_string("Webadmin login", PREFS_KEY_ADMIN_ID);
+        render_string("Webadmin password", PREFS_KEY_ADMIN_PASS);
         GP.BUTTON_DOWNLOAD("prefs_backup.bin", "Settings backup", GP_BLUE);
         GP.BUTTON_DOWNLOAD("crashdump.elf", "Last crash dump", GP_BLUE);
         GP.FILE_UPLOAD_RAW("prefs_restore", "Settings restore", GP_BLUE, "", "", "/prefs_restore");
@@ -619,6 +627,12 @@ void action() {
         save_int(PREFS_KEY_DISP_LANGUAGE, 0, 1);
         save_int(PREFS_KEY_TTS_LANGUAGE, 0, 2);
         save_int(PREFS_KEY_VOICE_MODE_RESAMPLING, 0, 1);
+        save_bool(PREFS_KEY_FVU_AUTO_CHECK);
+        save_bool(PREFS_KEY_FVU_AUTO_INSTALL);
+        save_int(PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES, 1, 60 * 24);
+        save_string(PREFS_KEY_FVU_SERVER);
+        save_string(PREFS_KEY_ADMIN_ID);
+        save_string(PREFS_KEY_ADMIN_PASS);
 
 #ifdef DEMO_WEATHER_WEBADMIN
         int temp_wc;
@@ -672,9 +686,16 @@ void admin_panel_prepare(SensorPool* s, Beeper* b) {
     ui.attach(action);
     ui.downloadAuto(false);
     ui.uploadAuto(false);
-#if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
-    ui.enableAuth(ADMIN_LOGIN, ADMIN_PASS);
-#endif
+
+    String login = prefs_get_string(PREFS_KEY_ADMIN_ID);
+    String pass = prefs_get_string(PREFS_KEY_ADMIN_PASS);
+    if(login.length() > 0 && pass.length() > 0) {
+        char * login_raw = (char*) malloc(login.length() + 1);
+        char * pass_raw = (char*) malloc(pass.length() + 1);
+        strncpy(login_raw, login.c_str(), login.length() + 1);
+        strncpy(pass_raw, pass.c_str(), pass.length() + 1);
+        ui.enableAuth(login_raw, pass_raw);
+    }
 
     all_chime_names_csv.reserve(all_chime_list.size() * 32);
     for(int i = 0; i < all_chime_list.size(); i++) {

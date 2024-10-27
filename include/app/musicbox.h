@@ -24,7 +24,7 @@ private:
     int rise = 4;
     int min_freq = 250;
     int max_freq = 3500;
-    int minTrackNo = 4;
-    int maxTrackNo = all_chime_count - 1;
+    int minTrackNo = 5;
+    int maxTrackNo = all_chime_count;
     int trackNo = minTrackNo;
 };

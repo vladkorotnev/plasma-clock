@@ -17,7 +17,9 @@ typedef enum device_state {
 #if HAS(BALANCE_BOARD_INTEGRATION)
     STATE_WEIGHING,
 #endif
-
+#if HAS(HTTPFVU)
+    STATE_HTTPFVU,
+#endif
     STATE_NEW_YEAR,
     STATE_OTAFVU,
 #if HAS(PLAYGROUND)

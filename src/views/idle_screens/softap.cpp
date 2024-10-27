@@ -3,6 +3,8 @@
 #include <fonts.h>
 
 static const uint8_t icon_data[] = {
+    // By PiiXL
+    // https://piiixl.itch.io/mega-1-bit-icons-bundle
     0x00, 0x00, 0x00, 0xfe, 0x01, 0x01, 0x01, 0x55, 0x01, 0x01, 0x01, 0x55, 0x11, 0x01, 0x19, 0x51, 
     0xfd, 0x01, 0x19, 0x01, 0x11, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x7d, 0x01, 0x01, 0x00, 0xfe
 };
@@ -44,7 +46,7 @@ void SoftApInfoView::create_components_if_needed() {
 
 void SoftApInfoView::prepare() {
     create_components_if_needed();
-    Composable::prepare();
+    Screen::prepare();
 
     network_name->set_string(NetworkManager::network_name());
     ip_address->set_string(NetworkManager::current_ip().c_str());
