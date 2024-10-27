@@ -3,6 +3,7 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
+#define HAS_OTAFVU
 #define HAS_OUTPUT_GU7000
 #define HAS_MOTION_SENSOR
 #define HAS_TEMP_SENSOR
@@ -16,7 +17,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "4"
+#define PRODUCT_VERSION "5"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;

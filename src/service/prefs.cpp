@@ -36,10 +36,20 @@ inline void init_store_if_needed() {
                 prefs_set_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT, true);
                 prefs_set_bool(PREFS_KEY_WEATHER_OVERLAY, true);
                 #ifdef WORDNIK_API_KEY
-                prefs_set_string(PREFS_KEY_WORDNIK_APIKEY, String(WORDNIK_API_KEY));
+                    prefs_set_string(PREFS_KEY_WORDNIK_APIKEY, String(WORDNIK_API_KEY));
                 #endif
                 #ifdef WEATHER_API_KEY
-                prefs_set_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
+                    prefs_set_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
+                #endif
+                #ifdef FVU_SERVER_URL
+                    prefs_set_string(PREFS_KEY_FVU_SERVER, String(FVU_SERVER_URL));
+                    prefs_set_bool(PREFS_KEY_FVU_AUTO_CHECK, true);
+                    prefs_set_bool(PREFS_KEY_FVU_AUTO_INSTALL, true);
+                    prefs_set_int(PREFS_KEY_FVU_AUTO_CHECK_INTERVAL_MINUTES, 240);
+                #endif
+                #if defined(ADMIN_LOGIN) && defined(ADMIN_PASS)
+                    prefs_set_string(PREFS_KEY_ADMIN_ID, String(ADMIN_LOGIN));
+                    prefs_set_string(PREFS_KEY_ADMIN_PASS, String(ADMIN_PASS));
                 #endif
 
                 prefs_set_bool(PREFS_KEY_INITIAL_SETTING_DONE, true);

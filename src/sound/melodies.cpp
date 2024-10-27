@@ -447,9 +447,9 @@ void load_melodies_from_disk() {
         closedir(d);
     }
     all_chime_count = all_chime_list.size();
-    all_chime_list.push_back(new RandomMelodySequence(all_chime_list, 4));
+    all_chime_list.insert(all_chime_list.begin(), new RandomMelodySequence(all_chime_list, 5));
 
-    // TODO: Get rid of those two entirely
+    // TODO: Get rid of those two vectors entirely
     all_chime_names.clear();
     for(int i = 0; i < all_chime_list.size(); i++) {
         all_chime_names.push_back(all_chime_list[i]->get_title());

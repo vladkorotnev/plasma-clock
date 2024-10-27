@@ -36,6 +36,7 @@
 #include <app/bootscreen.h>
 #include <app/musicbox.h>
 #include <app/new_year.h>
+#include <app/httpfvu.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 
@@ -210,7 +211,7 @@ static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
     bringup_sound();
-    if (!LittleFS.begin(true, "/disk")) {
+    if (!LittleFS.begin(true, FS_MOUNTPOINT)) {
         ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
         seq->play_sequence(&tulula_fvu);
     } else {
@@ -280,6 +281,9 @@ void boot_task(void*) {
     appHost->add_view(new AppShimPlayground(), STATE_PLAYGROUND);
 #endif
     appHost->add_view(new NewYearAppShim(beepola, seq, yukkuri), STATE_NEW_YEAR);
+#if HAS(HTTPFVU)
+    appHost->add_view(new HttpFvuApp(seq), STATE_HTTPFVU);
+#endif
 
     ESP_LOGI(LOG_TAG, "Finishing up");
     change_state(startup_state, TRANSITION_WIPE);

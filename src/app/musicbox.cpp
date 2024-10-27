@@ -117,7 +117,7 @@ void AppShimMusicbox::cleanup() {
 
 void AppShimMusicbox::load_and_play() {
     if(seq->is_sequencing()) seq->stop_sequence();
-    if(trackNo == all_chime_count) {
+    if(trackNo == all_chime_count + 1) {
         // Randomize is MIDI visualizer in this context
         hint_lbl->set_string("MIDI In");
         hint_lbl->hidden = false;
