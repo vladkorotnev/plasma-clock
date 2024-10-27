@@ -287,7 +287,7 @@ void app_idle_init(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
 
     bool has_at_least_one_screen = false;
     for(int i = 0; i < VIEW_MAX; i++) {
-        if(screen_times_ms[i] != 0 && i != VIEW_SOFTAP) {
+        if(screen_times_ms[i] != 0 && i != VIEW_SOFTAP && i != VIEW_FVU_NOTICE) {
             has_at_least_one_screen = true;
             break;
         }

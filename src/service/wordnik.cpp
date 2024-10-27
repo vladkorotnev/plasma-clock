@@ -30,7 +30,7 @@ TickType_t wotd_get_last_update() {
 bool wotd_get_current(char * w, size_t wsz, char * d, size_t dsz) {
     if(w == nullptr || d == nullptr) return false;
 
-    if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+    if(!xSemaphoreTake(cacheSemaphore, pdMS_TO_TICKS(1000))) {
         ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
         return false;
     }
@@ -70,8 +70,9 @@ void WordnikTaskFunction( void * pvParameter )
                     ESP_LOGE(LOG_TAG, "Parse error: %s", error.c_str());
                     isFailure = true;
                 } else {
-                    if(!xSemaphoreTake(cacheSemaphore, portMAX_DELAY)) {
+                    if(!xSemaphoreTake(cacheSemaphore, pdMS_TO_TICKS(5000))) {
                         ESP_LOGE(LOG_TAG, "Timeout waiting on cache semaphore");
+                        isFailure = true;
                     } else {
                         String w = response["word"].as<String>();
                         String d = response["definitions"][0]["text"].as<String>();
