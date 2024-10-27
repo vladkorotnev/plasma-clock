@@ -2,18 +2,24 @@ name: Build production version
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
   build-everything:
     runs-on: ubuntu-latest
     name: Build All Binaries
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           submodules: recursive
+      - name: Set up Git identity
+        run: |
+          git config user.name "Leønid Yakubovič"
+          git config user.email "sueydisnilyu@example.com"
       - name: Prepare environment
         uses: ./.github/actions/prepare_pio
       - name: Download AquesTalk
@@ -35,6 +41,8 @@ jobs:
           if-no-files-found: error
       - name: Delete WIP tunes
         run: rm ./data/music/wip_*.pomf
+      - name: Add FS version into the file system
+        run: echo "$(git rev-parse --short HEAD)" > ./data/FS_VER
       - name: Create LittleFS image
         run: pio run --target buildfs --environment music-pomf
       - name: Upload filesystem image
@@ -43,3 +51,14 @@ jobs:
           path: ./.pio/build/music-pomf/littlefs.bin
           name: filesystem.zip
           if-no-files-found: error
+      - name: Switch to public branch
+        run: git checkout pub
+      - name: Merge changes from main
+        run: git merge main
+      - name: Move things to FVUDATA for publishing
+        run: ./helper/ci/create_fvudata.sh
+      - name: Add FVUDATA stuff into git and push
+        run: |
+          git add -f ./webroot/fvudata/*
+          git commit -m "Publish firmwares at $(git rev-parse --short HEAD)"
+          git push --force -u origin pub
