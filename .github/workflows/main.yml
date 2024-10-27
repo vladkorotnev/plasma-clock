@@ -56,7 +56,9 @@ jobs:
       - name: Merge changes from main
         run: git merge main --strategy-option theirs
       - name: Move things to FVUDATA for publishing
-        run: ./helper/ci/create_fvudata.sh
+        run: |
+          git rm -r ./webroot/fvudata/*
+          ./helper/ci/create_fvudata.sh
       - name: Add FVUDATA stuff into git and push
         run: |
           cp ./CNAME ./webroot/CNAME
