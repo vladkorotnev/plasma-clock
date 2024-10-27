@@ -33,9 +33,10 @@ inline void init_store_if_needed() {
                 prefs_set_int(PREFS_KEY_HOURLY_CHIME_START_HOUR, 9);
                 prefs_set_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 21);
                 prefs_set_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES, 60);
-                prefs_set_int(PREFS_KEY_HOURLY_CHIME_MELODY, 2);
+                prefs_set_int(PREFS_KEY_HOURLY_CHIME_MELODY, 3);
                 prefs_set_bool(PREFS_KEY_VOICE_SPEAK_ON_HEADPAT, true);
                 prefs_set_bool(PREFS_KEY_WEATHER_OVERLAY, true);
+                prefs_set_bool(PREFS_KEY_TIMESERVER_ENABLE, true);
                 #ifdef WORDNIK_API_KEY
                     prefs_set_string(PREFS_KEY_WORDNIK_APIKEY, String(WORDNIK_API_KEY));
                 #endif
@@ -52,6 +53,14 @@ inline void init_store_if_needed() {
                     prefs_set_string(PREFS_KEY_ADMIN_ID, String(ADMIN_LOGIN));
                     prefs_set_string(PREFS_KEY_ADMIN_PASS, String(ADMIN_PASS));
                 #endif
+                prefs_set_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 15);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 5);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 5);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_OUTDOOR_SECONDS, 5);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 5);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_PRECIPITATION_SECONDS, 5);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_FORECAST_SECONDS, 5);
+                prefs_set_int(PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 5);
 
                 prefs_set_bool(PREFS_KEY_INITIAL_SETTING_DONE, true);
             }
