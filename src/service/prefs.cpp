@@ -26,6 +26,7 @@ inline void init_store_if_needed() {
                 #endif
                 prefs_set_int(PREFS_KEY_VOICE_SPEED, 100);
                 prefs_set_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL, true);
+                prefs_set_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR, true);
                 prefs_set_bool(PREFS_KEY_HOURLY_CHIME_ON, true);
                 prefs_set_bool(PREFS_KEY_TICKING_SOUND, true);
                 prefs_set_bool(PREFS_KEY_HOURLY_CHIME_ON, true);
