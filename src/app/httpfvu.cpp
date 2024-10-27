@@ -3,6 +3,8 @@
 #include <fonts.h>
 #include <service/localize.h>
 #include <service/prefs.h>
+#include <service/time.h>
+#include <service/alarm.h>
 #include <os_config.h>
 #include <state.h>
 #include <algorithm>
@@ -23,9 +25,19 @@ static void fvuCheckerTask(void*) {
             httpfvu_new_version_info_t ver = get_remote_version_info();
             if(prefs_get_bool(PREFS_KEY_FVU_AUTO_INSTALL) && ver.fs_current != nullptr && ver.fs_new != nullptr && strcmp(ver.fs_current, ver.fs_new) != 0) {
                 // New version auto install
-                // TODO: check if upcoming alarm and avoid installation in such case
-                is_auto_entry = true;
-                change_state(STATE_HTTPFVU);
+                tk_time_of_day_t now = get_current_time_coarse();
+                if(
+                    // If hourly chime is enabled, use it's schedule as the time to allow updating
+                    (prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON) && now.hour >= prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR) && now.hour <= prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR)) ||
+                    // Otherwise update from 10am til 10pm
+                    (!prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON) && now.hour >= 10 && now.hour <= 22)
+                ) {
+                    // Make sure there is no upcoming alarm -- we don't want to disrupt it with a potentially fatal update failure
+                    if(get_upcoming_alarm() == nullptr) {
+                        is_auto_entry = true;
+                        change_state(STATE_HTTPFVU);
+                    }
+                }
             }
         }
     }
