@@ -52,9 +52,12 @@ jobs:
           name: filesystem.zip
           if-no-files-found: error
       - name: Switch to public branch
-        run: git checkout pub
-      - name: Merge changes from main
-        run: git merge main --strategy-option theirs
+        run: |
+          cp ./data/FS_VER /tmp/FS_VER
+          git checkout HEAD -- ./data/FS_VER
+          git checkout pub
+          git merge main --strategy-option theirs
+          cp /tmp/FS_VER ./data/FS_VER
       - name: Move things to FVUDATA for publishing
         run: |
           git rm -r ./webroot/fvudata/*
