@@ -16,6 +16,7 @@ static String latitude;
 static String longitude;
 static TaskHandle_t hTask = NULL;
 static SemaphoreHandle_t cacheSemaphore;
+static SemaphoreHandle_t firstRunSemaphore;
 static current_weather_t cache = { 0 };
 static forecast_weather_t forecast_daily[FORECAST_WEATHER_DAYS] = { 0 };
 static hourly_weather_t forecast_hourly[FORECAST_WEATHER_HOURS] = { 0 };
@@ -142,6 +143,7 @@ void WeatherTaskFunction( void * pvParameter )
             ESP_LOGE(LOG_TAG, "Unexpected response code %i when refreshing", response);
             isFailure = true;
         }
+        xSemaphoreGive(firstRunSemaphore);
         vTaskDelay(isFailure ? pdMS_TO_TICKS(5000) : interval);
     }
 }
@@ -154,6 +156,8 @@ void weather_start() {
 
     cacheSemaphore = xSemaphoreCreateBinary();
     xSemaphoreGive(cacheSemaphore);
+
+    firstRunSemaphore = xSemaphoreCreateBinary();
 
     apiKey = prefs_get_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
     latitude = prefs_get_string(PREFS_KEY_WEATHER_LAT, String(WEATHER_LAT));
@@ -175,6 +179,10 @@ void weather_start() {
         &hTask
     ) != pdPASS) {
         ESP_LOGE(LOG_TAG, "Task creation failed!");
+    } else {
+        // avoid core contention by waiting for the first request to go through before continuing with boot
+        ESP_LOGI(LOG_TAG, "Waiting on first run semaphore");
+        xSemaphoreTake(firstRunSemaphore, portMAX_DELAY);
     }
 }
 

@@ -44,40 +44,9 @@ const char * day_letters() {
 
 static const std::map<const std::string, const char*> english = {
     {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
-
     {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
-    {"Loading...", "Loading..."},
-
-    {"Yes", "Yes"},
-    {"No", "No"},
-
-    {"SNOOZE", "SNOOZE"},
-    {"STOP", "STOP"},
-    {"HOLD", "HOLD"},
-    {"Only Once", "Only Once"},
-
-    {"(Randomize)", "(Randomize)"},
-    {"Clear", "Clear"},
-    {"Loud", "Loud"},
-    {"English", "English"},
     {"Russian", "Русский"},
     {"Japanese", "Japanese"},
-
-    {"Off", "Off"},
-    {"Wipe", "Wipe"},
-    {"Slide Left", "Slide Left"},
-    {"Slide Right", "Slide Right"},
-    {"Slide Up", "Slide Up"},
-    {"Slide Down", "Slide Down"},
-
-    {"Slow", "Slow"},
-    {"Medium", "Medium"},
-    {"Fast", "Fast"},
-    {"Sonic", "Sonic"},
-
-    {"Dim", "Dim"},
-    {"Bright", "Bright"},
-    {"Automatic", "Automatic"},
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
@@ -100,8 +69,12 @@ static const std::map<const std::string, const char*> russian = {
 
     {"Display", "Экран"},
     {"Offsets", "Калибровка"},
+    {"System", "Система"},
     {"Status", "Состояние"},
     {"Save & Restart", "Сохранить и перезагрузить"},
+
+    {"Reset Webadmin Password", "Сброс пароля вебморды"},
+    {"Press \x1A", "Нажми \x1A"},
 
     {"Notice", "Внимание"},
     {"FULL_SETTINGS_NOTICE", "Больше настроек доступно в вебморде через браузер"},
@@ -214,7 +187,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Snooze time", "Поспать ещё, минут"},
     {"Max beeping time, minutes", "Пищать не дольше чем, минут"},
 
-    {"SNOOZE", "СПАТЬ"},
+    {"SNOOZE", "СПЛЮ ЕЩЁ"},
     {"STOP", "ВСТАЮ"},
     {"HOLD", "ДЕРЖИ"},
 

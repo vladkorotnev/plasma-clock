@@ -308,10 +308,16 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     system_info->add_view(new MenuInfoItemView(localized_string("MAC Address"), buf_mac));
     system_info->add_view(new DiskSpaceView());
     system_info->add_view(new UptimeView());
-    system_info->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
+
+    static ListView * service_settings = new ListView();
+    service_settings->add_view(new MenuBooleanSettingView(localized_string("Remote Control Server"), PREFS_KEY_REMOTE_SERVER));
 #if HAS(SERIAL_MIDI)
-    system_info->add_view(new MenuBooleanSettingView(localized_string("Serial MIDI Input"), PREFS_KEY_SERIAL_MIDI));
+    service_settings->add_view(new MenuBooleanSettingView(localized_string("Serial MIDI Input"), PREFS_KEY_SERIAL_MIDI));
 #endif
+    service_settings->add_view(new MenuActionItemView(localized_string("Reset Webadmin Password"), []() {
+        prefs_set_string(PREFS_KEY_ADMIN_PASS, "");
+        change_state(STATE_RESTART, TRANSITION_NONE);
+    }, nullptr, localized_string("Press \x1A")));
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL
@@ -377,6 +383,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
 #if (HAS(TEMP_SENSOR) || (HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)))
     settings_menu->add_view(new MenuActionItemView(localized_string("Offsets"), [this](){ push_submenu(calibration_menu); }, &icon_thermo_1616));
 #endif
+    settings_menu->add_view(new MenuActionItemView(localized_string("System"), [this](){ push_submenu(service_settings); }, &wrench_icns));
     settings_menu->add_view(new MenuActionItemView(localized_string("Status"), [this](){ push_submenu(system_info); scroll_guidance->right = false; }, &status_icns));
     settings_menu->add_view(new MenuInfoItemView(localized_string("Notice"), localized_string("FULL_SETTINGS_NOTICE")));
     settings_menu->add_view(new MenuActionItemView(localized_string("Save & Restart"), [this](){

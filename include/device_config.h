@@ -11,8 +11,15 @@
 // Enable the Wordnik API and Word Of The Day screen. UNSTABLE: Uses a lot of RAM for HTTPS.
 #define HAS_WORDNIK_API
 
-// Enable over-the-air firmware version upgrade. NB: Requires a new partition map, someday later
+// Enable over-the-air firmware version upgrade
 #define HAS_OTAFVU
+
+// Enable HTTP firmware upgrade
+#define HAS_HTTPFVU
+// Set the HTTP firmware upgrade default server, if not present in .env
+#ifndef FVU_SERVER_URL
+#define FVU_SERVER_URL "http://pis-os.genjit.su/fvudata"
+#endif
 
 // DEPRECATED: Enable Switchbot Meter temperature probing. UNSTABLE: Uses NimBLE so a lot of RAM, disconnects over time.
 // #define HAS_SWITCHBOT_METER_INTEGRATION

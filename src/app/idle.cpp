@@ -121,6 +121,7 @@ void sound_tick_tock() {
 
 void _play_hourly_chime_if_enabled(bool first_chime) {
     if(!prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON)) return;
+    first_chime &= !foo_is_playing(); // <- play the usual (normally short) chime if Foobar is playing
     int melody_no = first_chime ? prefs_get_int(PREFS_KEY_FIRST_CHIME_MELODY) : prefs_get_int(PREFS_KEY_HOURLY_CHIME_MELODY);
     auto melody = melody_from_no(melody_no);
     sequencer->play_sequence(melody, SEQUENCER_PLAY_HOOK_ONLY);
