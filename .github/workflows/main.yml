@@ -59,6 +59,7 @@ jobs:
         run: ./helper/ci/create_fvudata.sh
       - name: Add FVUDATA stuff into git and push
         run: |
+          cp ./CNAME ./webroot/CNAME
           git add -f ./webroot/fvudata/*
           git commit -m "ci: Publish firmwares at $(git rev-parse --short HEAD)"
           git push --force -u origin pub
