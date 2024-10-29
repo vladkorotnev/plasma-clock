@@ -95,6 +95,10 @@ void pop_state(device_state_t expected, transition_type_t transition) {
     }
 }
 
+device_state_t get_state() {
+    return _actual_current_state;
+}
+
 void bringup_sound() {
     beepola = new Beeper();
     seq = new NewSequencer();

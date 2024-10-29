@@ -60,6 +60,10 @@
 #include <devices/mid_clock_noritake_wide.h>
 #endif
 
+#ifdef DEVICE_LEPISOS
+#include <devices/led_clock.h>
+#endif
+
 // ---- DEPENDENCY RULES
 #if !HAS(BLUETOOTH_LE)
     #if HAS(SWITCHBOT_METER_INTEGRATION)
