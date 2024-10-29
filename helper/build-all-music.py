@@ -8,8 +8,6 @@ ELF2POMF = "./helper/elf2pomf.py"
 
 def post_program_action(source, target, env):
     global OUTDIR, ELF2POMF
-    # Delete firmware.elf to avoid uploading dummy firmware
-    os.remove(target[0].get_abspath())
     music_path = os.path.join(str(target[0].get_dir()), "src", "music")
     print("Music path", music_path, "->", OUTDIR)
 

@@ -34,8 +34,11 @@ static void fvuCheckerTask(void*) {
                 ) {
                     // Make sure there is no upcoming alarm -- we don't want to disrupt it with a potentially fatal update failure
                     if(get_upcoming_alarm() == nullptr) {
+                        while(get_state() != STATE_IDLE) {
+                            vTaskDelay(pdMS_TO_TICKS(10000));
+                        }
                         is_auto_entry = true;
-                        change_state(STATE_HTTPFVU);
+                        push_state(STATE_HTTPFVU);
                     }
                 }
             }
