@@ -3,10 +3,6 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
-// Clock made around the PCB designed in 2024/09 labeled
-// 'uPIS-OS Devkit / Genjitsu Labs 2024'
-// 'microPIS-OS CPU BD V1.0 2024-09-16'
-
 #define HAS_OUTPUT_AKIZUKI_K875
 #define HAS_KEYPAD
 #define HAS_VARYING_BRIGHTNESS
