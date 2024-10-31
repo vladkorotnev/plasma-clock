@@ -43,7 +43,7 @@ public:
         int dark_pwm = 200,
         uint8_t panel_count = 4,
         uint8_t desired_frame_clock = 80,
-        spi_host_device_t host = SPI2_HOST
+        spi_host_device_t host = SPI3_HOST
     );
 
     void initialize() override;
