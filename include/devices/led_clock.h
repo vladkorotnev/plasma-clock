@@ -38,9 +38,9 @@ const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
 
 // ---- Connection of buttons ----
 const keypad_definition_t HWCONF_KEYPAD = {
-    {GPIO_NUM_14, KEY_RIGHT},
-    {GPIO_NUM_32, KEY_LEFT},
-    {GPIO_NUM_34, KEY_UP},
-    {GPIO_NUM_27, KEY_DOWN},
+    {GPIO_NUM_14, KEY_LEFT},
+    {GPIO_NUM_32, KEY_RIGHT},
+    {GPIO_NUM_34, KEY_DOWN},
+    {GPIO_NUM_27, KEY_UP},
     {GPIO_NUM_35, KEY_HEADPAT}, //<- finally a clock to have hardware headpat!
 };

@@ -61,7 +61,7 @@ def prev_note_off_event(chan):
     return None
 
 for msg in mid:
-    print(msg)
+    # print(msg)
     if msg.time > 0:
         if len(evts) > 0 and evts[-1].kind == "DELAY":
             evts[-1].arg += int(msg.time * 1000)
