@@ -36,12 +36,6 @@ static spi_device_handle_t hDev = nullptr;
 static size_t _bytes_per_row = 0;
 static spi_transaction_t * _txn = nullptr;
 
-IRAM_ATTR void txn_done_isr(spi_transaction_t * txn) {
-    if(txn->user != MAGIC_TXN_ID || _latch == 0 || _data == nullptr || _bytes_per_row == 0 || _txn == nullptr) return;
-    digitalWrite(_latch, 0);
-    digitalWrite(_latch, 1);
-}
-
 AkizukiK875Driver::AkizukiK875Driver(
     gpio_num_t latch_pin,
     gpio_num_t clock_pin,
@@ -90,9 +84,6 @@ void AkizukiK875Driver::initialize() {
     _latch = LATCH_PIN;
     _bytes_per_row = total_bytes_per_row;
 
-    pinMode(LATCH_PIN, OUTPUT);
-    digitalWrite(LATCH_PIN, 1);
-
     ledcSetup(ledcChannel, 16000, 8);
     ledcAttachPin(STROBE_PIN, ledcChannel);
     ledcWrite(ledcChannel, brightPwm);
@@ -134,11 +125,11 @@ void AkizukiK875Driver::initialize() {
             .cs_ena_posttrans = 0,
             .clock_speed_hz = PIXEL_CLOCK_HZ,
             .input_delay_ns = 0,
-            .spics_io_num = -1,
+            .spics_io_num = LATCH_PIN,
             .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_BIT_LSBFIRST | SPI_DEVICE_POSITIVE_CS,
             .queue_size = 128,
             .pre_cb = nullptr,
-            .post_cb = txn_done_isr
+            .post_cb = nullptr
         };
 
         res = spi_bus_add_device(spi, &dev_cfg, &hDev);
