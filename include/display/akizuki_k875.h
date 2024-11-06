@@ -42,7 +42,7 @@ public:
         int bright_pwm = 8,
         int dark_pwm = 200,
         uint8_t panel_count = 4,
-        uint8_t desired_frame_clock = HWCONF_DESIRED_FPS,
+        int desired_frame_clock = HWCONF_DESIRED_FPS * 10,
         spi_host_device_t host = SPI3_HOST
     );
 

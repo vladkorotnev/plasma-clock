@@ -2,6 +2,7 @@
 
 #if HAS(OUTPUT_AKIZUKI_K875)
 #include <hal/spi_ll.h>
+#include <driver/ledc.h>
 #include "display/akizuki_k875.h"
 #include "Arduino.h"
 
@@ -36,10 +37,13 @@ static int _row = 0;
 static spi_device_handle_t hDev = nullptr;  
 static size_t _bytes_per_row = 0;
 static spi_transaction_t * _txn = nullptr;
+static spi_dev_t * _spi = nullptr;
 
 static IRAM_ATTR void isr(void*) {
-    digitalWrite(_latch, LOW);
-    digitalWrite(_latch, HIGH);
+    _spi->dma_int_clr.out_eof = 1; // acknowledge the interrupt!
+
+    gpio_set_level(_latch, 0);
+    gpio_set_level(_latch, 1);
 }
 
 AkizukiK875Driver::AkizukiK875Driver(
@@ -54,7 +58,7 @@ AkizukiK875Driver::AkizukiK875Driver(
     int bright_pwm,
     int dark_pwm,
     uint8_t panel_count,
-    uint8_t desired_frame_clock,
+    int desired_frame_clock,
     spi_host_device_t host
 ):
     LATCH_PIN(latch_pin),
@@ -88,13 +92,11 @@ void AkizukiK875Driver::initialize() {
     _row = 0;
     _data = data;
     _latch = LATCH_PIN;
-    
-    ledcSetup(2, PIXEL_CLOCK_HZ / (PANEL_COUNT * columns_per_panel), 8);
-    ledcAttachPin(_latch, 2);
-    ledcWrite(2, 127);
-
     _bytes_per_row = total_bytes_per_row;
 
+    pinMode(_latch, OUTPUT);
+    digitalWrite(_latch, HIGH);
+    
     ledcSetup(ledcChannel, 16000, 8);
     ledcAttachPin(STROBE_PIN, ledcChannel);
     ledcWrite(ledcChannel, brightPwm);
@@ -136,9 +138,9 @@ void AkizukiK875Driver::initialize() {
             .cs_ena_posttrans = 0,
             .clock_speed_hz = PIXEL_CLOCK_HZ,
             .input_delay_ns = 0,
-            .spics_io_num = SACRIFICIAL_UNUSE_PIN,
+            .spics_io_num = -1,
             .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_BIT_LSBFIRST | SPI_DEVICE_POSITIVE_CS,
-            .queue_size = 128,
+            .queue_size = 4,
             .pre_cb = nullptr,
             .post_cb = nullptr
         };
@@ -153,19 +155,21 @@ void AkizukiK875Driver::initialize() {
     res = spi_device_queue_trans(hDev, &trans, portMAX_DELAY);
     if(res != ESP_OK) ESP_LOGE(LOG_TAG, "SPI Dev Txn Error %i: %s", res, esp_err_to_name(res));
     else {
-        spi_dev_t* const spiHw = &SPI3;
+        spi_dev_t* const spiHw = SPI_LL_GET_HW(spi);
+        _spi = spiHw;
         spi_transaction_t * t = &trans;
 
         res = spi_device_get_trans_result(hDev, &t, portMAX_DELAY);
         if(res != ESP_OK) ESP_LOGE(LOG_TAG, "SPI Dev Wait Error %i: %s", res, esp_err_to_name(res));
 
         lldesc_s * lldescs = (lldesc_s*) heap_caps_calloc(1, sizeof(lldesc_s) * (rows+1), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
-        for(int i = 0; i < rows; i++) {
+        for(int i = 0; i < rows + 1; i++) {
             lldesc_s * d = &lldescs[i];
             d->buf = &data[i * total_bytes_per_row];
             d->length = total_bytes_per_row;
             d->size = total_bytes_per_row;
             d->owner = LLDESC_HW_OWNED;
+            d->eof = 1;
             if(i == rows - 1) {
                 d->qe.stqe_next = &lldescs[0];
             } else {
@@ -180,12 +184,7 @@ void AkizukiK875Driver::initialize() {
         };
         spi_ll_master_set_line_mode(spiHw, lm);
 
-        // spiHw->user.usr_mosi = 1;
-        // spiHw->user.usr_miso = 0;
-        // spiHw->user.usr_addr = 0;
-        // spiHw->user.usr_command = 0;
         spiHw->dma_out_link.addr           = (int)(lldescs) & 0xFFFFF;
-
         // Set circular mode
         //      https://www.esp32.com/viewtopic.php?f=2&t=4011#p18107
         //      > yes, in SPI DMA mode, SPI will alway transmit and receive
@@ -194,6 +193,14 @@ void AkizukiK875Driver::initialize() {
 		spiHw->dma_conf.dma_continue	= 1;	// Set contiguous mode
 		spiHw->dma_out_link.start		= 1;	// Start SPI DMA transfer (1)
         spiHw->cmd.usr = 1;
+
+        spiHw->dma_int_clr.val = spiHw->dma_int_st.val;
+        spiHw->dma_conf.out_eof_mode = 1;
+
+        res = esp_intr_alloc(ETS_SPI3_DMA_INTR_SOURCE, 0, isr, nullptr, nullptr);
+        if(res != ESP_OK)  ESP_LOGE(LOG_TAG, "SPI Dev Intr Alloc Error %i: %s", res, esp_err_to_name(res));
+        
+        spiHw->dma_int_ena.out_eof = 1;
     }
 }
 

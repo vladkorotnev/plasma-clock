@@ -31,7 +31,7 @@ const gpio_num_t HWCONF_K875_SIN3_GPIO = GPIO_NUM_22;
 const gpio_num_t HWCONF_K875_SACRIFICIAL_GPIO = GPIO_NUM_5;
 #define HWCONF_DISPLAY_WIDTH_PX 128
 #define HWCONF_DISPLAY_HEIGHT_PX 16
-#define HWCONF_DESIRED_FPS 80
+#define HWCONF_DESIRED_FPS 60
 
 // ---- Connection to light sensors ----
 const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
