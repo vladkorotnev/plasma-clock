@@ -1,12 +1,11 @@
 #include <device_config.h>
 
 #if HAS(OUTPUT_AKIZUKI_K875)
+#include <hal/spi_ll.h>
 #include "display/akizuki_k875.h"
 #include "Arduino.h"
-#include <soc/spi_reg.h>
-#include <soc/dport_reg.h>
 
-static char LOG_TAG[] = "K875";
+static char LOG_TAG[] = "SWEEP";
 
 // Pretty crappy code quality converted from a PoC
 // But it seems to work!
@@ -14,331 +13,33 @@ static char LOG_TAG[] = "K875";
 // But I don't want to mess around that much for now!
 // Known issue: if the CPU freezes the framebuffer task or something, the screen blanks for a bit
 
+void* MAGIC_TXN_ID = (void*) 0x39393939;
 const uint8_t matrices_per_panel = 2;
 const uint8_t bus_cycles_per_panel = 16;
 const uint8_t bus_cycles_per_byte = 2;
 const uint8_t rows = 16;
 const int columns_per_panel = 32;
+
+static spi_transaction_t trans = {
+    .flags = SPI_TRANS_MODE_QIO,
+    .cmd = 0,
+    .addr = 0,
+    .length = 0, //<- to be set
+    .rxlength = 0,
+    .user = MAGIC_TXN_ID,
+    .tx_buffer = nullptr, //<- to be set
+    .rx_data = { 0 }
+};
+static gpio_num_t _latch = GPIO_NUM_0;
 static uint8_t * _data = nullptr;
 static int _row = 0;
+static spi_device_handle_t hDev = nullptr;  
 static size_t _bytes_per_row = 0;
+static spi_transaction_t * _txn = nullptr;
 
-static const uint8_t InvalidIndex = (uint8_t) -1;
-
-spi_dev_t *myspi_get_hw_for_host(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return &SPI1; break;
-    case HSPI_HOST: return &SPI2; break;
-    case VSPI_HOST: return &SPI3; break;
-    default:        return NULL;  break;
-    }
-}
-
-static uint8_t getSpidOutByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPID_OUT_IDX;	break;
-    case HSPI_HOST: return HSPID_OUT_IDX;	break;
-    case VSPI_HOST: return VSPID_OUT_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpidInByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPID_IN_IDX;		break;
-    case HSPI_HOST: return HSPID_IN_IDX;	break;
-    case VSPI_HOST: return VSPID_IN_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpiqOutByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPIQ_OUT_IDX;	break;
-    case HSPI_HOST: return HSPIQ_OUT_IDX;	break;
-    case VSPI_HOST: return VSPIQ_OUT_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpiqInByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPIQ_IN_IDX;		break;
-    case HSPI_HOST: return HSPIQ_IN_IDX;	break;
-    case VSPI_HOST: return VSPIQ_IN_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpiWpOutByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPIWP_OUT_IDX;	break;
-    case HSPI_HOST: return HSPIWP_OUT_IDX;	break;
-    case VSPI_HOST: return VSPIWP_OUT_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpiWpInByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPIWP_IN_IDX;		break;
-    case HSPI_HOST: return HSPIWP_IN_IDX;	break;
-    case VSPI_HOST: return VSPIWP_IN_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpiHdOutByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPIHD_OUT_IDX;	break;
-    case HSPI_HOST: return HSPIHD_OUT_IDX;	break;
-    case VSPI_HOST: return VSPIHD_OUT_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getSpiHdInByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPIHD_IN_IDX;		break;
-    case HSPI_HOST: return HSPIHD_IN_IDX;	break;
-    case VSPI_HOST: return VSPIHD_IN_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getCsOutByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPICS0_OUT_IDX;	break;
-    case HSPI_HOST: return HSPICS0_OUT_IDX;	break;
-    case VSPI_HOST: return VSPICS0_OUT_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-static uint8_t getCsInByHost(
-    spi_host_device_t host
-) {
-    switch(host) {
-    case SPI_HOST:  return SPICS0_IN_IDX;	break;
-    case HSPI_HOST: return HSPICS0_IN_IDX;	break;
-    case VSPI_HOST: return VSPICS0_IN_IDX;	break;
-    default:        return InvalidIndex;	break;
-    }
-}
-
-esp_err_t myspi_prepare_circular_buffer(
-      const spi_host_device_t   spiHostDevice
-    // , const int                 dma_chan
-    , const lldesc_t*           lldescs
-    , const double              dmaClockSpeedInHz
-    , const gpio_num_t          data0_gpio_num // mosi (spid)
-    , const gpio_num_t          data1_gpio_num // miso (spiq)
-    , const gpio_num_t          data2_gpio_num // spiwp
-    , const gpio_num_t          data3_gpio_num // spihd
-    , const gpio_num_t          cs_gpio_num
-    , const int                 waitCycle = 0
-) {
-    spi_dev_t* const spiHw = myspi_get_hw_for_host(spiHostDevice);
-    const int Cs = 0;
-	const int CsMask = 1 << Cs;
-
-    //Use GPIO
-    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[data0_gpio_num], PIN_FUNC_GPIO);
-    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[data1_gpio_num], PIN_FUNC_GPIO);
-    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[data2_gpio_num], PIN_FUNC_GPIO);
-    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[data3_gpio_num], PIN_FUNC_GPIO);
-    PIN_FUNC_SELECT(GPIO_PIN_MUX_REG[cs_gpio_num], PIN_FUNC_GPIO);
-
-    gpio_set_direction(data0_gpio_num, GPIO_MODE_INPUT_OUTPUT);
-    gpio_set_direction(data1_gpio_num, GPIO_MODE_INPUT_OUTPUT);
-    gpio_set_direction(data2_gpio_num, GPIO_MODE_INPUT_OUTPUT);
-    gpio_set_direction(data3_gpio_num, GPIO_MODE_INPUT_OUTPUT);
-    gpio_set_direction(cs_gpio_num, GPIO_MODE_INPUT_OUTPUT);
-
-    gpio_matrix_out(data0_gpio_num, getSpidOutByHost(spiHostDevice), false, false);
-    gpio_matrix_out(data1_gpio_num, getSpiqOutByHost(spiHostDevice), false, false);
-    gpio_matrix_out(data2_gpio_num, getSpiWpOutByHost(spiHostDevice), false, false);
-    gpio_matrix_out(data3_gpio_num, getSpiHdOutByHost(spiHostDevice), false, false);
-    gpio_matrix_out(cs_gpio_num, getCsOutByHost(spiHostDevice), false, false);
-
-    gpio_matrix_in(data0_gpio_num, getSpidInByHost(spiHostDevice), false);
-    gpio_matrix_in(data1_gpio_num, getSpiqInByHost(spiHostDevice), false);
-    gpio_matrix_in(data2_gpio_num, getSpiWpInByHost(spiHostDevice), false);
-    gpio_matrix_in(data3_gpio_num, getSpiHdInByHost(spiHostDevice), false);
-    gpio_matrix_in(cs_gpio_num, getCsInByHost(spiHostDevice), false);
-
-    //Select DMA channel.
-    // DPORT_SET_PERI_REG_BITS(
-    //       DPORT_SPI_DMA_CHAN_SEL_REG
-    //     , 3
-    //     , dma_chan
-    //     , (spiHostDevice * 2)
-    // );
-
-    //Reset DMA
-    spiHw->dma_conf.val        		|= SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST;
-    spiHw->dma_out_link.start  		= 0;
-    spiHw->dma_in_link.start   		= 0;
-    spiHw->dma_conf.val        		&= ~(SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST);
-
-    //Reset timing
-    spiHw->ctrl2.val           		= 0;
-
-    //Disable unneeded ints
-    spiHw->slave.rd_buf_done   		= 0;
-    spiHw->slave.wr_buf_done   		= 0;
-    spiHw->slave.rd_sta_done   		= 0;
-    spiHw->slave.wr_sta_done   		= 0;
-    spiHw->slave.rd_buf_inten  		= 0;
-    spiHw->slave.wr_buf_inten  		= 0;
-    spiHw->slave.rd_sta_inten  		= 0;
-    spiHw->slave.wr_sta_inten  		= 0;
-    spiHw->slave.trans_inten   		= 0;
-    spiHw->slave.trans_done    		= 0;
-
-    //Set CS pin, CS options
-	spiHw->pin.master_ck_sel			&= ~CsMask;
-	spiHw->pin.master_cs_pol			&= ~CsMask; // <- for LATCH high during output //&= ~CsMask;
-
-	// Set SPI Clock
-	//  Register 7.7: SPI_CLOCK_REG (0x18)
-	//
-	//		SPI_CLK_EQU_SYSCLK
-	//			In master mode, when this bit is set to 1, spi_clk is equal
-	//			to system clock; when set to 0, spi_clk is divided from system
-	//			clock.
-	//
-	//		SPI_CLKDIV_PRE
-	//			In master mode, the value of this register field is the
-	//			pre-divider value for spi_clk, minus one.
-	//
-	//		SPI_CLKCNT_N
-	//			In master mode, this is the divider for spi_clk minus one.
-	//			The spi_clk frequency is
-	//				system_clock/(SPI_CLKDIV_PRE+1)/(SPI_CLKCNT_N+1).
-	//
-	//		SPI_CLKCNT_H
-	//			For a 50% duty cycle, set this to floor((SPI_CLKCNT_N+1)/2-1)
-	//
-	//		SPI_CLKCNT_L
-	//			In master mode, this must be equal to SPI_CLKCNT_N.
-	{
-		const double	preDivider			= 1.0;
-	    const double	apbClockSpeedInHz	= APB_CLK_FREQ;
-		const double	apbClockPerDmaCycle	= (apbClockSpeedInHz / preDivider / dmaClockSpeedInHz);
-
-		const int32_t	clkdiv_pre	= ((int32_t) preDivider) - 1;
-		const int32_t	clkcnt_n	= ((int32_t) apbClockPerDmaCycle) - 1;
-		const int32_t	clkcnt_h	= (clkcnt_n + 1) / 2 - 1;
-		const int32_t	clkcnt_l	= clkcnt_n;
-
-		spiHw->clock.clk_equ_sysclk	= 0;
-	    spiHw->clock.clkcnt_n		= clkcnt_n;
-	    spiHw->clock.clkdiv_pre		= clkdiv_pre;
-		spiHw->clock.clkcnt_h		= clkcnt_h;
-	    spiHw->clock.clkcnt_l		= clkcnt_l;
-	}
-
-    //Configure bit order
-    spiHw->ctrl.rd_bit_order           = 0;    // MSB first
-    spiHw->ctrl.wr_bit_order           = 1;    // LSB first
-
-    //Configure polarity
-    spiHw->pin.ck_idle_edge            = 0;
-    spiHw->user.ck_out_edge            = 0;
-    spiHw->ctrl2.miso_delay_mode       = 0;
-
-    //configure dummy bits
-    spiHw->user.usr_dummy              = 0;
-    spiHw->user1.usr_dummy_cyclelen    = 0;
-
-    //Configure misc stuff
-    spiHw->user.doutdin                = 0;
-    spiHw->user.sio                    = 0;
-
-    spiHw->ctrl2.setup_time            = 0;
-    spiHw->user.cs_setup               = 0;
-    spiHw->ctrl2.hold_time             = 0;
-    spiHw->user.cs_hold                = 0;
-
-    //Configure CS pin
-    spiHw->pin.cs0_dis                 = (Cs == 0) ? 0 : 1;
-    spiHw->pin.cs1_dis                 = (Cs == 1) ? 0 : 1;
-    spiHw->pin.cs2_dis                 = (Cs == 2) ? 0 : 1;
-
-    //Reset SPI peripheral
-    spiHw->dma_conf.val                |= SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST;
-    spiHw->dma_out_link.start          = 0;
-    spiHw->dma_in_link.start           = 0;
-    spiHw->dma_conf.val                &= ~(SPI_OUT_RST|SPI_IN_RST|SPI_AHBM_RST|SPI_AHBM_FIFO_RST);
-    spiHw->dma_conf.out_data_burst_en  = 1;
-
-    //Set up QIO
-    spiHw->ctrl.val		&= ~(SPI_FREAD_DUAL|SPI_FREAD_QUAD|SPI_FREAD_DIO|SPI_FREAD_QIO);
-    spiHw->user.val		&= ~(SPI_FWRITE_DUAL|SPI_FWRITE_QUAD|SPI_FWRITE_DIO|SPI_FWRITE_QIO);
-
-    //DMA temporary workaround: let RX DMA work somehow to avoid the issue in ESP32 v0/v1 silicon
-    spiHw->dma_in_link.addr            = 0;
-    spiHw->dma_in_link.start           = 1;
-
-    spiHw->user1.usr_addr_bitlen       = 0;
-    spiHw->user2.usr_command_bitlen    = 0;
-    spiHw->user.usr_addr               = 0;
-    spiHw->user.usr_command            = 0;
-    if(waitCycle <= 0) {
-        spiHw->user.usr_dummy              = 0;
-        spiHw->user1.usr_dummy_cyclelen    = 0;
-    } else {
-        spiHw->user.usr_dummy              = 1;
-        spiHw->user1.usr_dummy_cyclelen    = (uint8_t) (waitCycle-1);
-    }
-
-    spiHw->user.usr_mosi_highpart      = 0;
-    spiHw->user2.usr_command_value     = 0;
-    spiHw->addr                        = 0;
-    spiHw->user.usr_mosi               = 1;        // Enable MOSI
-    spiHw->user.usr_miso               = 0;
-
-    spiHw->dma_out_link.addr           = (int)(lldescs) & 0xFFFFF;
-
-	spiHw->mosi_dlen.usr_mosi_dbitlen  = 0;	
-    spiHw->miso_dlen.usr_miso_dbitlen  = 0;
-
-    // Set circular mode
-    //      https://www.esp32.com/viewtopic.php?f=2&t=4011#p18107
-    //      > yes, in SPI DMA mode, SPI will alway transmit and receive
-    //      > data when you set the SPI_DMA_CONTINUE(BIT16) of SPI_DMA_CONF_REG.
-    spiHw->dma_conf.dma_continue       = 1;
-
-    spiHw->dma_conf.dma_tx_stop		= 1;	// Stop SPI DMA
-    spiHw->ctrl2.val           		= 0;	// Reset timing
-    spiHw->dma_conf.dma_tx_stop		= 0;	// Disable stop
-    spiHw->dma_conf.dma_continue	= 1;	// Set contiguous mode
-    spiHw->dma_out_link.start		= 1;	// Start SPI DMA transfer (1)
-    // Start
-    spiHw->cmd.usr					= 1;
-
-    return ESP_OK;
+static IRAM_ATTR void isr(void*) {
+    digitalWrite(_latch, LOW);
+    digitalWrite(_latch, HIGH);
 }
 
 AkizukiK875Driver::AkizukiK875Driver(
@@ -381,29 +82,18 @@ void AkizukiK875Driver::initialize() {
         ESP_LOGE(LOG_TAG, "Could not allocate data buffer! Wanted %i bytes", total_bytes_per_row * rows);
         return;
     }
+    trans.length = total_bytes_per_row * 8;
+    trans.tx_buffer = data;
+    _txn = &trans;
     _row = 0;
     _data = data;
+    _latch = LATCH_PIN;
+    
+    ledcSetup(2, PIXEL_CLOCK_HZ / (PANEL_COUNT * columns_per_panel), 8);
+    ledcAttachPin(_latch, 2);
+    ledcWrite(2, 127);
+
     _bytes_per_row = total_bytes_per_row;
-
-    lldesc_s * lldescs = (lldesc_s*) heap_caps_calloc(1, rows * sizeof(lldesc_s), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
-    for(int i = 0; i < rows; i++) {
-        lldesc_s * d = &lldescs[i];
-
-        d->buf = &data[i * total_bytes_per_row];
-        d->length = total_bytes_per_row;
-        d->size = total_bytes_per_row;
-        d->eof = 0;
-        d->sosf = 0;
-        d->owner = LLDESC_HW_OWNED;
-
-        // make buffer circular
-        if(i == (rows - 1)) {
-            d->qe.stqe_next = &lldescs[0];
-        } 
-        else {
-            d->qe.stqe_next = &lldescs[i + 1];
-        }
-    }
 
     ledcSetup(ledcChannel, 16000, 8);
     ledcAttachPin(STROBE_PIN, ledcChannel);
@@ -436,33 +126,74 @@ void AkizukiK875Driver::initialize() {
         return;
     }
     else {
-        // spi_device_interface_config_t dev_cfg = {
-        //     .command_bits = 0,
-        //     .address_bits = 0,
-        //     .dummy_bits = 0,
-        //     .mode = 3,
-        //     .duty_cycle_pos = 0,
-        //     .cs_ena_pretrans = 0,
-        //     .cs_ena_posttrans = 0,
-        //     .clock_speed_hz = PIXEL_CLOCK_HZ,
-        //     .input_delay_ns = 0,
-        //     .spics_io_num = LATCH_PIN,
-        //     .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_BIT_LSBFIRST | SPI_DEVICE_POSITIVE_CS,
-        //     .queue_size = 128,
-        //     .pre_cb = nullptr,
-        //     .post_cb = nullptr
-        // };
+        spi_device_interface_config_t dev_cfg = {
+            .command_bits = 0,
+            .address_bits = 0,
+            .dummy_bits = 0,
+            .mode = 3,
+            .duty_cycle_pos = 0,
+            .cs_ena_pretrans = 0,
+            .cs_ena_posttrans = 0,
+            .clock_speed_hz = PIXEL_CLOCK_HZ,
+            .input_delay_ns = 0,
+            .spics_io_num = SACRIFICIAL_UNUSE_PIN,
+            .flags = SPI_DEVICE_NO_DUMMY | SPI_DEVICE_HALFDUPLEX | SPI_DEVICE_BIT_LSBFIRST | SPI_DEVICE_POSITIVE_CS,
+            .queue_size = 128,
+            .pre_cb = nullptr,
+            .post_cb = nullptr
+        };
 
-        myspi_prepare_circular_buffer(
-            spi,
-            lldescs,
-            PIXEL_CLOCK_HZ,
-            SIN1_PIN,
-            SIN2_PIN,
-            SIN3_PIN,
-            SACRIFICIAL_UNUSE_PIN,
-            LATCH_PIN
-        );
+        res = spi_bus_add_device(spi, &dev_cfg, &hDev);
+        if(res != ESP_OK) {
+            ESP_LOGE(LOG_TAG, "SPI Dev Init Error %i: %s", res, esp_err_to_name(res));
+            return;
+        }
+    }
+
+    res = spi_device_queue_trans(hDev, &trans, portMAX_DELAY);
+    if(res != ESP_OK) ESP_LOGE(LOG_TAG, "SPI Dev Txn Error %i: %s", res, esp_err_to_name(res));
+    else {
+        spi_dev_t* const spiHw = &SPI3;
+        spi_transaction_t * t = &trans;
+
+        res = spi_device_get_trans_result(hDev, &t, portMAX_DELAY);
+        if(res != ESP_OK) ESP_LOGE(LOG_TAG, "SPI Dev Wait Error %i: %s", res, esp_err_to_name(res));
+
+        lldesc_s * lldescs = (lldesc_s*) heap_caps_calloc(1, sizeof(lldesc_s) * (rows+1), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
+        for(int i = 0; i < rows; i++) {
+            lldesc_s * d = &lldescs[i];
+            d->buf = &data[i * total_bytes_per_row];
+            d->length = total_bytes_per_row;
+            d->size = total_bytes_per_row;
+            d->owner = LLDESC_HW_OWNED;
+            if(i == rows - 1) {
+                d->qe.stqe_next = &lldescs[0];
+            } else {
+                d->qe.stqe_next = &lldescs[i + 1];
+            }
+        }
+
+        spi_line_mode_t lm = {
+            .cmd_lines = 1,
+            .addr_lines = 1,
+            .data_lines = 4,
+        };
+        spi_ll_master_set_line_mode(spiHw, lm);
+
+        // spiHw->user.usr_mosi = 1;
+        // spiHw->user.usr_miso = 0;
+        // spiHw->user.usr_addr = 0;
+        // spiHw->user.usr_command = 0;
+        spiHw->dma_out_link.addr           = (int)(lldescs) & 0xFFFFF;
+
+        // Set circular mode
+        //      https://www.esp32.com/viewtopic.php?f=2&t=4011#p18107
+        //      > yes, in SPI DMA mode, SPI will alway transmit and receive
+        //      > data when you set the SPI_DMA_CONTINUE(BIT16) of SPI_DMA_CONF_REG.
+		spiHw->dma_conf.dma_tx_stop		= 0;	// Disable stop
+		spiHw->dma_conf.dma_continue	= 1;	// Set contiguous mode
+		spiHw->dma_out_link.start		= 1;	// Start SPI DMA transfer (1)
+        spiHw->cmd.usr = 1;
     }
 }
 

@@ -28,7 +28,7 @@ public:
     /// @param bright_pwm PWM duty cycle in bright state (255 = display off, 0 = full brightness)
     /// @param dark_pwm PWM duty cycle in dark state (255 = display off, 0 = full brightness)
     /// @param panel_count Count of daisy chained boards in the row. Default is 4 boards (8 panels, 128px horizontal).
-    /// @param desired_frame_clock Desired refresh rate for the whole screen in Hz. Default is 120. Too high can congest the CPU with interrupts, too low causes flickering.
+    /// @param desired_frame_clock Desired refresh rate for the whole screen in Hz. Default is `HWCONF_DESIRED_FPS`. Too high can congest the CPU with interrupts, too low causes flickering.
     /// @param host SPI host to use
     AkizukiK875Driver(
         gpio_num_t latch_pin,
@@ -42,7 +42,7 @@ public:
         int bright_pwm = 8,
         int dark_pwm = 200,
         uint8_t panel_count = 4,
-        uint8_t desired_frame_clock = 80,
+        uint8_t desired_frame_clock = HWCONF_DESIRED_FPS,
         spi_host_device_t host = SPI3_HOST
     );
 
