@@ -39,13 +39,6 @@ static size_t _bytes_per_row = 0;
 static spi_transaction_t * _txn = nullptr;
 static spi_dev_t * _spi = nullptr;
 
-static IRAM_ATTR void isr(void*) {
-    _spi->dma_int_clr.out_eof = 1; // acknowledge the interrupt!
-
-    gpio_set_level(_latch, 0);
-    gpio_set_level(_latch, 1);
-}
-
 AkizukiK875Driver::AkizukiK875Driver(
     gpio_num_t latch_pin,
     gpio_num_t clock_pin,
@@ -93,9 +86,6 @@ void AkizukiK875Driver::initialize() {
     _data = data;
     _latch = LATCH_PIN;
     _bytes_per_row = total_bytes_per_row;
-
-    pinMode(_latch, OUTPUT);
-    digitalWrite(_latch, HIGH);
     
     ledcSetup(ledcChannel, 16000, 8);
     ledcAttachPin(STROBE_PIN, ledcChannel);
@@ -108,7 +98,7 @@ void AkizukiK875Driver::initialize() {
         .data1_io_num = SIN2_PIN, // SIN2
         .sclk_io_num = CLOCK_PIN, // COCK
         .data2_io_num = SIN3_PIN, // SIN3
-        .data3_io_num = SACRIFICIAL_UNUSE_PIN, // unuse for now, sacrificial pin
+        .data3_io_num = LATCH_PIN, // unuse for now, sacrificial pin
         .data4_io_num = -1, // unuse for now
         .data5_io_num = -1, // unuse for now
         .data6_io_num = -1, // unuse for now
@@ -193,14 +183,6 @@ void AkizukiK875Driver::initialize() {
 		spiHw->dma_conf.dma_continue	= 1;	// Set contiguous mode
 		spiHw->dma_out_link.start		= 1;	// Start SPI DMA transfer (1)
         spiHw->cmd.usr = 1;
-
-        spiHw->dma_int_clr.val = spiHw->dma_int_st.val;
-        spiHw->dma_conf.out_eof_mode = 1;
-
-        res = esp_intr_alloc(ETS_SPI3_DMA_INTR_SOURCE, 0, isr, nullptr, nullptr);
-        if(res != ESP_OK)  ESP_LOGE(LOG_TAG, "SPI Dev Intr Alloc Error %i: %s", res, esp_err_to_name(res));
-        
-        spiHw->dma_int_ena.out_eof = 1;
     }
 }
 
@@ -219,15 +201,16 @@ void AkizukiK875Driver::write_fanta(const uint8_t * strides, size_t count) {
 
             row_array[byte_idx] |= 
                 (
-                    ((led1 & (1 << row)) == 0 ? 0 : 0b010) |
-                    ((led2 & (1 << row)) == 0 ? 0 : 0b100)
+                    ((led1 & (1 << row)) == 0 ? 0 : 0b0010) |
+                    ((led2 & (1 << row)) == 0 ? 0 : 0b0100) |
+                    ((col_idx == (total_bytes_per_row * 2) - 1) ? 0 : 0b1000)
                 ) << (nibble_idx ? 4 : 0);
         }
         // put the row enable signals at appropriate locations
         uint8_t byte_no = row / 2;
         uint8_t nibble_no = row % 2;
         for(int i = 0; i < PANEL_COUNT; i++) {
-            row_array[byte_no + i * bus_cycles_per_panel / bus_cycles_per_byte] |= 0b001 << (nibble_no == 0 ? 0 : 4);
+            row_array[byte_no + i * bus_cycles_per_panel / bus_cycles_per_byte] |= 0b0001 << (nibble_no == 0 ? 0 : 4);
         }
     }
 
