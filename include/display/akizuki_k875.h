@@ -66,7 +66,8 @@ protected:
     const gpio_num_t CLOCK_PIN;
     const gpio_num_t STROBE_PIN;
     const gpio_num_t SACRIFICIAL_UNUSE_PIN;
-    uint8_t * data;
+    uint8_t * dma_buffer;
+    uint8_t * scratch_buffer;
     const uint8_t ledcChannel;
     const int brightPwm;
     const int darkPwm;

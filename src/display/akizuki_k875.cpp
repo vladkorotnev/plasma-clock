@@ -74,7 +74,7 @@ AkizukiK875Driver::AkizukiK875Driver(
     STROBE_PIN(strobe_pin),
     SACRIFICIAL_UNUSE_PIN(sacrificial_pin),
     PANEL_COUNT(panel_count),
-    PIXEL_CLOCK_HZ(200000),
+    PIXEL_CLOCK_HZ(250000),
     total_bytes_per_row(bus_cycles_per_panel * panel_count / bus_cycles_per_byte),
     ledcChannel(ledc_channel),
     brightPwm(bright_pwm),
@@ -89,9 +89,17 @@ void AkizukiK875Driver::initialize() {
     ESP_LOGI(LOG_TAG, "Expected pixel clock = %i", PIXEL_CLOCK_HZ);
 
     // Create DMA-accessible buffer for the signals
-    data = (uint8_t*) heap_caps_calloc(1, (total_bytes_per_row + 1) * rows, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
-    if(data == nullptr) {
+    dma_buffer = (uint8_t*) heap_caps_calloc(1, (total_bytes_per_row + 1) * rows, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL | MALLOC_CAP_DMA);
+    if(dma_buffer == nullptr) {
         ESP_LOGE(LOG_TAG, "Could not allocate data buffer! Wanted %i bytes", (total_bytes_per_row + 1) * rows);
+        return;
+    }
+
+    // On average it takes about 400us to transform the data from Fanta format into the signal sequence format, but only 3us to copy within the internal memory
+    // So to reduce flickering due to DMA concurrent access, let's prep the data in a scratch buffer then copy it
+    scratch_buffer = (uint8_t*) heap_caps_calloc(1, (total_bytes_per_row + 1) * rows, MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+    if(scratch_buffer == nullptr) {
+        ESP_LOGE(LOG_TAG, "Could not allocate scratch buffer! Wanted %i bytes", (total_bytes_per_row + 1) * rows);
         return;
     }
 
@@ -110,7 +118,7 @@ void AkizukiK875Driver::initialize() {
         .length = total_bytes_per_row * 8,
         .rxlength = 0,
         .user = nullptr,
-        .tx_buffer = data,
+        .tx_buffer = dma_buffer,
         .rx_data = { 0 }
     };
 
@@ -177,7 +185,7 @@ void AkizukiK875Driver::initialize() {
 
             // And prime the data buffer with some pattern to indicate init succeeded
             for(int row = 0; row < rows; row++) {
-                uint8_t *row_array = &data[row * (total_bytes_per_row + 1)];
+                uint8_t *row_array = &dma_buffer[row * (total_bytes_per_row + 1)];
                 memset(row_array, 0, (total_bytes_per_row + 1));
                 for(int col_idx = 0; col_idx < total_bytes_per_row * 2; col_idx++) {
                     size_t byte_idx = col_idx / 2;
@@ -210,7 +218,7 @@ void AkizukiK875Driver::initialize() {
             for(int i = 0; i < rows; i++) {
                 lldesc_s * d = &lldescs[i];
                 // Put a single row of display image plus the LATCH signal into the linked list entry
-                d->buf = &data[i * (total_bytes_per_row + 1)];
+                d->buf = &dma_buffer[i * (total_bytes_per_row + 1)];
                 d->length = total_bytes_per_row + 1;
                 d->size = total_bytes_per_row + 1;
                 d->owner = LLDESC_HW_OWNED;
@@ -323,11 +331,11 @@ void AkizukiK875Driver::initialize() {
 }
 
 void AkizukiK875Driver::write_fanta(const uint8_t * strides, size_t count) {
-    taskENTER_CRITICAL(&_spinlock);
-
+    // Prep the signal sequence: 400us on average
+    // Might be possible to optimize but eh
     const uint16_t * columns = (const uint16_t*) strides;
     for(int row = 0; row < rows; row++) {
-        uint8_t *row_array = &data[row * (total_bytes_per_row + 1)];
+        uint8_t *row_array = &scratch_buffer[row * (total_bytes_per_row + 1)];
         memset(row_array, 0, (total_bytes_per_row + 1));
         for(int col_idx = 0; col_idx < total_bytes_per_row * 2; col_idx++) {
             size_t byte_idx = col_idx / 2;
@@ -353,6 +361,9 @@ void AkizukiK875Driver::write_fanta(const uint8_t * strides, size_t count) {
         row_array[total_bytes_per_row] = (QIO_BITVAL_LATCH << 4); // open the LATCH for one cycle at the end of the row
     }
 
+    taskENTER_CRITICAL(&_spinlock);
+    // Copy from the scratch buffer into DMA buffer: 3.5us on average
+    memcpy(dma_buffer, scratch_buffer, (total_bytes_per_row + 1) * rows);
     taskEXIT_CRITICAL(&_spinlock);
 
     if(curPwm != targetPwm) {
