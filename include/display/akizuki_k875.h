@@ -23,7 +23,7 @@ public:
     /// @param sin1_pin Pin to the SIN1 (vertical sweep data) signal
     /// @param sin2_pin Pin to the SIN2 (LED1 panel data) signal
     /// @param sin3_pin Pin to the SIN3 (LED2 panel data) signal
-    /// @param sacrificial_pin Sacrificial pin used in setting up the QIO SPI driver. Not used, can be freed after the driver was set up.
+    /// @param sacrificial_pin Sacrificial pin used in signal routing between peripherals. Keep allocated to this driver, do not use for anything else or connect anywhere else.
     /// @param ledc_channel LEDC channel for brightness control. Default is 1.
     /// @param bright_pwm PWM duty cycle in bright state (255 = display off, 0 = full brightness)
     /// @param dark_pwm PWM duty cycle in dark state (255 = display off, 0 = full brightness)
@@ -42,7 +42,6 @@ public:
         int bright_pwm = 8,
         int dark_pwm = 200,
         uint8_t panel_count = 4,
-        int desired_frame_clock = HWCONF_DESIRED_FPS * 10,
         spi_host_device_t host = SPI3_HOST
     );
 

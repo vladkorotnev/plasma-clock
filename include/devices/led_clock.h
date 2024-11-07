@@ -7,7 +7,7 @@
 #define HAS_KEYPAD
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_LIGHT_SENSOR
-#define HAS_OTAFVU
+// #define HAS_OTAFVU
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "LePIS-OS"
