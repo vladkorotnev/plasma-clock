@@ -23,12 +23,12 @@ public:
     /// @param sin1_pin Pin to the SIN1 (vertical sweep data) signal
     /// @param sin2_pin Pin to the SIN2 (LED1 panel data) signal
     /// @param sin3_pin Pin to the SIN3 (LED2 panel data) signal
-    /// @param sacrificial_pin Sacrificial pin used in setting up the QIO SPI driver. Not used, can be freed after the driver was set up.
+    /// @param sacrificial_pin Sacrificial pin used in signal routing between peripherals. Keep allocated to this driver, do not use for anything else or connect anywhere else.
     /// @param ledc_channel LEDC channel for brightness control. Default is 1.
     /// @param bright_pwm PWM duty cycle in bright state (255 = display off, 0 = full brightness)
     /// @param dark_pwm PWM duty cycle in dark state (255 = display off, 0 = full brightness)
     /// @param panel_count Count of daisy chained boards in the row. Default is 4 boards (8 panels, 128px horizontal).
-    /// @param desired_frame_clock Desired refresh rate for the whole screen in Hz. Default is 120. Too high can congest the CPU with interrupts, too low causes flickering.
+    /// @param desired_frame_clock Desired refresh rate for the whole screen in Hz. Default is `HWCONF_DESIRED_FPS`. Too high can congest the CPU with interrupts, too low causes flickering.
     /// @param host SPI host to use
     AkizukiK875Driver(
         gpio_num_t latch_pin,
@@ -42,8 +42,7 @@ public:
         int bright_pwm = 8,
         int dark_pwm = 200,
         uint8_t panel_count = 4,
-        uint8_t desired_frame_clock = 80,
-        spi_host_device_t host = SPI2_HOST
+        spi_host_device_t host = SPI3_HOST
     );
 
     void initialize() override;
@@ -67,7 +66,8 @@ protected:
     const gpio_num_t CLOCK_PIN;
     const gpio_num_t STROBE_PIN;
     const gpio_num_t SACRIFICIAL_UNUSE_PIN;
-    uint8_t * data;
+    uint8_t * dma_buffer;
+    uint8_t * scratch_buffer;
     const uint8_t ledcChannel;
     const int brightPwm;
     const int darkPwm;

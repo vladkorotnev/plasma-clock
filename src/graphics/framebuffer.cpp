@@ -4,7 +4,11 @@
 #include <freertos/task.h>
 #include <os_config.h>
 
-static const int DESIRED_FPS = 60;
+#ifndef HWCONF_DESIRED_FPS
+#define HWCONF_DESIRED_FPS 60
+#endif
+
+static const int DESIRED_FPS = HWCONF_DESIRED_FPS;
 
 #define EVT_BIT_ENDED_DRAWING (1 << 0)
 

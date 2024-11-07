@@ -295,7 +295,8 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
 #endif
 
     static ListView * system_info = new ListView();
-    system_info->add_view(new MenuInfoItemView(localized_string("OS Type"), PRODUCT_NAME));
+    system_info->add_view(new MenuInfoItemView(localized_string("OS Name"), PRODUCT_NAME));
+    system_info->add_view(new MenuInfoItemView(localized_string("OS Type"), FVU_FLAVOR));
     system_info->add_view(new MenuInfoItemView(localized_string("OS Version"), PRODUCT_VERSION));
     system_info->add_view(new MenuInfoItemView(localized_string("OS Build"), get_current_version_info().fs_current));
     system_info->add_view(new MenuInfoItemView(localized_string("WiFi Name"), NetworkManager::network_name()));

@@ -106,7 +106,7 @@ void AppShimMusicbox::step() {
     }
 
     WeatherChartCommon::step();
-    if(trackNo != all_chime_count) // Allow hiding only if MIDI IN mode
+    if(trackNo != all_chime_count + 1) // Allow hiding only if MIDI IN mode
         hint_framecounter = 255;
 }
 

@@ -3,19 +3,14 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
-// Clock made around the PCB designed in 2024/09 labeled
-// 'uPIS-OS Devkit / Genjitsu Labs 2024'
-// 'microPIS-OS CPU BD V1.0 2024-09-16'
-
 #define HAS_OUTPUT_AKIZUKI_K875
 #define HAS_KEYPAD
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_LIGHT_SENSOR
-#define COMPOSABLE_NO_EVENODD
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "LePIS-OS"
-#define PRODUCT_VERSION "5"
+#define PRODUCT_VERSION "5.1"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;
@@ -33,18 +28,18 @@ const gpio_num_t HWCONF_K875_SIN1_GPIO = GPIO_NUM_23;
 const gpio_num_t HWCONF_K875_SIN2_GPIO = GPIO_NUM_2;
 const gpio_num_t HWCONF_K875_SIN3_GPIO = GPIO_NUM_22;
 const gpio_num_t HWCONF_K875_SACRIFICIAL_GPIO = GPIO_NUM_5;
+#define HWCONF_DISPLAY_WIDTH_PX 128
+#define HWCONF_DISPLAY_HEIGHT_PX 16
+#define HWCONF_DESIRED_FPS 60
 
 // ---- Connection to light sensors ----
 const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
 
-#define HWCONF_DISPLAY_WIDTH_PX 128
-#define HWCONF_DISPLAY_HEIGHT_PX 16
-
 // ---- Connection of buttons ----
 const keypad_definition_t HWCONF_KEYPAD = {
-    {GPIO_NUM_14, KEY_RIGHT},
-    {GPIO_NUM_32, KEY_LEFT},
-    {GPIO_NUM_34, KEY_UP},
-    {GPIO_NUM_27, KEY_DOWN},
+    {GPIO_NUM_14, KEY_LEFT},
+    {GPIO_NUM_32, KEY_RIGHT},
+    {GPIO_NUM_34, KEY_DOWN},
+    {GPIO_NUM_27, KEY_UP},
     {GPIO_NUM_35, KEY_HEADPAT}, //<- finally a clock to have hardware headpat!
 };

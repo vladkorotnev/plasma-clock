@@ -161,7 +161,8 @@ static const std::map<const std::string, const char*> russian = {
     {"Display dimming threshold", "Нижний порог освещённости"},
     {"Display brightening threshold", "Верхний порог освещённости"},
 
-    {"OS Type", "Операционная система"},
+    {"OS Name", "Операционная система"},
+    {"OS Type", "Класс устройства"},
     {"OS Version", "Версия системы"},
     {"OS Build", "Сборка системы"},
     {"WiFi Name", "Имя сети"},

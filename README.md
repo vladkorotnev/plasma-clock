@@ -130,6 +130,14 @@ There is a MIDI to sequencer conversion tool (supports note events in one track 
 
 You can also use the `HAS_SERIAL_MIDI` feature flag in combination with Hairless MIDI Serial to get a rough idea of how the ringtones will sound when writing them in e.g. Sekaiju. However exact representation in comparison to the native sequencer converter script is not guaranteed. Additionally there is no way of using PWM samples in this MIDI mode.
 
+## Update Server
+
+An update server is an HTTP (not HTTPS!) server similar to http://pis-os.genjit.su/fvudata, which contains the `fs_ver.txt` file as well as the `<FVUFLAVOR>.avu` file for the device's firmware and the `fs.fvu` file for the filesystem.
+
+The device periodically fetches the `fs_ver.txt` file and if it's different from the `FS_VER` inside the built-in filesystem, it offers to install a new version.
+
+Due to being unable to set the ESP-APP version because of using the Arduino framework, the firmware version check relies on the FS_VER file. If the FS_VER is different (new file system available), it's considered that new firmware is also available.
+
 ## Remote Control Server
 
 There is a remote control server you can enable in settings for debugging remotely when uploading firmware via OTA, or using an emulator without any screen and buttons.
@@ -175,10 +183,11 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 ## Predefined target devices
 
-* `DEVICE_PLASMA_CLOCK`: a [clock](https://youtu.be/D4MiHmhhjeQ) that I built around a plasma screen from an old Japanese bus/train. [Definition file](include/devices/big_clock.h)
-* `DEVICE_MINIPISOS`: a portable devkit for PIS-OS, using a 100x16 OLED from WinStar. [Definition file](include/devices/mid_clock.h)
-* `DEVICE_MINIPISOS_VFD`: same hardware as above, but using a Noritake ITRON GU-112x16-7000 VFD display. [Definition file](include/devices/mid_clock_noritake.h)
-* `DEVICE_MINIPISOS_VFD_WIDE`: same as above, but for a GU-140x12-7000. [Definiton file](include/devices/mid_clock_noritake_wide.h)
+* `DEVICE_PLASMA_CLOCK` (FVUFlavor = `PLASMA`): a [clock](https://youtu.be/D4MiHmhhjeQ) that I built around a plasma screen from an old Japanese bus/train. [Definition file](include/devices/big_clock.h)
+* `DEVICE_MINIPISOS` (FVUFlavor = `OLED`): a portable devkit for PIS-OS, using a 100x16 OLED from WinStar. [Definition file](include/devices/mid_clock.h)
+* `DEVICE_MINIPISOS_VFD` (FVUFlavor = `NORITAKE_GU112`): same hardware as above, but using a Noritake ITRON GU-112x16-7000 VFD display. [Definition file](include/devices/mid_clock_noritake.h)
+* `DEVICE_MINIPISOS_VFD_WIDE` (FVUFlavor = `NORITAKE_GU140`): same as above, but for a GU-140x12-7000. [Definiton file](include/devices/mid_clock_noritake_wide.h)
+* `DEVICE_LEPISOS` (FVUFlavor = `AKI_K875`): based on the same board as the devkit, but uses 4 of the Akizuki Denshi LED panels for the display.
 
 ## Supported hardware and feature-flags
 
@@ -187,15 +196,15 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 * Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display/md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
 * Winstar (sometimes sold as Vishay) WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming. Datasheet backup: [Controller](docs/reference/datasheet/winstar/WS0010.pdf), [display](docs/reference/datasheet/winstar/WEG010016ALPP5N00000.pdf)
 * Noritake ITRON GU-NNNx16-7000 series graphic VFDs in 8-bit parallel mode ([driver](src/display/gu7000.cpp), feature flag `HAS_OUTPUT_GU7000`). Datasheet backup before the bundled CDR got completely rotten: [140x16-7000](docs/reference/datasheet/noritake_itron/s-gu140x16g-7000_j04.pdf), [140x16-7100](docs/reference/datasheet/noritake_itron/s-gu140x16g-7100_j00.pdf), [112x16](docs/reference/datasheet/noritake_itron/s-gu112x16g-7000_j04.pdf)
-* *Planned:* [Akizuki Denshi K-875](https://akizukidenshi.com/img/contents/kairo/%E3%83%87%E3%83%BC%E3%82%BF/%E8%A1%A8%E7%A4%BA%E8%A3%85%E7%BD%AE/LED%E9%9B%BB%E5%85%89%E6%8E%B2%E7%A4%BA.pdf) ×4 for a 128x16 display (I couldn't resist not scooping some up in the Outlet Sale for 200 yen apiece). [Datasheet backup](docs/reference/datasheet/akizuki/LED電光掲示.pdf)
+* *Experimental:* [Akizuki Denshi K-875](https://akizukidenshi.com/img/contents/kairo/%E3%83%87%E3%83%BC%E3%82%BF/%E8%A1%A8%E7%A4%BA%E8%A3%85%E7%BD%AE/LED%E9%9B%BB%E5%85%89%E6%8E%B2%E7%A4%BA.pdf) ×4 for a 128x16 display (I couldn't resist not scooping some up in the Outlet Sale for 200 yen apiece). Known issues: small luma jitter sometimes, driver code is cursed. [Driver](src/display/akizuki_k875.cpp), feature flag `HAS_OUTPUT_AKIZUKI_K875`. [Datasheet backup](docs/reference/datasheet/akizuki/LED電光掲示.pdf)
 
 ### Speaker (at least one required)
 
 * Piezo speakers: *now with 1-bit DMA polyphony!* ([driver](src/sound/beeper.cpp), [music](src/sound/melodies.cpp), [sequencer](src/sound/sequencer.cpp))
 
-### Haptics (WIP)
+### Haptics
 
-* Taptic Engine via 2N3904 transistor as an amp (WIP: wired in parallel with the speaker)
+* Taptic Engine via 2N3904 transistor as an amp (WIP: wired in parallel with the speaker. *Upd:* This makes bass reproduction better, similar to a vibration speaker, so this is now part of platform!)
 
 ### Software flags
 
@@ -208,7 +217,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 ### Thermal sensors
 
 * AM2322 over IIC ([driver](src/sensor/am2322.cpp), feature flag `HAS_TEMP_SENSOR`)
-* Switchbot Meter over BLE (unstable, [driver](src/sensor/switchbot/api.cpp), feature flag `SWITCHBOT_METER_INTEGRATION`, needs extra ram of a WROVER module)
+* Switchbot Meter over BLE (unstable/experimental, [driver](src/sensor/switchbot/api.cpp), feature flag `SWITCHBOT_METER_INTEGRATION`, needs extra ram of a WROVER module)
 
 ### Motion sensors
 
