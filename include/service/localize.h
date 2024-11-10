@@ -4,6 +4,8 @@
 #include <service/time.h>
 
 typedef enum display_language {
+    DSPL_LANG_INVALID = -1,
+    
     DSPL_LANG_EN = 0,
     DSPL_LANG_RU = 1
 } display_language_t;
@@ -15,7 +17,7 @@ typedef enum spoken_language {
 } spoken_language_t;
 
 display_language_t active_display_language();
-const char * localized_string(const char* key, display_language_t lang = active_display_language());
+const char * localized_string(const char* key);
 const char * day_letters();
 
 spoken_language_t active_tts_language();
