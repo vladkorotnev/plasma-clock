@@ -55,7 +55,7 @@ void VerUpNoticeView::prepare() {
     Screen::prepare();
 
     title->set_string(localized_string("New Firmware Available!"));
-    message->set_string(localized_string("Press \x1A to install"));
+    message->set_string(localized_string("Press → to install"));
 
     int width = std::max(title->string_width, message->string_width);
     title->string_width = width;

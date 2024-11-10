@@ -2,6 +2,13 @@
 #include <stdint.h>
 #include "sprite.h"
 
+typedef enum font_encoding {
+    /// @brief ASCII or some bespoke encoding (e.g. graphical fonts)
+    FONT_ENCODING_BESPOKE_ASCII,
+    /// @brief UTF-16 codepoints
+    FONT_ENCODING_UTF16,
+} font_encoding_t;
+
 typedef struct font_range {
     /// @brief The first character included in the range
     char16_t start;
@@ -13,6 +20,9 @@ typedef struct font_range {
 
 /// @brief A monospace bitmap font in an uncontiguous character space
 typedef struct font_definition {
+    /// @brief In which encoding are the character ranges specified?
+    font_encoding_t encoding;
+    /// @brief In which format are the glyphs stored?
     sprite_fmt_t glyph_format;
     /// @brief The character that best suits the cursor role in the font
     char16_t cursor_character;
@@ -50,4 +60,6 @@ typedef enum text_style : text_attributes_t {
 /// @param masked Whether the character should have no background (masked by itself)
 void sprite_from_glyph(const font_definition_t*, char16_t glyph, bool masked, sprite_t* output);
 /// @brief Measure a string's width when drawn with a specified font 
-extern unsigned int measure_string_width(const font_definition_t*, const char*, text_attributes_t attributes = TEXT_NORMAL);
+unsigned int measure_string_width(const font_definition_t*, const char*, text_attributes_t attributes = TEXT_NORMAL);
+/// @brief Iterate over a UTF8 string's codepoints. Returns char16_t's and increments ptr until EOS or an error, otherwise returns 0.
+char16_t iterate_utf8(const char ** ptr);

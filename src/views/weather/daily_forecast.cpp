@@ -39,19 +39,19 @@ public:
         icon->set_sprite(sprite_from_conditions(forecast->conditions));
         
         char buf[16] = { 0 };
-        const char fmt_temp[] = "%.0f\370";
+        const char fmt_temp[] = "%.0f°";
         if(forecast->day_temperature_kelvin > 0) {
             snprintf(buf, 15, fmt_temp, convert_temperature(KELVIN, forecast->day_temperature_kelvin));
             day_temp->set_string(buf);
         } else {
-            day_temp->set_string("--\370");
+            day_temp->set_string("--°");
         }
 
         if(forecast->night_temperature_kelvin > 0) {
             snprintf(buf, 15, fmt_temp, convert_temperature(KELVIN, forecast->night_temperature_kelvin));
             night_temp->set_string(buf);
         } else {
-            night_temp->set_string("--\370");
+            night_temp->set_string("--°");
         }
 
         if(forecast->date.day > 0) {

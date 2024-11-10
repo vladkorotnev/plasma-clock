@@ -44,13 +44,13 @@ const char * day_letters() {
 
 static const std::map<const std::string, const char*> english = {
     {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
-    {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
+    {"WEATHER_FMT", "%s. Feels like %.01f°%c. Wind %.01f m/s. Pressure %i hPa."},
     {"Russian", "Русский"},
     {"Japanese", "Japanese"},
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Disconnected"},
-    {"BB_CNCT_GUIDE", "\x1A to connect"},
+    {"BB_CNCT_GUIDE", "→ to connect"},
 
     {"BB_SCN", "Scanning..."},
     {"BB_SYNC_NOW", "Press the SYNC button on the Balance Board now"},
@@ -74,7 +74,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Save & Restart", "Сохранить и перезагрузить"},
 
     {"Reset Webadmin Password", "Сброс пароля вебморды"},
-    {"Press \x1A", "Нажми \x1A"},
+    {"Press →", "Нажми →"},
 
     {"Notice", "Внимание"},
     {"FULL_SETTINGS_NOTICE", "Больше настроек доступно в вебморде через браузер"},
@@ -156,7 +156,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Display power on", "При включении экрана"},
     {"Always", "Всегда"},
 
-    {"Temperature (\370C)", "Температура (\370C)"},
+    {"Temperature (°C)", "Температура (°C)"},
     {"Humidity", "Влажность"},
     {"Display dimming threshold", "Нижний порог освещённости"},
     {"Display brightening threshold", "Верхний порог освещённости"},
@@ -174,7 +174,7 @@ static const std::map<const std::string, const char*> russian = {
     {"Remote Control Server", "Удалённый доступ"},
     {"Serial MIDI Input", "Эмуляция синтезатора"},
 
-    {"WEATHER_FMT", "Сейчас %s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
+    {"WEATHER_FMT", "Сейчас %s. Ощущается как %.01f°%c. Ветер %.01f м/с. Давление %i гПа."},
     {"Loading...", "Загрузка..."},
     {"PoP, %", "Осадки, %"},
     {"P, hPa", "Давл., гПа"},
@@ -195,7 +195,7 @@ static const std::map<const std::string, const char*> russian = {
 
 #if HAS(BALANCE_BOARD_INTEGRATION)
     {"BB_DSCNCT", "Нет связи"},
-    {"BB_CNCT_GUIDE", "Нажми \x1A для подключения"},
+    {"BB_CNCT_GUIDE", "Нажми → для подключения"},
 
     {"BB_SCN", "Поиск..."},
     {"BB_SYNC_NOW", "Самое время нажать кнопку SYNC на Balance Board"},
@@ -203,7 +203,7 @@ static const std::map<const std::string, const char*> russian = {
 
 #if HAS(HTTPFVU)
     {"New Firmware Available!", "Доступна новая версия!"},
-    {"Press \x1A to install", "Нажми \x1A для установки"},
+    {"Press → to install", "Нажми → для установки"},
 
     {"Periodically check for updates", "Автоматически проверять наличие обновлений"},
     {"Automatically download and install updates", "Автоматически устанавливать доступные обновления"},

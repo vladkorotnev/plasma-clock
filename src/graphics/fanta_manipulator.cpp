@@ -166,7 +166,7 @@ void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool in
     }
 }
 
-void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned char glyph, int x, int y, text_attributes_t style) {
+void FantaManipulator::put_glyph(const font_definition_t * font, const char16_t glyph, int x, int y, text_attributes_t style) {
     if(x + font->width + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || x - ((style & TEXT_OUTLINED) ? 1 : 0) > get_width()) return;
     if(y + font->height + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || y - ((style & TEXT_OUTLINED) ? 1 : 0) > get_height()) return;
 
@@ -197,32 +197,8 @@ void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned 
 void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y, text_attributes_t style) {
     size_t i = 0;
     int cur_x = x;
-    while(char ch = string[i]) {
-        // hacky way of mapping cyrillic from utf8 to cp866 since most of our fonts are from keyrus
-        if((ch & 0b11100000) == 0b11000000 && (string[i + 1] & 0b11000000) == 0b10000000) {
-            if(((ch >> 2) & 7) == 0x04) {
-                // U+04xx
-                ch = ((ch & 0b00000011) << 6) | (string[i + 1] & 0b00111111);
-                i++;
-                if(ch >= 0x10 && ch <= 0x3F) {
-                    ch += (0x80 - 0x10);
-                }
-                else if(ch >= 0x40 && ch <= 0x4F) {
-                    ch += (0xE0 - 0x40);
-                }
-                else if(ch == 0x01) {
-                    ch = 0x85;// 0xF0;
-                }
-                else if(ch == 0x51) {
-                    ch = 0xA5;// 0xF1;
-                }
-                else {
-                    // wasn't cyrillic, so draw as is...
-                    i--;
-                    ch = string[i];
-                }
-            }
-        }
+    const char * tmp = string;
+    while(char16_t ch = iterate_utf8(&tmp)) {
         put_glyph(font, ch, cur_x, y, style);
         cur_x += font->width;
         i++;

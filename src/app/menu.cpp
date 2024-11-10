@@ -281,7 +281,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
 #if (HAS(TEMP_SENSOR) || (HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)))
     static ListView * calibration_menu = new ListView();
     #if HAS(TEMP_SENSOR)
-    calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (\370C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
+    calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Temperature (°C)"), PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50, 1, normalActivationFunction));
     calibration_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Humidity"), PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50, 1, normalActivationFunction));
     #endif
     #if HAS(LIGHT_SENSOR) && HAS(VARYING_BRIGHTNESS)
@@ -328,7 +328,7 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     service_settings->add_view(new MenuActionItemView(localized_string("Reset Webadmin Password"), []() {
         prefs_set_string(PREFS_KEY_ADMIN_PASS, "");
         change_state(STATE_RESTART, TRANSITION_NONE);
-    }, nullptr, localized_string("Press \x1A")));
+    }, nullptr, localized_string("Press →")));
 
     static const uint8_t status_icns_data[] = {
         // By PiiXL
