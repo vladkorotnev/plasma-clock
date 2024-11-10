@@ -5,6 +5,7 @@
 #include <service/prefs.h>
 #include <service/time.h>
 #include <service/alarm.h>
+#include <service/power_management.h>
 #include <os_config.h>
 #include <state.h>
 #include <algorithm>
@@ -85,6 +86,7 @@ HttpFvuApp::HttpFvuApp(NewSequencer *s) {
 void HttpFvuApp::prepare() {
     Composite::prepare();
 #if HAS(HTTPFVU)
+    power_mgmt_pause();
     _oldState = FVUAPP_INIT;
     progBar->value = -1;
     delayCounter = 0;
@@ -113,6 +115,7 @@ void HttpFvuApp::prepare() {
 }
 
 void HttpFvuApp::cleanup() {
+    power_mgmt_resume();
     Composite::cleanup();
     if(hCheckerTask != NULL && appState != FVUAPP_SUCCESS) vTaskResume(hCheckerTask);
 }
