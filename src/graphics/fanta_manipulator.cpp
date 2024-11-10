@@ -173,7 +173,8 @@ void FantaManipulator::put_glyph(const font_definition_t * font, const unsigned 
     bool need_masked_char = ((style & TEXT_NO_BACKGROUND != 0) || (style & TEXT_OUTLINED != 0));
     bool invert = (style & TEXT_INVERTED) != 0;
 
-    sprite_t char_sprite = sprite_from_glyph(font, glyph, need_masked_char);
+    static sprite_t char_sprite = { 0 };
+    sprite_from_glyph(font, glyph, need_masked_char, &char_sprite);
     if(need_masked_char && (style & TEXT_NO_BACKGROUND) == 0) {
         // If the char is masked but background was requested, prepare the background on our own
         rect(x, y, x + font->width, y + font->height, true, invert);

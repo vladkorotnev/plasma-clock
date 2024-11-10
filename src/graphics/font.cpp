@@ -4,22 +4,34 @@
 
 static char LOG_TAG[] = "FONT";
 
-sprite_t sprite_from_glyph(const font_definition_t* font, char16_t glyph, bool masked) {
-    if(glyph > font->end_character || glyph < font->start_character) {
-        ESP_LOGI(LOG_TAG, "Not known character %u in font", glyph);
-        glyph = 0;
+void sprite_from_glyph(const font_definition_t* font, char16_t glyph, bool masked, sprite_t* output) {
+    bool found = false;
+    const uint8_t * glyph_ptr = nullptr;
+    for(int i = 0; i < font->range_count; i++) {
+        const font_range_t *r = &font->ranges[i];
+        if(glyph >= r->start || glyph <= r->end) {
+            found = true;
+            glyph_ptr = &font->data[r->data_offset + (glyph - r->start) * font->height * std::max(font->width/8, 1)];
+            break;
+        }
     }
-    size_t start_idx = (glyph - font->start_character) * font->height * std::max(font->width/8, 1);
 
-    sprite_t rslt = {
-        .width = font->width,
-        .height = font->height,
-        .data = &font->data[start_idx],
-        .mask = masked ? &font->data[start_idx] : nullptr,
-        .format = SPRFMT_HORIZONTAL
-    };
-
-    return rslt;
+    if(!found) {
+        if(glyph != font->invalid_character) {
+            ESP_LOGI(LOG_TAG, "Not known character %u in font", glyph);
+            sprite_from_glyph(font, font->invalid_character, masked, output);
+        } else {
+            ESP_LOGW(LOG_TAG, "Not known character %u in font, and swap failed!", glyph);
+            sprite_from_glyph(font, font->ranges[0].start, masked, output);
+        }
+        return;
+    } else {
+        output->width = font->width;
+        output->height = font->height;
+        output->data = glyph_ptr;
+        output->mask = masked ? glyph_ptr : nullptr;
+        output->format = font->glyph_format;
+    }
 }
 
 unsigned int measure_string_width(const font_definition_t* f, const char* s, text_attributes_t attributes) {
