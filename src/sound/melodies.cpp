@@ -3,8 +3,8 @@
 #include <service/localize.h>
 #include <bits/stl_algobase.h>
 #include <sound/pomf.h>
+#include <service/disk.h>
 #include <vector>
-#include <LittleFS.h>
 #include <dirent.h>
 #include <miniz_ext.h>
 
@@ -422,7 +422,7 @@ protected:
     size_t offset;
 };
 
-#define MUSIC_DIR "/disk/music"
+#define MUSIC_DIR (FS_MOUNTPOINT "/music")
 void load_melodies_from_disk() {
     DIR *d;
     struct dirent *dir;

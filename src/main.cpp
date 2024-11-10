@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <LittleFS.h>
 #include <device_config.h>
 #include <os_config.h>
 #include <display/display.h>
@@ -21,6 +20,7 @@
 #include <service/wordnik.h>
 #include <service/foo_client.h>
 #include <service/alarm.h>
+#include <service/disk.h>
 #include <network/admin_panel.h>
 #include <utils.h>
 #include <state.h>
@@ -215,7 +215,7 @@ static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
     bringup_sound();
-    if (!LittleFS.begin(true, FS_MOUNTPOINT)) {
+    if (!mount_disk(true)) {
         ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
         seq->play_sequence(&tulula_fvu);
     } else {
