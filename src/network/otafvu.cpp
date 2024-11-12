@@ -43,6 +43,7 @@ const font_range_t pixel_bar_font_ranges[] = {
 };
 
 const font_definition_t one_pixel_bar_font = {
+    .valid = true,
     .encoding = FONT_ENCODING_BESPOKE_ASCII,
     .glyph_format = SPRFMT_HORIZONTAL,
     .cursor_character = '|' - 1,
