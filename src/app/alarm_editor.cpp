@@ -24,16 +24,17 @@ public:
 
     void render(FantaManipulator *fb) {
         // box around number
+        const font_definition_t * f = find_font(FONT_STYLE_UI_TEXT);
         fb->rect(0, 2, 10 + setting.enabled, 12, setting.enabled);
-        fb->put_string(&keyrus0808_font, index_str, 2, 4, setting.enabled ? TEXT_INVERTED : TEXT_NORMAL);
+        fb->put_string(f, index_str, 2, 4, setting.enabled ? TEXT_INVERTED : TEXT_NORMAL);
 
-        fb->put_string(&keyrus0808_font, time_buf, 14, 0);
+        fb->put_string(f, time_buf, 14, 0);
 
         if(setting.days == 0) {
-            fb->put_string(&keyrus0808_font, localized_string("Only Once"), 14, 8);
+            fb->put_string(f, localized_string("Only Once"), 14, 8);
         } else {
             for(int d = 0; d < 7; d++) {
-                fb->put_string(&keyrus0808_font, &_day_letters[d * 2], 14 + d * (keyrus0808_font.width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
+                fb->put_string(f, &_day_letters[d * 2], 14 + d * (f->width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
             }
         }
     }
@@ -65,7 +66,7 @@ class AlarmDaySelectorView: public Composite {
 public:
     AlarmDaySelectorView(const char * title, alarm_setting_t * setting, std::function<void(bool, Renderable*)> onActivated):
         isActive {false},
-        label(new StringScroll(&keyrus0808_font, title)),
+        label(new StringScroll(find_font(FONT_STYLE_UI_TEXT), title)),
         setting(setting),
         cursor { 0 },
         framecount { 0 },
@@ -117,17 +118,17 @@ public:
 
         if(isActive || setting->days != 0) {
             for(int d = 0; d < 7; d++) {
-                int ltr_x = fb->get_width() - 70 + d * (keyrus0808_font.width + 2);
+                int ltr_x = fb->get_width() - 70 + d * (label->font->width + 2);
                 bool lit_up = (setting->days & ALARM_DAY_OF_WEEK(d)) != 0;
 
                 if(isActive && d == cursor && cursorShows) {
                     fb->rect(ltr_x - 2, 7, ltr_x + 8, 15, lit_up);
                 }
-                fb->put_string(&keyrus0808_font, &_day_letters[d * 2], ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
+                fb->put_string(label->font, &_day_letters[d * 2], ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
             }
         } else {
             static const char * one_time = localized_string("Only Once");
-            fb->put_string(&keyrus0808_font, one_time, fb->get_width() - measure_string_width(&keyrus0808_font, one_time), 8);
+            fb->put_string(label->font, one_time, fb->get_width() - measure_string_width(label->font, one_time), 8);
         }
     }
 

@@ -4,13 +4,55 @@
 
 #if HAS(OTAFVU)
 #include <sound/melodies.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/power_management.h>
 #include <state.h>
 #include <utils.h>
-#include <fonts.h>
+#include <graphics/font.h>
 
 static char LOG_TAG[] = "OTAFVU";
+
+
+// Utilitary font to draw the FVU progress bar
+static const uint8_t one_pixel_bar_data[] = {
+    // cursor, empty
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    0b00000000,
+    // bar, filled
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+    0xFF,
+};
+
+const font_range_t pixel_bar_font_ranges[] = {
+    font_range_t {
+        .start = '|' - 1,
+        .end = '|'
+    }
+};
+
+const font_definition_t one_pixel_bar_font = {
+    .encoding = FONT_ENCODING_BESPOKE_ASCII,
+    .glyph_format = SPRFMT_HORIZONTAL,
+    .cursor_character = '|' - 1,
+    .invalid_character = '|' - 1,
+    .width = 1,
+    .height = 8,
+    .range_count = 1,
+    .data = one_pixel_bar_data,
+    .ranges = pixel_bar_font_ranges
+};
 
 extern "C" void OtaFvuTaskFunction( void * pvParameter );
 
@@ -85,7 +127,7 @@ void OTAFVUManager::get_ready() {
 
 void OTAFVUManager::shut_up_and_explode() {
     ESP_LOGI(LOG_TAG, "Shut up and explode!");
-    con->set_font(&keyrus0816_font);
+    con->set_font(find_font(FONT_STYLE_TALL_TEXT));
     con->clear();
     con->print("OTAFVU Done!");
     seq->play_sequence(&oelutz_fvu);

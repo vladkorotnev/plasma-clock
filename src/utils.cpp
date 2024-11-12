@@ -1,4 +1,6 @@
 #include <Arduino.h>
+#include <miniz_ext.h>
+static char LOG_TAG[] = "UTIL";
 
 String getChipId() {
   uint64_t macAddress = ESP.getEfuseMac();
@@ -48,3 +50,25 @@ void hexDump(const char* tag, const uint8_t* pData, uint32_t length) {
         ESP_LOGV(tag, "%.4x %s %s", lineNumber * 16, hex, ascii);
     }
 } // hexDump
+
+void * decompress_emplace(void * compressed_data, uint32_t src_size, uint32_t decomp_size) {
+    unsigned long dst_sz = decomp_size;
+    void * dest = malloc(dst_sz);
+    if(dest == nullptr) {
+        ESP_LOGE(LOG_TAG, "OOM allocating decompression buffer of %i bytes", dst_sz);
+        free(compressed_data);
+        return nullptr;
+    }
+
+    int rslt = mz_uncompress((unsigned char*)dest, &dst_sz, (unsigned char*) compressed_data, src_size);
+    
+    free(compressed_data);
+
+    if(rslt != MZ_OK) {
+        free(dest);
+        ESP_LOGE(LOG_TAG, "Decompress error %i: %s", rslt, mz_error(rslt));
+        return nullptr;
+    }
+
+    return dest; 
+}

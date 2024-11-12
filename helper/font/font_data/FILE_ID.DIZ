@@ -17,3 +17,19 @@ Yanked from the Apple XNU kernel.
 https://github.com/apple/darwin-xnu/blob/main/osfmk/console/iso_font.c
 (c) 2000 Apple Computer, Inc.
 (c) 2000 Ka-Ping Yee
+
+----
+
+misaki
+
+Misaki Mincho font by https://littlelimit.net/misaki.htm
+
+----
+
+jiskan
+
+Public domain JISKAN16 font
+
+Portions copyright by Sony? Origins unclear
+
+https://ja.wikipedia.org/wiki/Jiskan

@@ -17,7 +17,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
-#define PRODUCT_VERSION "5"
+#define PRODUCT_VERSION "5.3"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;

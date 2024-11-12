@@ -1,10 +1,6 @@
 #ifndef FEATUREFLAG_H_
 #define FEATUREFLAG_H_
 
-#ifndef FS_MOUNTPOINT
-#define FS_MOUNTPOINT "/disk"
-#endif
-
 #define HAS(x) defined(HAS_##x)
 
 // ---- SOFTWARE FEATURE FLAGS

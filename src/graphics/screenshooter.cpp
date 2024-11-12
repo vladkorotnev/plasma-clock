@@ -132,7 +132,7 @@ void Screenshooter::start_server(uint16_t port) {
     xTaskCreate(
         serverTaskFunc,
         "VNC",
-        2048,
+        4096,
         framebuffer,
         pisosTASK_PRIORITY_REMOTE_DESKTOP,
         &hServerTask

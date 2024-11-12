@@ -1,14 +1,15 @@
 #include "views/weather/chart_common.h"
-#include <fonts.h>
+#include <graphics/font.h>
 #include <vector>
 #include <algorithm>
 
 WeatherChartCommon::WeatherChartCommon() {
-    hint_lbl = new StringScroll(&keyrus0808_font);
+    hint_lbl = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
     hint_lbl->x_offset = 0;
     hint_lbl->set_y_position(1);
     hint_lbl->render_mode = TEXT_NO_BACKGROUND | TEXT_OUTLINED;
     add_composable(hint_lbl);
+    legend_font = find_font(FONT_STYLE_HUD_DIGITS);
 }
 
 void WeatherChartCommon::prepare() {
@@ -45,11 +46,11 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
                 if(p.annotation >= 0) {
                     snprintf(buf, 7, "%d", p.annotation);
                     int x = (p_idx >= 3) ? p_idx - 3 : 0; 
-                    int w = measure_string_width(&fps_counter_font, buf) + 1;
+                    int w = measure_string_width(legend_font, buf) + 1;
                     int txt_y = fb->get_height() - 5;
                     if(y >= txt_y) txt_y = y - 6;
                     fb->rect(x, txt_y - 1, x + w, txt_y + 5, true, false);
-                    fb->put_string(&fps_counter_font, buf, x + 1, txt_y, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
+                    fb->put_string(legend_font, buf, x + 1, txt_y, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
                 }
             }
         }
@@ -58,16 +59,16 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
     if(show_legend) {
         if(show_minimum) {
             snprintf(buf, 7, "%d", minimum);
-            int w = measure_string_width(&fps_counter_font, buf) + 1;
+            int w = measure_string_width(legend_font, buf) + 1;
             int x = fb->get_width() - w; 
-            fb->put_string(&fps_counter_font, buf, x, fb->get_height() - 5, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
+            fb->put_string(legend_font, buf, x, fb->get_height() - 5, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
         }
         
         if(show_maximum) {
             snprintf(buf, 7, "%d", maximum);
-            int w = measure_string_width(&fps_counter_font, buf) + 1;
+            int w = measure_string_width(legend_font, buf) + 1;
             int x = fb->get_width() - w; 
-            fb->put_string(&fps_counter_font, buf, x, 0, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
+            fb->put_string(legend_font, buf, x, 0, TEXT_NO_BACKGROUND | TEXT_OUTLINED);
         }
     }
 

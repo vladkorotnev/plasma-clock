@@ -1,5 +1,5 @@
 #pragma once
-#include "fonts.h"
+#include "graphics/font.h"
 #include <service/localize.h>
 #include <service/prefs.h>
 #include <views/framework.h>
@@ -12,7 +12,7 @@ protected:
         wants_clear_surface = true;
         
         progBar = new Swoopie();
-        label = new StringScroll(&keyrus0808_font, title);
+        label = new StringScroll(find_font(FONT_STYLE_UI_TEXT), title);
 
         label->stopped = true;
         label->x_offset = (DisplayFramebuffer::width/2 - label->string_width / 2);

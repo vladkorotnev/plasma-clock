@@ -1,6 +1,6 @@
 #include "views/idle_screens/softap.h"
 #include <network/netmgr.h>
-#include <fonts.h>
+#include <graphics/font.h>
 
 static const uint8_t icon_data[] = {
     // By PiiXL
@@ -22,7 +22,7 @@ int SoftApInfoView::desired_display_time() {
 
 void SoftApInfoView::create_components_if_needed() {
     if(network_name == nullptr) {
-        network_name = new StringScroll(&keyrus0808_font, nullptr);
+        network_name = new StringScroll(find_font(FONT_STYLE_UI_TEXT), nullptr);
         network_name->x_offset = 17;
         network_name->holdoff = 60;
         network_name->start_at_visible = true;
@@ -30,7 +30,7 @@ void SoftApInfoView::create_components_if_needed() {
     }
 
     if(ip_address == nullptr) {
-        ip_address = new StringScroll(&keyrus0808_font, nullptr);
+        ip_address = new StringScroll(find_font(FONT_STYLE_UI_TEXT), nullptr);
         ip_address->set_y_position(8);
         ip_address->x_offset = 17;
         ip_address->holdoff = 60;

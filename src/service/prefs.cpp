@@ -53,6 +53,10 @@ inline void init_store_if_needed() {
                     prefs_set_string(PREFS_KEY_ADMIN_ID, String(ADMIN_LOGIN));
                     prefs_set_string(PREFS_KEY_ADMIN_PASS, String(ADMIN_PASS));
                 #endif
+                #if defined(DEFAULT_WIFI_SSID) && defined(DEFAULT_WIFI_PASS)
+                    prefs_set_string(PREFS_KEY_WIFI_SSID, DEFAULT_WIFI_SSID);
+                    prefs_set_string(PREFS_KEY_WIFI_PASS, DEFAULT_WIFI_PASS);
+                #endif
                 prefs_set_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS, 15);
                 prefs_set_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS, 5);
                 prefs_set_int(PREFS_KEY_SCRN_TIME_INDOOR_SECONDS, 5);

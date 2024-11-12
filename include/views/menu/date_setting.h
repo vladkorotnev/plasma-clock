@@ -1,7 +1,7 @@
 #include <views/framework.h>
 #include <views/common/dropping_digits.h>
 #include <sound/beeper.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <functional>
 
 class MenuDateSettingView: public Composite {
@@ -14,6 +14,7 @@ public:
         year(initialYear),
         month(initialMonth),
         day(initialDay),
+        font(find_font(FONT_STYLE_CLOCK_FACE)),
         yearView(new DroppingDigitView(4, initialYear, b)),
         monthView(new DroppingDigitView(2, initialMonth, b)),
         dayView(new DroppingDigitView(2, initialDay, b)),
@@ -23,12 +24,12 @@ public:
         onFinish(onFinish),
         beeper(b) {
             int char_count = 10; // YYYY/MM/dd
-            int text_width = char_count * xnu_font.width;
+            int text_width = char_count * font->width;
             int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
 
             yearView->x_offset = left_offset;
-            monthView->x_offset = yearView->x_offset + yearView->width + xnu_font.width;
-            dayView->x_offset = monthView->x_offset + monthView->width + xnu_font.width;
+            monthView->x_offset = yearView->x_offset + yearView->width + font->width;
+            dayView->x_offset = monthView->x_offset + monthView->width + font->width;
 
             add_composable(yearView);
             add_composable(monthView);
@@ -63,4 +64,5 @@ private:
     void ensure_valid_day();
     int get_max_day_for_month();
     Beeper * beeper;
+    const font_definition_t * font;
 };

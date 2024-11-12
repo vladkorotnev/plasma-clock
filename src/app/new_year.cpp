@@ -3,7 +3,7 @@
 #include <service/localize.h>
 #include <esp32-hal-log.h>
 #include "../sound/melodies/abba.h"
-#include <fonts.h>
+#include <graphics/font.h>
 #include <Arduino.h>
 #include <algorithm>
 #include <service/power_management.h>
@@ -27,6 +27,22 @@ static const uint8_t bg_image[] = {
     0x00,0xff, 0x00, 0xff, 0x80, 0xff, 0x80, 0xff
 };
 
+static const sprite_t bg_spr_left = {
+    .width = 28,
+    .height = 16,
+    .data = bg_image,
+    .mask = bg_image,
+    .format = SPRFMT_NATIVE
+};
+
+static const sprite_t bg_spr_right = {
+    .width = 72,
+    .height = 16,
+    .data = &bg_image[56],
+    .mask = &bg_image[56],
+    .format = SPRFMT_NATIVE
+};
+
 static inline void _print_mem(const char * descr) {
     ESP_LOGI(LOG_TAG, " === %s === ", descr);
     ESP_LOGI(LOG_TAG, "HEAP: %d free of %d (%d minimum)", ESP.getFreeHeap(), ESP.getHeapSize(), ESP.getMinFreeHeap());
@@ -43,6 +59,7 @@ NewYearAppShim::NewYearAppShim(Beeper *b, NewSequencer *s, Yukkuri *y):
     snow { nullptr },
     utterance_localized { nullptr },
     allocated { false },
+    font(find_font(FONT_STYLE_CLOCK_FACE)),
     Composite() 
 {
     wants_clear_surface = true;
@@ -106,7 +123,7 @@ void NewYearAppShim::prepare() {
 void NewYearAppShim::render(FantaManipulator* fb) {
     Composite::render(fb);
     TickType_t now = xTaskGetTickCount();
-    int digit_x = fb->get_width() / 2 - xnu_font.width * 2;
+    int digit_x = fb->get_width() / 2 - font->width * 2;
 
     for(int i = 0; i < 4; i++) {
         int digit_y = 0;
@@ -115,11 +132,13 @@ void NewYearAppShim::render(FantaManipulator* fb) {
             int progress_in_digit = std::max(0, std::min(intro_elapsed - (227 * i), 200));
             digit_y = fb->get_height() - (fb->get_height() * progress_in_digit / 200);
         }
-        fb->put_glyph(&xnu_font, digits[i], digit_x, digit_y, TEXT_NO_BACKGROUND);
-        digit_x += xnu_font.width;
+        fb->put_glyph(font, digits[i], digit_x, digit_y, TEXT_NO_BACKGROUND);
+        digit_x += font->width;
     }
 
-    fb->put_fanta((fanta_buffer_t) bg_image, 0, 0, 100, 16, (fanta_buffer_t) bg_image);
+    fb->put_sprite(&bg_spr_left, 0, 0, false);
+    fb->put_sprite(&bg_spr_right, fb->get_width() - bg_spr_right.width, 0, false);
+    fb->line(bg_spr_left.width, 15, fb->get_width(), 15);
 }
 
 void NewYearAppShim::step() {
@@ -161,7 +180,7 @@ void NewYearAppShim::step() {
             }
             break;
         case CHILLOUT:
-            if(now - start_time >= pdMS_TO_TICKS(5000)) {
+            if(now - start_time >= pdMS_TO_TICKS(10000)) {
                 phase = FIN;
                 ESP_LOGI(LOG_TAG, "Finita la comedia");
                 pop_state(STATE_NEW_YEAR, TRANSITION_SLIDE_HORIZONTAL_RIGHT);

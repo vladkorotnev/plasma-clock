@@ -2,7 +2,7 @@
 #include <functional>
 #include <views/framework.h>
 #include <input/keys.h>
-#include <fonts.h>
+#include <graphics/font.h>
 
 class MenuActionItemView: public Composite {
 public:

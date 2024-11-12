@@ -1,5 +1,5 @@
 #include "views/weather/daily_forecast.h"
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/owm/weather.h>
 #include <service/owm/weather_icons.h>
 
@@ -10,18 +10,18 @@ public:
         icon->x_offset = 0;
         icon->width = 16;
 
-        day_temp = new StringScroll(&keyrus0808_font);
+        day_temp = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
         day_temp->stopped = true;
         day_temp->set_y_position(0);
         day_temp->x_offset = 17;
 
-        night_temp = new StringScroll(&keyrus0808_font);
+        night_temp = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
         night_temp->stopped = true;
         night_temp->set_y_position(8);
         night_temp->x_offset = 17;
         night_temp->gray = true;
         
-        date = new StringScroll(&fps_counter_font);
+        date = new StringScroll(find_font(FONT_STYLE_HUD_DIGITS));
         date->render_mode = TEXT_OUTLINED | TEXT_NO_BACKGROUND;
         date->stopped = true;
         date->set_y_position(11);
@@ -39,19 +39,19 @@ public:
         icon->set_sprite(sprite_from_conditions(forecast->conditions));
         
         char buf[16] = { 0 };
-        const char fmt_temp[] = "%.0f\370";
+        const char fmt_temp[] = "%.0f°";
         if(forecast->day_temperature_kelvin > 0) {
             snprintf(buf, 15, fmt_temp, convert_temperature(KELVIN, forecast->day_temperature_kelvin));
             day_temp->set_string(buf);
         } else {
-            day_temp->set_string("--\370");
+            day_temp->set_string("--°");
         }
 
         if(forecast->night_temperature_kelvin > 0) {
             snprintf(buf, 15, fmt_temp, convert_temperature(KELVIN, forecast->night_temperature_kelvin));
             night_temp->set_string(buf);
         } else {
-            night_temp->set_string("--\370");
+            night_temp->set_string("--°");
         }
 
         if(forecast->date.day > 0) {

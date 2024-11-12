@@ -1,7 +1,12 @@
 #include <service/localize.h>
 #include <service/prefs.h>
+#include <service/disk.h>
 #include <device_config.h>
 #include <map>
+#include <ArduinoJson.h>
+
+static char LOG_TAG[] = "LOCA";
+#define LANG_DIR "/lang/"
 
 display_language_t active_display_language() {
     return (display_language_t) prefs_get_int(PREFS_KEY_DISP_LANGUAGE);
@@ -42,198 +47,68 @@ const char * day_letters() {
     return en_letters;
 }
 
-static const std::map<const std::string, const char*> english = {
-    {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
-    {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
-    {"Russian", "Русский"},
-    {"Japanese", "Japanese"},
+static display_language_t lang_map_language = DSPL_LANG_INVALID;
+static EXT_RAM_ATTR std::map<const std::string, char*> lang_map = {};
 
-#if HAS(BALANCE_BOARD_INTEGRATION)
-    {"BB_DSCNCT", "Disconnected"},
-    {"BB_CNCT_GUIDE", "\x1A to connect"},
+static void _load_lang_map_if_needed() {
+    display_language_t lang =  active_display_language();
+    if(lang_map_language == lang) return;
 
-    {"BB_SCN", "Scanning..."},
-    {"BB_SYNC_NOW", "Press the SYNC button on the Balance Board now"},
-#endif
-};
-
-static const std::map<const std::string, const char*> russian = {
-    {"Clock", "Часы"},
-    {"Timer", "Таймер"},
-    {"Stopwatch", "Секундомер"},
-    {"Weather", "Погода"},
-    {"Alarm", "Будильник"},
-    {"Weighing", "Весы"},
-    {"Music Box", "Музыка"},
-    {"Settings", "Параметры"},
-
-    {"Display", "Экран"},
-    {"Offsets", "Калибровка"},
-    {"System", "Система"},
-    {"Status", "Состояние"},
-    {"Save & Restart", "Сохранить и перезагрузить"},
-
-    {"Reset Webadmin Password", "Сброс пароля вебморды"},
-    {"Press \x1A", "Нажми \x1A"},
-
-    {"Notice", "Внимание"},
-    {"FULL_SETTINGS_NOTICE", "Больше настроек доступно в вебморде через браузер"},
-
-    {"Yes", "Да"},
-    {"No", "Нет"},
-
-    {"Uptime", "Время работы"},
-
-    {"24-hour display", "24-часовой формат отображения"},
-    {"24-hour announcements", "24-часовой формат голоса"},
-    {"Show seconds", "Показывать секунды"},
-    {"Blink dots", "Мигающие точки"},
-    {"Tick sound", "Тикание часов"},
-    {"Ticking only when screen on", "Тикание только при включённом экране"},
-    {"Hourly chime", "Ежечасный сигнал"},
-    {"Fake Soviet radio time signals", "Имитация сигналов точного времени радиоточки"},
-    {"First chime", "Первый за день"},
-    {"Other chimes", "Остальные"},
-    {"Chime from", "Первый час"},
-    {"Chime until", "Последний час"},
-    {"Speak every hour", "Проговаривать время каждый час"},
-    {"Speak on headpat", "Сказать время при нажатии на верхнюю кнопку"},
-    {"Speak date on first chime", "Проговаривать дату в первый час"},
-    {"Voice speed", "Скорость голоса"},
-
-    {"Voice mode", "Режим голоса"},
-    {"Clear", "Чёткий"},
-    {"Loud", "Громкий"},
-
-    {"Voice language", "Язык голоса"},
-    {"English", "Английский"},
-    {"Russian", "Русский"},
-    {"Japanese", "Японский"},
-
-    {"Set time", "Настроить время"},
-    {"Set date", "Настроить дату"},
-    {"Use internet time", "Синхронизация времени с интернетом"},
-    {"NTP/Timezone", "NTP и часовой пояс"},
-    {"Please use the Web UI to configure.", "Настройка доступна только через вебморду"},
-
-    {"Screen Times", "Длительность показа"},
-    {"Alarm countdown", "Обратный отсчёт будильника"},
-    {"Thermometer", "Термометр"},
-    {"Current Weather", "Текущая погода"},
-    {"2-day Forecast", "Прогноз на два дня"},
-    {"Hourly Precipitation % Graph", "Почасовой график осадков"},
-    {"Hourly Pressure Graph", "Почасовой график давления"},
-
-    {"Transition", "Анимация"},
-    {"Off", "Отключить"},
-    {"Wipe", "Стирание"},
-    {"Slide Left", "Сдвиг влево"},
-    {"Slide Right", "Сдвиг вправо"},
-    {"Slide Up", "Сдвиг вверх"},
-    {"Slide Down", "Сдвиг вниз"},
-    {"(Randomize)", "(Как повезёт)"},
-
-    {"Scroll Speed", "Скорость бегущей строки"},
-    {"Slow", "Медленно"},
-    {"Medium", "Средне"},
-    {"Fast", "Быстро"},
-    {"Sonic", "Соник"},
-
-    {"Brightness", "Яркость"},
-    {"Dim", "Темно"},
-    {"Bright", "Ярко"},
-    {"Automatic", "Авто"},
-
-    {"Blank display after (s)", "Пустой дисплей после (сек.)"},
-    {"Turn display off after (s)", "Выключить дисплей после (сек.)"},
-    {"Use Fahrenheit for temperature", "Температура в градусах Фаренгейта"},
-    {"FPS counter", "Счётчик кадров в секунду"},
-    {"Weather effects", "Эффекты погоды"},
-    {"Keypress beep", "Звук клавиш"},
-
-    {"WiFi signal", "Уровень сигнала WiFi"},
-    {"Disconnected", "Когда нет связи"},
-    {"Display power on", "При включении экрана"},
-    {"Always", "Всегда"},
-
-    {"Temperature (\370C)", "Температура (\370C)"},
-    {"Humidity", "Влажность"},
-    {"Display dimming threshold", "Нижний порог освещённости"},
-    {"Display brightening threshold", "Верхний порог освещённости"},
-
-    {"OS Name", "Операционная система"},
-    {"OS Type", "Класс устройства"},
-    {"OS Version", "Версия системы"},
-    {"OS Build", "Сборка системы"},
-    {"WiFi Name", "Имя сети"},
-    {"WiFi IP", "IP-адрес"},
-    {"MAC Address", "MAC-адрес"},
-    {"Disk Space", "Место на диске"},
-    {"System Memory", "Оперативная память"},
-    {"free", "свободно"},
-    {"Remote Control Server", "Удалённый доступ"},
-    {"Serial MIDI Input", "Эмуляция синтезатора"},
-
-    {"WEATHER_FMT", "Сейчас %s. Ощущается как %.01f\370%c. Ветер %.01f м/с. Давление %i гПа."},
-    {"Loading...", "Загрузка..."},
-    {"PoP, %", "Осадки, %"},
-    {"P, hPa", "Давл., гПа"},
-
-    {"Only Once", "Один раз"},
-    {"Enabled", "Включить"},
-    {"Repeat on", "Дни недели"},
-    {"Time", "Время"},
-    {"Smart Alarm", "Лёгкое пробуждение"},
-    {"Smart margin", "Запас минут для лёгкого пробуждения"},
-    {"Melody", "Мелодия"},
-    {"Snooze time", "Поспать ещё, минут"},
-    {"Max beeping time, minutes", "Пищать не дольше чем, минут"},
-
-    {"SNOOZE", "СПЛЮ ЕЩЁ"},
-    {"STOP", "ВСТАЮ"},
-    {"HOLD", "ДЕРЖИ"},
-
-#if HAS(BALANCE_BOARD_INTEGRATION)
-    {"BB_DSCNCT", "Нет связи"},
-    {"BB_CNCT_GUIDE", "Нажми \x1A для подключения"},
-
-    {"BB_SCN", "Поиск..."},
-    {"BB_SYNC_NOW", "Самое время нажать кнопку SYNC на Balance Board"},
-#endif
-
-#if HAS(HTTPFVU)
-    {"New Firmware Available!", "Доступна новая версия!"},
-    {"Press \x1A to install", "Нажми \x1A для установки"},
-
-    {"Periodically check for updates", "Автоматически проверять наличие обновлений"},
-    {"Automatically download and install updates", "Автоматически устанавливать доступные обновления"},
-    {"Check interval (minutes)", "Интервал проверки (минут)"},
-    {"Check for updates now", "Проверить обновления"},
-
-    {"Checking for update", "Поиск новой версии"},
-    {"Downloading firmware", "Загрузка программы"},
-    {"Downloading filesystem", "Загрузка файловой системы"},
-    {"Update failed", "Не удалось!"},
-    {"Update successful", "Обновление успешно!"},
-    {"No new version", "Новой версии нет"},
-#endif
-
-    {"Restarting...", "Перезагрузка..."},
-};
-
-const char * localized_string(const char* key, display_language_t l) {
-    const std::map<const std::string, const char*> * lang = nullptr;
-    switch(l) {
-        case DSPL_LANG_EN:
-            lang = &english;
-            break;
+    const char * filename = nullptr;
+    switch(lang) {
         case DSPL_LANG_RU:
-            lang = &russian;
+            filename = LANG_DIR "ru.lang";
+            break;
+        case DSPL_LANG_JA:
+            filename = LANG_DIR "ja.lang";
+            break;
+        case DSPL_LANG_EN:
+        default:
+            filename = LANG_DIR "en.lang";
             break;
     }
 
-    if(lang->count(key)) {
-        return lang->at(key);
+    File f = open_file(filename);
+    if(!f) {
+        ESP_LOGE(LOG_TAG, "Loading %s failed! No such file? Pretending nothing happened.", filename);
+        lang_map_language = lang;
+        return;
+    }
+
+    JsonDocument content;
+    DeserializationError error = deserializeJson(content, f);
+    if(error) {
+        ESP_LOGE(LOG_TAG, "Parsing %s failed: %s", filename, error.c_str());
+        lang_map_language = lang;
+        return;
+    }
+
+    JsonObject root = content.as<JsonObject>();
+
+    for (auto kv : lang_map) {
+        free(kv.second);
+    }
+
+    lang_map.clear();
+    int i = 0;
+
+    for (JsonPair kv : root) {
+        const char * val = kv.value().as<const char *>();
+        char * dst = (char*)malloc(strlen(val) + 1);
+        strcpy(dst, val);
+        lang_map[kv.key().c_str()] = dst;
+        i++;
+    }
+
+    lang_map_language = lang;
+    ESP_LOGI(LOG_TAG, "Loaded language ID=%i, Entries: %i", lang_map_language, i);
+}
+
+const char * localized_string(const char* key) {
+    _load_lang_map_if_needed();
+
+    if(lang_map.count(key)) {
+        return lang_map.at(key);
     } else {
         return key;
     }
@@ -588,19 +463,19 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
     switch(lang) {
         case TTS_LANG_JA:
             if(time.hour == 12 && time.minute == 0) {
-                snprintf(hourBuf, sizeof(hourBuf), "sho'-go;de_su,");
+                snprintf(hourBuf, sizeof(hourBuf), "sho'-go/de_su,");
             } else {
                 if(is_12h) {
                     if(time.minute == 0) {
-                        snprintf(hourBuf, sizeof(hourBuf), "%s<NUMK VAL=%i COUNTER=ji>;de_su,", is_pm ? "go'go" : "gozenn", time.hour);
+                        snprintf(hourBuf, sizeof(hourBuf), "%s/<NUMK VAL=%i COUNTER=ji>,de_su,", is_pm ? "go'go" : "gozenn", time.hour);
                     } else {
-                        snprintf(hourBuf, sizeof(hourBuf), "%s<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", is_pm ? "go'go" : "gozenn", time.hour, time.minute);
+                        snprintf(hourBuf, sizeof(hourBuf), "%s/<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>,de_su,", is_pm ? "go'go" : "gozenn", time.hour, time.minute);
                     }
                 } else {
                     if(time.minute == 0) {
-                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>;de_su,", time.hour);
+                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,de_su,", time.hour);
                     } else {
-                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>;de_su,", time.hour, time.minute);
+                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>,de_su,", time.hour, time.minute);
                     }
                 }
             }
