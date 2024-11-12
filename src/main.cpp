@@ -4,7 +4,7 @@
 #include <display/display.h>
 #include <graphics/framebuffer.h>
 #include <graphics/screenshooter.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <console.h>
 #include <sensor/sensors.h>
 #include <input/touch_plane.h>
@@ -214,14 +214,6 @@ void bringup_hid() {
 static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
-    bringup_sound();
-    if (!mount_disk(true)) {
-        ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
-        seq->play_sequence(&tulula_fvu);
-    } else {
-        ESP_LOGI(LOG_TAG, "File system mounted");
-        seq->play_sequence(&pc98_pipo);
-    }
 
     // con->print("WiFi init");
     NetworkManager::startup();
@@ -321,9 +313,20 @@ void setup() {
     display_driver.set_bright(true);
 #endif
 
+    bringup_sound();
+    if (!mount_disk(true)) {
+        ESP_LOGE(LOG_TAG, "An Error has occurred while mounting file system");
+        seq->play_sequence(&tulula_fvu);
+    } else {
+        ESP_LOGI(LOG_TAG, "File system mounted");
+        seq->play_sequence(&pc98_pipo);
+    }
+
+    load_fonts();
+
     fb = new DisplayFramebuffer(&display_driver);
 
-    con = new Console(&keyrus0808_font, fb);
+    con = new Console(find_font(FONT_STYLE_CONSOLE), fb);
     con->set_cursor(true);
     con->print("");
     

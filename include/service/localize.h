@@ -7,7 +7,8 @@ typedef enum display_language {
     DSPL_LANG_INVALID = -1,
     
     DSPL_LANG_EN = 0,
-    DSPL_LANG_RU = 1
+    DSPL_LANG_RU = 1,
+    DSPL_LANG_JA = 2
 } display_language_t;
 
 typedef enum spoken_language {

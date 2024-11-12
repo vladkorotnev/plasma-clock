@@ -97,7 +97,7 @@
     "Display power on": "При включении экрана",
     "Always": "Всегда",
 
-    "Temperature (\u00F8C)": "Температура (\u00F8C)",
+    "Temperature (\u00B0C)": "Температура (\u00B0C)",
     "Humidity": "Влажность",
     "Display dimming threshold": "Нижний порог освещённости",
     "Display brightening threshold": "Верхний порог освещённости",
@@ -115,7 +115,8 @@
     "Remote Control Server": "Удалённый доступ",
     "Serial MIDI Input": "Эмуляция синтезатора",
 
-    "WEATHER_FMT": "Сейчас %s. Ощущается как %.01f\u00F8%c. Ветер %.01f м/с. Давление %i гПа.",
+    "WEATHER_FMT": "Сейчас %s. Ощущается как %.01f\u00B0%c. Ветер %.01f м/с. Давление %i гПа.",
+    "WEATHER_LANGCODE": "ru",
     "Loading...": "Загрузка...",
     "PoP, %": "Осадки, %",
     "P, hPa": "Давл., гПа",

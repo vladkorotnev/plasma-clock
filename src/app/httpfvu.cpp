@@ -1,6 +1,6 @@
 #include "app/httpfvu.h"
 #include <service/httpfvu.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/localize.h>
 #include <service/prefs.h>
 #include <service/time.h>
@@ -57,7 +57,7 @@ HttpFvuApp::HttpFvuApp(NewSequencer *s) {
     wants_clear_surface = true;
     
     progBar = new Swoopie();
-    label = new StringScroll(&keyrus0808_font);
+    label = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
     label->start_at_visible = true;
     label->holdoff = 100;
     sequencer = s;

@@ -6,7 +6,7 @@
 #include <service/disk.h>
 #include <vector>
 #include <dirent.h>
-#include <miniz_ext.h>
+#include <utils.h>
 
 static char LOG_TAG[] = "MUDB";
 
@@ -294,27 +294,6 @@ protected:
     melody_item_t * array_ = nullptr;
     std::vector<rle_sample_t *> samples = {};
     int num_rows_ = 0;
-
-    void * decompress_emplace(void * compressed_data, uint32_t src_size, uint32_t decomp_size) {
-        unsigned long dst_sz = decomp_size;
-        void * dest = malloc(dst_sz);
-        if(dest == nullptr) {
-            ESP_LOGE(TAG, "OOM allocating decompression buffer of %i bytes", dst_sz);
-            return nullptr;
-        }
-
-        int rslt = mz_uncompress((unsigned char*)dest, &dst_sz, (unsigned char*) compressed_data, src_size);
-        
-        free(compressed_data);
-
-        if(rslt != MZ_OK) {
-            free(dest);
-            ESP_LOGE(TAG, "Decompress error %i: %s", rslt, mz_error(rslt));
-            return nullptr;
-        }
-
-        return dest; 
-    }
 
     void unload_samples() {
         for(auto i: samples) {

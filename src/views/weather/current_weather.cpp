@@ -1,6 +1,6 @@
 #include "views/weather/current_weather.h"
 #include <service/owm/weather_icons.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <esp32-hal-log.h>
 #include <service/localize.h>
 
@@ -15,8 +15,8 @@ CurrentWeatherView::CurrentWeatherView() {
     animation->x_offset = 0;
     animation->width = 16;
 
-    big_font = &keyrus0816_font;
-    small_font = &keyrus0808_font;
+    big_font = find_font(FONT_STYLE_TALL_TEXT);
+    small_font = find_font(FONT_STYLE_UI_TEXT);
 
     bottom_line = new StringScroll(small_font);
     bottom_line->set_y_position(8);

@@ -167,6 +167,7 @@ void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool in
 }
 
 void FantaManipulator::put_glyph(const font_definition_t * font, const char16_t glyph, int x, int y, text_attributes_t style) {
+    if(font == nullptr) return;
     if(x + font->width + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || x - ((style & TEXT_OUTLINED) ? 1 : 0) > get_width()) return;
     if(y + font->height + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || y - ((style & TEXT_OUTLINED) ? 1 : 0) > get_height()) return;
 
@@ -195,6 +196,7 @@ void FantaManipulator::put_glyph(const font_definition_t * font, const char16_t 
 }
 
 void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y, text_attributes_t style) {
+    if(font == nullptr) return;
     size_t i = 0;
     int cur_x = x;
     const char * tmp = string;

@@ -1,6 +1,7 @@
 {
     "FULL_SETTINGS_NOTICE": "Full settings are only available in the Web UI",
-    "WEATHER_FMT": "%s. Feels like %.01f\u00F8%c. Wind %.01f m/s. Pressure %i hPa.",
+    "WEATHER_FMT": "%s. Feels like %.01f\u00B0%c. Wind %.01f m/s. Pressure %i hPa.",
+    "WEATHER_LANGCODE": "en",
     "Russian": "Русский",
     "Japanese": "Japanese",
     "BB_DSCNCT": "Disconnected",

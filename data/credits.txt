@@ -1,0 +1,42 @@
+    PIS-OS
+Personal
+ Information
+  Screen
+     -
+   Operating
+    System
+
+by Genjitsu Labs
+
+    Icons by PiiXL
+    piiixl.itch.io
+Weather animations done
+   by Genjitsu Labs
+
+   Voice module 
+    AquesTalk
+    by AQUEST
+  www.a-quest.com
+
+Fonts used:
+- keyrus
+  (c) Dmitriy Gurtyak 1989-1994
+- XNU Console Font
+  (c) 2000 Apple Computer, Inc.
+  (c) 2000 Ka-Ping Yee
+- Misaki Mincho
+  https://littlelimit.net/misaki.htm
+- JISKAN16
+  Public Domain, from JIS X 9051-1984
+
+All chime melodies arranged for beeper 
+            by DJ AKASAKA
+
+Greetz to:
+- PASHA & co. (Venus)
+- Akito (DENSETOS)
+- Kirill (Paw Noir)
+- Xavier
+- Engineegor
+- Atsuko & Nina
+-... and YOU!

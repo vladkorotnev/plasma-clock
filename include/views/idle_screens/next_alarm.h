@@ -22,5 +22,6 @@ private:
     int disp_h, disp_m;
     DroppingDigitView *hourView;
     DroppingDigitView *minuteView;
+    const font_definition_t * font;
 };
 

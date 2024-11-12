@@ -49,19 +49,6 @@ const char * day_letters() {
 
 static display_language_t lang_map_language = DSPL_LANG_INVALID;
 static EXT_RAM_ATTR std::map<const std::string, char*> lang_map = {};
-    // {"FULL_SETTINGS_NOTICE", "Full settings are only available in the Web UI"},
-    // {"WEATHER_FMT", "%s. Feels like %.01f\370%c. Wind %.01f m/s. Pressure %i hPa."},
-    // {"Russian", "Русский"},
-    // {"Japanese", "Japanese"},
-
-#if HAS(BALANCE_BOARD_INTEGRATION)
-    // {"BB_DSCNCT", "Disconnected"},
-    // {"BB_CNCT_GUIDE", "\x1A to connect"},
-
-    // {"BB_SCN", "Scanning..."},
-    // {"BB_SYNC_NOW", "Press the SYNC button on the Balance Board now"},
-#endif
-// };
 
 static void _load_lang_map_if_needed() {
     display_language_t lang =  active_display_language();
@@ -72,14 +59,14 @@ static void _load_lang_map_if_needed() {
         case DSPL_LANG_RU:
             filename = LANG_DIR "ru.lang";
             break;
+        case DSPL_LANG_JA:
+            filename = LANG_DIR "ja.lang";
+            break;
         case DSPL_LANG_EN:
         default:
             filename = LANG_DIR "en.lang";
             break;
     }
-    
-    // This function is sometimes used before the disk mount function in the main process had a chance to execute
-    mount_disk(false);
 
     File f = open_file(filename);
     if(!f) {

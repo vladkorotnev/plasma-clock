@@ -32,7 +32,8 @@ private:
     const char * utterance_localized;
     char digits[4] = { '0', '0', '0', '0' };
     TickType_t start_time;
-
+    const font_definition_t * font;
+    
     // This app is only executed once a year at most
     // so we should not keep any resources before `prepare` or after `cleanup`
     bool allocated;

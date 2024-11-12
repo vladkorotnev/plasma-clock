@@ -3,7 +3,7 @@
 #include <service/localize.h>
 #include <esp32-hal-log.h>
 #include "../sound/melodies/abba.h"
-#include <fonts.h>
+#include <graphics/font.h>
 #include <Arduino.h>
 #include <algorithm>
 #include <service/power_management.h>
@@ -59,6 +59,7 @@ NewYearAppShim::NewYearAppShim(Beeper *b, NewSequencer *s, Yukkuri *y):
     snow { nullptr },
     utterance_localized { nullptr },
     allocated { false },
+    font(find_font(FONT_STYLE_CLOCK_FACE)),
     Composite() 
 {
     wants_clear_surface = true;
@@ -122,7 +123,7 @@ void NewYearAppShim::prepare() {
 void NewYearAppShim::render(FantaManipulator* fb) {
     Composite::render(fb);
     TickType_t now = xTaskGetTickCount();
-    int digit_x = fb->get_width() / 2 - xnu_font.width * 2;
+    int digit_x = fb->get_width() / 2 - font->width * 2;
 
     for(int i = 0; i < 4; i++) {
         int digit_y = 0;
@@ -131,8 +132,8 @@ void NewYearAppShim::render(FantaManipulator* fb) {
             int progress_in_digit = std::max(0, std::min(intro_elapsed - (227 * i), 200));
             digit_y = fb->get_height() - (fb->get_height() * progress_in_digit / 200);
         }
-        fb->put_glyph(&xnu_font, digits[i], digit_x, digit_y, TEXT_NO_BACKGROUND);
-        digit_x += xnu_font.width;
+        fb->put_glyph(font, digits[i], digit_x, digit_y, TEXT_NO_BACKGROUND);
+        digit_x += font->width;
     }
 
     fb->put_sprite(&bg_spr_left, 0, 0, false);

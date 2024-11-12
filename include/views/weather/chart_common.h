@@ -36,4 +36,5 @@ protected:
     bool cursor_phase = false;
     int reveal_index = 0;
     bool show_legend = true;
+    const font_definition_t * legend_font;
 };

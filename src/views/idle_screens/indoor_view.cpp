@@ -1,11 +1,11 @@
 #include <views/idle_screens/indoor_view.h>
 #include <rsrc/common_icons.h>
 #include <service/owm/weather.h>
-#include <fonts.h>
+#include <graphics/font.h>
 
 AirSensorView::AirSensorView(SensorPool *s, sensor_id_t t, sensor_id_t h, const sprite_t * ic) {
     sensors = s;
-    value_font = &keyrus0816_font;
+    value_font = find_font(FONT_STYLE_CLOCK_FACE);
     temperature_id = t;
     humidity_id = h;
     icon = ic;

@@ -1,5 +1,5 @@
 #include "views/weather/daily_forecast.h"
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/owm/weather.h>
 #include <service/owm/weather_icons.h>
 
@@ -10,18 +10,18 @@ public:
         icon->x_offset = 0;
         icon->width = 16;
 
-        day_temp = new StringScroll(&keyrus0808_font);
+        day_temp = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
         day_temp->stopped = true;
         day_temp->set_y_position(0);
         day_temp->x_offset = 17;
 
-        night_temp = new StringScroll(&keyrus0808_font);
+        night_temp = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
         night_temp->stopped = true;
         night_temp->set_y_position(8);
         night_temp->x_offset = 17;
         night_temp->gray = true;
         
-        date = new StringScroll(&fps_counter_font);
+        date = new StringScroll(find_font(FONT_STYLE_HUD_DIGITS));
         date->render_mode = TEXT_OUTLINED | TEXT_NO_BACKGROUND;
         date->stopped = true;
         date->set_y_position(11);

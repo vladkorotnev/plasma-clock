@@ -1,0 +1,12 @@
+{
+    "encoding": "utf16",
+    "glyph_format": "horizontal",
+    "cursor": 23,
+    "invalid": 15,
+    "width": 8,
+    "height": 16,
+    "bitmap_file": "xnu.fnt",
+    "ranges": [
+        {"start": 0, "end": 255, "offset": 0, "comment": "ASCII + Latin supplement"}
+    ]
+}

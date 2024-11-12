@@ -4,13 +4,13 @@
 
 #if HAS(PLAYGROUND)
 
-#include <fonts.h>
+#include <graphics/font.h>
 #include <state.h>
 
 class AppShimPlayground: public Composite {
 public:
     AppShimPlayground() {
-        scroller = new StringScroll(&keyrus0808_font);
+        scroller = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
         scroller->set_y_position(6);
         scroller->render_mode = slides[slide].first;
         scroller->set_string(slides[slide].second);

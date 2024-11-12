@@ -13,7 +13,7 @@
 #include <views/overlays/touch_arrows_ovl.h>
 #include <views/idle_screens/simple_clock.h>
 #include <input/keys.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <state.h>
 
 static char LOG_TAG[] = "APL_ALM";
@@ -44,9 +44,11 @@ static bool is_snoozing = false;
 static const alarm_setting_t * alarm_setting;
 static TickType_t startedAt;
 static TickType_t maxDur;
+static const font_definition_t * tall_font;
 
 void app_alarming_prepare(NewSequencer* s) {
     startedAt = xTaskGetTickCount();
+    tall_font = find_font(FONT_STYLE_TALL_TEXT);
     maxDur = pdMS_TO_TICKS( prefs_get_int(PREFS_KEY_ALARM_MAX_DURATION_MINUTES) * 60000 );
 
     if(seq) {
@@ -112,7 +114,7 @@ void app_alarming_draw(FantaManipulator* fb) {
             {
                 snooze_hold_remain = fb->get_width();
                 static const char * snooze_str = localized_string("SNOOZE");
-                fb->put_string(&keyrus0816_font, snooze_str, 12, 0);
+                fb->put_string(tall_font, snooze_str, 12, 0);
                 arrows->render(fb);
                 if(framecount >= 180) {
                     arrows->left = false;
@@ -129,7 +131,7 @@ void app_alarming_draw(FantaManipulator* fb) {
             {
                 snooze_hold_remain = fb->get_width();
                 static const char * stop_str = localized_string("STOP");
-                fb->put_string(&keyrus0816_font, stop_str, fb->get_width() - 12 - measure_string_width(&keyrus0816_font, stop_str), 0);
+                fb->put_string(tall_font, stop_str, fb->get_width() - 12 - measure_string_width(tall_font, stop_str), 0);
                 arrows->render(fb);
                 if(framecount >= 180) {
                     framecount = 0;
@@ -156,7 +158,7 @@ void app_alarming_draw(FantaManipulator* fb) {
         case SNOOZE_HOLD_COUNTDOWN:
             {
                 static const char * hold_str = localized_string("HOLD");
-                fb->put_string(&keyrus0816_font, hold_str, 12, 0);
+                fb->put_string(tall_font, hold_str, 12, 0);
                 arrows->render(fb);
                 if(snooze_hold_remain > 0) snooze_hold_remain -= 1;
                 FantaManipulator *holdProgress = fb->slice(snooze_hold_remain, fb->get_width() - snooze_hold_remain);
@@ -168,7 +170,7 @@ void app_alarming_draw(FantaManipulator* fb) {
         case STOP_HOLD_COUNTDOWN:
             {
                 static const char * hold_str = localized_string("HOLD");
-                fb->put_string(&keyrus0816_font, hold_str, fb->get_width() - 12 - measure_string_width(&keyrus0816_font, hold_str), 0);
+                fb->put_string(tall_font, hold_str, fb->get_width() - 12 - measure_string_width(tall_font, hold_str), 0);
                 arrows->render(fb);
                 if(snooze_hold_remain > 0 && framecount % 2 == 0) snooze_hold_remain -= 1;
                 FantaManipulator *holdProgress = fb->slice(0,  fb->get_width() - snooze_hold_remain);

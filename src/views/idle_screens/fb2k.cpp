@@ -1,6 +1,6 @@
 #include <views/idle_screens/fb2k.h>
 #include <service/foo_client.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <rsrc/common_icons.h>
 #include <esp32-hal-log.h>
 
@@ -8,7 +8,7 @@ static char LOG_TAG[] = "FOO";
 
 
 Fb2kView::Fb2kView() {
-    font = &keyrus0808_font;
+    font = find_font(FONT_STYLE_UI_TEXT);
     memset(artist_buffer, 0, 128);
     memset(title_buffer, 0, 128);
 
