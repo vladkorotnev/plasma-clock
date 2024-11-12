@@ -17,8 +17,8 @@ void MenuDateSettingView::render(FantaManipulator *fb) {
 
     Composite::render(fb);
     
-    fb->put_glyph(&xnu_font, '/', yearView->x_offset + yearView->width, 0);
-    fb->put_glyph(&xnu_font, '/', monthView->x_offset + monthView->width, 0);
+    fb->put_glyph(font, '/', yearView->x_offset + yearView->width, 0);
+    fb->put_glyph(font, '/', monthView->x_offset + monthView->width, 0);
 
     DroppingDigitView * editedView;
     switch(cursorPosition) {

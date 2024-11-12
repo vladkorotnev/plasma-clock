@@ -1,12 +1,12 @@
 #include "service/httpfvu.h"
 #include <service/prefs.h>
+#include <service/disk.h>
 #include <device_config.h>
 #include <string.h>
 #include <esp_ota_ops.h>
 #include <Arduino.h>
 #include <WiFi.h>
 #include <HTTPClient.h>
-#include <LittleFS.h>
 #if !HAS(HTTPFVU)
 #define NO_GLOBAL_UPDATE
 #endif
@@ -109,12 +109,12 @@ void download_fs(httpfvu_progress_cb_t progress_callback) {
     http.begin(client, url);
     int response = http.GET();
     if(response == HTTP_CODE_OK) {
-        LittleFS.end();
+        unmount_disk();
         int len = http.getSize();
         if(len == -1) len = UPDATE_SIZE_UNKNOWN;
         if(!Update.begin(len, U_SPIFFS)) {
             ESP_LOGE(LOG_TAG, "FS: Update prerequisite check failed");
-            LittleFS.begin(true, FS_MOUNTPOINT);
+            mount_disk(true);
             progress_callback(true, false, 0, 0);
             client.stop();
             return;
@@ -123,18 +123,18 @@ void download_fs(httpfvu_progress_cb_t progress_callback) {
         ESP_LOGI(LOG_TAG, "FS: Written %i bytes", written);
         if(Update.hasError()) {
             ESP_LOGE(LOG_TAG, "Update error: (%i) %s", Update.getError(), Update.errorString());
-            LittleFS.begin(true, FS_MOUNTPOINT);
+            mount_disk(true);
             progress_callback(true, false, 0, 0);
             client.stop();
             return;
         }
         if(Update.end(true)) {
             ESP_LOGI(LOG_TAG, "Completed FS update");
-            LittleFS.begin(true, FS_MOUNTPOINT);
+            mount_disk(true);
         }
         if(Update.hasError()) {
             ESP_LOGE(LOG_TAG, "FS Update error: (%i) %s", Update.getError(), Update.errorString());
-            LittleFS.begin(true, FS_MOUNTPOINT);
+            mount_disk(true);
             progress_callback(true, false, 0, 0);
             client.stop();
             return;

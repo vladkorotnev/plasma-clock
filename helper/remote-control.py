@@ -22,7 +22,7 @@ PRESS_STS=0
 RELEASE_STS=0
 DISP_STS=[]
 DISP_RES=(0,0)
-CANVAS_RES=(500,80)
+CANVAS_RES=(700,80)
 
 REC_IMGS=[]
 REC_STS=False
@@ -102,7 +102,7 @@ def tx_pkt():
 def rx_pkt():
     global sock, IP, PORT, DISP_STS, DISP_RES, REC_STS, REC_IMGS
     try:
-        data, addrport = sock.recvfrom(255)
+        data, addrport = sock.recvfrom(1024)
     except TimeoutError:
         return
     if addrport[0] != IP or addrport[1] != PORT:
@@ -139,7 +139,7 @@ window.title("PIS-OS Remote")
 window.resizable(False, False)
 
 # Set window size
-window.geometry("520x150")
+window.geometry("800x150")
 window.grid_columnconfigure(0, weight=1, uniform="foo")
 window.grid_columnconfigure(1, weight=1, uniform="foo")
 window.grid_columnconfigure(2, weight=1, uniform="foo")

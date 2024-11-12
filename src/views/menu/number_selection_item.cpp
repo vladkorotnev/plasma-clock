@@ -1,10 +1,10 @@
 #include <views/menu/number_selection_item.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <input/keys.h>
 
 MenuNumberSelectorView::MenuNumberSelectorView(const char * title, int min_, int max_, int step_, int initialValue, std::function<void(bool, Renderable*)> onActivated_, std::function<void(int)> onChange_):
-    label(new StringScroll(&keyrus0808_font, title)),
-    value(new StringScroll(&keyrus0808_font, std::to_string(initialValue).c_str())),
+    label(new StringScroll(find_font(FONT_STYLE_UI_TEXT), title)),
+    value(new StringScroll(find_font(FONT_STYLE_UI_TEXT), std::to_string(initialValue).c_str())),
     currentValue(initialValue),
     min(min_),
     max(max_),
@@ -13,7 +13,7 @@ MenuNumberSelectorView::MenuNumberSelectorView(const char * title, int min_, int
     onActivated(onActivated_),
     isActive(false),
     currentValueStr {0} {
-        value->set_y_position(keyrus0808_font.height);
+        value->set_y_position(label->font->height);
         value->align_to_right = true;
         value->start_at_visible = true;
         value->holdoff = 100;
@@ -60,6 +60,6 @@ void MenuNumberSelectorView::step() {
 void MenuNumberSelectorView::render(FantaManipulator *fb) {
     Composite::render(fb);
     if(isActive) {
-        fb->put_glyph(&keyrus0808_font, 0x12 /* CP866: up-down arrows */, 0, 8);
+        fb->put_glyph(value->font, 0x2195 /* '↕' UTF16 */, 0, 8);
     }
 }

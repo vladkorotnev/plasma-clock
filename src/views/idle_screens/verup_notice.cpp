@@ -1,6 +1,6 @@
 #include "views/idle_screens/verup_notice.h"
 #include <network/netmgr.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/localize.h>
 #include <service/httpfvu.h>
 #include <service/prefs.h>
@@ -28,7 +28,7 @@ int VerUpNoticeView::desired_display_time() {
 
 void VerUpNoticeView::create_components_if_needed() {
     if(title == nullptr) {
-        title = new StringScroll(&keyrus0808_font, nullptr);
+        title = new StringScroll(find_font(FONT_STYLE_UI_TEXT), nullptr);
         title->x_offset = 17;
         title->holdoff = 60;
         title->start_at_visible = true;
@@ -36,7 +36,7 @@ void VerUpNoticeView::create_components_if_needed() {
     }
 
     if(message == nullptr) {
-        message = new StringScroll(&keyrus0808_font, nullptr);
+        message = new StringScroll(find_font(FONT_STYLE_UI_TEXT), nullptr);
         message->set_y_position(8);
         message->x_offset = 17;
         message->holdoff = 60;
@@ -55,7 +55,7 @@ void VerUpNoticeView::prepare() {
     Screen::prepare();
 
     title->set_string(localized_string("New Firmware Available!"));
-    message->set_string(localized_string("Press \x1A to install"));
+    message->set_string(localized_string("Press \u001A to install"));
 
     int width = std::max(title->string_width, message->string_width);
     title->string_width = width;

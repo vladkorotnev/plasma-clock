@@ -14,7 +14,6 @@
 #if HAS(OUTPUT_AKIZUKI_K875)
 
 // Akizuki K875 Display Driver
-// Known issues: some flicker due to DMA memory concurrent writes. TODO fix (double buffering?)
 
 #include <hal/spi_ll.h>
 #define SPI_LL_GET_CLK(ID) ((ID)==0? SPICLK_OUT_IDX:((ID)==1? HSPICLK_OUT_IDX : VSPICLK_OUT_IDX))

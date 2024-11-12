@@ -52,18 +52,7 @@ void WeatherTaskFunction( void * pvParameter )
 
     EXT_RAM_ATTR static char url[256];
 
-    static const char * langcode;
-    switch(active_display_language()) {
-        case DSPL_LANG_RU:
-            langcode = "ru";
-            break;
-        case DSPL_LANG_EN:
-        default:
-            langcode = "en";
-            break;
-    }
-
-    snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str(), langcode);
+    snprintf(url, 150, currentApi, latitude.c_str(), longitude.c_str(), apiKey.c_str(), localized_string("WEATHER_LANGCODE"));
 
     bool isFailure = false;
 

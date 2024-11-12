@@ -14,6 +14,7 @@ public:
     int holdoff;
     int reappear_delay;
     int left_margin;
+    const font_definition_t * font;
     void set_string(const char*);
     void set_y_position(int);
     void rewind();
@@ -22,7 +23,6 @@ public:
     void render(FantaManipulator *);
 
 private:
-    const font_definition_t * font;
     const char * string;
     int y_position;
     int position;

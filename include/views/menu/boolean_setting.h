@@ -2,7 +2,7 @@
 #include <views/framework.h>
 #include <input/keys.h>
 #include <service/prefs.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/localize.h>
 
 class MenuBooleanSelectorView: public Renderable {
@@ -22,6 +22,7 @@ private:
     key_id_t _button;
     StringScroll * label;
     std::function<void(bool)> _onChange;
+    const font_definition_t * font;
 };
 
 class MenuBooleanSettingView: public MenuBooleanSelectorView {

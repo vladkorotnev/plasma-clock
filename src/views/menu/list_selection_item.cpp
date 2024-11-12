@@ -1,10 +1,10 @@
 #include <views/menu/list_selection_item.h>
 #include <input/keys.h>
-#include <fonts.h>
+#include <graphics/font.h>
 
 MenuListSelectorView::MenuListSelectorView(const char * title, std::vector<const char*> items_, int initialValue, std::function<void(bool, Renderable*)> onActivated_, std::function<void(int)> onChange_):
-    label(new StringScroll(&keyrus0808_font, title)),
-    value(new StringScroll(&keyrus0808_font)),
+    label(new StringScroll(find_font(FONT_STYLE_UI_TEXT), title)),
+    value(new StringScroll(find_font(FONT_STYLE_UI_TEXT))),
     currentValue(initialValue),
     items(items_),
     onChange(onChange_),
@@ -15,7 +15,7 @@ MenuListSelectorView::MenuListSelectorView(const char * title, std::vector<const
         } else if(items_.size() >= 1) {
             value->set_string(items_[0]);
         }
-        value->set_y_position(keyrus0808_font.height);
+        value->set_y_position(label->font->height);
         value->align_to_right = true;
         value->start_at_visible = true;
         value->holdoff = 100;
@@ -61,6 +61,6 @@ void MenuListSelectorView::step() {
 void MenuListSelectorView::render(FantaManipulator *fb) {
     Composite::render(fb);
     if(isActive) {
-        fb->put_glyph(&keyrus0808_font, 0x12 /* CP866: up-down arrows */, 0, 8);
+        fb->put_glyph(value->font, 0x2195 /* '↕' UTF16 */, 0, 8);
     }
 }

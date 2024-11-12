@@ -1,6 +1,6 @@
 #include <views/idle_screens/simple_clock.h>
 #include <service/prefs.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <esp32-hal-ledc.h>
 
 #define CLOCK_SEPARATOR ':'

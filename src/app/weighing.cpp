@@ -10,7 +10,7 @@ class AppShimWeighing::WeighingView: public Composable {
 public:
     WeighingView(SensorPool*s): 
         sensors(s),
-        font(&keyrus0816_font),
+        font(find_font(FONT_STYLE_TALL_TEXT)),
         value_str { 0 },
         value_len { 0 },
         disp_value { 0 }

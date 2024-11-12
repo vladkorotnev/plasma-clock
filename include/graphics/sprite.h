@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-typedef enum sprite_fmt {
+typedef enum sprite_fmt: uint8_t {
     /// A horizontally laid out sprite
     /// @details I.e. a 14x2 sprite will consist of 4 bytes. 0th one will contain the leftmost 6 pixels of the top row aligned towards LSB, 
     ///          1st one will contain the rightmost 8 pixels, 2nd one will contain the leftmost 6px of the bottom row, and so forth.

@@ -4,7 +4,7 @@
 
 #include <views/idle_screens/word_of_the_day.h>
 #include <service/wordnik.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <esp32-hal-log.h>
 
 static char LOG_TAG[] = "WOTD";
@@ -40,7 +40,7 @@ static const ani_sprite_t book_icon = {
 };
 
 WordOfTheDayView::WordOfTheDayView() {
-    font = &keyrus0808_font;
+    font = find_font(FONT_STYLE_UI_TEXT);
     memset(word_buffer, 0, 32);
     memset(definition_buffer, 0, 256);
 

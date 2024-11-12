@@ -1,11 +1,11 @@
 #include <views/menu/info_item.h>
 
 MenuInfoItemView::MenuInfoItemView(const char * title, const char * subtitle) {
-    top_label = new StringScroll(&keyrus0808_font, title);
+    top_label = new StringScroll(find_font(FONT_STYLE_UI_TEXT), title);
     top_label->set_y_position(0);
 
-    bottom_label = new StringScroll(&keyrus0808_font, subtitle);
-    bottom_label->set_y_position(keyrus0808_font.height);
+    bottom_label = new StringScroll(find_font(FONT_STYLE_UI_TEXT), subtitle);
+    bottom_label->set_y_position(top_label->font->height);
 
     top_label->start_at_visible = true;
     top_label->holdoff = 100;

@@ -15,13 +15,16 @@ public:
         stop_time = start_time;
         strncpy(ms_buf, ".000", 8);
 
+        big_font = find_font(FONT_STYLE_CLOCK_FACE);
+        small_font = find_font(FONT_STYLE_CLOCK_FACE_SMALL);
+
         int char_count = 12; // XX:XX:XX.xxx
-        int text_width = 9 * xnu_font.width + 3 * keyrus0808_font.width;
+        int text_width = 9 * big_font->width + 3 * small_font->width;
         int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
         hourView->x_offset = left_offset;
-        left_offset += hourView->width + xnu_font.width;
+        left_offset += hourView->width + big_font->width;
         minuteView->x_offset = left_offset;
-        left_offset += hourView->width + xnu_font.width;
+        left_offset += hourView->width + big_font->width;
         secondView->x_offset = left_offset;
 
         add_composable(hourView);
@@ -32,9 +35,9 @@ public:
     void render(FantaManipulator *fb) {
         Composite::render(fb);
         
-        fb->put_glyph(&xnu_font, ':', hourView->x_offset + hourView->width, 0);
-        fb->put_glyph(&xnu_font, ':', minuteView->x_offset + minuteView->width, 0);
-        fb->put_string(&keyrus0808_font, ms_buf, secondView->x_offset + secondView->width, fb->get_height() - keyrus0808_font.height - 1);
+        fb->put_glyph(big_font, ':', hourView->x_offset + hourView->width, 0);
+        fb->put_glyph(big_font, ':', minuteView->x_offset + minuteView->width, 0);
+        fb->put_string(small_font, ms_buf, secondView->x_offset + secondView->width, fb->get_height() - small_font->height - 1);
     }
 
     void step() {
@@ -85,6 +88,8 @@ private:
     tk_time_of_day_t start_time;
     tk_time_of_day_t stop_time;
     char ms_buf[8];
+    const font_definition_t * small_font;
+    const font_definition_t * big_font;
 };
 
 AppShimStopwatch::AppShimStopwatch(Beeper *b) {

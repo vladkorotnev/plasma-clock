@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 #include <views/framework.h>
-#include <fonts.h>
+#include <graphics/font.h>
 
 class MenuInfoItemView: public Composite {
 public:

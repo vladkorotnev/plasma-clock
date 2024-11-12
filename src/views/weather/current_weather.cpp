@@ -1,6 +1,6 @@
 #include "views/weather/current_weather.h"
 #include <service/owm/weather_icons.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <esp32-hal-log.h>
 #include <service/localize.h>
 
@@ -15,8 +15,8 @@ CurrentWeatherView::CurrentWeatherView() {
     animation->x_offset = 0;
     animation->width = 16;
 
-    big_font = &keyrus0816_font;
-    small_font = &keyrus0808_font;
+    big_font = find_font(FONT_STYLE_TALL_TEXT);
+    small_font = find_font(FONT_STYLE_UI_TEXT);
 
     bottom_line = new StringScroll(small_font);
     bottom_line->set_y_position(8);
@@ -55,7 +55,7 @@ void CurrentWeatherView::prepare_for_new_weather() {
         animation->set_sprite(icon);
     }
 
-    snprintf(top_text, sizeof(top_text), "%.01f\370%c %i%%", convert_temperature(KELVIN, weather.temperature_kelvin), preferred_temperature_unit(), weather.humidity_percent);
+    snprintf(top_text, sizeof(top_text), "%.01f°%c %i%%", convert_temperature(KELVIN, weather.temperature_kelvin), preferred_temperature_unit(), weather.humidity_percent);
     snprintf(bottom_text, sizeof(bottom_text), localized_string("WEATHER_FMT"), weather.description, convert_temperature(KELVIN, weather.feels_like_kelvin), preferred_temperature_unit(), weather.windspeed_mps, weather.pressure_hpa);
     top_line->set_string(top_text);
     bottom_line->set_string(bottom_text);

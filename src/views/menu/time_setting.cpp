@@ -17,10 +17,10 @@ void MenuTimeSettingView::render(FantaManipulator *fb) {
 
     Composite::render(fb);
 
-    fb->put_glyph(&xnu_font, ':', hourView->x_offset + hourView->width, 0);
+    fb->put_glyph(font, ':', hourView->x_offset + hourView->width, 0);
 
     if (showSeconds) {
-        fb->put_glyph(&xnu_font, ':', minuteView->x_offset + minuteView->width, 0);
+        fb->put_glyph(font, ':', minuteView->x_offset + minuteView->width, 0);
     }
 
     DroppingDigitView * editedView;

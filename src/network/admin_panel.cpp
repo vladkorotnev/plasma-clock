@@ -285,7 +285,7 @@ static void build() {
 
     GP.SPOILER_BEGIN("Display", GP_BLUE);
         GP.LABEL("Display language (not in WebUI):");
-        GP.SELECT(PREFS_KEY_DISP_LANGUAGE, "English,Русский", prefs_get_int(PREFS_KEY_DISP_LANGUAGE));
+        GP.SELECT(PREFS_KEY_DISP_LANGUAGE, "English,Русский,日本語", prefs_get_int(PREFS_KEY_DISP_LANGUAGE));
         GP.HR();
 #if HAS(VARYING_BRIGHTNESS)
         GP.LABEL("Display brightness:");

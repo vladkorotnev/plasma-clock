@@ -1,10 +1,11 @@
 #include "app/httpfvu.h"
 #include <service/httpfvu.h>
-#include <fonts.h>
+#include <graphics/font.h>
 #include <service/localize.h>
 #include <service/prefs.h>
 #include <service/time.h>
 #include <service/alarm.h>
+#include <service/power_management.h>
 #include <os_config.h>
 #include <state.h>
 #include <algorithm>
@@ -56,7 +57,7 @@ HttpFvuApp::HttpFvuApp(NewSequencer *s) {
     wants_clear_surface = true;
     
     progBar = new Swoopie();
-    label = new StringScroll(&keyrus0808_font);
+    label = new StringScroll(find_font(FONT_STYLE_UI_TEXT));
     label->start_at_visible = true;
     label->holdoff = 100;
     sequencer = s;
@@ -85,6 +86,7 @@ HttpFvuApp::HttpFvuApp(NewSequencer *s) {
 void HttpFvuApp::prepare() {
     Composite::prepare();
 #if HAS(HTTPFVU)
+    power_mgmt_pause();
     _oldState = FVUAPP_INIT;
     progBar->value = -1;
     delayCounter = 0;
@@ -113,6 +115,7 @@ void HttpFvuApp::prepare() {
 }
 
 void HttpFvuApp::cleanup() {
+    power_mgmt_resume();
     Composite::cleanup();
     if(hCheckerTask != NULL && appState != FVUAPP_SUCCESS) vTaskResume(hCheckerTask);
 }
