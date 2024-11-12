@@ -139,7 +139,7 @@ void bringup_temp_sensor() {
 
     if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("T sens err");
-        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+        beepola->beep(CHANNEL_SYSTEM, 500, 125);
         return;
     } else {
         con->print("T sensor OK");
@@ -149,7 +149,7 @@ void bringup_temp_sensor() {
     delay(1000);
     if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
         con->print("H sens err");
-        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+        beepola->beep(CHANNEL_SYSTEM, 500, 125);
     } else {
         con->print("H sensor OK");
     }
@@ -197,7 +197,7 @@ void bringup_hid() {
     con->print("Touch init");
     if(touchplane_start() != ESP_OK) {
         con->print("TP init err");
-        beepola->beep_blocking(CHANNEL_SYSTEM, 500, 125);
+        beepola->beep(CHANNEL_SYSTEM, 500, 125);
     }
     ESP_LOGI(LOG_TAG, "Touchpad ready");
 #endif

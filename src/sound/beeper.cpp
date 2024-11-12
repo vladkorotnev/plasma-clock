@@ -62,14 +62,6 @@ void Beeper::stop_tone(beeper_channel_t ch) {
     voice->set_parameter(ToneGenerator::Parameter::PARAMETER_ACTIVE, false);
 }
 
-void Beeper::beep_blocking(beeper_channel_t ch, uint freq, uint len, uint16_t duty) {
-    if(active_channel > ch) return;
-    if(!is_channel_enabled(ch)) return;
-
-    beep(ch, freq, len, duty);
-    vTaskDelay(len);
-}
-
 void Beeper::beep(beeper_channel_t ch, uint freq, uint len, uint16_t duty) {
     if(active_channel > ch) return;
     if(!is_channel_enabled(ch)) return;
