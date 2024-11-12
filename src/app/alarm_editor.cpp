@@ -3,8 +3,6 @@
 #include <state.h>
 #include <service/localize.h>
 
-static const char * _day_letters = day_letters();
-
 class AlarmItemView: public Renderable {
 public:
     AlarmItemView(int index, std::function<void(int)> onSelect):
@@ -34,7 +32,7 @@ public:
             fb->put_string(f, localized_string("Only Once"), 14, 8);
         } else {
             for(int d = 0; d < 7; d++) {
-                fb->put_string(f, &_day_letters[d * 2], 14 + d * (f->width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
+                fb->put_string(f, day_letter(d), 14 + d * (f->width + 1), 8, ALARM_ON_DAY(setting, d) ? TEXT_INVERTED : TEXT_NORMAL);
             }
         }
     }
@@ -124,7 +122,7 @@ public:
                 if(isActive && d == cursor && cursorShows) {
                     fb->rect(ltr_x - 2, 7, ltr_x + 8, 15, lit_up);
                 }
-                fb->put_string(label->font, &_day_letters[d * 2], ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
+                fb->put_string(label->font, day_letter(d), ltr_x, 8, lit_up ? TEXT_INVERTED : TEXT_NORMAL);
             }
         } else {
             static const char * one_time = localized_string("Only Once");
