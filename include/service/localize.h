@@ -19,7 +19,7 @@ typedef enum spoken_language {
 
 display_language_t active_display_language();
 const char * localized_string(const char* key);
-const char * day_letters();
+const char * day_letter(int day);
 
 spoken_language_t active_tts_language();
 YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t time, spoken_language_t lang = active_tts_language());

@@ -16,35 +16,28 @@ spoken_language_t active_tts_language() {
     return (spoken_language_t) prefs_get_int(PREFS_KEY_TTS_LANGUAGE);
 }
 
-const char * day_letters() {
-    static const char en_letters[14] = {
-        'S', 0,
-        'M', 0,
-        'T', 0,
-        'W', 0,
-        'T', 0,
-        'F', 0,
-        'S', 0,
+const char * day_letter(int day) {
+    static const char * const en_letters[14] = {
+        "S", "M", "T", "W", "T", "F", "S"
     };
 
     switch(active_display_language()) {
-        case DSPL_LANG_EN:
-            return en_letters;
-
         case DSPL_LANG_RU:
-            static const char ru_letters[14] = {
-                0x82, 0,
-                0x8F, 0,
-                0x82, 0,
-                0x91, 0,
-                0x97, 0,
-                0x8F, 0,
-                0x91, 0,
+            static const char * const ru_letters[7] = {
+                "В", "П", "В", "С", "Ч", "П", "С"
             };
-            return ru_letters;
-    }
+            return ru_letters[day];
 
-    return en_letters;
+        case DSPL_LANG_JA:
+            static const char * const ja_letters[7] = {
+                "日", "月", "火", "水", "木", "金", "土"
+            };
+            return ja_letters[day];
+
+        case DSPL_LANG_EN:
+        default:
+            return en_letters[day];
+    }
 }
 
 static display_language_t lang_map_language = DSPL_LANG_INVALID;
