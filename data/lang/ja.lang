@@ -122,8 +122,8 @@
     "P, hPa": "気圧 hPa",
 
     "Only Once": "一回のみ",
-    "Enabled": "このアラームを使用する",
-    "Repeat on": "繰り返し日程",
+    "Enabled": "アラーム",
+    "Repeat on": "スケジュール設定",
     "Time": "時刻",
     "Smart Alarm": "スマートアラーム",
     "Smart margin": "スマートアラームの余裕時間（分）",
@@ -133,7 +133,7 @@
 
     "SNOOZE": "スヌーズ",
     "STOP": "アラーム停止",
-    "HOLD": "押し続けて",
+    "HOLD": "長押し",
 
     "BB_DSCNCT": "接続されていません",
     "BB_CNCT_GUIDE": "\u001A を押して接続を開始してください",

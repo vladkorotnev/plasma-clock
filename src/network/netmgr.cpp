@@ -64,6 +64,7 @@ void NetworkManager::wifi_event(WiFiEvent_t ev) {
             } else {
                 save_current_network();
             }
+            ESP_LOGI(LOG_TAG, "RSSI: %i dB", rssi());
             break;
         default:
             ESP_LOGI(LOG_TAG, "Unhandled event %i", ev);

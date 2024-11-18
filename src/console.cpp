@@ -54,7 +54,7 @@ void Console::task() {
     
     if(xQueueReceive(hQueue, &next_line, pdMS_TO_TICKS( 500 )) == pdTRUE) {
         // Output next line
-        if(active) {
+        if(active && font != nullptr && font->valid) {
             FantaManipulator * m = disp->manipulate();
 
             if(m->lock()) {
@@ -90,7 +90,7 @@ void Console::task() {
         cursor_state = false;
     }
 
-    if(cursor_enable && active) {
+    if(cursor_enable && active && font != nullptr && font->valid) {
         cursor_state = !cursor_state;
         FantaManipulator * m = disp->manipulate();
         if(m->lock()) {
@@ -107,6 +107,7 @@ void Console::clear() {
 }
 
 void Console::set_cursor(bool enable) {
+    if(font == nullptr || !font->valid) return;
     if(enable && !cursor_enable) {
         cursor_state = true;
         if(active) {
@@ -129,6 +130,7 @@ void Console::set_cursor(bool enable) {
 }
 
 void Console::cursor_newline(FantaManipulator * m) {
+    if(font == nullptr || !font->valid) return;
     if(cursor_y + font->height * 2 > disp->height) {
         // Next line won't fit, so scroll current content above and keep Y same
         m->scroll(0, -font->height);

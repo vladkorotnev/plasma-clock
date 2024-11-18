@@ -7,6 +7,8 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 
 ![](docs/img/hero.jpg)
 
+More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
+
 ## Available widgets
 
 * Clock
@@ -115,7 +117,7 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 * [HIRO — Space Harrier](https://datadiscs.bandcamp.com/track/main-theme): [MIDI](helper/chimes/space_harrier.mid) (scale altered for 1-bit output range)
 * [A-ha — Take On Me](https://www.youtube.com/watch?v=djV11Xbc914): [MIDI](helper/chimes/takeonme.mid)
 * [Ennio Morricone - My Name Is Nobody](https://www.youtube.com/watch?v=srSpyXwz-MQ): [MIDI](helper/chimes/mynameisnobody.mid)
-* [PPK - ResuRection (ППК - Воскрешение)](https://www.youtube.com/watch?v=KvOR2E_hZsw): [MIDI](helper/chimes/ppk.mid)
+* [PPK - ResuRection (ППК - Воскрешение)](https://www.youtube.com/watch?v=KvOR2E_hZsw): [MIDI](helper/chimes/ppk.mid), [MP3](docs/rec/gagarin.mp3)
 * [Owl City - Fireflies](https://www.youtube.com/watch?v=psuRGfAaju4): [MIDI](helper/chimes/fireflies.mid)
 * [Ado - Odo](https://www.youtube.com/watch?v=YnSW8ian29w): [MIDI](helper/chimes/odo.mid)
 * [ZUN - Legend of Hourai](https://www.youtube.com/watch?v=d2_tY7cl818): [MIDI](helper/chimes/hourai_sou1.mid) based on work by sou1

@@ -6,6 +6,8 @@
 class DailyForecastView::Column: public Composite {
 public:
     Column() {
+        wants_clear_surface = true;
+
         icon = new AniSpriteView();
         icon->x_offset = 0;
         icon->width = 16;
