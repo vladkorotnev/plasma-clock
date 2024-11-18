@@ -87,7 +87,7 @@ bool load_font_from_file_handle(FILE * f, font_definition_t * dest) {
         r = fread(&((uint8_t*) ranges)[total], 1, sect.size - total, f);
         total += r;
     }
-    
+
     if(total != sect.size) {
         ESP_LOGE(LOG_TAG, "Underrun reading range table: expected %u bytes but got only %u", sect.size, total);
         free(ranges);
@@ -95,6 +95,7 @@ bool load_font_from_file_handle(FILE * f, font_definition_t * dest) {
     }
 
     if(sect.magic == MONOFONT_MAGIC_RANGES_DEFL) {
+        ESP_LOGI(LOG_TAG, "Decompressing RngZ");
         ranges = (font_range_t *) decompress_emplace(ranges, sect.size, sect.real_size);
         if(ranges == nullptr) return false;
         dest->range_count =  (sect.real_size / sizeof(font_range_t));
@@ -123,6 +124,7 @@ bool load_font_from_file_handle(FILE * f, font_definition_t * dest) {
     uint8_t * bitmap = (uint8_t*) ps_malloc(sect.size);
     if(bitmap == nullptr) {
         ESP_LOGE(LOG_TAG, "OOM allocating bitmap table");
+        free(ranges);
         return false;
     }
 
@@ -140,6 +142,7 @@ bool load_font_from_file_handle(FILE * f, font_definition_t * dest) {
     }
 
     if(sect.magic == MONOFONT_MAGIC_BITMAP_DEFL) {
+        ESP_LOGI(LOG_TAG, "Decompressing BMPZ");
         bitmap = (uint8_t*) decompress_emplace(bitmap, sect.size, sect.real_size);
         if(bitmap == nullptr) {
             free(ranges);
@@ -294,7 +297,6 @@ const font_definition_t * find_font(font_style_t style, font_fallback_behavior_t
     // Stub, todo fallback and all
     if(!fonts_loaded && !did_try_loading_font) load_fonts();
     did_try_loading_font = true;
-    if(!fonts_loaded) return nullptr;
 
     if(style == FONT_STYLE_UI_TEXT || style == FONT_STYLE_CLOCK_FACE_SMALL || style == FONT_STYLE_CONSOLE) {
         return &keyrus0808_font;
@@ -419,6 +421,7 @@ void sprite_from_glyph(const font_definition_t* font, char16_t glyph, bool maske
 }
 
 unsigned int measure_string_width(const font_definition_t* f, const char* s, text_attributes_t attributes) {
+    if(f == nullptr || !f->valid) return 0;
     unsigned int rslt = 0;
     const char * tmp = s;
     while(iterate_utf8(&tmp)) {
