@@ -7,6 +7,8 @@ A somewhat portable relatively-stylish pixel-art clock/weather station.
 
 ![](docs/img/hero.jpg)
 
+More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
+
 ## Available widgets
 
 * Clock
