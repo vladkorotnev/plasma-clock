@@ -1,11 +1,81 @@
-<h1>Nobody here but us chickens!</h1>
-<p>This is an update server for <a href="https://github.com/vladkorotnev/plasma-clock">PIS-OS</a>.</p>
-<h3>Get the latest binaries:</h3>
-<ul>
-    <li><a href="fvudata/fs.fvu">Filesystem</a> (must be flashed alongside the newest OS!)</li>
-    <li><a href="fvudata/PLASMA.avu">PLASMA</a> for clock type MD16101DS</li>
-    <li><a href="fvudata/OLED.avu">OLED</a> for clocks with the WS0010 display based upon CPU BD V1.0</li>
-    <li><a href="fvudata/NORITAKE_GU112.avu">NORITAKE_GU112</a> for clocks with a 112px wide ITRON display based upon CPU BD V1.0</li>
-    <li><a href="fvudata/NORITAKE_GU140.avu">NORITAKE_GU140</a> for clocks with a 140px wide ITRON display based upon CPU BD V1.0</li>
-    <li><a href="fvudata/AKI_K875.avu">AKI_K875</a> for clocks with a 128px wide display built up of Akizuki Denshi K875 LED matrix kit</li>
-</ul>
+<html>
+    <head>
+        <title>PIS-OS Update Server</title>
+        <style type="text/css">
+            img {
+                width: 600px;
+                height: auto;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Nobody here but us chickens!</h1>
+        <p>This is an update server for <a href="https://github.com/vladkorotnev/plasma-clock">PIS-OS</a>.</p>
+        <img src="rsrc/family-photo.jpg" alt="Family Photo (2024/09)" />
+        <h2>Get the latest binaries:</h2>
+        <ul>
+            <li><a href="fvudata/fs.fvu">Filesystem</a> (must be flashed alongside the newest OS!)</li>
+            <li><a href="fvudata/PLASMA.avu">PLASMA</a> for clock type MD16101DS</li>
+            <li><a href="fvudata/OLED.avu">OLED</a> for clocks with the WS0010 display based upon CPU BD V1.0</li>
+            <li><a href="fvudata/NORITAKE_GU112.avu">NORITAKE_GU112</a> for clocks with a 112px wide ITRON display based upon CPU BD V1.0</li>
+            <li><a href="fvudata/NORITAKE_GU140.avu">NORITAKE_GU140</a> for clocks with a 140px wide ITRON display based upon CPU BD V1.0</li>
+            <li><a href="fvudata/AKI_K875.avu">AKI_K875</a> for clocks with a 128px wide display built up of Akizuki Denshi K875 LED matrix kit</li>
+        </ul>
+        <hr />
+        <a name="photos"></a>
+        <h2>Photo Gallery</h2>
+        <h4>PLASMA</h4>
+        <p>build by akasaka, Apr 2024. Done on multiple breadboards with magnet wire. The original Orange Ticking Thing. Features: Plasma display (Morio Denki MD16101), motion sensor, light sensor.</p>
+        <img src="rsrc/plasma.jpg" />
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/D4MiHmhhjeQ?si=5r3CRCdFREg4hbOS" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <p>WIP photos:</p>
+        <img src="rsrc/plasma-wip.jpg" />
+        <img src="rsrc/plasma-wip2.jpg" />
+        <h4>NORITAKE_GU112</h4>
+        <p>build by akasaka, Oct 2024. Uses uPIS-OS PCB rev1.0. Features: VFD display (112x16-GU7000), vibration speaker (Taptic Engine), motion sensor, light sensor, headpat.</p>
+        <img src="rsrc/gu112-1.jpg" />
+        <img src="rsrc/gu112-2.jpg" />
+        <img src="rsrc/gu112-3.jpg" />
+        <h4>NORITAKE_GU140</h4>
+        <p>build by akasaka, Oct 2024. Main development machine, based around PCB rev1.0. Features: VFD display (140x16-GU7000), audio output port, motion sensor, light sensor, headpat.</p>
+        <img src="rsrc/gu140.jpg" />
+        <h4>AKI_K875</h4>
+        <p>build by akasaka, Nov 2024. Based around PCB rev1.0. Features: LED display using shift registers, big sperker, light sensor.</p>
+        <img src="rsrc/aki-1.jpg" />
+        <img src="rsrc/aki-2.jpg" />
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/4sID_2LK8-w?si=NMj1jICq6d6z5cce" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <h4>DEVICE_MICROPISOS</h4>
+        <p>build by akasaka, Jul 2024. Breadboard + magnet wire. Features: OLED display (WS0010), audio output port, touchscreen (4 zones). Dismantled in Sep 2024.</p>
+        <img src="rsrc/micropisos.jpg" />
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/Kn7ZN_xONCQ?si=BfsuYNZ3EWhcnEwt" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <iframe width="560" height="315" src="https://www.youtube.com/embed/FE-4xm7QFkQ?si=pHjOYdzPCwXkMBBb" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        <h4>OLED</h4>
+        <p>build by akasaka, Sep-Nov 2024, total of 4 units. Identical to the NORITAKE_GU112 above, but uses a cheaper WS0010 OLED display instead.</p>
+        <img src="rsrc/oled-1.jpg" />
+        <img src="rsrc/oled-2.jpg" />
+        <img src="rsrc/oled-3.jpg" />
+        <hr />
+        <h2>Project Credits</h2>
+        <ul>
+            <li>Icons by <a target="_blank" href="https://piixl.itch.io">PiiXL</a>, weather animations done by akasaka</li>
+            <li>Voice module (optional) AquesTalk by <a target="_blank" href="http://www.a-quest.com">A-QUEST</a></li>
+            <li>Ringtones arranged for beeper and 1-bit poly by <a target="_blank" href="https://twitter.com/akasaka_spk">DJ AKASAKA</a> with some help from <a target="_blank" href="https://www.fiverr.com/lemuel_producer">lemuel_producer</a> (in Antenna 39, Shabon, En Elmegyek)</li>
+            <li>keyrus0808, keyrus0816 fonts &copy; Dmitriy Gurtyak 1989-1994</li>
+            <li>XNU Console Font &copy; 2000 Apple Computer, Inc. &amp; Ka-Ping Yee</li>
+            <li>Misaki Mincho Font by <a href="https://littlelimit.net/misaki.htm" target="_blank">LittleLimit</a></li>
+            <li>JISKAN16 font from Public Domain (JIS X 9051-1984)</li>
+        </ul>
+        <h2>Project GREETZ!</h2>
+        <ul>
+            <li>PASHA & co. from VENUS</li>
+            <li>Akito from DENSETOS</li>
+            <li>Kirill from PAW NOIR</li>
+            <li>Xavier</li>
+            <li>Atsuko &amp; Nina</li>
+            <li>Dancing Zombie</li>
+            <li><a href="http://warmplace.ru" target="_blank">NightRadio</a></li>
+            <li>... and YOU the users!</li>
+        </ul>
+        <em>&copy; 2024 / a <a href="https://genjit.su">Genjitsu Gadget Lab</a> product</em>
+    </body>
+</html>
