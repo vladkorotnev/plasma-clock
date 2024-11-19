@@ -54,6 +54,8 @@ void ItronGU7000Driver::initialize() {
 
     ESP_ERROR_CHECK(gpio_config(&io_conf));
 
+    show_state = true;
+
     wait_shit_through();
     delay(2000);
 }
@@ -94,7 +96,6 @@ void ItronGU7000Driver::write_string(const char * s) {
 }
 
 void ItronGU7000Driver::reset() {
-    // taskENTER_CRITICAL(&_spinlock);
     wait_shit_through();
 
     // Bringup Step 1: Initialize display
@@ -119,12 +120,37 @@ void ItronGU7000Driver::reset() {
 }
 
 void ItronGU7000Driver::set_show(bool show) {
+    taskENTER_CRITICAL(&_spinlock);
 
+    ESP_LOGI(LOG_TAG, "Show = %i", show);
+    /**
+     * From datasheet:
+     * 
+     * P=2～4の場合、スクリーンセーバーの起動を行ないます。スクリーンセーバーは
+     * 次のデータ入力により中断され、コマンド以前の表示状態に復帰します
+     * 
+     * Thus we need to save the show state and stop data flow when entering screen blanking mode
+     */
+    show_state = show;
+    write_string("\x1F\x28\x61\x40");
+    // Turn off the display without turning off the heaters. This helps reduce strain on the heaters and prevent their failure from metal fatigue.
+    set_databus(show ? 0x1 : 0x2);
+    pulse_clock();
+
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void ItronGU7000Driver::set_power(bool power) {
     taskENTER_CRITICAL(&_spinlock);
 
+    /**
+     * From datasheet:
+     * P=0～1の場合、表示用電源のON/OFF制御を行ないます。
+     * 次の表示用電源のON/OFF制御コマンドが入力されるまで保持されます
+     * 
+     * Thus we don't need to save state unlike the `set_show` command
+     */
+    ESP_LOGI(LOG_TAG, "Power = %i", power);
     write_string("\x1F\x28\x61\x40");
     set_databus(power ? 0x1 : 0x0);
     pulse_clock();
@@ -152,25 +178,27 @@ inline uint8_t flipByte(uint8_t c){
 void ItronGU7000Driver::write_fanta(const uint8_t * strides, size_t count) {
     taskENTER_CRITICAL(&_spinlock);
 
-    write_string("\x1F\x24"); // cursor move to 0
-    set_databus(0);
-    pulse_clock(); pulse_clock(); pulse_clock(); pulse_clock();
+    if(show_state) { // <- see technote in `set_show` method above
+        write_string("\x1F\x24"); // cursor move to 0
+        set_databus(0);
+        pulse_clock(); pulse_clock(); pulse_clock(); pulse_clock();
 
-    write_string("\x1F\x28\x66\x11");
-    set_databus(HWCONF_DISPLAY_WIDTH_PX & 0x00FF);
-    pulse_clock();
-    set_databus(HWCONF_DISPLAY_WIDTH_PX & 0xFF00);
-    pulse_clock();
-    set_databus((HWCONF_DISPLAY_HEIGHT_PX / 8) & 0x00FF);
-    pulse_clock();
-    set_databus((HWCONF_DISPLAY_HEIGHT_PX / 8) & 0xFF00);
-    pulse_clock();
-    set_databus(1);
-    pulse_clock();
-
-    for(int i = 0; i < count; i++) {
-        set_databus(flipByte(strides[i]));
+        write_string("\x1F\x28\x66\x11");
+        set_databus(HWCONF_DISPLAY_WIDTH_PX & 0x00FF);
         pulse_clock();
+        set_databus(HWCONF_DISPLAY_WIDTH_PX & 0xFF00);
+        pulse_clock();
+        set_databus((HWCONF_DISPLAY_HEIGHT_PX / 8) & 0x00FF);
+        pulse_clock();
+        set_databus((HWCONF_DISPLAY_HEIGHT_PX / 8) & 0xFF00);
+        pulse_clock();
+        set_databus(1);
+        pulse_clock();
+
+        for(int i = 0; i < count; i++) {
+            set_databus(flipByte(strides[i]));
+            pulse_clock();
+        }
     }
 
     taskEXIT_CRITICAL(&_spinlock);
