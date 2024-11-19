@@ -5,6 +5,7 @@
 
 #define HAS_OTAFVU
 #define HAS_OUTPUT_GU7000
+#define HAS_DISPLAY_BLANKING
 // #define HAS_TEMP_SENSOR
 #define HAS_MOTION_SENSOR
 #define HAS_KEYPAD

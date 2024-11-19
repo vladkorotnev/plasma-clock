@@ -38,6 +38,7 @@ private:
     gpio_num_t databus_gpios[8];
     gpio_num_t wr_gpio;
     gpio_num_t busy_gpio;
+    bool show_state;
 
     inline void set_databus(uint8_t data);
     inline void pulse_clock();

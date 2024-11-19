@@ -229,9 +229,6 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
         screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Wordnik"), PREFS_KEY_SCRN_TIME_WORD_OF_THE_DAY_SECONDS, 0, 3600, 1, normalActivationFunction));
 #endif
         screen_times->add_view(new MenuNumberSelectorPreferenceView(localized_string("Foobar2000"), PREFS_KEY_SCRN_TIME_FOOBAR_SECONDS, 0, 3600, 1, normalActivationFunction));
-#if HAS(DISPLAY_BLANKING)
-    display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Blank display after (s)"), PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 21600, 1, normalActivationFunction));
-#endif
 #if HAS(VARYING_BRIGHTNESS)
     display_menu->add_view(new MenuListSelectorPreferenceView(
         localized_string("Brightness"),
@@ -245,6 +242,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
         PREFS_KEY_BRIGHTNESS_MODE,
         normalActivationFunction
     ));
+#endif
+#if HAS(DISPLAY_BLANKING)
+    display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Blank display after (s)"), PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 21600, 1, normalActivationFunction));
 #endif
     display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Turn display off after (s)"), PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000, 1, normalActivationFunction));
     display_menu->add_view(new MenuBooleanSettingView(localized_string("Keypress beep"), PREFS_KEY_BUTTON_BEEP, [b](bool newValue) {
