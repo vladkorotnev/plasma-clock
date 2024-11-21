@@ -3,7 +3,6 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
-#define HAS_OTAFVU
 #define HAS_OUTPUT_GU7000
 #define HAS_DISPLAY_BLANKING
 // #define HAS_TEMP_SENSOR
@@ -12,9 +11,6 @@
 #define HAS_SERIAL_MIDI
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_LIGHT_SENSOR
-
-//      ↓ Looks like shite on the VFD display
-#define COMPOSABLE_NO_EVENODD
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-dev"

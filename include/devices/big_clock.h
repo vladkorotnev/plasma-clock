@@ -13,7 +13,7 @@
 #define HAS_KEYPAD
 
 //      ↓ Looks like shite on the plasma display
-#define COMPOSABLE_NO_EVENODD
+// #define COMPOSABLE_NO_EVENODD // let's see how it looks
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"
