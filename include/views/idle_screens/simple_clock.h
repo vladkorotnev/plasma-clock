@@ -19,5 +19,7 @@ private:
     char separator;
     bool blink_separator;
     bool show_seconds;
+    bool time_not_set;
+    bool not_set_blink_phase;
     AmPmLabel * pm_label;
 };
