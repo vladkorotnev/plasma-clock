@@ -86,6 +86,8 @@ SimpleClock::SimpleClock(): DroppingDigits() {
     add_composable(pm_label);
     blink_separator = prefs_get_bool(PREFS_KEY_BLINK_SEPARATORS);
     show_seconds = prefs_get_bool(PREFS_KEY_SHOW_SECONDS);
+    time_not_set = true;
+    not_set_blink_phase = false;
 }
 
 void add_one_second(tk_time_of_day_t * time) {
@@ -123,6 +125,9 @@ void subtract_one_second(tk_time_of_day_t * time) {
 }
 
 void SimpleClock::step() {
+    tk_date_t date = get_current_date();
+    time_not_set = (date.year == 1970 && date.month == 1);
+
     now = get_current_time_precise();
     next_time = now;
 
@@ -132,16 +137,20 @@ void SimpleClock::step() {
 
     phase = 0;
 
-    // When animating precisely on-the-millisecond, the digit does an annoying blink of the last value sometimes
-    // So animate the first half in the "previous" second, and the second half in the "next" second
-    if(remain_ms < (steps/2) * ms_per_step) {
-        phase = (steps/2) - (remain_ms / ms_per_step);
-        add_one_second(&next_time);
-    } else if (now.millisecond < (steps/2) * ms_per_step) {
-        phase = (steps/2) + (now.millisecond / ms_per_step);
-        subtract_one_second(&now);
+    if(time_not_set) {
+        not_set_blink_phase = (remain_ms < 500);
+    } else {
+        // When animating precisely on-the-millisecond, the digit does an annoying blink of the last value sometimes
+        // So animate the first half in the "previous" second, and the second half in the "next" second
+        if(remain_ms < (steps/2) * ms_per_step) {
+            phase = (steps/2) - (remain_ms / ms_per_step);
+            add_one_second(&next_time);
+        } else if (now.millisecond < (steps/2) * ms_per_step) {
+            phase = (steps/2) + (now.millisecond / ms_per_step);
+            subtract_one_second(&now);
+        }
+        phase = EASING_CURVE[phase];
     }
-    phase = EASING_CURVE[phase];
 
     if(!prefs_get_bool(PREFS_KEY_DISP_24_HRS)) {
         bool now_pm = false;
@@ -168,19 +177,22 @@ void SimpleClock::render(FantaManipulator *framebuffer) {
     int left_offset = framebuffer->get_width() / 2 - text_width / 2;
     pm_label->x_offset = left_offset - 11;
 
-    draw_dropping_number(framebuffer, now.hour, next_time.hour, phase, left_offset);
+    if(!time_not_set || !not_set_blink_phase) 
+        draw_dropping_number(framebuffer, now.hour, next_time.hour, phase, left_offset);
     left_offset += 2 * font->width;
     
     framebuffer->put_glyph(font, separator, left_offset, 0);
     left_offset += font->width;
 
-    draw_dropping_number(framebuffer, now.minute, next_time.minute, phase, left_offset);
+    if(!time_not_set || !not_set_blink_phase) 
+        draw_dropping_number(framebuffer, now.minute, next_time.minute, phase, left_offset);
     left_offset += 2 * font->width;
     
     if(show_seconds) {
         framebuffer->put_glyph(font, separator, left_offset, 0);
         left_offset += font->width;
-        draw_dropping_number(framebuffer, now.second, next_time.second, phase, left_offset);
+        if(!time_not_set || !not_set_blink_phase) 
+            draw_dropping_number(framebuffer, now.second, next_time.second, phase, left_offset);
     }
 
     Screen::render(framebuffer);
