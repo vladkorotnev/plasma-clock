@@ -21,6 +21,7 @@ public:
     int x_offset = 0;
     int width = -1;
     bool hidden = false;
+    // NB: Experimental. Current implementation is less flickery than just showing only every other frame, but doesn't play nice with alpha channel items.
     bool gray = false;
 };
 
@@ -57,7 +58,30 @@ public:
         for(Composable *r: composables) {
             if(r->hidden) continue;
 #ifndef COMPOSABLE_NO_EVENODD
-            if(r->gray && !even_odd) continue;
+            if(r->gray) { 
+                int w = (r->width >= 0 ? r->width : fb->get_width());
+                size_t bufsz = w * sizeof(uint16_t);
+                fanta_buffer_t tmpbuf = (fanta_buffer_t) gralloc(bufsz);
+                if(tmpbuf) {
+                    fanta_buffer_t mask = (fanta_buffer_t) gralloc(bufsz);
+                    if(mask) {
+                        bool dirty = false;
+                        FantaManipulator *tmp = new FantaManipulator(tmpbuf, bufsz, w, 16, NULL, &dirty);
+                        tmp->clear();
+                        dirty = false;
+                        r->render(tmp);
+                        if(dirty) {
+                            memcpy(mask, tmpbuf, bufsz);
+                            for(int i = 0; i < bufsz; i++) { mask[i] &= (even_odd ? 0b01010101 : 0b10101010); }
+                            fb->put_fanta(tmp->get_fanta(), r->x_offset, 0, tmp->get_width(), tmp->get_height(), mask);
+                        }
+                        delete tmp;
+                        free(mask);
+                    } else ESP_LOGE("COMP", "Failed to alloc MASK of %i bytes", bufsz);
+                    free(tmpbuf);
+                } else ESP_LOGE("COMP", "Failed to alloc TMP of %i bytes", bufsz);
+                continue;
+            }
 #endif
             if(r->x_offset <= 0 && r->width < 0) {
                 r->render(fb);
