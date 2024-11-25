@@ -36,6 +36,13 @@ static AkizukiK875Driver display_driver(
     HWCONF_K875_SIN3_GPIO,
     HWCONF_K875_SACRIFICIAL_GPIO
 );
+#elif HAS(OUTPUT_GU312)
+#include <display/gu312.h>
+static NoritakeGu312Driver display_driver(
+    HWCONF_GU312_DATABUS_GPIOS,
+    HWCONF_GU312_CD_GPIO,
+    HWCONF_GU312_WR_GPIO
+);
 #else
 #error Display module type not selected
 #endif
