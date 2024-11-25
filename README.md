@@ -121,6 +121,10 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [Owl City - Fireflies](https://www.youtube.com/watch?v=psuRGfAaju4): [MIDI](helper/chimes/fireflies.mid)
 * [Ado - Odo](https://www.youtube.com/watch?v=YnSW8ian29w): [MIDI](helper/chimes/odo.mid)
 * [ZUN - Legend of Hourai](https://www.youtube.com/watch?v=d2_tY7cl818): [MIDI](helper/chimes/hourai_sou1.mid) based on work by sou1
+* [Hiiragi Magnetite — Antenna 39](https://www.youtube.com/watch?v=7yJRsFFRoQY): [Recording](https://www.youtube.com/watch?v=zYAEvVJUqVs), [MIDI](helper/chimes/antenna39.mid)
+* [daniwellP - Nyan Cat](https://www.youtube.com/watch?v=LfKCLdPTqtM): [MIDI](helper/chimes/nyancat.mid), [MP3](docs/rec/squarecat.mp3)
+* [Neru - Tokyo Teddy Bear](https://www.youtube.com/watch?v=eSI7RsjZy1E): [MIDI](helper/chimes/tokyoteddybear.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=Y30ZyZbRCrE)
+* [LamazeP - Triple Baka](https://open.spotify.com/track/2dE6zWGJXZuqvfengytVGo): [MIDI](helper/chimes/3baka.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=HNPrwdLJC8g), [MP3](docs/rec/baka.mp3)
 
 ## Creating your own melodies
 
