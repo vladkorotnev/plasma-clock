@@ -25,6 +25,12 @@ void WeatherChartCommon::prepare() {
 void WeatherChartCommon::render(FantaManipulator* fb) {
     fb->clear();
     static char buf[8] = { 0 };
+    bool cursor_state = false;
+#ifdef COMPOSABLE_NO_EVENODD
+    cursor_state = cursor_phase;
+#else
+    cursor_state = cursor_phase | even_odd;
+#endif
 
     if(points.size() > 0) {
         for(int p_idx = 0; p_idx < std::min((int)points.size(), reveal_index); p_idx++) {
@@ -32,9 +38,9 @@ void WeatherChartCommon::render(FantaManipulator* fb) {
 
             int y = fb->get_height() - (p.value - minimum) * fb->get_height() / (maximum - minimum);
             if(filled) {
-                fb->line(p_idx, y, p_idx, fb->get_height(), (p_idx == cursor_index) ? cursor_phase : true);
+                fb->line(p_idx, y, p_idx, fb->get_height(), (p_idx == cursor_index) ? cursor_state : true);
             } else {
-                fb->plot_pixel(p_idx, y, (p_idx == cursor_index) ? cursor_phase : true);
+                fb->plot_pixel(p_idx, y, (p_idx == cursor_index) ? cursor_state : true);
             }
         }
 
