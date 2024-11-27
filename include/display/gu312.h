@@ -11,11 +11,13 @@ public:
     /// @param cd Pin connected to the display controller's C/D pin
     /// @param wr Pin connected to the display controller's WR pin
     /// @param blank Pin connected to the display controller's blanking pin
+    /// @param vsync Pin connected to the display controller's FEP pin (optional)
     NoritakeGu312Driver(
         const gpio_num_t databus[8],
         const gpio_num_t cd,
-        const gpio_num_t wr
-        // const gpio_num_t blank
+        const gpio_num_t wr,
+        const gpio_num_t blank,
+        const gpio_num_t vsync = gpio_num_t::GPIO_NUM_NC
     );
 
     void initialize();
@@ -36,14 +38,12 @@ private:
     gpio_num_t databus_gpios[8];
     gpio_num_t cd_gpio;
     gpio_num_t wr_gpio;
+    gpio_num_t blank_gpio;
+    gpio_num_t fep_gpio;
 
     void send_command(uint8_t cmd);
     inline void set_databus(uint8_t data);
     inline void set_is_command(bool);
     inline void pulse_clock();
-    void write_string(const char *);
-
-    bool power_state;
-    void _set_pmu_internal();
 };
 #endif

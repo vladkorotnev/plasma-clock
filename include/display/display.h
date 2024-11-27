@@ -41,7 +41,9 @@ static AkizukiK875Driver display_driver(
 static NoritakeGu312Driver display_driver(
     HWCONF_GU312_DATABUS_GPIOS,
     HWCONF_GU312_CD_GPIO,
-    HWCONF_GU312_WR_GPIO
+    HWCONF_GU312_WR_GPIO,
+    HWCONF_GU312_BLANKING_GPIO,
+    HWCONF_GU312_FEP_GPIO
 );
 #else
 #error Display module type not selected

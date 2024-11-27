@@ -88,7 +88,7 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [Kosaki Satoru - Haruhi no Omoi](https://www.youtube.com/watch?v=KMKoyHKYSNk): [MIDI](helper/chimes/haruhi_no_omoi.mid)
 * [WAVE and DRAX - When Present Is Past](https://modarchive.org/index.php?request=view_by_moduleid&query=140039): [MIDI](helper/chimes/when_present_is_past.mid)
 * [Kawada Mami - Hishoku no Sora](https://www.youtube.com/watch?v=FNl1ud7KxtI): [MIDI](helper/chimes/hishoku.mid)
-* [? - Like The Wind (TMMS)](https://www.youtube.com/watch?v=uYpkri8Kv2E): [MIDI](helper/chimes/like_the_wind.mid)
+* [FEX — Subways Of Your Mind (Like The Wind / The Most Mysterious Song On The Internet)](https://www.youtube.com/watch?v=uYpkri8Kv2E): [MIDI](helper/chimes/like_the_wind.mid)
 * [NightRadio - Waiting Freqs](https://www.youtube.com/watch?v=_0MBreuq94Y): [MIDI](helper/chimes/waiting_freqs.mid)
 * [NightRadio - The Way](https://nightradio.bandcamp.com/track/the-way): [MIDI](helper/chimes/the_way.mid)
 * [Dougal & Gammer — Guitar Hero](https://youtu.be/ID4pO9epHPA?t=89): [MIDI](helper/chimes/gtrhero.mid), [MP3 Recording](docs/rec/guitarhero.mp3)
@@ -202,7 +202,8 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 * Morio Denki 16101DS (see [below](#morio-denki-plasma-display-info), [driver](src/display/md_plasma.cpp), feature flag `HAS_OUTPUT_MD_PLASMA`)
 * Winstar (sometimes sold as Vishay) WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming. Datasheet backup: [Controller](docs/reference/datasheet/winstar/WS0010.pdf), [display](docs/reference/datasheet/winstar/WEG010016ALPP5N00000.pdf)
 * Noritake ITRON GU-NNNx16-7000 series graphic VFDs in 8-bit parallel mode ([driver](src/display/gu7000.cpp), feature flag `HAS_OUTPUT_GU7000`). Datasheet backup before the bundled CDR got completely rotten: [140x16-7000](docs/reference/datasheet/noritake_itron/s-gu140x16g-7000_j04.pdf), [140x16-7100](docs/reference/datasheet/noritake_itron/s-gu140x16g-7100_j00.pdf), [112x16](docs/reference/datasheet/noritake_itron/s-gu112x16g-7000_j04.pdf)
-* *Experimental:* [Akizuki Denshi K-875](https://akizukidenshi.com/img/contents/kairo/%E3%83%87%E3%83%BC%E3%82%BF/%E8%A1%A8%E7%A4%BA%E8%A3%85%E7%BD%AE/LED%E9%9B%BB%E5%85%89%E6%8E%B2%E7%A4%BA.pdf) ×4 for a 128x16 display (I couldn't resist not scooping some up in the Outlet Sale for 200 yen apiece). Known issues: small luma jitter sometimes, driver code is cursed. [Driver](src/display/akizuki_k875.cpp), feature flag `HAS_OUTPUT_AKIZUKI_K875`. [Datasheet backup](docs/reference/datasheet/akizuki/LED電光掲示.pdf)
+* [Akizuki Denshi K-875](https://akizukidenshi.com/img/contents/kairo/%E3%83%87%E3%83%BC%E3%82%BF/%E8%A1%A8%E7%A4%BA%E8%A3%85%E7%BD%AE/LED%E9%9B%BB%E5%85%89%E6%8E%B2%E7%A4%BA.pdf) ×4 for a 128x16 display (I couldn't resist not scooping some up in the Outlet Sale for 200 yen apiece). Known issues: small luma jitter sometimes, driver code is cursed. [Driver](src/display/akizuki_k875.cpp), feature flag `HAS_OUTPUT_AKIZUKI_K875`. [Datasheet backup](docs/reference/datasheet/akizuki/LED電光掲示.pdf)
+* *Experimental* Noritake ITRON GU-NNNx16-312. Mine is 192px wide, taken out of an old bus display panel (labeled GU-192x16-505), no datasheet, no other technical info aside from that written in the [driver](src/display/gu312.cpp)'s comments. Autoincrement is weird so there is a lot of write amplification in the driver. Supports Vsync/FEP (untested). No software heater power-off. Feature flag `HAS_OUTPUT_GU312`.
 
 ### Speaker (at least one required)
 
@@ -237,6 +238,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 * Keypad/D-Pad. Set feature flag `HAS_KEYPAD` and define `const keypad_definition_t HWCONF_KEYPAD` in the device definition. [Driver](src/input/keypad.cpp)
 * Touch plane. E.g. a faceplate with touch sensitive arrow keys to work in place of a D-pad. Set feature flag `HAS_TOUCH_PLANE` and define `const touch_plane_definition_t HWCONF_TOUCH_PLANE` in the device definition. [Driver](src/input/touch_plane.cpp)
+* *Experimental/Untested* IR Remote. Set feature flag `HAS_IR_RECEIVER` and define `const infrared_definition_t HWCONF_IR_BUTTONS` in the device definition. [Driver](src/input/infrared.cpp)
 
 ### Others
 
