@@ -9,7 +9,7 @@ static char LOG_TAG[] = "WTHVW";
 CurrentWeatherView::CurrentWeatherView() {
     icon = { 0 };
     weather = { 0 };
-    weather.conditions = weather_condition_code::UNKNOWN;
+    weather.conditions = weather_condition_code::UNKNOWN_CONDITIONS;
 
     animation = new AniSpriteView(nullptr);
     animation->x_offset = 0;
@@ -62,7 +62,7 @@ void CurrentWeatherView::prepare_for_new_weather() {
 }
 
 void CurrentWeatherView::render(FantaManipulator* fb) {
-    if(weather.conditions == UNKNOWN) {
+    if(weather.conditions == UNKNOWN_CONDITIONS) {
         fb->put_string(big_font, localized_string("Loading..."), 4, 0);
     } else {   
         Screen::render(fb);

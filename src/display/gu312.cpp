@@ -25,10 +25,6 @@
 //     +------+
 //    33     34
 
-
-
-
-
 #if HAS(OUTPUT_GU312)
 #include "display/gu312.h"
 #include <esp32-hal-log.h>
@@ -41,18 +37,21 @@ static portMUX_TYPE _spinlock = portMUX_INITIALIZER_UNLOCKED;
 NoritakeGu312Driver::NoritakeGu312Driver(
     const gpio_num_t databus[8],
     const gpio_num_t cd,
-    const gpio_num_t wr
+    const gpio_num_t wr,
+    const gpio_num_t blank,
+    const gpio_num_t vsync
 ) {
     for(int i = 0; i < 8; i++) {
         databus_gpios[i] = databus[i];
     }
     cd_gpio = cd;
     wr_gpio = wr;
-    power_state = false;
+    blank_gpio = blank;
+    fep_gpio = vsync;
 }
 
 void NoritakeGu312Driver::initialize() {
-    ESP_LOGI(LOG_TAG, "Initializing Noritake Itron GU312 with data bus: %i %i %i %i %i %i %i %i, cd=%i, wr=%i", databus_gpios[0], databus_gpios[1], databus_gpios[2], databus_gpios[3], databus_gpios[4], databus_gpios[5], databus_gpios[6], databus_gpios[7], cd_gpio, wr_gpio);
+    ESP_LOGI(LOG_TAG, "Initializing Noritake Itron GU312 with data bus: %i %i %i %i %i %i %i %i, cd=%i, wr=%i, bl=%i", databus_gpios[0], databus_gpios[1], databus_gpios[2], databus_gpios[3], databus_gpios[4], databus_gpios[5], databus_gpios[6], databus_gpios[7], cd_gpio, wr_gpio, blank_gpio);
 
     gpio_config_t io_conf = {
         .mode = GPIO_MODE_OUTPUT,
@@ -65,11 +64,23 @@ void NoritakeGu312Driver::initialize() {
 
     io_conf.pin_bit_mask |= 1ULL << cd_gpio;
     io_conf.pin_bit_mask |= 1ULL << wr_gpio;
+    io_conf.pin_bit_mask |= 1ULL << blank_gpio;
 
     ESP_ERROR_CHECK(gpio_config(&io_conf));
 
+    gpio_set_level(blank_gpio, 1);
     gpio_set_level(wr_gpio, 1);
     gpio_set_level(cd_gpio, 0);
+
+    if(fep_gpio != GPIO_NUM_NC) {
+        gpio_config_t fep_conf = {
+            .pin_bit_mask = 1ULL << fep_gpio,
+            .mode = GPIO_MODE_INPUT,
+            .pull_up_en = gpio_pullup_t::GPIO_PULLUP_DISABLE,
+            .pull_down_en = gpio_pulldown_t::GPIO_PULLDOWN_DISABLE,
+        };
+        ESP_ERROR_CHECK(gpio_config(&io_conf));
+    }
 
     delay(500);
 }
@@ -94,16 +105,6 @@ void NoritakeGu312Driver::set_is_command(bool rs) {
     // H: COMMAND, L: Data
     gpio_set_level(cd_gpio, rs ? 1 : 0);
     delayMicroseconds(3);
-}
-
-void NoritakeGu312Driver::write_string(const char * s) {
-    set_is_command(false);
-    int len = strlen(s);
-    for(int i = 0; i < len; i++) {
-        set_databus(s[i]);
-        pulse_clock();
-        delayMicroseconds(100);
-    }
 }
 
 void NoritakeGu312Driver::send_command(uint8_t cmd) {
@@ -151,14 +152,11 @@ void NoritakeGu312Driver::reset() {
 }
 
 void NoritakeGu312Driver::set_power(bool power) {
-    power_state = power;
-    _set_pmu_internal();
+    gpio_set_level(blank_gpio, power ? 1 : 0);
 }
 
 void NoritakeGu312Driver::clear() {
-    taskENTER_CRITICAL(&_spinlock);
-
-    taskEXIT_CRITICAL(&_spinlock);
+    ESP_LOGW(LOG_TAG, "Not supported!");
 }
 
 inline uint8_t flipByte(uint8_t c){
@@ -173,6 +171,12 @@ inline uint8_t flipByte(uint8_t c){
 
 void NoritakeGu312Driver::write_fanta(const uint8_t * strides, size_t count) {
     taskENTER_CRITICAL(&_spinlock);
+    if(fep_gpio != GPIO_NUM_NC) {
+        // wait for frame pulse
+        while(!gpio_get_level(fep_gpio));
+        while(gpio_get_level(fep_gpio));
+    }
+
     send_command(0b01110); // set write pos Low
         set_databus(0); pulse_clock();
     send_command(0b01111); // set write pos High
@@ -194,12 +198,6 @@ void NoritakeGu312Driver::set_bright(bool bright) {
     taskENTER_CRITICAL(&_spinlock);
     send_command(bright ? 0b11001 : 0b11011);
     // undocumented: can go from 11000 (100%) to as low as 11111 (undocumented)
-    taskEXIT_CRITICAL(&_spinlock);
-}
-
-void NoritakeGu312Driver::_set_pmu_internal() {
-    taskENTER_CRITICAL(&_spinlock);
-
     taskEXIT_CRITICAL(&_spinlock);
 }
 

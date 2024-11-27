@@ -246,7 +246,7 @@ void weather_overlay_update() {
         case SCATTERED_CLOUDS:
         case BROKEN_CLOUDS:
         case OVERCAST:
-        case UNKNOWN:
+        case UNKNOWN_CONDITIONS:
         default:
             // No rain, no snow, nothing
             rain->set_intensity(0);

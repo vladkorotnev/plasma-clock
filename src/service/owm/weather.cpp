@@ -39,7 +39,7 @@ weather_condition_t normalized_conditions(uint conditions) {
 
     ESP_LOGE(LOG_TAG, "Unknown conditions %u", conditions);
 
-    return weather_condition_t::UNKNOWN;
+    return weather_condition_t::UNKNOWN_CONDITIONS;
 }
 
 extern "C" void WeatherTaskFunction( void * pvParameter );

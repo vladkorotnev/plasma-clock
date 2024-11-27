@@ -7,8 +7,6 @@
 #include <graphics/font.h>
 #include <console.h>
 #include <sensor/sensors.h>
-#include <input/touch_plane.h>
-#include <input/keypad.h>
 #include <sound/yukkuri.h>
 #include <sound/melodies.h>
 #include <network/netmgr.h>
@@ -204,6 +202,10 @@ void bringup_hid() {
 #if HAS(KEYPAD)
     keypad_start();
     ESP_LOGI(LOG_TAG, "Keypad ready");
+#endif
+#if HAS(IR_RECEIVER)
+    infrared_start();
+    ESP_LOGI(LOG_TAG, "Infrared ready");
 #endif
     if(prefs_get_bool(PREFS_KEY_BUTTON_BEEP)) {
         hid_set_key_beeper(beepola);
