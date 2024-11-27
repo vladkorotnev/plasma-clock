@@ -291,7 +291,7 @@ const ani_sprite_t * sprite_from_conditions(weather_condition_t conditions) {
         case BROKEN_CLOUDS: return &broken_clouds_icon;
         case OVERCAST: return &overcast_icon;
 
-        case UNKNOWN:
+        case UNKNOWN_CONDITIONS:
         default:
             return &null_icon;
     }

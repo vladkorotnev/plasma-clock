@@ -6,7 +6,7 @@
 #define FORECAST_WEATHER_HOURS 36
 
 typedef enum weather_condition_code {
-    UNKNOWN = 0,
+    UNKNOWN_CONDITIONS = 0,
 
     THUNDERSTORM = 200,
 
