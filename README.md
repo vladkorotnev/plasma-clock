@@ -125,6 +125,7 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [daniwellP - Nyan Cat](https://www.youtube.com/watch?v=LfKCLdPTqtM): [MIDI](helper/chimes/nyancat.mid), [MP3](docs/rec/squarecat.mp3)
 * [Neru - Tokyo Teddy Bear](https://www.youtube.com/watch?v=eSI7RsjZy1E): [MIDI](helper/chimes/tokyoteddybear.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=Y30ZyZbRCrE)
 * [LamazeP - Triple Baka](https://open.spotify.com/track/2dE6zWGJXZuqvfengytVGo): [MIDI](helper/chimes/3baka.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=HNPrwdLJC8g), [MP3](docs/rec/baka.mp3)
+* [Desireless — Voyage Voyage](https://youtu.be/sM2ZhByFcDk): [MIDI](helper/chimes/voyage.mid)
 
 ## Creating your own melodies
 
