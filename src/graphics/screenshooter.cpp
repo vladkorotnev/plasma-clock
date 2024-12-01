@@ -74,7 +74,7 @@ static void serverTaskFunc(void * pvFramebuffer) {
                 continue;
             }
 
-            ESP_LOGI(LOG_TAG, "Got packet: magic 0x%x, pressed 0x%x, released 0x%x", req.magic, req.pressed, req.released);
+            ESP_LOGV(LOG_TAG, "Got packet: magic 0x%x, pressed 0x%x, released 0x%x", req.magic, req.pressed, req.released);
 
             // Virtual keyboard handling
             key_id_t mask = (key_id_t) 0;

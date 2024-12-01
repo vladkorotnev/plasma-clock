@@ -239,7 +239,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 * Keypad/D-Pad. Set feature flag `HAS_KEYPAD` and define `const keypad_definition_t HWCONF_KEYPAD` in the device definition. [Driver](src/input/keypad.cpp)
 * Touch plane. E.g. a faceplate with touch sensitive arrow keys to work in place of a D-pad. Set feature flag `HAS_TOUCH_PLANE` and define `const touch_plane_definition_t HWCONF_TOUCH_PLANE` in the device definition. [Driver](src/input/touch_plane.cpp)
-* *Experimental/Untested* IR Remote. Set feature flag `HAS_IR_RECEIVER` and define `const infrared_definition_t HWCONF_IR_BUTTONS` in the device definition. [Driver](src/input/infrared.cpp)
+* IR Remote. Set feature flag `HAS_IR_RECEIVER` and define `const infrared_definition_t HWCONF_IR_BUTTONS` in the device definition. [Driver](src/input/infrared.cpp)
 
 ### Others
 
