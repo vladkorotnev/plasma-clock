@@ -5,7 +5,6 @@
 #include <graphics/framebuffer.h>
 #include <graphics/screenshooter.h>
 #include <graphics/font.h>
-#include <console.h>
 #include <sensor/sensors.h>
 #include <sound/yukkuri.h>
 #include <sound/melodies.h>
@@ -53,7 +52,6 @@ static FpsCounter * fpsCounter;
 static DisplayFramebuffer * fb;
 static Screenshooter * screenshooter;
 static FantaManipulator * graph;
-static Console * con;
 static SensorPool * sensors;
 static OTAFVUManager * ota;
 static Beeper * beepola;
@@ -117,7 +115,6 @@ void bringup_light_sensor() {
 #if HAS(LIGHT_SENSOR)
     als = new AmbientLightSensor(HWCONF_LIGHTSENSE_GPIO);
     sensors->add(SENSOR_ID_AMBIENT_LIGHT, als, pdMS_TO_TICKS(250));
-    con->print("L sensor OK");
     ESP_LOGI(LOG_TAG, "Light sensor ready");
 #endif
 }
@@ -125,7 +122,6 @@ void bringup_light_sensor() {
 void bringup_motion_sensor() {
 #if HAS(MOTION_SENSOR)
     sensors->add(SENSOR_ID_MOTION, new MotionSensor(HWCONF_MOTION_GPIO), pdMS_TO_TICKS(250));
-    con->print("M sensor OK");
     ESP_LOGI(LOG_TAG, "Motion sensor ready");
 #endif
 }
@@ -136,20 +132,15 @@ void bringup_temp_sensor() {
     AM2322* tempSens = new AM2322(&Wire);
 
     if(!sensors->add(SENSOR_ID_AMBIENT_TEMPERATURE, new Am2322TemperatureSensor(tempSens), pdMS_TO_TICKS(5000))) {
-        con->print("T sens err");
         beepola->beep(CHANNEL_SYSTEM, 500, 125);
         return;
-    } else {
-        con->print("T sensor OK");
-    }
+    } 
     ESP_LOGI(LOG_TAG, "Temperature sensor ready");
 
     delay(1000);
     if(!sensors->add(SENSOR_ID_AMBIENT_HUMIDITY, new Am2322HumiditySensor(tempSens), pdMS_TO_TICKS(5000))) {
-        con->print("H sens err");
         beepola->beep(CHANNEL_SYSTEM, 500, 125);
-    } else {
-        con->print("H sensor OK");
+        return;
     }
     ESP_LOGI(LOG_TAG, "Humidity sensor ready");
 #endif
@@ -167,18 +158,16 @@ void bringup_switchbot_sensor() {
             SwitchbotMeterTemperature *remoteTemp = new SwitchbotMeterTemperature(wometer);
 
             if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY, remoteHum, pdMS_TO_TICKS(30000))) {
-                con->print("WoH err");
+                ESP_LOGE(LOG_TAG, "WoH err");
             } else {
-                con->print("WoH ok");
                 if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_HUMIDITY)) {
                     sensors->short_circuit(SENSOR_ID_AMBIENT_HUMIDITY, SENSOR_ID_SWITCHBOT_INDOOR_HUMIDITY);
                 }
             }
 
             if(!sensors->add(SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE, remoteTemp, pdMS_TO_TICKS(30000))) {
-                con->print("WoT err");
+                ESP_LOGE(LOG_TAG, "WoT err");
             } else {
-                con->print("WoT ok");
                 if(prefs_get_bool(PREFS_KEY_SWITCHBOT_EMULATES_LOCAL) && !sensors->exists(SENSOR_ID_AMBIENT_TEMPERATURE)) {
                     sensors->short_circuit(SENSOR_ID_AMBIENT_TEMPERATURE, SENSOR_ID_SWITCHBOT_INDOOR_TEMPERATURE);
                 }
@@ -192,9 +181,8 @@ void bringup_switchbot_sensor() {
 
 void bringup_hid() {
 #if HAS(TOUCH_PLANE)
-    con->print("Touch init");
     if(touchplane_start() != ESP_OK) {
-        con->print("TP init err");
+        ESP_LOGE(LOG_TAG, "TP init err");
         beepola->beep(CHANNEL_SYSTEM, 500, 125);
     }
     ESP_LOGI(LOG_TAG, "Touchpad ready");
@@ -217,29 +205,20 @@ static TaskHandle_t bootTaskHandle = NULL;
 void boot_task(void*) {
     ESP_LOGI(LOG_TAG, PRODUCT_NAME " v" PRODUCT_VERSION " is in da house now!!");
 
-    // con->print("WiFi init");
     NetworkManager::startup();
     ESP_LOGI(LOG_TAG, "NetMgr started");
     while(!NetworkManager::is_up()) {
         delay(1000);
         ESP_LOGI(LOG_TAG, "Waiting for NetMgr...");
-        // con->write('.');
     }
 
     screenshooter = new Screenshooter(fb->manipulate());
     if(prefs_get_bool(PREFS_KEY_REMOTE_SERVER)) {
         screenshooter->start_server(3939);
         ESP_LOGI(LOG_TAG, "RC Server ready");
-        // con->print("RC server up!");
-        // delay(1000);
     }
-    // con->print(NetworkManager::network_name());
-    // con->print("%i dBm", NetworkManager::rssi());
-    // delay(2000);
-    // con->print(NetworkManager::current_ip().c_str());
-    // delay(2000);
 
-    ota = new OTAFVUManager(con, seq);
+    ota = new OTAFVUManager(seq);
     ESP_LOGI(LOG_TAG, "OTAFVUMgr ready");
 
     sensors = new SensorPool();
@@ -328,12 +307,6 @@ void setup() {
 
     fb = new DisplayFramebuffer(&display_driver);
 
-    con = new Console(find_font(FONT_STYLE_CONSOLE), fb);
-    con->set_cursor(true);
-    con->print("");
-    
-    con->print(PRODUCT_NAME " v" PRODUCT_VERSION);
-
     desktop = new ViewCompositor();
     appHost = new ViewMultiplexor();
     desktop->add_layer(appHost);
@@ -343,7 +316,6 @@ void setup() {
     appHost->add_view(new RebootScreen(), STATE_RESTART);
 
     graph = fb->manipulate();
-    con->set_active(false);
     fb->clear();
 
     if(xTaskCreate(
