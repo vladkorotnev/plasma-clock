@@ -3,7 +3,7 @@
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
 
-// #define HAS_OTAFVU
+#define HAS_OTAFVU
 #define HAS_OUTPUT_MD_PLASMA
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_DISPLAY_BLANKING
@@ -11,9 +11,6 @@
 #define HAS_TEMP_SENSOR
 #define HAS_MOTION_SENSOR
 #define HAS_KEYPAD
-
-//      ↓ Looks like shite on the plasma display
-// #define COMPOSABLE_NO_EVENODD // let's see how it looks
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"

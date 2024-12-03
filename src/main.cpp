@@ -21,6 +21,7 @@
 #include <network/admin_panel.h>
 #include <utils.h>
 #include <state.h>
+#include <app/app_host.h>
 #include <app/idle.h>
 #include <app/alarming.h>
 #include <app/menu.h>
@@ -60,11 +61,13 @@ static Yukkuri * yukkuri = nullptr;
 static AmbientLightSensor * als = nullptr;
 
 void change_state(device_state_t to, transition_type_t transition) {
+#if HAS(OTAFVU)
     if(to == STATE_OTAFVU) {
         current_state = STATE_OTAFVU;
         _actual_current_state = STATE_OTAFVU;
         return; // all other things handled in the FVU process
     }
+#endif
 
     if(to == current_state) return;
 
@@ -74,6 +77,10 @@ void change_state(device_state_t to, transition_type_t transition) {
     // might we need a queue here?
     _next_transition = transition;
     current_state = to;
+
+    if(to == STATE_IDLE) {
+        state_stack.empty();
+    }
 }
 
 void push_state(device_state_t next, transition_type_t transition) {
@@ -308,7 +315,7 @@ void setup() {
     fb = new DisplayFramebuffer(&display_driver);
 
     desktop = new ViewCompositor();
-    appHost = new ViewMultiplexor();
+    appHost = new AppHost();
     desktop->add_layer(appHost);
     desktop->add_layer(new FpsCounter(fb));
 
@@ -355,7 +362,9 @@ void loop() {
         bumTheDog = true;
     }
     
+#if HAS(OTAFVU)
     if(_actual_current_state != STATE_OTAFVU) { // OTAFVU basically locks everything down until reboot
+#endif
         fb->wait_next_frame();
         if(graph->lock()) {
             desktop->render(graph);
@@ -369,10 +378,12 @@ void loop() {
             appHost->switch_to(_actual_current_state, _next_transition);
         }
         print_memory();
+#if HAS(OTAFVU)
     } else {
         if(_actual_current_state != current_state && current_state == STATE_RESTART) {
             _actual_current_state = current_state;
             appHost->switch_to(_actual_current_state, _next_transition);
         }
     }
+#endif
 }
