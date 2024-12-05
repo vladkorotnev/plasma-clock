@@ -4,7 +4,7 @@
 #include <sound/sequence.h>
 #include <device_config.h>
 
-typedef enum sequence_playback_flags {
+typedef enum sequence_playback_flags : uint8_t {
     SEQUENCER_PLAY_NORMALLY = 0,
     SEQUENCER_REPEAT_INDEFINITELY = (1 << 0),
     SEQUENCER_PLAY_HOOK_ONLY = (1 << 1),
@@ -15,6 +15,7 @@ public:
     static const int TONE_CHANNELS = 4;
     static const int EXTRA_CHANNELS = 2;
     static const int CHANNELS = TONE_CHANNELS + EXTRA_CHANNELS;
+    sequence_playback_flags_t flags;
     ToneGenerator * voices[CHANNELS] = { nullptr };
     NewSequencer();
     ~NewSequencer();
@@ -35,7 +36,6 @@ private:
     size_t loop_point;
     int repetitions;
     bool is_running;
-    sequence_playback_flags_t flags;
     EventGroupHandle_t wait_end_group;
     int remaining_delay_samples;
     void process_steps_until_delay();

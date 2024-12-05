@@ -27,6 +27,9 @@ typedef enum device_state {
 #if HAS(PLAYGROUND)
     STATE_PLAYGROUND,
 #endif
+#if HAS(PIXEL_CAVE)
+    STATE_PIXEL_CAVE,
+#endif
 } device_state_t;
 
 device_state_t get_state();

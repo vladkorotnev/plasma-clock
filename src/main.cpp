@@ -35,6 +35,7 @@
 #include <app/musicbox.h>
 #include <app/new_year.h>
 #include <app/httpfvu.h>
+#include <app/pixel_cave.h>
 #include <sensor/switchbot/meter.h>
 #include <views/overlays/fps_counter.h>
 
@@ -267,6 +268,9 @@ void boot_task(void*) {
     appHost->add_view(new NewYearAppShim(beepola, seq, yukkuri), STATE_NEW_YEAR);
 #if HAS(HTTPFVU)
     appHost->add_view(new HttpFvuApp(seq), STATE_HTTPFVU);
+#endif
+#if HAS(PIXEL_CAVE)
+    appHost->add_view(new AppPixelCave(seq), STATE_PIXEL_CAVE);
 #endif
 
     ESP_LOGI(LOG_TAG, "Finishing up");
