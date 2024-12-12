@@ -7,6 +7,7 @@
 #if HAS(IR_RECEIVER)
 // NB: disable all the stuff of no use in the platformio.ini file!
 #include <IRrecv.h>
+#include <IRutils.h>
 #endif
 
 static char LOG_TAG[] = "IRRC";
@@ -25,6 +26,8 @@ static void ir_task(void*) {
         if(receiver.decode(&results)) {
             if(results.repeat) {
                 last_pressed_timestamp = xTaskGetTickCount();
+            } else if(results.overflow) {
+                ESP_LOGW(LOG_TAG, "Overflow when decoding IR code TYPE=%i, VALUE=0x%x, ADDRESS=0x%x, COMMAND=0x%x", results.decode_type, results.value, results.address, results.command);
             } else {
                 bool found = false;
                 for(int i = 0; i < sizeof(HWCONF_IR_BUTTONS) / sizeof(infrared_identifier_t); i++) {
@@ -47,22 +50,25 @@ static void ir_task(void*) {
                         last_pressed = id->key;
                         ESP_LOGI(LOG_TAG, "Press key %i", last_pressed);
                         hid_set_key_state(id->key, true);
+                        break;
                     }
                 }
                 if(!found) {
-                    ESP_LOGI(LOG_TAG, "IR code { .protocol = %i, .address = 0x%x, .command = 0x%x, .value = 0x%x, .key = ? }", results.decode_type, results.address, results.command, results.value);
+                    ESP_LOGI(LOG_TAG, "Unknown IR code { .protocol = %i, .address = 0x%x, .command = 0x%x, .value = 0x%x, .key = ? }", results.decode_type, results.address, results.command, results.value);
+                    ESP_LOGV(LOG_TAG, "%s", resultToHumanReadableBasic(&results).c_str());
+                    ESP_LOGI(LOG_TAG, "%s", resultToSourceCode(&results).c_str());
                 }
             }
 
             receiver.resume();
         } else {
-            if(last_pressed != KEY_MAX_INVALID && (xTaskGetTickCount() - last_pressed_timestamp) > pdMS_TO_TICKS(150)) {
+            if(last_pressed != KEY_MAX_INVALID && (xTaskGetTickCount() - last_pressed_timestamp) > pdMS_TO_TICKS(300)) {
                 ESP_LOGI(LOG_TAG, "Unpress key %i (timeout)", last_pressed);
                 hid_set_key_state(last_pressed, false);
                 last_pressed = KEY_MAX_INVALID;
             }
         }
-        vTaskDelay(pdMS_TO_TICKS(10));
+        vTaskDelay(pdMS_TO_TICKS(25));
     }
 }
 #endif
@@ -77,7 +83,7 @@ void infrared_start() {
             "IRRC",
             8000,
             nullptr,
-            pisosTASK_PRIORITY_KEYPAD,
+            pisosTASK_PRIORITY_INFRARED,
             &hTask
         );
 #endif

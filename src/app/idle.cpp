@@ -110,6 +110,7 @@ static int last_chimed_hour = 0;
 static const int tick_tock_offset_ms = 250;
 
 void sound_tick_tock() {
+    if(get_state() != STATE_IDLE) return;
     tk_time_of_day_t now = get_current_time_precise();
     if(now.millisecond >= tick_tock_offset_ms && !tick_tock) {
         if(!sequencer->is_sequencing() && (yukkuri == nullptr || !yukkuri->is_speaking())) {
@@ -152,7 +153,7 @@ void _play_precise_time_signal_if_enabled(const tk_time_of_day_t &now) {
 }
 
 void hourly_chime() {
-    if(sequencer->is_sequencing()) return;
+    if(sequencer->is_sequencing() || get_state() != STATE_IDLE) return;
     tk_time_of_day now = get_current_time_coarse();
     int first_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_START_HOUR);
     int last_hour = prefs_get_int(PREFS_KEY_HOURLY_CHIME_STOP_HOUR);

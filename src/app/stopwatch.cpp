@@ -21,6 +21,7 @@ public:
         add_composable(hourView);
         add_composable(minuteView);
         add_composable(secondView);
+        wants_clear_surface = true;
     }
 
     void render(FantaManipulator *fb) {
