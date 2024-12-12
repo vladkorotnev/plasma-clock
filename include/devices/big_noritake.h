@@ -9,10 +9,12 @@
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_MOTION_SENSOR
 #define HAS_IR_RECEIVER
+#define HAS_PIXEL_CAVE
+#define HAS_OTAFVU
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "LongPIS-OS"
-#define PRODUCT_VERSION "5.3"
+#define PRODUCT_VERSION "5.5"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;
@@ -37,7 +39,8 @@ const gpio_num_t HWCONF_GU312_DATABUS_GPIOS[] = {
 const gpio_num_t HWCONF_GU312_CD_GPIO = GPIO_NUM_19; 
 const gpio_num_t HWCONF_GU312_WR_GPIO = GPIO_NUM_18;
 const gpio_num_t HWCONF_GU312_BLANKING_GPIO = GPIO_NUM_12;
-const gpio_num_t HWCONF_GU312_FEP_GPIO = GPIO_NUM_13; //<- optional, can be GPIO_NUM_NC
+// Disable Vsync for the sake of smoothness, may change later
+const gpio_num_t HWCONF_GU312_FEP_GPIO = GPIO_NUM_NC;//GPIO_NUM_13; //<- optional, can be GPIO_NUM_NC
 
 #define HWCONF_DISPLAY_WIDTH_PX 192
 #define HWCONF_DISPLAY_HEIGHT_PX 16
@@ -62,10 +65,41 @@ const infrared_definition_t HWCONF_IR_BUTTONS = {
     { .protocol = IRPROTO_NEC, .address = 0x10, .command = 0xf8, .value = 0x8f71fe0, .key = KEY_SOFT_F1}, // A
     { .protocol = IRPROTO_NEC, .address = 0x10, .command = 0x78, .value = 0x8f71ee1, .key = KEY_SOFT_F2}, // B
     { .protocol = IRPROTO_NEC, .address = 0x10, .command = 0x58, .value = 0x8f71ae5, .key = KEY_SOFT_F3}, // C
-
     // Top-left: TYPE=3, VALUE=0x8f78d72, ADDRESS=0x10, COMMAND=0xb1
     // Top-right: TYPE=3, VALUE=0x8f7847b, ADDRESS=0x10, COMMAND=0x21
     // Bottom-left: TYPE=3, VALUE=0x8f78877, ADDRESS=0x10, COMMAND=0x11
     // Bottom-right: TYPE=3, VALUE=0x8f7817e, ADDRESS=0x10, COMMAND=0x81
     // Power: TYPE=3, VALUE=0x8f71be4, ADDRESS=0x10, COMMAND=0xd8
+
+    /**
+     * ProSpec DVE (Digital Video Editor)
+     */
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa0, .value = 0x0, .key = KEY_UP },
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa2, .value = 0x0, .key = KEY_DOWN },
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa5, .value = 0x0, .key = KEY_LEFT },
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa4, .value = 0x0, .key = KEY_RIGHT },
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa1, .value = 0x0, .key = KEY_HEADPAT }, // input sw
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa7, .value = 0x0, .key = KEY_SOFT_F1 }, // pwr
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa6, .value = 0x0, .key = KEY_SOFT_F3 }, // frame
+    { .protocol = IRPROTO_NEC, .address = 0x2e82, .command = 0xa3, .value = 0x0, .key = KEY_SOFT_F2 }, // back
+
+
+    /**
+     * UNKNOWN "LCD remote"
+     */
+    { .protocol = IRPROTO_NEC, .address = 0x6b86, .command = 0x1b, .value = 0x0, .key = KEY_UP },
+    { .protocol = IRPROTO_NEC, .address = 0x6b86, .command = 0x1a, .value = 0x0, .key = KEY_DOWN },
+    { .protocol = IRPROTO_NEC, .address = 0x6b86, .command = 0x4, .value = 0x0, .key = KEY_LEFT },
+    { .protocol = IRPROTO_NEC, .address = 0x6b86, .command = 0x6, .value = 0x0, .key = KEY_RIGHT },
+    { .protocol = IRPROTO_NEC, .address = 0x6b86, .command = 0x5, .value = 0x0, .key = KEY_HEADPAT },
+    { .protocol = IRPROTO_NEC, .address = 0x6b86, .command = 0x6, .value = 0x0, .key = KEY_SOFT_F2 }, // pwr
+
+    /**
+     * UNKNOWN "Audio Switch" SPDIF/TOSLINK 4X1 REMOTE CONTROL
+     */
+    { .protocol = IRPROTO_NEC, .address = 0x0, .command = 0x15, .value = 0x0, .key = KEY_UP },
+    { .protocol = IRPROTO_NEC, .address = 0x0, .command = 0x18, .value = 0x0, .key = KEY_DOWN },
+    { .protocol = IRPROTO_NEC, .address = 0x0, .command = 0x16, .value = 0x0, .key = KEY_LEFT },
+    { .protocol = IRPROTO_NEC, .address = 0x0, .command = 0xd, .value = 0x0, .key = KEY_RIGHT },
+    { .protocol = IRPROTO_NEC, .address = 0x0, .command = 0x45, .value = 0x0, .key = KEY_HEADPAT },
 };

@@ -202,7 +202,7 @@ bool NewSequencer::process_step(const melody_item_t * cur_line) {
             if(cur_line->argument == LOOP_POINT_TYPE_HOOK_END && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) {
                 if(end_of_song()) return true;
             }
-            else if(cur_line->argument == LOOP_POINT_TYPE_LOOP) {
+            else if((cur_line->argument == LOOP_POINT_TYPE_HOOK_START && (flags & SEQUENCER_PLAY_HOOK_ONLY) != 0) || (cur_line->argument == LOOP_POINT_TYPE_LOOP) ){
                 loop_point = pointer + 1;
             }
             break;

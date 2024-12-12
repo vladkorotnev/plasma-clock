@@ -50,7 +50,7 @@ static void ir_task(void*) {
                     }
                 }
                 if(!found) {
-                    ESP_LOGI(LOG_TAG, "IR code TYPE=%i, VALUE=0x%x, ADDRESS=0x%x, COMMAND=0x%x", results.decode_type, results.value, results.address, results.command);
+                    ESP_LOGI(LOG_TAG, "IR code { .protocol = %i, .address = 0x%x, .command = 0x%x, .value = 0x%x, .key = ? }", results.decode_type, results.address, results.command, results.value);
                 }
             }
 
