@@ -18,15 +18,6 @@ public:
         secondView = new DroppingDigitView(2, 0, b);
         font = find_font(FONT_STYLE_CLOCK_FACE);
 
-        int char_count = 10; // XX:XX:XX []
-        int text_width = char_count * font->width;
-        int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
-        hourView->x_offset = left_offset;
-        left_offset += hourView->width + font->width;
-        minuteView->x_offset = left_offset;
-        left_offset += hourView->width + font->width;
-        secondView->x_offset = left_offset;
-
         add_composable(hourView);
         add_composable(minuteView);
         add_composable(secondView);
@@ -74,6 +65,15 @@ public:
 
         int cursor_offset = 0;
 
+        int char_count = 10; // XX:XX:XX []
+        int text_width = char_count * font->width;
+        int left_offset = fb->get_width()/2 - text_width/2;
+        hourView->x_offset = left_offset;
+        left_offset += hourView->width + font->width;
+        minuteView->x_offset = left_offset;
+        left_offset += hourView->width + font->width;
+        secondView->x_offset = left_offset;
+
         if(cursorPosition == CursorPosition::HOUR) cursor_offset = hourView->x_offset;
         if(cursorPosition == CursorPosition::MINUTE) cursor_offset = minuteView->x_offset;
         if(cursorPosition == CursorPosition::SECOND) cursor_offset = secondView->x_offset;
@@ -83,10 +83,10 @@ public:
         fb->put_glyph(font, ':', hourView->x_offset + hourView->width, 0);
         fb->put_glyph(font, ':', minuteView->x_offset + minuteView->width, 0);
 
-        int left_offset = secondView->x_offset + secondView->width + font->width;
+        left_offset = secondView->x_offset + secondView->width + font->width;
 
         if(isRunning) fb->rect(left_offset-1, 0, left_offset + 17, 15, true);
-        fb->put_glyph(find_font(FONT_STYLE_TALL_TEXT), 0x10, left_offset, 0, isRunning ? TEXT_INVERTED : TEXT_NORMAL);
+        fb->put_glyph(find_font(FONT_STYLE_TALL_TEXT), 0x10, left_offset, 0, TEXT_OUTLINED | TEXT_NO_BACKGROUND | (isRunning ? TEXT_INVERTED : TEXT_NORMAL));
         if(cursorPosition == CursorPosition::PLAY_PAUSE) cursor_offset = left_offset;
 
         if(isShowingCursor) {

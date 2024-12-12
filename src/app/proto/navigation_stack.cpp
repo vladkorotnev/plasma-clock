@@ -63,6 +63,7 @@ void ProtoShimNavigationStack::set_active_renderable(Renderable *next, transitio
 
 void ProtoShimNavigationStack::render(FantaManipulator*fb) {
     fb->clear();
+    transition_coordinator->update_width(fb->get_width());
     current_renderable()->render(fb);
     scroll_guidance->render(fb);
 }

@@ -48,7 +48,7 @@ const device_state_t startup_state = STATE_IDLE;
 static std::stack<device_state_t> state_stack = {};
 
 static ViewCompositor * desktop;
-static ViewMultiplexor * appHost;
+static AppHost * appHost;
 static FpsCounter * fpsCounter;
 
 static DisplayFramebuffer * fb;

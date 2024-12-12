@@ -15,6 +15,11 @@ static TickType_t keypress_started_at[KEY_MAX_INVALID] = { 0 };
 static TickType_t keypress_repeated_at[KEY_MAX_INVALID] = { 0 };
 static Beeper * beepola = nullptr;
 static TimerSensor * hid_state_sensor = nullptr;
+static bool hid_locked = false;
+
+void hid_set_lock_state(bool locked) {
+    hid_locked = locked;
+}
 
 void hid_set_key_beeper(Beeper* b) {
     beepola = b;
@@ -30,6 +35,8 @@ inline key_state_t time_to_state(TickType_t time) {
 }
 
 static key_state_t min_state_of_mask(key_bitmask_t keys, bool peek = false) {
+    if(hid_locked) return KEYSTATE_RELEASED;
+    
     TickType_t maxTimeStamp = 0;
     for(key_id_t i = (key_id_t)0; i < KEY_MAX_INVALID; i = (key_id_t) (i + 1)) {
         if((keys & KEY_ID_TO_BIT(i)) == 0) continue;

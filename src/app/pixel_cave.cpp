@@ -66,6 +66,7 @@ void AppPixelCave::render(FantaManipulator* fb) {
 
         case PCGAME_OVER:
             {
+                fb->clear();
                 // TODO GUI
                 if(crash_flash < 2) {
                     render_game(fb, false);

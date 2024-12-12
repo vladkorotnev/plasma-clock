@@ -62,3 +62,14 @@ void TransitionAnimationCoordinator::render(FantaManipulator *fb) {
     render_backing_views();
     completed = transition->render(fb, this);
 }
+
+void TransitionAnimationCoordinator::update_width(int width) {
+    if(width != backingA->get_width()) {
+        delete backingA;
+        backingA = new FantaManipulator(backingBufferA, DisplayFramebuffer::BUFFER_SIZE, width, DisplayFramebuffer::height, semaA, &dirtyA);
+    }
+    if(width != backingB->get_width()) {
+        delete backingB;
+        backingB = new FantaManipulator(backingBufferB, DisplayFramebuffer::BUFFER_SIZE, width, DisplayFramebuffer::height, semaB, &dirtyB);
+    }
+}

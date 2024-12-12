@@ -425,6 +425,13 @@ void AppShimMenu::prepare() {
     last_touch_time = xTaskGetTickCount();
 }
 
+void AppShimMenu::render(FantaManipulator *fb) {
+    ProtoShimNavMenu::render(fb);
+    if(fb->get_width() != last_width) {
+        last_width = fb->get_width();
+        last_touch_time = xTaskGetTickCount();
+    }
+}
 
 void AppShimMenu::step() {
     ProtoShimNavMenu::step();

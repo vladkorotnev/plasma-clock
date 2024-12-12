@@ -196,7 +196,7 @@ void NoritakeGu312Driver::write_fanta(const uint8_t * strides, size_t count) {
 
 void NoritakeGu312Driver::set_bright(bool bright) {
     taskENTER_CRITICAL(&_spinlock);
-    send_command(bright ? 0b11001 : 0b11011);
+    send_command(bright ? 0b11001 : 0b11110);
     // undocumented: can go from 11000 (100%) to as low as 11111 (undocumented)
     taskEXIT_CRITICAL(&_spinlock);
 }

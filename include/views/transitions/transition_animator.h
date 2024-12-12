@@ -31,6 +31,8 @@ public:
     void step();
     void render(FantaManipulator *);
 
+    void update_width(int width);
+
     fanta_buffer_t backingBufferA;
     fanta_buffer_t backingBufferB;
     FantaManipulator * backingA;

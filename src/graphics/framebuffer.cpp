@@ -8,13 +8,17 @@
 #define HWCONF_DESIRED_FPS 60
 #endif
 
+#ifndef PDFB_PERF_LOG_INTERVAL
+#define PDFB_PERF_LOG_INTERVAL 600
+#endif
+
 static const int DESIRED_FPS = HWCONF_DESIRED_FPS;
 
 #define EVT_BIT_ENDED_DRAWING (1 << 0)
 
 static char LOG_TAG[] = "PDFB";
 
-#define LOCK_BUFFER_OR_DIE if(!xSemaphoreTake(buffer_semaphore, pdMS_TO_TICKS(16))) {ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");return;}
+#define LOCK_BUFFER_OR_DIE if(!xSemaphoreTake(buffer_semaphore, portMAX_DELAY)) {ESP_LOGW(LOG_TAG, "Timeout while waiting on FB semaphore");return;}
 #define UNLOCK_BUFFER xSemaphoreGive(buffer_semaphore)
 
 DisplayFramebuffer::DisplayFramebuffer(DisplayDriver * disp) {
@@ -37,7 +41,6 @@ DisplayFramebuffer::~DisplayFramebuffer() {
 
 extern "C" void FbTaskFunc( void * pvParameter );
 
-#ifdef PDFB_PERF_LOGS
 static TickType_t last_draw_at = 0;
 static TickType_t avg_frametime = 0;
 static TickType_t max_frametime = 0;
@@ -46,7 +49,6 @@ static uint16_t perf_counter = 0;
 unsigned int DisplayFramebuffer::get_fps() {
     return 1000/pdTICKS_TO_MS(avg_frametime);
 }
-#endif
 
 void FbTaskFunc( void * pvParameter )
 {
@@ -56,10 +58,7 @@ void FbTaskFunc( void * pvParameter )
     TickType_t interval = pdMS_TO_TICKS(1000 / DESIRED_FPS);
     while(1) {
         fb->write_all_if_needed();
-#ifdef PDFB_PERF_LOGS
-#ifndef PDFB_PERF_LOG_INTERVAL
-#define PDFB_PERF_LOG_INTERVAL 600
-#endif
+
         perf_counter++;
         if(perf_counter >= PDFB_PERF_LOG_INTERVAL) {
             perf_counter = 0;
@@ -72,9 +71,8 @@ void FbTaskFunc( void * pvParameter )
         avg_frametime += frametime;
         avg_frametime /= 2;
         last_draw_at = now;
-#endif
 
-        xTaskDelayUntil(&now, interval);
+        xTaskDelayUntil(&now, interval); //<- also updates `now`
     }
 }
 

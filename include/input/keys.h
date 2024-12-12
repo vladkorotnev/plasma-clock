@@ -30,6 +30,7 @@ typedef uint16_t key_bitmask_t;
 
 const key_bitmask_t KEYMASK_ALL = 0xFFFF;
 
+void hid_set_lock_state(bool locked);
 void hid_set_key_beeper(Beeper *);
 void hid_set_key_state(key_id_t key, bool state);
 key_state_t hid_test_key_state(key_id_t key);
