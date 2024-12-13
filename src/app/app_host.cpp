@@ -86,7 +86,7 @@ void AppHost::step() {
         }
         else if(hid_test_key_state(KEY_SOFT_F2) == KEYSTATE_HIT) {
             if(get_state() == STATE_IDLE) {
-                change_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
+                push_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_RIGHT);
             } else {
                 change_state(STATE_IDLE, TRANSITION_WIPE);
             }

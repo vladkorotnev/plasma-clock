@@ -4,6 +4,8 @@
 #include <esp32-hal-log.h>
 #include <unordered_set>
 
+static char LOG_TAG[] = "KEYHID";
+
 const TickType_t KEYPRESS_THRESHOLD_TIME = pdMS_TO_TICKS(16);
 const TickType_t KEYHOLD_THRESHOLD_TIME = pdMS_TO_TICKS(1000);
 const TickType_t KEYHOLD_REPETITION_TIME = pdMS_TO_TICKS(500);
@@ -56,6 +58,7 @@ static key_state_t min_state_of_mask(key_bitmask_t keys, bool peek = false) {
         case KEYSTATE_PRESSED:
             if(pressed_keycombos.count(keys) == 0) {
                 if(!peek) {
+                    ESP_LOGV(LOG_TAG, "Detect combo %x", keys);
                     pressed_keycombos.insert(keys);
                     if(beepola != nullptr) beepola->beep(CHANNEL_NOTICE, 1000, 10);
                 }
@@ -76,6 +79,12 @@ void hid_set_key_state(key_id_t key, bool state) {
         if(hid_state_sensor) hid_state_sensor->trigger();
     } else if(!state && (active_keys & KEY_ID_TO_BIT(key)) != 0) {
         active_keys &= ~KEY_ID_TO_BIT(key);
+        for(const auto& combo: pressed_keycombos) {
+            if((combo & KEY_ID_TO_BIT(key)) != 0) {
+                ESP_LOGV(LOG_TAG, "Unpress combo %x", combo);
+                pressed_keycombos.erase(combo);
+            }
+        }
     }
 }
 
