@@ -10,6 +10,7 @@ class AppShimMusicbox : public WeatherChartCommon {
 public:
     AppShimMusicbox(NewSequencer * s);
     void prepare() override;
+    void render(FantaManipulator*) override;
     void step() override;
     void cleanup() override;
 

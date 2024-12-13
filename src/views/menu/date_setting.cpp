@@ -9,6 +9,14 @@ void MenuDateSettingView::prepare() {
 }
 
 void MenuDateSettingView::render(FantaManipulator *fb) {
+    int char_count = 10; // YYYY/MM/dd
+    int text_width = char_count * font->width;
+    int left_offset = fb->get_width()/2 - text_width/2;
+
+    yearView->x_offset = left_offset;
+    monthView->x_offset = yearView->x_offset + yearView->width + font->width;
+    dayView->x_offset = monthView->x_offset + monthView->width + font->width;
+
     cursorTimer++;
     if(cursorTimer == 30) {
         cursorTimer = 0;

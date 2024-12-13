@@ -57,6 +57,7 @@ public:
         }
         for(Composable *r: composables) {
             if(r->hidden) continue;
+            if(r->x_offset >= fb->get_width() || r->width == 0) continue;
 #ifndef COMPOSABLE_NO_EVENODD
             if(r->gray) { 
                 int w = (r->width >= 0 ? r->width : fb->get_width());
@@ -87,12 +88,16 @@ public:
                 r->render(fb);
             } else if(r->width > 0) {
                 FantaManipulator * temp = fb->slice(r->x_offset, r->width);
-                r->render(temp);
-                delete temp;
+                if(temp != nullptr) {
+                    r->render(temp);
+                    delete temp;
+                }
             } else if(r->width == -1) {
                 FantaManipulator * temp = fb->slice(r->x_offset, fb->get_width() - r->x_offset);
-                r->render(temp);
-                delete temp;
+                if(temp != nullptr) {
+                    r->render(temp);
+                    delete temp;
+                }
             }
         }
 #ifndef COMPOSABLE_NO_EVENODD

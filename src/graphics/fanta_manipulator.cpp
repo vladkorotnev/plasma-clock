@@ -31,6 +31,11 @@ void FantaManipulator::unlock() {
 }
 
 FantaManipulator* FantaManipulator::slice(int x, int w) {
+    if(x < 0) {
+        x = 0;
+        w += x;
+    }
+
     if(x > buffer_size/2) {
         ESP_LOGE(LOG_TAG, "Position (X=%i) is out of bounds of the screen", x);
         return nullptr;

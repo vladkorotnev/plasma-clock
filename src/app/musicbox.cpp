@@ -28,9 +28,6 @@ AppShimMusicbox::AppShimMusicbox(NewSequencer * s):
 
     show_minimum = false;
     show_maximum = false;
-    for(int i = 0; i < DisplayFramebuffer::width; i++) {
-        points.push_back( { .annotation = -1, .value = 0 });
-    }
     
     filled = true;
     autoscale = false;
@@ -47,6 +44,15 @@ AppShimMusicbox::AppShimMusicbox(NewSequencer * s):
         maxTrackNo ++;
     }
 #endif
+}
+
+void AppShimMusicbox::render(FantaManipulator* fb) {
+    if(points.size() < fb->get_width()) {
+        for(int i = 0; i < fb->get_width(); i++) {
+            points.push_back( { .annotation = -1, .value = 0 });
+        }
+    }
+    WeatherChartCommon::render(fb);
 }
 
 void AppShimMusicbox::prepare() {

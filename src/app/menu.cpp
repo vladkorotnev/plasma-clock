@@ -412,6 +412,9 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     main_menu->add_view(new MenuActionItemView(localized_string("Weighing"), [this](){ push_state(STATE_WEIGHING, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &weight_icns));
 #endif
     main_menu->add_view(new MenuActionItemView(localized_string("Settings"), [this](){ push_submenu(settings_menu); }, &wrench_icns));
+#if HAS(PIXEL_CAVE)
+    main_menu->add_view(new MenuActionItemView("Pixel Cave", []() { push_state(STATE_PIXEL_CAVE, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &good_icns));
+#endif
 #if HAS(PLAYGROUND)
     main_menu->add_view(new MenuActionItemView("Test", []() { push_state(STATE_PLAYGROUND, TRANSITION_SLIDE_HORIZONTAL_LEFT); }, &good_icns));
 #endif
@@ -422,6 +425,13 @@ void AppShimMenu::prepare() {
     last_touch_time = xTaskGetTickCount();
 }
 
+void AppShimMenu::render(FantaManipulator *fb) {
+    ProtoShimNavMenu::render(fb);
+    if(fb->get_width() != last_width) {
+        last_width = fb->get_width();
+        last_touch_time = xTaskGetTickCount();
+    }
+}
 
 void AppShimMenu::step() {
     ProtoShimNavMenu::step();

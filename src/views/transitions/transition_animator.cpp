@@ -37,7 +37,13 @@ bool TransitionAnimationCoordinator::is_completed() {
 }
 
 void TransitionAnimationCoordinator::set_transition(Transition *t) {
+    if(transition != nullptr) {
+        delete transition;
+        transition = nullptr;
+    }
+
     transition = t;
+    
     if(transition != nullptr) {
         transition->rewind();
         completed = false;
@@ -61,4 +67,15 @@ void TransitionAnimationCoordinator::render(FantaManipulator *fb) {
     if(transition == nullptr) { return; }
     render_backing_views();
     completed = transition->render(fb, this);
+}
+
+void TransitionAnimationCoordinator::update_width(int width) {
+    if(width != backingA->get_width()) {
+        delete backingA;
+        backingA = new FantaManipulator(backingBufferA, DisplayFramebuffer::BUFFER_SIZE, width, DisplayFramebuffer::height, semaA, &dirtyA);
+    }
+    if(width != backingB->get_width()) {
+        delete backingB;
+        backingB = new FantaManipulator(backingBufferB, DisplayFramebuffer::BUFFER_SIZE, width, DisplayFramebuffer::height, semaB, &dirtyB);
+    }
 }

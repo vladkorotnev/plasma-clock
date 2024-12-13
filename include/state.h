@@ -21,9 +21,14 @@ typedef enum device_state {
     STATE_HTTPFVU,
 #endif
     STATE_NEW_YEAR,
+#if HAS(OTAFVU)
     STATE_OTAFVU,
+#endif
 #if HAS(PLAYGROUND)
     STATE_PLAYGROUND,
+#endif
+#if HAS(PIXEL_CAVE)
+    STATE_PIXEL_CAVE,
 #endif
 } device_state_t;
 

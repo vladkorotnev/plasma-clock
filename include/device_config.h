@@ -83,4 +83,8 @@
     #endif
 #endif
 
+#if HWCONF_DISPLAY_WIDTH_PX >= 192
+    #define HAS_SPLIT_SCREEN_APPHOST
+#endif
+
 #endif

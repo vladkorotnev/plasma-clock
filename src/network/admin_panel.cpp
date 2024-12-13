@@ -364,9 +364,7 @@ static void build() {
 #endif
 
     GP.SPOILER_BEGIN("Overlays", GP_BLUE);
-#if defined(PDFB_PERF_LOGS)
         render_bool("FPS counter", PREFS_KEY_FPS_COUNTER);
-#endif
         GP.LABEL("WiFi status:");
         GP.SELECT(PREFS_KEY_WIFI_ICON, "None,Disconnected only,On display power on,Always", prefs_get_int(PREFS_KEY_WIFI_ICON));
     GP.SPOILER_END();

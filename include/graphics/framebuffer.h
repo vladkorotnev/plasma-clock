@@ -26,10 +26,8 @@ public:
     /// @brief Output the backing buffer to the display controller, if it was altered since the last transmission
     void write_all_if_needed();
     
-#ifdef PDFB_PERF_LOGS
     /// @brief Get the average number of frames transmitted to the display controller per second
     unsigned int get_fps();
-#endif
 
     /// @brief Manipulate the graphics in the backing buffer
     /// @return A pointer to the manipulator, owned by the caller

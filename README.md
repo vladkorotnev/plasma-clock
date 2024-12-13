@@ -125,6 +125,7 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [daniwellP - Nyan Cat](https://www.youtube.com/watch?v=LfKCLdPTqtM): [MIDI](helper/chimes/nyancat.mid), [MP3](docs/rec/squarecat.mp3)
 * [Neru - Tokyo Teddy Bear](https://www.youtube.com/watch?v=eSI7RsjZy1E): [MIDI](helper/chimes/tokyoteddybear.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=Y30ZyZbRCrE)
 * [LamazeP - Triple Baka](https://open.spotify.com/track/2dE6zWGJXZuqvfengytVGo): [MIDI](helper/chimes/3baka.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=HNPrwdLJC8g), [MP3](docs/rec/baka.mp3)
+* [Desireless — Voyage Voyage](https://youtu.be/sM2ZhByFcDk): [MIDI](helper/chimes/voyage.mid)
 
 ## Creating your own melodies
 
@@ -238,7 +239,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 
 * Keypad/D-Pad. Set feature flag `HAS_KEYPAD` and define `const keypad_definition_t HWCONF_KEYPAD` in the device definition. [Driver](src/input/keypad.cpp)
 * Touch plane. E.g. a faceplate with touch sensitive arrow keys to work in place of a D-pad. Set feature flag `HAS_TOUCH_PLANE` and define `const touch_plane_definition_t HWCONF_TOUCH_PLANE` in the device definition. [Driver](src/input/touch_plane.cpp)
-* *Experimental/Untested* IR Remote. Set feature flag `HAS_IR_RECEIVER` and define `const infrared_definition_t HWCONF_IR_BUTTONS` in the device definition. [Driver](src/input/infrared.cpp)
+* IR Remote. Set feature flag `HAS_IR_RECEIVER` and define `const infrared_definition_t HWCONF_IR_BUTTONS` in the device definition. [Driver](src/input/infrared.cpp)
 
 ### Others
 

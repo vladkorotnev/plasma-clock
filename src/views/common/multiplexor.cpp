@@ -80,6 +80,7 @@ void ViewMultiplexor::prepare() {
 
 void ViewMultiplexor::render(FantaManipulator * fb) {
     Renderable *r = current_renderable();
+    transition_coordinator->update_width(fb->get_width());
     if(r != nullptr) r->render(fb);
 }
 
