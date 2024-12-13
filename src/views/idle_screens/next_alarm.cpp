@@ -27,12 +27,6 @@ NextAlarmView::NextAlarmView() {
     minuteView = new DroppingDigitView(2, 0);
     font = find_font(FONT_STYLE_CLOCK_FACE);
 
-    int char_count = 5; // XX:XX
-    int text_width = char_count * font->width;
-    int left_offset = (HWCONF_DISPLAY_WIDTH_PX - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
-    hourView->x_offset = left_offset;
-    minuteView->x_offset = hourView->x_offset + hourView->width + font->width;
-
     add_composable(hourView);
     add_composable(minuteView);
 }
@@ -80,6 +74,12 @@ void NextAlarmView::step() {
 }
 
 void NextAlarmView::render(FantaManipulator *fb) {
+    int char_count = 5; // XX:XX
+    int text_width = char_count * font->width;
+    int left_offset = (fb->get_width() - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
+    hourView->x_offset = left_offset;
+    minuteView->x_offset = hourView->x_offset + hourView->width + font->width;
+
     Composite::render(fb);
     fb->put_sprite(&sleep_icns, 0, 0);
     fb->put_glyph(font, ':', hourView->x_offset + hourView->width, 0);

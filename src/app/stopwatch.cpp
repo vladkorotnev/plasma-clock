@@ -18,21 +18,22 @@ public:
         big_font = find_font(FONT_STYLE_CLOCK_FACE);
         small_font = find_font(FONT_STYLE_CLOCK_FACE_SMALL);
 
+        add_composable(hourView);
+        add_composable(minuteView);
+        add_composable(secondView);
+        wants_clear_surface = true;
+    }
+
+    void render(FantaManipulator *fb) {
         int char_count = 12; // XX:XX:XX.xxx
         int text_width = 9 * big_font->width + 3 * small_font->width;
-        int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
+        int left_offset = fb->get_width()/2 - text_width/2;
         hourView->x_offset = left_offset;
         left_offset += hourView->width + big_font->width;
         minuteView->x_offset = left_offset;
         left_offset += hourView->width + big_font->width;
         secondView->x_offset = left_offset;
 
-        add_composable(hourView);
-        add_composable(minuteView);
-        add_composable(secondView);
-    }
-
-    void render(FantaManipulator *fb) {
         Composite::render(fb);
         
         fb->put_glyph(big_font, ':', hourView->x_offset + hourView->width, 0);

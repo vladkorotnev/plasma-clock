@@ -6,7 +6,6 @@
 #include <driver/touch_sensor_common.h>
 #include <hal/touch_sensor_types.h>
 #include <hal/touch_sensor_hal.h>
-#include <console.h>
 #include <os_config.h>
 
 // I don't know how this works
@@ -88,26 +87,6 @@ static void touch_task(void* pvParams) {
     while(1) {
         poll_touch_controller();
         vTaskDelay(pdMS_TO_TICKS(10));
-    }
-}
-
-void touchplane_debug(Console * con) {
-    while(1) {
-       // con->print("R %i U %i\nD %i L %i", lastDeltas[TOUCH_PAD_NUM9], lastDeltas[TOUCH_PAD_NUM8], lastDeltas[TOUCH_PAD_NUM7], lastDeltas[TOUCH_PAD_NUM6]);
-        if(hid_test_key_state(KEY_UP)) ESP_LOGI(LOG_TAG, "UP pressed");
-        if(hid_test_key_state(KEY_DOWN)) ESP_LOGI(LOG_TAG, "DOWN pressed");
-        if(hid_test_key_state(KEY_LEFT)) ESP_LOGI(LOG_TAG, "LEFT pressed");
-        if(hid_test_key_state(KEY_RIGHT)) ESP_LOGI(LOG_TAG, "RIGHT pressed");
-        if(hid_test_key_state(KEY_HEADPAT)) ESP_LOGI(LOG_TAG, "HEADPAT pressed");
-
-        con->clear();
-        if(hid_test_key_state(KEY_UP)) con->print("UP");
-        if(hid_test_key_state(KEY_DOWN)) con->print("DOWN");
-        if(hid_test_key_state(KEY_LEFT)) con->print("LEFT");
-        if(hid_test_key_state(KEY_RIGHT)) con->print("RIGHT");
-        if(hid_test_key_state(KEY_HEADPAT)) con->print("HEADPAT");
-
-        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 #endif

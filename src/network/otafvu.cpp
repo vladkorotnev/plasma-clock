@@ -12,49 +12,6 @@
 
 static char LOG_TAG[] = "OTAFVU";
 
-
-// Utilitary font to draw the FVU progress bar
-static const uint8_t one_pixel_bar_data[] = {
-    // cursor, empty
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    0b00000000,
-    // bar, filled
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF,
-    0xFF,
-};
-
-const font_range_t pixel_bar_font_ranges[] = {
-    font_range_t {
-        .start = '|' - 1,
-        .end = '|'
-    }
-};
-
-const font_definition_t one_pixel_bar_font = {
-    .valid = true,
-    .encoding = FONT_ENCODING_BESPOKE_ASCII,
-    .glyph_format = SPRFMT_HORIZONTAL,
-    .cursor_character = '|' - 1,
-    .invalid_character = '|' - 1,
-    .width = 1,
-    .height = 8,
-    .range_count = 1,
-    .data = one_pixel_bar_data,
-    .ranges = pixel_bar_font_ranges
-};
-
 extern "C" void OtaFvuTaskFunction( void * pvParameter );
 
 void OtaFvuTaskFunction( void * pvParameter )
@@ -67,9 +24,8 @@ void OtaFvuTaskFunction( void * pvParameter )
     }
 }
 
-OTAFVUManager::OTAFVUManager(Console* c, NewSequencer*s) {
+OTAFVUManager::OTAFVUManager(NewSequencer*s) {
     ESP_LOGI(LOG_TAG, "Initializing");
-    con = c;
     seq = s;
 
     ArduinoOTA.setHostname((String("plasma-") + getChipId()).c_str());
@@ -112,14 +68,6 @@ void OTAFVUManager::get_ready() {
     ESP_LOGI(LOG_TAG, "Get ready");
     change_state(STATE_OTAFVU);
 
-    con->set_active(true);
-    con->clear();
-    con->print("OTA FVU RECV\n");
-    con->flush();
-    con->set_cursor(false);
-    con->set_font(&one_pixel_bar_font);
-    con->write('|');
-
     // Keep display on when updating
     power_mgmt_pause();
 
@@ -128,35 +76,13 @@ void OTAFVUManager::get_ready() {
 
 void OTAFVUManager::shut_up_and_explode() {
     ESP_LOGI(LOG_TAG, "Shut up and explode!");
-    con->set_font(find_font(FONT_STYLE_TALL_TEXT));
-    con->clear();
-    con->print("OTAFVU Done!");
     seq->play_sequence(&oelutz_fvu);
     seq->wait_end_play();
-    con->set_active(false);
     change_state(STATE_RESTART, TRANSITION_NONE);
 }
 
 void OTAFVUManager::on_error(ota_error_t error) {
     ESP_LOGE(LOG_TAG, "OTA error %i!!", error);
-    con->clear();
-    switch(error) {
-        case OTA_AUTH_ERROR:
-            con->print("Auth err!");
-            break;
-        case OTA_BEGIN_ERROR:
-            con->print("Begin err!");
-            break;
-        case OTA_CONNECT_ERROR:
-            con->print("Conn err!");
-            break;
-        case OTA_RECEIVE_ERROR:
-            con->print("Recv err!");
-            break;
-        case OTA_END_ERROR:
-            con->print("End error!");
-            break;
-    }
 }
 
 void OTAFVUManager::on_progress(unsigned int progress, unsigned int total) {
@@ -164,7 +90,6 @@ void OTAFVUManager::on_progress(unsigned int progress, unsigned int total) {
     unsigned int percent =  (progress / (total / 100));
     ESP_LOGV(LOG_TAG, "Recv: %u%% [%u / %u]", percent, progress, total);
     while(lastPercent < percent) {
-        con->write('|');
         lastPercent++;
     }
 }

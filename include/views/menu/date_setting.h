@@ -23,14 +23,6 @@ public:
         isShowingCursor { false },
         onFinish(onFinish),
         beeper(b) {
-            int char_count = 10; // YYYY/MM/dd
-            int text_width = char_count * font->width;
-            int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
-
-            yearView->x_offset = left_offset;
-            monthView->x_offset = yearView->x_offset + yearView->width + font->width;
-            dayView->x_offset = monthView->x_offset + monthView->width + font->width;
-
             add_composable(yearView);
             add_composable(monthView);
             add_composable(dayView);

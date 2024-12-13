@@ -1,5 +1,6 @@
 #pragma once
 #include <sound/types.h>
+#include <vector>
 
 class MelodySequence {
 public:
@@ -38,3 +39,31 @@ protected:
     int num_rows_;
 };
 
+
+class PomfMelodySequence: public MelodySequence {
+public:
+    PomfMelodySequence(const char * sourcePath);
+    ~PomfMelodySequence();
+
+    bool valid() { return exists; }
+    bool load() override;
+    void unload() override;
+
+    const char * get_title() override { return title_; }
+    const char * get_long_title() override { return long_title_; }
+    const melody_item_t * get_array() override { return array_; }
+    int get_num_rows() override { return num_rows_; }
+
+protected:
+    bool exists = false;
+    bool loaded = false;
+    char path[64] = { 0 };
+    char * title_ = nullptr;
+    char * long_title_ = nullptr;
+    melody_item_t * array_ = nullptr;
+    std::vector<rle_sample_t *> samples = {};
+    int num_rows_ = 0;
+
+    void unload_samples();
+    void try_preload_metadata();
+};

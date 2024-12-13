@@ -25,14 +25,6 @@ public:
         isShowingCursor { false },
         onFinish(onFinish),
         beeper(b) {
-            int char_count = showSeconds ? 8 : 5; // XX:XX:XX or XX:XX
-            int text_width = char_count * font->width;
-            int left_offset = HWCONF_DISPLAY_WIDTH_PX/2 - text_width/2;
-
-            hourView->x_offset = left_offset;
-            minuteView->x_offset = hourView->x_offset + hourView->width + font->width;
-            secondView->x_offset = minuteView->x_offset + minuteView->width + font->width;
-
             add_composable(hourView);
             add_composable(minuteView);
             if(showSeconds) {

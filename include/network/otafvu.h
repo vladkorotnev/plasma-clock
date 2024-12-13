@@ -1,6 +1,5 @@
 #pragma once
 #include <graphics/framebuffer.h>
-#include <console.h>
 #include <sound/sequencer.h>
 #include <ArduinoOTA.h>
 
@@ -8,13 +7,12 @@
 /// @brief Manages the ArduinoOTA update service
 class OTAFVUManager {
 public:
-    OTAFVUManager(Console*, NewSequencer*);
+    OTAFVUManager(NewSequencer*);
     ~OTAFVUManager();
 
     /// @brief Perform pending work of the service. Normally this is called by the internal task of the service and doesn't need to be called externally.
     void task();
 private:
-    Console *con;
     NewSequencer *seq;
 
     /// @brief Prepare to install an OTA update
@@ -28,7 +26,7 @@ private:
 #else
 class OTAFVUManager {
 public:
-    OTAFVUManager(Console*, NewSequencer*) {}
+    OTAFVUManager(NewSequencer*) {}
     ~OTAFVUManager() {}
 };
 #endif

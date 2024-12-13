@@ -2,15 +2,18 @@
 
 #include <hal/gpio_hal.h>
 #include <input/keypad.h>
+#include <input/infrared.h>
+#include <devices/ir_remotes/all_remotes.h>
 
 #define HAS_OUTPUT_AKIZUKI_K875
 #define HAS_KEYPAD
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_LIGHT_SENSOR
+#define HAS_IR_RECEIVER
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "LePIS-OS"
-#define PRODUCT_VERSION "5.3"
+#define PRODUCT_VERSION "5.5"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;
@@ -34,6 +37,7 @@ const gpio_num_t HWCONF_K875_SACRIFICIAL_GPIO = GPIO_NUM_5;
 
 // ---- Connection to light sensors ----
 const gpio_num_t HWCONF_LIGHTSENSE_GPIO = GPIO_NUM_36;
+const gpio_num_t HWCONF_IR_RECV_GPIO = GPIO_NUM_13;
 
 // ---- Connection of buttons ----
 const keypad_definition_t HWCONF_KEYPAD = {

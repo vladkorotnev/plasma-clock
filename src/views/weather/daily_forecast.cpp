@@ -74,39 +74,79 @@ private:
 DailyForecastView::DailyForecastView(bool ctl) {
     controllable = ctl;
     offset = 0;
+    columns = {};
 
-    leftView = new Column();
-    leftView->width = 48;
+    one_widget_width = 48;
 
-    rightView = new Column();
-    rightView->width = 48;
-    rightView->x_offset = std::max(rightView->width + 4, HWCONF_DISPLAY_WIDTH_PX/2);
-
-    add_composable(leftView);
-    add_composable(rightView);
-}
-
-DailyForecastView::~DailyForecastView() {
-    delete leftView;
-    delete rightView;
+    screen_width = DisplayFramebuffer::width;
+    update_width();
 }
 
 void DailyForecastView::prepare() {
-    leftView->set_forecast(weather_get_forecast(0));
-    rightView->set_forecast(weather_get_forecast(1));
+    update_data();
     Screen::prepare();
+}
+
+void DailyForecastView::update_data() {
+    for(int i = 0; i < columns.size(); i++) {
+        columns[i]->set_forecast(weather_get_forecast(offset + i));
+    }
+}
+
+void DailyForecastView::render(FantaManipulator *fb) {
+    Screen::render(fb);
+
+    // Animation looks like shite, let it just clip for now
+    // if(fb->get_width() != screen_width) {
+    //     screen_width = fb->get_width();
+    //     need_width_update = true;
+    // }
+}
+
+void DailyForecastView::update_width() {
+    int x_offs = 0;
+    one_widget_width = 48;
+    total_per_screen = screen_width / one_widget_width;
+    one_widget_width = screen_width / total_per_screen;
+    while(total_per_screen > columns.size()) {
+        Column * c = new Column();
+        add_composable(c);
+        columns.push_back(c);
+    }
+
+    for(int i = 0; i < total_per_screen; i++) {
+        Column * c = columns[i];
+        c->width = one_widget_width;
+        c->x_offset = x_offs;
+        c->hidden = false;
+        x_offs += one_widget_width;
+    }
+
+    if(total_per_screen < columns.size()) {
+        for(int i = total_per_screen - 1; i < columns.size(); i++) {
+            columns[i]->hidden = true;
+        }
+    }
+
+    need_width_update = false;
 }
 
 void DailyForecastView::step() {
     Screen::step();
+    
+    if(need_width_update) {
+        offset = 0;
+        update_width();
+        update_data();
+    }
+
     if(controllable) {
         if(hid_test_key_state_repetition(KEY_RIGHT)) {
-            offset += 2;
+            offset += total_per_screen;
             if((offset + 1) >= FORECAST_WEATHER_DAYS) {
                 offset = 0;
             }
-            leftView->set_forecast(weather_get_forecast(offset));
-            rightView->set_forecast(weather_get_forecast(offset + 1));
+            update_data();
         }
     }
 }

@@ -12,10 +12,13 @@ typedef enum infrared_protocol {
 
 typedef struct infrared_identifier {
     infrared_protocol_t protocol;
-    uint64_t value;
     uint32_t address;
     uint32_t command;
+    uint32_t value;
+    key_id_t key;
 } infrared_identifier_t;
 
-typedef std::vector<std::pair<const infrared_identifier_t, const key_id_t>> infrared_definition_t;
+const key_id_t IRKEY_REPETITION = KEY_MAX_INVALID;
+
+typedef infrared_identifier_t const infrared_definition_t[];
 void infrared_start();
