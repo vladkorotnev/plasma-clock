@@ -43,12 +43,12 @@ static void ir_task(void*) {
                         if(last_pressed != KEY_MAX_INVALID) {
                             if(last_pressed == id->key)
                                 break;
-                            ESP_LOGI(LOG_TAG, "Unpress key %i (recv)", last_pressed);
+                            ESP_LOGV(LOG_TAG, "Unpress key %i (recv)", last_pressed);
                             hid_set_key_state(last_pressed, false);
                         }
 
                         last_pressed = id->key;
-                        ESP_LOGI(LOG_TAG, "Press key %i", last_pressed);
+                        ESP_LOGV(LOG_TAG, "Press key %i", last_pressed);
                         hid_set_key_state(id->key, true);
                         break;
                     }
@@ -62,8 +62,8 @@ static void ir_task(void*) {
 
             receiver.resume();
         } else {
-            if(last_pressed != KEY_MAX_INVALID && (xTaskGetTickCount() - last_pressed_timestamp) > pdMS_TO_TICKS(300)) {
-                ESP_LOGI(LOG_TAG, "Unpress key %i (timeout)", last_pressed);
+            if(last_pressed != KEY_MAX_INVALID && (xTaskGetTickCount() - last_pressed_timestamp) > pdMS_TO_TICKS(250)) {
+                ESP_LOGV(LOG_TAG, "Unpress key %i (timeout)", last_pressed);
                 hid_set_key_state(last_pressed, false);
                 last_pressed = KEY_MAX_INVALID;
             }

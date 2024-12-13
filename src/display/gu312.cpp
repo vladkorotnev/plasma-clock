@@ -140,10 +140,8 @@ void NoritakeGu312Driver::reset() {
         set_databus(0xc); pulse_clock();
     send_command(0b01000); // WRITE mode
    
-    for(int i = 0; i < 192 * 8 / 2; i++) {
+    for(int i = 0; i < 192 * 8; i++) {
         set_databus(0xAA);
-        pulse_clock();
-        set_databus(0x55);
         pulse_clock();
     }
 

@@ -13,7 +13,7 @@
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "LePIS-OS"
-#define PRODUCT_VERSION "5.3"
+#define PRODUCT_VERSION "5.5"
 
 // ---- Connection to beeper ----
 const gpio_num_t HWCONF_BEEPER_GPIO = GPIO_NUM_33;

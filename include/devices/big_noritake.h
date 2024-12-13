@@ -11,7 +11,6 @@
 #define HAS_LIGHT_SENSOR
 #define HAS_TEMP_SENSOR
 #define HAS_IR_RECEIVER
-#define HAS_PIXEL_CAVE
 #define HAS_OTAFVU
 
 // Plasma Information System OS (not DOS, there's no disk in it!)

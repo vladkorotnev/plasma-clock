@@ -27,7 +27,7 @@ void AppHost::switch_to(view_id_t view, transition_type_t transition) {
         main_idle = (view == STATE_IDLE);
         if(!main_idle) {
             split_screen->x_offset = -split_screen->width;
-            main_screen->x_offset = 0;
+            main_screen->x_offset = 0; // <- TODO rewrite to instead use a root multiplexor and a split container in one of its views
         }
     } else {
         ESP_LOGV(LOG_TAG, "New SPLIT-screen state %i", view);
@@ -149,8 +149,10 @@ bool AppHost::state_wants_full_screen(view_id_t sts) {
 #if HAS(OTAFVU)
      sts == STATE_OTAFVU || 
 #endif
-     sts == STATE_NEW_YEAR ||
-      sts == STATE_PIXEL_CAVE;
+#if HAS(PIXEL_CAVE)
+     sts == STATE_PIXEL_CAVE ||
+#endif
+     sts == STATE_NEW_YEAR;
 #else
     return true;
 #endif
