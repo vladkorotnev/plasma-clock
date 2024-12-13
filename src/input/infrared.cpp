@@ -27,7 +27,7 @@ static void ir_task(void*) {
             if(results.repeat) {
                 last_pressed_timestamp = xTaskGetTickCount();
             } else if(results.overflow) {
-                ESP_LOGW(LOG_TAG, "Overflow when decoding IR code TYPE=%i, VALUE=0x%x, ADDRESS=0x%x, COMMAND=0x%x", results.decode_type, results.value, results.address, results.command);
+                ESP_LOGW(LOG_TAG, "Overflow when decoding IR code TYPE=%i, VALUE=0x%lx, ADDRESS=0x%lx, COMMAND=0x%lx", results.decode_type, results.value, results.address, results.command);
             } else {
                 bool found = false;
                 for(int i = 0; i < sizeof(HWCONF_IR_BUTTONS) / sizeof(infrared_identifier_t); i++) {
@@ -54,7 +54,7 @@ static void ir_task(void*) {
                     }
                 }
                 if(!found) {
-                    ESP_LOGI(LOG_TAG, "Unknown IR code { .protocol = %i, .address = 0x%x, .command = 0x%x, .value = 0x%x, .key = ? }", results.decode_type, results.address, results.command, results.value);
+                    ESP_LOGI(LOG_TAG, "Unknown IR code { .protocol = %i, .address = 0x%lx, .command = 0x%lx, .value = 0x%lx, .key = ? }", results.decode_type, results.address, results.command, results.value);
                     ESP_LOGV(LOG_TAG, "%s", resultToHumanReadableBasic(&results).c_str());
                     ESP_LOGI(LOG_TAG, "%s", resultToSourceCode(&results).c_str());
                 }

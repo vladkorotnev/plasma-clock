@@ -37,7 +37,13 @@ bool TransitionAnimationCoordinator::is_completed() {
 }
 
 void TransitionAnimationCoordinator::set_transition(Transition *t) {
+    if(transition != nullptr) {
+        delete transition;
+        transition = nullptr;
+    }
+
     transition = t;
+    
     if(transition != nullptr) {
         transition->rewind();
         completed = false;
