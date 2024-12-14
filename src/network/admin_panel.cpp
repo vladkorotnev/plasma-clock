@@ -520,7 +520,7 @@ static void build() {
     GP.SPOILER_BEGIN("Foobar2000", GP_BLUE);
         render_string("Control Server IP", PREFS_KEY_FOOBAR_SERVER);
         render_int("Control Server Port:", PREFS_KEY_FOOBAR_PORT);
-        GP.SPAN("Please set the format in foo_controlserver to: %artist%|%title%, and main delimiter to: |");
+        GP.SPAN("Please set the format in foo_controlserver to: <pre>%track number%|%artist%|%title%</pre>, and main delimiter to: |");
     GP.SPOILER_END();
     GP.BREAK();
 
