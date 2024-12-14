@@ -28,7 +28,11 @@
 // #define HAS_BALANCE_BOARD_INTEGRATION
 
 // Enable the yukkuri voice talking clock
+#ifdef LIBAQUESTALK_FOUND
 #define HAS_AQUESTALK
+#else
+#warning "Lib AquesTalk not found, TTS disabled"
+#endif
 
 // Disable the faux brightness reduction for some UI elements by drawing them only every other frame
 // #define COMPOSABLE_NO_EVENODD
