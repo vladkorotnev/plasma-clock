@@ -96,6 +96,8 @@ for msg in mid:
     elif msg.type == "control_change":
         if msg.control == 2:
             evts.append(Event("DUTY_SET", msg.channel, int(msg.value)))
+        elif msg.control == 111: # For compatibility with Sekaiju playback
+            evts.append(Event("LOOP_POINT_SET", 0, "LOOP_POINT_TYPE_LOOP"))
 
 print('#include <sound/pomf.h>')     
 print('extern "C" const POMFHeader POMF_HEAD = {')
