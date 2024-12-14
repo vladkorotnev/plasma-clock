@@ -26,6 +26,7 @@ static char recv_buf[RECV_BUF_SIZE];
 
 static char title_buf[TEXT_BUF_SIZE];
 static char artist_buf[TEXT_BUF_SIZE];
+static int track_no = -1;
 static bool play_sts = false;
 static SemaphoreHandle_t sts_semaphore;
 static TickType_t last_recv = 0;
@@ -63,6 +64,10 @@ void foo_get_artist(char * buf, size_t buf_size) {
     strncpy(buf, artist_buf, buf_size-1);
 
     xSemaphoreGive(sts_semaphore);
+}
+
+int foo_get_track_number() {
+    return track_no;
 }
 
 TickType_t foo_last_recv() {
@@ -115,24 +120,45 @@ void parse_line(char * line) {
     dummy = parse_field(&current);
     dummy = parse_field(&current);
 
-    char * artist = parse_field(&current);
-    strncpy(artist_buf, artist, TEXT_BUF_SIZE);
+    if(dummy != nullptr) {
+        char * trkno_ascii = parse_field(&current);
+        if(trkno_ascii != nullptr) {
+            if(trkno_ascii[0] == '?') {
+                track_no = -1; // Not known track number
+            } else {
+                if(sscanf(trkno_ascii, "%d", &track_no) != 1) {
+                    ESP_LOGI(LOG_TAG, "TrkNr parse failed: %s", trkno_ascii);
+                    track_no = -1;
+                }
+            }
 
-    // Cannot use parse_field here in case the track name might contain the separator character
-    char * txt = current;
-    size_t txt_len = strlen(txt);
-    txt[txt_len - 1] = 0;
+            char * artist = parse_field(&current);
+            if(artist != nullptr) {
+                strncpy(artist_buf, artist, TEXT_BUF_SIZE);
 
-    if(!xSemaphoreTake(sts_semaphore, pdMS_TO_TICKS(1000))) {
-        ESP_LOGE(LOG_TAG, "Semaphore timed out");
-        return;
+                // Cannot use parse_field here in case the track name might contain the separator character
+                char * txt = current;
+                size_t txt_len = strlen(txt);
+                txt[txt_len - 1] = 0;
+
+                if(!xSemaphoreTake(sts_semaphore, pdMS_TO_TICKS(1000))) {
+                    ESP_LOGE(LOG_TAG, "Semaphore timed out");
+                    return;
+                }
+
+                play_sts = (type == 111);
+                strncpy(title_buf, txt, TEXT_BUF_SIZE);
+                ESP_LOGI(LOG_TAG, "Track Nr.%i: %s, Artist: %s, Play_sts: %i", track_no, title_buf, artist_buf, play_sts);
+                last_recv = xTaskGetTickCount();
+            } else {
+                ESP_LOGE(LOG_TAG, "Could not read artist: unexpected end of message");
+            }
+        } else {
+            ESP_LOGE(LOG_TAG, "Could not read TrkNr: unexpected end of message");
+        }
+    } else {
+        ESP_LOGE(LOG_TAG, "Could not read metadata: unexpected end of message");
     }
-
-    play_sts = (type == 111);
-    strncpy(title_buf, txt, TEXT_BUF_SIZE);
-    ESP_LOGI(LOG_TAG, "Track: %s, Artist: %s, Play_sts: %i", title_buf, artist_buf, play_sts);
-    last_recv = xTaskGetTickCount();
-
     xSemaphoreGive(sts_semaphore);
 }
 

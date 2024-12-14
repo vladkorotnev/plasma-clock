@@ -12,4 +12,6 @@ void foo_client_begin();
 bool foo_is_playing();
 void foo_get_title(char *, size_t);
 void foo_get_artist(char *, size_t);
+int foo_get_track_number();
+
 TickType_t foo_last_recv();
