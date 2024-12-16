@@ -96,15 +96,15 @@ void NoritakeGu312Driver::set_databus(uint8_t data) {
 
 void NoritakeGu312Driver::pulse_clock() {
     gpio_set_level(wr_gpio, 0);
-    delayMicroseconds(2);
+    delayMicroseconds(1);
     gpio_set_level(wr_gpio, 1);
-    delayMicroseconds(2);
+    delayMicroseconds(1);
 }
 
 void NoritakeGu312Driver::set_is_command(bool rs) {
     // H: COMMAND, L: Data
     gpio_set_level(cd_gpio, rs ? 1 : 0);
-    delayMicroseconds(3);
+    delayMicroseconds(1);
 }
 
 void NoritakeGu312Driver::send_command(uint8_t cmd) {
@@ -116,7 +116,7 @@ void NoritakeGu312Driver::send_command(uint8_t cmd) {
 
 void NoritakeGu312Driver::reset() {
     ESP_LOGI(LOG_TAG, "Resetting");
-     taskENTER_CRITICAL(&_spinlock);
+    taskENTER_CRITICAL(&_spinlock);
 
     send_command(0b11000); // brightness max
     send_command(0b00010); // SCR2 on
@@ -147,8 +147,7 @@ void NoritakeGu312Driver::reset() {
 
     ESP_LOGI(LOG_TAG, "Reset complete");
 
-     taskEXIT_CRITICAL(&_spinlock);
-    //   while(true) vTaskDelay(portMAX_DELAY);
+    taskEXIT_CRITICAL(&_spinlock);
 }
 
 void NoritakeGu312Driver::set_power(bool power) {
@@ -157,16 +156,6 @@ void NoritakeGu312Driver::set_power(bool power) {
 
 void NoritakeGu312Driver::clear() {
     ESP_LOGW(LOG_TAG, "Not supported!");
-}
-
-inline uint8_t flipByte(uint8_t c){
-  char r=0;
-  for(uint8_t i = 0; i < 8; i++){
-    r <<= 1;
-    r |= c & 1;
-    c >>= 1;
-  }
-  return r;
 }
 
 void NoritakeGu312Driver::write_fanta(const uint8_t * strides, size_t count) {
@@ -183,7 +172,7 @@ void NoritakeGu312Driver::write_fanta(const uint8_t * strides, size_t count) {
         set_databus(0xc); pulse_clock();
     send_command(0b01000); // WRITE mode
     for(int i = 0; i < count; i++) {
-        set_databus(flipByte(strides[i]));
+        set_databus(strides[count - 1 - i]);
         pulse_clock();
         if(i % 2 != 0) {
             set_databus(0);

@@ -437,7 +437,7 @@ void AppShimMenu::step() {
     ProtoShimNavMenu::step();
     if(hid_test_key_any()) {
         last_touch_time = xTaskGetTickCount();
-    } else if (xTaskGetTickCount() - last_touch_time >= pdMS_TO_TICKS(back_stack.size() == 0 ? 5000 : 30000)) {
+    } else if (xTaskGetTickCount() - last_touch_time >= pdMS_TO_TICKS(30000)) {
         pop_state(STATE_MENU, TRANSITION_SLIDE_HORIZONTAL_LEFT);
     }
 }

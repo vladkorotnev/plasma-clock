@@ -532,7 +532,9 @@ static void build() {
 
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
+#if HAS(SERIAL_MIDI)
         render_bool("Serial MIDI input", PREFS_KEY_SERIAL_MIDI);
+#endif
 #if HAS(HTTPFVU)
         render_bool("Check for updates automatically", PREFS_KEY_FVU_AUTO_CHECK);
         render_bool("Install updates automatically", PREFS_KEY_FVU_AUTO_INSTALL);

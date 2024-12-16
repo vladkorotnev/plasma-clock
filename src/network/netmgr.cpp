@@ -57,7 +57,8 @@ void NetworkManager::wifi_event(WiFiEvent_t ev) {
             }
             break;
         case SYSTEM_EVENT_STA_GOT_IP:
-            ESP_LOGI(LOG_TAG, "Connection succeeded");
+            ESP_LOGI(LOG_TAG, "Connection succeeded. SSID:'%s', IP: %s", network_name(), current_ip().c_str());
+
             has_ip = true;
             if(initial_connection_ongoing) {
                 initial_connection_succeeded = true;
