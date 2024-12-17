@@ -424,8 +424,10 @@ unsigned int measure_string_width(const font_definition_t* f, const char* s, tex
     if(f == nullptr || !f->valid) return 0;
     unsigned int rslt = 0;
     const char * tmp = s;
-    while(iterate_utf8(&tmp)) {
-        rslt += f->width;
+    sprite_t spr;
+    while(char16_t uchar = iterate_utf8(&tmp)) {
+        sprite_from_glyph(f, uchar, false, &spr, FONT_FALLBACK_SAME_HEIGHT);
+        rslt += spr.width;
     }
     return rslt + ((attributes & TEXT_OUTLINED) != 0 ? 2 : 0);
 }

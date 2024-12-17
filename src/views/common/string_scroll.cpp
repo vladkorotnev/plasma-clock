@@ -106,7 +106,7 @@ void StringScroll::set_y_position(int y) {
 }
 
 int StringScroll::estimated_frame_count() {
-    return string_width * frame_divisor / increment;
+    return (string_width + (start_at_visible ? 0 : DisplayFramebuffer::width) + holdoff) * frame_divisor / increment;
 }
 
 void StringScroll::render(FantaManipulator * fb) {

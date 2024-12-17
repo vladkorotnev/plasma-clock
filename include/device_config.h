@@ -27,12 +27,26 @@
 // DEPRECATED: Enable Wii Balance Board measuring. UNSTABLE: Uses Bluedroid (a FUCKTON of RAM), periodic disconnects or reboots without leaving a stack trace.
 // #define HAS_BALANCE_BOARD_INTEGRATION
 
+// WIP: Pixel Cave the game
+// #define HAS_PIXEL_CAVE
+
+// Enable serial MIDI input
+// #define HAS_SERIAL_MIDI
+
 // Enable the yukkuri voice talking clock
 #ifdef LIBAQUESTALK_FOUND
 #define HAS_AQUESTALK
 #else
-#warning "Lib AquesTalk not found, TTS disabled"
+#warning "AquesTalk not found, TTS disabled. See `./lib/nonfree-aquestalk/README.md` on how to add the library correctly."
 #endif
+
+// Enable the split-screen app host, only useful on long screens
+#if HWCONF_DISPLAY_WIDTH_PX >= 192
+    #define HAS_SPLIT_SCREEN_APPHOST
+#endif
+
+// Enable the scroll string between cycles
+// #define HAS_FREE_TEXT_SCROLL
 
 // Disable the faux brightness reduction for some UI elements by drawing them only every other frame
 // #define COMPOSABLE_NO_EVENODD
@@ -79,16 +93,6 @@
     #if HAS(BALANCE_BOARD_INTEGRATION)
         #error Balance Board requires Bluetooth Classic
     #endif
-#endif
-
-#if HAS(AQUESTALK)
-    #if !defined(LIBAQUESTALK_FOUND)
-        #error libaquestalk was not found. See `./lib/nonfree-aquestalk/README.md` on how to add it correctly, or disable `HAS_AQUESTALK` feature flag.
-    #endif
-#endif
-
-#if HWCONF_DISPLAY_WIDTH_PX >= 192
-    #define HAS_SPLIT_SCREEN_APPHOST
 #endif
 
 #endif

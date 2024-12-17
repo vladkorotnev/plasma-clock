@@ -70,5 +70,6 @@ void CurrentWeatherView::render(FantaManipulator* fb) {
 }
 
 int CurrentWeatherView::desired_display_time() {
-    return std::max((bottom_line->estimated_frame_count() * 1000 / 58) + 2000, 1); // workaround when the bottom string is null 
+    int estimated_ms = (bottom_line->estimated_frame_count() * 1000 / 58);
+    return estimated_ms > 0 ? estimated_ms : DISP_TIME_NO_OVERRIDE;
 }

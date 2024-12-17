@@ -94,7 +94,8 @@ void WordOfTheDayView::prepare() {
 }
 
 int WordOfTheDayView::desired_display_time() {
-    return (bottom_line->estimated_frame_count() * 1000 / 58) + 2000; 
+    int estimated_ms = (bottom_line->estimated_frame_count() * 1000 / 58);
+    return estimated_ms > 3000 ? estimated_ms : DISP_TIME_NO_OVERRIDE; // <= maybe each widget should know its time and not have it be the responsibility of the idle app...
 }
 
 #endif

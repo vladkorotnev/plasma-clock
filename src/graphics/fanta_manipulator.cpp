@@ -171,10 +171,10 @@ void FantaManipulator::put_sprite(const sprite_t * sprite, int x, int y, bool in
     }
 }
 
-void FantaManipulator::put_glyph(const font_definition_t * font, const char16_t glyph, int x, int y, text_attributes_t style) {
-    if(font == nullptr) return;
-    if(x + font->width + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || x - ((style & TEXT_OUTLINED) ? 1 : 0) > get_width()) return;
-    if(y + font->height + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || y - ((style & TEXT_OUTLINED) ? 1 : 0) > get_height()) return;
+int FantaManipulator::put_glyph(const font_definition_t * font, const char16_t glyph, int x, int y, text_attributes_t style) {
+    if(font == nullptr) return 0;
+    if(x + font->width + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || x - ((style & TEXT_OUTLINED) ? 1 : 0) > get_width()) return 0;
+    if(y + font->height + ((style & TEXT_OUTLINED) ? 1 : 0) < 0 || y - ((style & TEXT_OUTLINED) ? 1 : 0) > get_height()) return 0;
 
     bool need_masked_char = ((style & TEXT_NO_BACKGROUND != 0) || (style & TEXT_OUTLINED != 0));
     bool invert = (style & TEXT_INVERTED) != 0;
@@ -198,6 +198,7 @@ void FantaManipulator::put_glyph(const font_definition_t * font, const char16_t 
     }
 
     put_sprite(&char_sprite, x, y, invert);
+    return char_sprite.width;
 }
 
 void FantaManipulator::put_string(const font_definition_t * font, const char * string, int x, int y, text_attributes_t style) {
@@ -206,8 +207,7 @@ void FantaManipulator::put_string(const font_definition_t * font, const char * s
     int cur_x = x;
     const char * tmp = string;
     while(char16_t ch = iterate_utf8(&tmp)) {
-        put_glyph(font, ch, cur_x, y, style);
-        cur_x += font->width;
+        cur_x += put_glyph(font, ch, cur_x, y, style);
         i++;
     }
 }
