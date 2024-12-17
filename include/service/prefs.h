@@ -121,6 +121,10 @@ static constexpr prefs_key_t PREFS_KEY_FVU_AUTO_INSTALL = "fvu_ainst";
 static constexpr prefs_key_t PREFS_KEY_ADMIN_ID = "adm_id";
 static constexpr prefs_key_t PREFS_KEY_ADMIN_PASS = "adm_pass";
 
+static constexpr prefs_key_t PREFS_KEY_FREE_TEXT_STRING = "ftxt_str";
+static constexpr prefs_key_t PREFS_KEY_FREE_TEXT_RANDOM = "ftxt_mode";
+
+
 void prefs_force_save();
 
 String prefs_get_string(prefs_key_t, String def = String());

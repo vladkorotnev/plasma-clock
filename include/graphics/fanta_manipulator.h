@@ -46,7 +46,8 @@ public:
     /// @param glyph Glyph code to place
     /// @param x X position for the glyph
     /// @param y Y position for the glyph
-    void put_glyph(const font_definition_t * font, const char16_t glyph, int x, int y, text_attributes_t style = TEXT_NORMAL);
+    /// @returns Width of the placed glyph. This is useful in case a font fallback has occurred. Or maybe it's time to refactor text rendering out of here...
+    int put_glyph(const font_definition_t * font, const char16_t glyph, int x, int y, text_attributes_t style = TEXT_NORMAL);
     /// @brief Draw a string with the specified font at the specified position in the Fanta buffer. Does not do any line wrapping.
     void put_string(const font_definition_t *, const char *, int x, int y, text_attributes_t style = TEXT_NORMAL);
     /// @brief Offset the contents of the buffer

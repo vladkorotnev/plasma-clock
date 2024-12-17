@@ -25,6 +25,7 @@
 #include <views/idle_screens/next_alarm.h>
 #include <views/idle_screens/softap.h>
 #include <views/idle_screens/verup_notice.h>
+#include <views/idle_screens/free_text.h>
 #include <views/overlays/signal_icon.h>
 #include <views/overlays/touch_arrows_ovl.h>
 #include <input/keys.h>
@@ -51,6 +52,7 @@ typedef enum MainViewId: uint16_t {
     VIEW_WORD_OF_THE_DAY,
 #endif
     VIEW_FB2K,
+    VIEW_FREE_TEXT,
 
     VIEW_MAX
 } MainViewId_t;
@@ -92,6 +94,7 @@ static WeatherPressureChart * pressureView;
 static WordOfTheDayView * wotdView;
 #endif
 static Fb2kView *fb2kView;
+static FreeTextView *freeTextView;
 
 static ViewMultiplexor * slideShow;
 
@@ -269,6 +272,7 @@ void app_idle_init(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
 
     screen_times_ms[VIEW_SOFTAP] = 30000;
     screen_times_ms[VIEW_FVU_NOTICE] = 10000;
+    screen_times_ms[VIEW_FREE_TEXT] = 1000;
     screen_times_ms[VIEW_CLOCK] = prefs_get_int(PREFS_KEY_SCRN_TIME_CLOCK_SECONDS) * 1000;
     screen_times_ms[VIEW_NEXT_ALARM] = prefs_get_int(PREFS_KEY_SCRN_TIME_NEXT_ALARM_SECONDS) * 1000;
 #if HAS(TEMP_SENSOR)
@@ -311,6 +315,7 @@ void app_idle_init(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
     fb2kView = new Fb2kView();
     nextAlarmView = new NextAlarmView();
     softApView = new SoftApInfoView();
+    freeTextView = new FreeTextView();
 
     touchArrows = new TouchArrowOverlay();
     touchArrows->bottom = true;
@@ -346,6 +351,7 @@ void app_idle_init(SensorPool* s, Beeper* b, NewSequencer* seq, Yukkuri* tts) {
     slideShow->add_view(wotdView, VIEW_WORD_OF_THE_DAY);
 #endif
     slideShow->add_view(fb2kView, VIEW_FB2K);
+    slideShow->add_view(freeTextView, VIEW_FREE_TEXT);
 
     lastScreenSwitch = xTaskGetTickCount();
 

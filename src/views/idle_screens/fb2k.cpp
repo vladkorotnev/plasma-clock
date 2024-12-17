@@ -88,7 +88,8 @@ int Fb2kView::desired_display_time() {
             ESP_LOGV(LOG_TAG, "Requesting attention");
             return DISP_TIME_ATTENTION;
         } else {
-            return DISP_TIME_NO_OVERRIDE;
+            int estimated_ms = (bottom_line->estimated_frame_count() * 1000 / 58);
+            return estimated_ms > 5000 ? estimated_ms : DISP_TIME_NO_OVERRIDE;
         }
     } else {
         return DISP_TIME_DONT_SHOW;

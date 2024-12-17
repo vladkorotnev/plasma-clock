@@ -460,15 +460,15 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
             } else {
                 if(is_12h) {
                     if(time.minute == 0) {
-                        snprintf(hourBuf, sizeof(hourBuf), "%s/<NUMK VAL=%i COUNTER=ji>,de_su,", is_pm ? "go'go" : "gozenn", time.hour);
+                        snprintf(hourBuf, sizeof(hourBuf), "%s,<NUMK VAL=%i COUNTER=ji>/de_su,", is_pm ? "go'go" : "gozenn", time.hour);
                     } else {
-                        snprintf(hourBuf, sizeof(hourBuf), "%s/<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>,de_su,", is_pm ? "go'go" : "gozenn", time.hour, time.minute);
+                        snprintf(hourBuf, sizeof(hourBuf), "%s,<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>/de_su,", is_pm ? "go'go" : "gozenn", time.hour, time.minute);
                     }
                 } else {
                     if(time.minute == 0) {
                         snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,de_su,", time.hour);
                     } else {
-                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>,de_su,", time.hour, time.minute);
+                        snprintf(hourBuf, sizeof(hourBuf), "<NUMK VAL=%i COUNTER=ji>,<NUMK VAL=%i COUNTER=funn>/de_su,", time.hour, time.minute);
                     }
                 }
             }

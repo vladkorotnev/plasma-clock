@@ -453,6 +453,15 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+    GP.SPOILER_BEGIN("Free Text", GP_BLUE);
+        GP.SPAN("Enter multiple lines of text to show between cycles, separating them with the Enter key.");
+        GP.AREA(PREFS_KEY_FREE_TEXT_STRING, 4, prefs_get_string(PREFS_KEY_FREE_TEXT_STRING));
+        GP.HR();
+        GP.LABEL("Display mode:");
+        GP.SELECT(PREFS_KEY_FREE_TEXT_RANDOM, "Sequential,Randomize", prefs_get_int(PREFS_KEY_FREE_TEXT_RANDOM));
+    GP.SPOILER_END();
+    GP.BREAK();
+
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
         #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         render_int("Bright screen when over:", PREFS_KEY_LIGHTNESS_THRESH_UP);
@@ -524,12 +533,6 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
-    // GP.SPOILER_BEGIN("Music Files", GP_BLUE);
-    //     GP.FILE_UPLOAD("music_upload", "Upload Music", ".pomf", GP_BLUE);
-    //     GP.FILE_MANAGER(&LittleFS, "/music");
-    // GP.SPOILER_END();
-    // GP.BREAK();
-
     GP.SPOILER_BEGIN("Administration", GP_BLUE);
         render_bool("Remote control server", PREFS_KEY_REMOTE_SERVER);
 #if HAS(SERIAL_MIDI)
@@ -599,6 +602,8 @@ void action() {
         save_bool(PREFS_KEY_BUTTON_BEEP);
         save_int(PREFS_KEY_TEMP_SENSOR_TEMP_OFFSET, -50, 50);
         save_int(PREFS_KEY_TEMP_SENSOR_HUM_OFFSET, -50, 50);
+        save_string(PREFS_KEY_FREE_TEXT_STRING);
+        save_int(PREFS_KEY_FREE_TEXT_RANDOM, 0, 1);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_UP, 0, 4096);
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 36000);
