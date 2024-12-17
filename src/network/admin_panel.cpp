@@ -453,6 +453,7 @@ static void build() {
     GP.SPOILER_END();
     GP.BREAK();
 
+#if HAS(FREE_TEXT_SCROLL)
     GP.SPOILER_BEGIN("Free Text", GP_BLUE);
         GP.SPAN("Enter multiple lines of text to show between cycles, separating them with the Enter key.");
         GP.AREA(PREFS_KEY_FREE_TEXT_STRING, 4, prefs_get_string(PREFS_KEY_FREE_TEXT_STRING));
@@ -461,6 +462,7 @@ static void build() {
         GP.SELECT(PREFS_KEY_FREE_TEXT_RANDOM, "Sequential,Randomize", prefs_get_int(PREFS_KEY_FREE_TEXT_RANDOM));
     GP.SPOILER_END();
     GP.BREAK();
+#endif
 
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
         #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)

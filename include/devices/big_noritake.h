@@ -12,6 +12,7 @@
 #define HAS_TEMP_SENSOR
 #define HAS_IR_RECEIVER
 #define HAS_OTAFVU
+#define HAS_FREE_TEXT_SCROLL
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "LongPIS-OS"

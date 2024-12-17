@@ -11,6 +11,7 @@
 #define HAS_TEMP_SENSOR
 #define HAS_MOTION_SENSOR
 #define HAS_KEYPAD
+#define HAS_FREE_TEXT_SCROLL
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-OS"

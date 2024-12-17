@@ -11,7 +11,10 @@
 #define HAS_SERIAL_MIDI
 #define HAS_VARYING_BRIGHTNESS
 #define HAS_LIGHT_SENSOR
+
+// For Dev, not useful yet
 #define HAS_PIXEL_CAVE
+#define HAS_FREE_TEXT_SCROLL
 
 // Plasma Information System OS (not DOS, there's no disk in it!)
 #define PRODUCT_NAME "PIS-dev"
