@@ -112,7 +112,12 @@ void wotd_start() {
     firstRunSemaphore = xSemaphoreCreateBinary();
     hasQueries = true;
 
-    apiKey = prefs_get_string(PREFS_KEY_WORDNIK_APIKEY, String(WORDNIK_API_KEY));
+    apiKey = prefs_get_string(PREFS_KEY_WORDNIK_APIKEY);
+
+    if (!apiKey.length()){
+        ESP_LOGW(LOG_TAG, "No wordnik API key, disabling updates!");
+        return;
+    }
 
     int interval_minutes = prefs_get_int(PREFS_KEY_WORDNIK_INTERVAL_MINUTES);
     if(interval_minutes == 0) {
