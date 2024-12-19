@@ -202,10 +202,11 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 ## Predefined target devices
 
 * `DEVICE_PLASMA_CLOCK` (FVUFlavor = `PLASMA`): a [clock](https://youtu.be/D4MiHmhhjeQ) that I built around a plasma screen from an old Japanese bus/train. [Definition file](include/devices/big_clock.h)
-* `DEVICE_MINIPISOS` (FVUFlavor = `OLED`): a portable devkit for PIS-OS, using a 100x16 OLED from WinStar. [Definition file](include/devices/mid_clock.h)
+* `DEVICE_MINIPISOS` (FVUFlavor = `OLED`): a portable devkit for PIS-OS, using a 100x16 OLED from WinStar. [Definition file](include/devices/mid_clock.h), [PCB](schematics/microPISOS_DevKit_V1) in DipTrace 5 format.
 * `DEVICE_MINIPISOS_VFD` (FVUFlavor = `NORITAKE_GU112`): same hardware as above, but using a Noritake ITRON GU-112x16-7000 VFD display. [Definition file](include/devices/mid_clock_noritake.h)
 * `DEVICE_MINIPISOS_VFD_WIDE` (FVUFlavor = `NORITAKE_GU140`): same as above, but for a GU-140x12-7000. [Definiton file](include/devices/mid_clock_noritake_wide.h)
 * `DEVICE_LEPISOS` (FVUFlavor = `AKI_K875`): based on the same board as the devkit, but uses 4 of the Akizuki Denshi LED panels for the display.
+* `DEVICE_LONGPISOS` (FVUFlavor = `NORITAKE_321_192`): a clock made by repurposing a Noritake ITRON GU-192x16-505 bus billboard display. The original logic board is replaced with a [PCB](schematics/longPISOS_DevKit_V1) (which has quite some errors). The protocol for the display is somewhat weird.
 
 ## Supported hardware and feature-flags
 
@@ -215,7 +216,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 * Winstar (sometimes sold as Vishay) WEG010016A in 8-bit parallel mode ([driver](src/display/ws0010.cpp), feature flag `HAS_OUTPUT_WS0010`). Includes BFI (Black Frame Insertion) for smoother operation and dimming. Datasheet backup: [Controller](docs/reference/datasheet/winstar/WS0010.pdf), [display](docs/reference/datasheet/winstar/WEG010016ALPP5N00000.pdf)
 * Noritake ITRON GU-NNNx16-7000 series graphic VFDs in 8-bit parallel mode ([driver](src/display/gu7000.cpp), feature flag `HAS_OUTPUT_GU7000`). Datasheet backup before the bundled CDR got completely rotten: [140x16-7000](docs/reference/datasheet/noritake_itron/s-gu140x16g-7000_j04.pdf), [140x16-7100](docs/reference/datasheet/noritake_itron/s-gu140x16g-7100_j00.pdf), [112x16](docs/reference/datasheet/noritake_itron/s-gu112x16g-7000_j04.pdf)
 * [Akizuki Denshi K-875](https://akizukidenshi.com/img/contents/kairo/%E3%83%87%E3%83%BC%E3%82%BF/%E8%A1%A8%E7%A4%BA%E8%A3%85%E7%BD%AE/LED%E9%9B%BB%E5%85%89%E6%8E%B2%E7%A4%BA.pdf) ×4 for a 128x16 display (I couldn't resist not scooping some up in the Outlet Sale for 200 yen apiece). Known issues: small luma jitter sometimes, driver code is cursed. [Driver](src/display/akizuki_k875.cpp), feature flag `HAS_OUTPUT_AKIZUKI_K875`. [Datasheet backup](docs/reference/datasheet/akizuki/LED電光掲示.pdf)
-* *Experimental* Noritake ITRON GU-NNNx16-312. Mine is 192px wide, taken out of an old bus display panel (labeled GU-192x16-505), no datasheet, no other technical info aside from that written in the [driver](src/display/gu312.cpp)'s comments. Autoincrement is weird so there is a lot of write amplification in the driver. Supports Vsync/FEP (untested). No software heater power-off. Feature flag `HAS_OUTPUT_GU312`.
+* Noritake ITRON GU-NNNx16-312. Mine is 192px wide, taken out of an old bus display panel (labeled GU-192x16-505), no datasheet, no other technical info aside from that written in the [driver](src/display/gu312.cpp)'s comments. Autoincrement is weird so there is a lot of write amplification in the driver. Supports Vsync/FEP (untested). No software heater power-off. Feature flag `HAS_OUTPUT_GU312`.
 
 ### Speaker (at least one required)
 
