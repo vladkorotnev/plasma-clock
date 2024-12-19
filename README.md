@@ -40,7 +40,7 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
     
     ![](docs/img/widget/word_pretty.png)
 
-* Foobar2000 (via [foo_controlverver](https://github.com/vladkorotnev/foo_controlserver/tree/fix-streams))
+* Foobar2000 (via [foo_controlserver](https://github.com/vladkorotnev/foo_controlserver/tree/fix-streams) — link to my own fork which fixes metadata in internet radio)
     
     ![](docs/img/widget/foo_pretty.png)
     
@@ -71,6 +71,13 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * Settings
     
     ![](docs/img/app/settings.gif)
+
+## Available languages
+
+* [English](data/lang/en.lang)
+* [Japanese](data/lang/ja.lang)
+* [Russian](data/lang/ru.lang)
+* ... make a PR with yours, perhaps? :-) (as long as the fonts support it)
 
 ## Available chime melodies
 
@@ -126,6 +133,10 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [Neru - Tokyo Teddy Bear](https://www.youtube.com/watch?v=eSI7RsjZy1E): [MIDI](helper/chimes/tokyoteddybear.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=Y30ZyZbRCrE)
 * [LamazeP - Triple Baka](https://open.spotify.com/track/2dE6zWGJXZuqvfengytVGo): [MIDI](helper/chimes/3baka.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=HNPrwdLJC8g), [MP3](docs/rec/baka.mp3)
 * [Desireless — Voyage Voyage](https://youtu.be/sM2ZhByFcDk): [MIDI](helper/chimes/voyage.mid)
+* [NightRadio — Pixel Cave](https://www.youtube.com/watch?v=GA1l-3_yTpM): [MIDI](helper/chimes/pixelcave.mid) based on original file from [SunVox](https://warmplace.ru/soft/sunvox/)
+* [S3RL — MTC](https://www.youtube.com/watch?v=bO-NaEj2dQ0): [MIDI](helper/chimes/mtc.mid) based on synthesia file by [Helipuma](https://www.youtube.com/watch?v=DguXF3tzq34)
+* [Inabakumori — Lagtrain](https://www.youtube.com/watch?v=UnIhRpIT7nc): [MIDI](helper/chimes/lagtr.mid) based on file from [HamieNet](http://www.hamienet.com/midi49362_Lagtrain.html)
+* [Paul Mauriat — Toccata Version 88](https://www.youtube.com/watch?v=dSxy3yYLGA8): [MIDI](helper/chimes/toccata88.mid)
 
 ## Creating your own melodies
 
@@ -221,6 +232,7 @@ An ESP32-WROVER is required, because the firmware takes up 99.8% of an OTA parti
 * `HAS_OTAFVU`: OTA updates via ArduinoOTA. Currently disabled due to partition size constraints from the above.
 * `HAS_SERIAL_MIDI`: Enable receiving MIDI data over serial. Makes the CPU a tad bit hotter so probably do not include this feature flag in production builds, unless you really want a MIDI powered alarm clock for some reason.
 * `HAS_HTTPFVU`: OTA updates via HTTP from this repository's main branch. HTTPS is omitted for performance reasons, and the security is instead ensured using the highly secure [Ostrich algorithm](https://en.wikipedia.org/wiki/Ostrich_algorithm).
+* `HAS_FREE_TEXT_SCROLL`: add an option to add a freely enterable scrolling text between each cycle of all the idle widgets
 
 ### Thermal sensors
 
