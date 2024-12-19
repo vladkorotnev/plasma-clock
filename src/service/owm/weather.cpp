@@ -149,9 +149,14 @@ void weather_start() {
 
     firstRunSemaphore = xSemaphoreCreateBinary();
 
-    apiKey = prefs_get_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
-    latitude = prefs_get_string(PREFS_KEY_WEATHER_LAT, String(WEATHER_LAT));
-    longitude = prefs_get_string(PREFS_KEY_WEATHER_LON, String(WEATHER_LON));
+    apiKey = prefs_get_string(PREFS_KEY_WEATHER_APIKEY);
+    latitude = prefs_get_string(PREFS_KEY_WEATHER_LAT);
+    longitude = prefs_get_string(PREFS_KEY_WEATHER_LON);
+
+    if (!apiKey.length()){
+        ESP_LOGW(LOG_TAG, "No weather API key, disabling weather updates!");
+        return;
+    }
 
     int interval_minutes = prefs_get_int(PREFS_KEY_WEATHER_INTERVAL_MINUTES);
     if(interval_minutes == 0) {
