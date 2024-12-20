@@ -40,16 +40,15 @@
 #warning "AquesTalk not found, TTS disabled. See `./lib/nonfree-aquestalk/README.md` on how to add the library correctly."
 #endif
 
-// Enable the split-screen app host, only useful on long screens
-#if HWCONF_DISPLAY_WIDTH_PX >= 192
-    #define HAS_SPLIT_SCREEN_APPHOST
-#endif
-
 // Enable the scroll string between cycles
 // #define HAS_FREE_TEXT_SCROLL
 
 // Disable the faux brightness reduction for some UI elements by drawing them only every other frame
 // #define COMPOSABLE_NO_EVENODD
+
+// Enable the split-screen app host, where idle screen is always visible on the right and the menu/apps are on the left
+// Useful only on 192px+ wide devices, and automatically enabled on such (see the end of this file)
+// #define HAS_SPLIT_SCREEN_APPHOST
 
 // ---- HARDWARE
 
@@ -83,6 +82,12 @@
 #endif
 
 // ---- DEPENDENCY RULES
+
+// Enable the split-screen app host, only useful on long screens
+#if HWCONF_DISPLAY_WIDTH_PX >= 192
+    #define HAS_SPLIT_SCREEN_APPHOST
+#endif
+
 #if !HAS(BLUETOOTH_LE)
     #if HAS(SWITCHBOT_METER_INTEGRATION)
         #error Switchbot requires Bluetooth LE
