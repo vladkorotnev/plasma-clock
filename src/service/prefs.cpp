@@ -43,6 +43,12 @@ inline void init_store_if_needed() {
                 #ifdef WEATHER_API_KEY
                     prefs_set_string(PREFS_KEY_WEATHER_APIKEY, String(WEATHER_API_KEY));
                 #endif
+                #ifdef WEATHER_LAT
+                    prefs_set_string(PREFS_KEY_WEATHER_LAT, String(WEATHER_LAT));
+                #endif
+                #ifdef WEATHER_LON
+                    prefs_set_string(PREFS_KEY_WEATHER_LON, String(WEATHER_LON));
+                #endif
                 #ifdef FVU_SERVER_URL
                     prefs_set_string(PREFS_KEY_FVU_SERVER, String(FVU_SERVER_URL));
                     prefs_set_bool(PREFS_KEY_FVU_AUTO_CHECK, true);
