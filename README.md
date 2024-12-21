@@ -137,6 +137,9 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [S3RL — MTC](https://www.youtube.com/watch?v=bO-NaEj2dQ0): [MIDI](helper/chimes/mtc.mid) based on synthesia file by [Helipuma](https://www.youtube.com/watch?v=DguXF3tzq34)
 * [Inabakumori — Lagtrain](https://www.youtube.com/watch?v=UnIhRpIT7nc): [MIDI](helper/chimes/lagtr.mid) based on file from [HamieNet](http://www.hamienet.com/midi49362_Lagtrain.html)
 * [Paul Mauriat — Toccata Version 88](https://www.youtube.com/watch?v=dSxy3yYLGA8): [MIDI](helper/chimes/toccata88.mid)
+* [TokuP — SPiCA](https://www.youtube.com/watch?v=ec3V80b0S2c) (long version / somewhat-39'sGivingDay-inspired edit): [MIDI](helper/chimes/spica.mid)
+* [Asa — Yoshiwara Lament](https://www.nicovideo.jp/watch/sm18395392): [MIDI](helper/chimes/yosiwara.mid)
+* ? — Meatloaf (a.k.a. SX_1016.MID: something from some Sierra Online game? This file has been following me around ever since my first MIDI-capable cellphone): [MIDI](helper/chimes/meatloaf.mid)
 
 ## Creating your own melodies
 
