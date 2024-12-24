@@ -36,6 +36,9 @@ static constexpr prefs_key_t PREFS_KEY_LIGHTNESS_THRESH_DOWN = "bri_thr_dn";
 
 static constexpr prefs_key_t PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS = "mot_off_s";
 static constexpr prefs_key_t PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS = "mot_hv_off_s";
+static constexpr prefs_key_t PREFS_KEY_IGNORE_MOTION_SCHEDULE_ON = "mot_ign_sch_en";
+static constexpr prefs_key_t PREFS_KEY_IGNORE_MOTION_START_HR = "mot_ign_sh";
+static constexpr prefs_key_t PREFS_KEY_IGNORE_MOTION_END_HR = "mot_ign_eh";
 
 static constexpr prefs_key_t PREFS_KEY_WEATHER_LAT = "w_lat";
 static constexpr prefs_key_t PREFS_KEY_WEATHER_LON = "w_lon";

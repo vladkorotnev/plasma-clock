@@ -247,6 +247,11 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Blank display after (s)"), PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 21600, 1, normalActivationFunction));
 #endif
     display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Turn display off after (s)"), PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000, 1, normalActivationFunction));
+#if HAS(MOTION_SENSOR)
+    display_menu->add_view(new MenuBooleanSettingView(localized_string("Ignore motion sensor by schedule"), PREFS_KEY_IGNORE_MOTION_SCHEDULE_ON));
+    display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Start ignore at hour"), PREFS_KEY_IGNORE_MOTION_START_HR, 0, 23, 1, normalActivationFunction));
+    display_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("End ignore at hour"), PREFS_KEY_IGNORE_MOTION_END_HR, 0, 23, 1, normalActivationFunction));
+#endif
     display_menu->add_view(new MenuBooleanSettingView(localized_string("Keypress beep"), PREFS_KEY_BUTTON_BEEP, [b](bool newValue) {
         hid_set_key_beeper(newValue ? b : nullptr);
     }));

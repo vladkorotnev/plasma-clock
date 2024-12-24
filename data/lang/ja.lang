@@ -87,6 +87,9 @@
 
     "Blank display after (s)": "ブランキングまでの時間（秒）",
     "Turn display off after (s)": "消灯までの時間（秒）",
+    "Ignore motion sensor by schedule": "人感センサー無視スケジュール",
+    "Start ignore at hour": "人感センサー無視開始時間",
+    "End ignore at hour": "人感センサー無視終了時間",
     "Use Fahrenheit for temperature": "温度の華氏度表示",
     "FPS counter": "（開発向け）レンダリング間隔の表示",
     "Weather effects": "天気予報により画面エフェクト",

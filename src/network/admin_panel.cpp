@@ -465,15 +465,21 @@ static void build() {
 #endif
 
     GP.SPOILER_BEGIN("Power Management", GP_BLUE);
-        #if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
+#if HAS(VARYING_BRIGHTNESS) && HAS(LIGHT_SENSOR)
         render_int("Bright screen when over:", PREFS_KEY_LIGHTNESS_THRESH_UP);
         render_int("Dark screen when under:", PREFS_KEY_LIGHTNESS_THRESH_DOWN);
         GP.HR();
-        #endif
+#endif
 #if HAS(DISPLAY_BLANKING)
         render_int("Blank display after seconds:", PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS);
 #endif
         render_int("Turn off display after seconds:", PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS);
+#if HAS(MOTION_SENSOR)
+        GP.HR();
+        render_bool("Ignore motion sensor", PREFS_KEY_IGNORE_MOTION_SCHEDULE_ON);
+        render_int("Ignore start hr.", PREFS_KEY_IGNORE_MOTION_START_HR);
+        render_int("Ignore end hr.", PREFS_KEY_IGNORE_MOTION_END_HR);
+#endif
     GP.SPOILER_END();
     GP.BREAK();
 
@@ -610,6 +616,9 @@ void action() {
         save_int(PREFS_KEY_LIGHTNESS_THRESH_DOWN, 0, 4096);
         save_int(PREFS_KEY_MOTIONLESS_TIME_OFF_SECONDS, 0, 36000);
         save_int(PREFS_KEY_MOTIONLESS_TIME_HV_OFF_SECONDS, 0, 72000);
+        save_bool(PREFS_KEY_IGNORE_MOTION_SCHEDULE_ON);
+        save_int(PREFS_KEY_IGNORE_MOTION_START_HR, 0, 23);
+        save_int(PREFS_KEY_IGNORE_MOTION_END_HR, 0, 23);
         save_string(PREFS_KEY_WEATHER_APIKEY);
         save_string(PREFS_KEY_WEATHER_LAT);
         save_string(PREFS_KEY_WEATHER_LON);

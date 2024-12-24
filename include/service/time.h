@@ -49,3 +49,4 @@ bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 bool operator>=(const tk_time_of_day_t& a, const tk_time_of_day_t& b);
 
 void convert_to_12h(tk_time_of_day_t * time, bool * out_pm_flag = nullptr);
+bool time_in_range(const tk_time_of_day_t& time, const tk_time_of_day_t& start, const tk_time_of_day_t& end);

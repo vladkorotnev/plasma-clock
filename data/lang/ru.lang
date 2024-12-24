@@ -87,6 +87,9 @@
 
     "Blank display after (s)": "Пустой дисплей после (сек.)",
     "Turn display off after (s)": "Выключить дисплей после (сек.)",
+    "Ignore motion sensor by schedule": "Игнорировать датчик движения по графику",
+    "Start ignore at hour": "Игнорировать начиная с (час)",
+    "End ignore at hour": "Игнорировать до (час)",
     "Use Fahrenheit for temperature": "Температура в градусах Фаренгейта",
     "FPS counter": "Счётчик кадров в секунду",
     "Weather effects": "Эффекты погоды",
