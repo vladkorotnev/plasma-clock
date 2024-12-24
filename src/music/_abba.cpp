@@ -1,7 +1,15 @@
-// ABBA - Happy New Year
+#include <sound/pomf.h>
+
+extern "C" const POMFHeader POMF_HEAD = {
+    POMF_MAGIC_FILE,
+    POMF_CURVER,
+    "EasterEgg",
+    "ABBA Happy New Year"
+};
+
 // NB: not in the main list of chimes! No hook and loop in here
-static const unsigned abba_melody_ascend_time_ms = 227 * 4; // time until the first bar
-static const melody_item_t abba_data[] = {
+
+extern "C" const melody_item_t POMF_TUNE[] = {
     {DUTY_SET, 0, 8},
     {DUTY_SET, 1, 16},
     {DUTY_SET, 2, 4},
@@ -566,5 +574,3 @@ static const melody_item_t abba_data[] = {
     {DELAY, 0, 11},
     {FREQ_SET, 0, 0},
 };
-
-static StaticMelodySequence abba(abba_data, sizeof(abba_data)/sizeof(melody_item_t), "");

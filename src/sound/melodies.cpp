@@ -126,7 +126,7 @@ void load_melodies_from_disk() {
     char pbuf[64] = { 0 };
     if (d) {
         while ((dir = readdir(d)) != NULL) {
-            if(dir->d_type == DT_REG && strlen(dir->d_name) > 5 && !strcmp(dir->d_name + strlen(dir->d_name) - 5, ".pomf")) {
+            if(dir->d_type == DT_REG && strlen(dir->d_name) > 5 && !strcmp(dir->d_name + strlen(dir->d_name) - 5, ".pomf") && dir->d_name[0] != '_') {
                 ESP_LOGV(LOG_TAG, "Found music file: %s", dir->d_name);
                 snprintf(pbuf, 63, "%s/%s", MUSIC_DIR, dir->d_name);
                 auto seq = new PomfMelodySequence(pbuf);

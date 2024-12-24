@@ -1,14 +1,16 @@
 #include <app/new_year.h>
 #include <state.h>
 #include <service/localize.h>
+#include <service/disk.h>
 #include <esp32-hal-log.h>
-#include "../sound/melodies/abba.h"
 #include <graphics/font.h>
 #include <Arduino.h>
 #include <algorithm>
 #include <service/power_management.h>
 
 static char LOG_TAG[] = "APL_NY";
+static const unsigned abba_melody_ascend_time_ms = 227 * 4; // time until the first bar
+static PomfMelodySequence * abba_melody = nullptr;
 const unsigned bg_left_margin = 28;
 static const uint8_t bg_image[] = {
     // 'ny_bg', 16x100px
@@ -69,6 +71,9 @@ void NewYearAppShim::allocate_all() {
     if(allocated) return;
 
     _print_mem("BEFORE ALLOC");
+
+    abba_melody = new PomfMelodySequence((FS_MOUNTPOINT "/music/_abba.pomf"));
+
     fireworks = new FireworksOverlay(beeper);
     fireworks->intense = false;
     fireworks->sound = false;
@@ -117,7 +122,7 @@ void NewYearAppShim::prepare() {
     start_time = xTaskGetTickCount();
     phase = INTRO;
     power_mgmt_pause();
-    sequencer->play_sequence(&abba);
+    sequencer->play_sequence(abba_melody);
 }
 
 void NewYearAppShim::render(FantaManipulator* fb) {
