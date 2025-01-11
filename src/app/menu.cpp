@@ -9,6 +9,8 @@
 #include <service/localize.h>
 #include <LittleFS.h>
 
+const char LOG_TAG[] = "MENU";
+
 class UptimeView: public MenuInfoItemView {
 public:
     UptimeView(): MenuInfoItemView(localized_string("Uptime"), "") {
@@ -131,10 +133,47 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Blink dots"), PREFS_KEY_BLINK_SEPARATORS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Tick sound"), PREFS_KEY_TICKING_SOUND));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Ticking only when screen on"), PREFS_KEY_NO_SOUND_WHEN_OFF));
-    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Hourly chime"), PREFS_KEY_HOURLY_CHIME_ON));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("First chime"), PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
-    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("Other chimes"), PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
-    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Fake Soviet radio time signals"), PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL));
+
+        // Possible chime values
+        // 0: No chime
+        // 1: Only chime
+        // 2: Only beep
+        // 3: Beep + chime
+        // 4: Talk
+        // 5: Talk + chime
+        // 6: Talk + beep
+        // 7: Talk + beep + chime
+        // thus, bit allocations are: 0bxxxxxTBC
+    
+    const int CHIME_MODE_CHIME_BIT_NO = 0;
+    const int CHIME_MODE_BEEP_BIT_NO = 1;
+    const int CHIME_MODE_TALK_BIT_NO = 2;
+
+    clock_menu->add_view(new MenuListSelectorView(localized_string("Hourly chime"), {
+        localized_string("No chime"),
+        localized_string("Melody chime"),
+        localized_string("6 second beep signal"),
+        localized_string("6 beeps → melody"),
+#if HAS(AQUESTALK)
+        localized_string("Talking clock"),
+        localized_string("Talk → Melody"),
+        localized_string("6 beeps → Talk"),
+        localized_string("6 beeps → Talk → Melody")
+#endif
+    }, 
+        (prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON) ? (1 << CHIME_MODE_CHIME_BIT_NO) : 0) | 
+        (prefs_get_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL) ? (1 << CHIME_MODE_BEEP_BIT_NO) : 0) | 
+        (prefs_get_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR) ? (1 << CHIME_MODE_TALK_BIT_NO) : 0),
+    normalActivationFunction, [](int newChimeValue) {
+        prefs_set_bool(PREFS_KEY_HOURLY_CHIME_ON, (newChimeValue & (1 << CHIME_MODE_CHIME_BIT_NO)) != 0);
+        prefs_set_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL, (newChimeValue & (1 << CHIME_MODE_BEEP_BIT_NO)) != 0);
+        prefs_set_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR, (newChimeValue & (1 << CHIME_MODE_TALK_BIT_NO)) != 0);
+
+        ESP_LOGI(LOG_TAG, "New chime state: hourly chime = %i, precise time signal = %i, voice announce = %i", prefs_get_bool(PREFS_KEY_HOURLY_CHIME_ON), prefs_get_bool(PREFS_KEY_HOURLY_PRECISE_TIME_SIGNAL), prefs_get_bool(PREFS_KEY_VOICE_ANNOUNCE_HOUR));
+    }));
+
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("First chime melody"), PREFS_KEY_FIRST_CHIME_MELODY, normalActivationFunction));
+    clock_menu->add_view(new MenuMelodySelectorPreferenceView(s, localized_string("Other chimes melody"), PREFS_KEY_HOURLY_CHIME_MELODY, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime from"), PREFS_KEY_HOURLY_CHIME_START_HOUR, 0, 23, 1, normalActivationFunction));
     clock_menu->add_view(new MenuNumberSelectorPreferenceView(localized_string("Chime until"), PREFS_KEY_HOURLY_CHIME_STOP_HOUR, 0, 23, 1, normalActivationFunction));
 #if HAS(AQUESTALK)
@@ -163,7 +202,6 @@ AppShimMenu::AppShimMenu(Beeper *b, NewSequencer *s, Yukkuri *y, AmbientLightSen
         y->speak(test_utterance);
     };
 
-    clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak every hour"), PREFS_KEY_VOICE_ANNOUNCE_HOUR));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak on headpat"), PREFS_KEY_VOICE_SPEAK_ON_HEADPAT));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("24-hour announcements"), PREFS_KEY_VOICE_24_HRS));
     clock_menu->add_view(new MenuBooleanSettingView(localized_string("Speak date on first chime"), PREFS_KEY_VOICE_ANNOUNCE_DATE));

@@ -155,9 +155,9 @@ void AppPixelCave::step_game() {
 
     // TODO: variable speed
     if(framecount % 5 == 0) {
-        playfield->scroll(1, 0);
-        playfield->line(0, 0, 0, 3);
-        playfield->line(0, playfield->get_height(), 0, playfield->get_height() - 3);
+        playfield->scroll(-1, 0);
+        playfield->line(playfield->get_width() - 1, 0, playfield->get_width() - 1, 3);
+        playfield->line(playfield->get_width() - 1, playfield->get_height(), playfield->get_width() - 1, playfield->get_height() - 3);
         // TODO: render walls
         if(unsettled) {
             cur_score ++;
