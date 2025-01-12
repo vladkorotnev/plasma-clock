@@ -213,6 +213,11 @@ void FantaManipulator::put_string(const font_definition_t * font, const char * s
 }
 
 void FantaManipulator::scroll(int dx, int dy) {
+    if(abs(dy) >= height || abs(dx) >= width) {
+        clear();
+        return;
+    }
+
     if(dy != 0) {
         uint16_t * columns = (uint16_t*) buffer;
         for(int i = 0; i < width; i++) {
@@ -231,10 +236,10 @@ void FantaManipulator::scroll(int dx, int dy) {
     } else if (dx < 0) {
         size_t src_index = abs(dx) * 2;
         memcpy(buffer, &buffer[src_index], buffer_size - src_index);
-        memset(&buffer[src_index], 0, buffer_size - src_index);
+        memset(&buffer[buffer_size - src_index], 0, src_index);
     }
 
-    *dirty = true;
+    *dirty = *dirty || (dx != 0) || (dy != 0);
 }
 
 int FantaManipulator::get_width() {

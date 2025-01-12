@@ -1,5 +1,6 @@
 #include <service/power_management.h>
 #include <service/prefs.h>
+#include <service/time.h>
 #include <input/keys.h>
 #include <Arduino.h>
 #include <os_config.h>
@@ -130,7 +131,18 @@ void PMTaskFunction( void * pvParameter )
         #if HAS(MOTION_SENSOR)
         sensor_info_t * motion_info = sensors->get_info(SENSOR_ID_MOTION);
         if(motion_info != nullptr) {
-            if(motion_info->last_result > 0) {
+            static tk_time_of_day_t cur_time;
+            cur_time = get_current_time_coarse();
+
+            static tk_time_of_day_t start_ignore_time = { 0 };
+            static tk_time_of_day_t end_ignore_time = { 0 };
+            start_ignore_time.hour = prefs_get_int(PREFS_KEY_IGNORE_MOTION_START_HR);
+            end_ignore_time.hour = prefs_get_int(PREFS_KEY_IGNORE_MOTION_END_HR);
+
+            if(
+                motion_info->last_result > 0 && 
+                !(prefs_get_bool(PREFS_KEY_IGNORE_MOTION_SCHEDULE_ON) && time_in_range(cur_time, start_ignore_time, end_ignore_time))
+            ) {
                 // There was some motion, reenable the display
                 wake_up(now);
             }

@@ -150,11 +150,15 @@ tk_time_of_day_t get_uptime() {
 
 // Why not std::chrono? idk, legacy I guess
 
+inline int64_t time_to_ms(const tk_time_of_day_t& t) {
+    return (t.hour * 60 * 60 + t.minute * 60 + t.second) * 1000 + t.millisecond;
+}
+
 tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
     tk_time_of_day result = { 0 };
 
-    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
-    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    int64_t a_ms = time_to_ms(a);
+    int64_t b_ms = time_to_ms(b);
 
     int64_t diff_ms = a_ms - b_ms;
 
@@ -175,14 +179,14 @@ tk_time_of_day operator -(const tk_time_of_day_t& a, const tk_time_of_day_t& b) 
 
 
 bool operator==(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
-    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
-    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    int64_t a_ms = time_to_ms(a);
+    int64_t b_ms = time_to_ms(b);
     return a_ms == b_ms;
 }
 
 bool operator<(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
-    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
-    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    int64_t a_ms = time_to_ms(a);
+    int64_t b_ms = time_to_ms(b);
     return a_ms < b_ms;
 }
 
@@ -191,8 +195,8 @@ bool operator<=(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
 }
 
 bool operator>(const tk_time_of_day_t& a, const tk_time_of_day_t& b) {
-    int64_t a_ms = (a.hour * 60 * 60 + a.minute * 60 + a.second) * 1000 + a.millisecond;
-    int64_t b_ms = (b.hour * 60 * 60 + b.minute * 60 + b.second) * 1000 + b.millisecond;
+    int64_t a_ms = time_to_ms(a);
+    int64_t b_ms = time_to_ms(b);
     return a_ms > b_ms;
 }
 
@@ -207,5 +211,13 @@ void convert_to_12h(tk_time_of_day_t * time, bool * out_pm) {
     }
     else if(time->hour == 0) {
         time->hour = 12;
+    }
+}
+
+bool time_in_range(const tk_time_of_day_t& time, const tk_time_of_day_t& start, const tk_time_of_day_t& end) {
+    if(start > end) {
+        return (time >= start) || (time <= end);
+    } else {
+        return (time >= start) && (time <= end);
     }
 }
