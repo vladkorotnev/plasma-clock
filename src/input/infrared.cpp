@@ -12,12 +12,12 @@
 
 static char LOG_TAG[] = "IRRC";
 
+#if HAS(IR_RECEIVER)
 static TaskHandle_t hTask;
 
 static key_id_t last_pressed = KEY_MAX_INVALID;
 static TickType_t last_pressed_timestamp = 0;
 
-#if HAS(IR_RECEIVER)
 static IRrecv receiver(HWCONF_IR_RECV_GPIO);
 
 static void ir_task(void*) {
