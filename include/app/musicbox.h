@@ -28,4 +28,5 @@ private:
     int minTrackNo = 5;
     int maxTrackNo = all_chime_count;
     int trackNo = minTrackNo;
+    int display_width = DisplayFramebuffer::width;
 };
