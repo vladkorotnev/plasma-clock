@@ -36,8 +36,9 @@ AppShimMusicbox::AppShimMusicbox(NewSequencer * s):
     hint_lbl->stopped = false;
     hint_lbl->set_y_position(4);
     hint_lbl->scroll_only_if_not_fit = false;
-    hint_lbl->start_at_visible = false;
+    hint_lbl->start_at_visible = true;
     hint_lbl->reappear_delay = 150;
+    hint_lbl->holdoff = 120;
     trackNo = maxTrackNo;
 #if HAS(SERIAL_MIDI)
     if(prefs_get_bool(PREFS_KEY_SERIAL_MIDI)) {
@@ -47,8 +48,9 @@ AppShimMusicbox::AppShimMusicbox(NewSequencer * s):
 }
 
 void AppShimMusicbox::render(FantaManipulator* fb) {
-    if(points.size() < fb->get_width()) {
-        for(int i = 0; i < fb->get_width(); i++) {
+    display_width = fb->get_width();
+    if(points.size() < display_width) {
+        for(int i = 0; i < display_width; i++) {
             points.push_back( { .annotation = -1, .value = 0 });
         }
     }
@@ -128,12 +130,14 @@ void AppShimMusicbox::load_and_play() {
         hint_lbl->set_string("MIDI In");
         hint_lbl->hidden = false;
         hint_lbl->stopped = true;
-        hint_lbl->x_offset = DisplayFramebuffer::width / 2 - hint_lbl->string_width / 2;
+        hint_lbl->x_offset = display_width / 2 - hint_lbl->string_width / 2;
         hint_framecounter = 0;
     }
     else {
         auto melody = melody_from_no(trackNo);
         hint_lbl->set_string(melody->get_title());
+        hint_lbl->left_margin = std::max(0, display_width / 2 - hint_lbl->string_width / 2);
+        hint_lbl->rewind();
         hint_lbl->x_offset = 0;
         seq->play_sequence(melody, SEQUENCER_REPEAT_INDEFINITELY);
         hint_lbl->stopped = false;

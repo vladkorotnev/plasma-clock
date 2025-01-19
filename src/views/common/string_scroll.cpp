@@ -147,5 +147,5 @@ void StringScroll::render(FantaManipulator * fb) {
 } 
 
 void StringScroll::rewind() {
-    position = 0;
+    position = INT_MAX;
 }
