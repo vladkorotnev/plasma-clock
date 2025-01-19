@@ -540,6 +540,9 @@ YukkuriUtterance localized_utterance_for_time(tk_time_of_day_t _time, spoken_lan
                     }
                 } else {
                     acc += ',';
+                    if(time.minute < 10) {
+                        acc += "o/";
+                    }
                     acc += _tts_number_in_language(time.minute, TTS_LANG_EN, TTSNUM_NOMINATIVE);
                     if(is_12h) {
                         acc += is_pm ? "/pi';e'n" : "/e'i;e'n";
