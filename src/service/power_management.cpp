@@ -41,12 +41,8 @@ static void wake_up(TickType_t now) {
     if(isHvOff) {
         // Sometimes dim mode voltage is not enough, so enable bright mode when turning HV back on for a bit
         ESP_LOGV(LOG_TAG, "Reenable HV");
-    #if HAS(VARYING_BRIGHTNESS)
-        display->set_bright(true);
-    #endif
         display->set_power(true);
         isHvOff = false;
-        vTaskDelay(pdMS_TO_TICKS(500));
     #if HAS(VARYING_BRIGHTNESS)
         display->set_bright(isBright);
     #endif
