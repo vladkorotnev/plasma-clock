@@ -140,6 +140,7 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [TokuP — SPiCA](https://www.youtube.com/watch?v=ec3V80b0S2c) (long version / somewhat-39'sGivingDay-inspired edit): [MIDI](helper/chimes/spica.mid)
 * [Asa — Yoshiwara Lament](https://www.nicovideo.jp/watch/sm18395392): [MIDI](helper/chimes/yosiwara.mid)
 * ? — Meatloaf (a.k.a. SX_1016.MID: something from some Sierra Online game? This file has been following me around ever since my first MIDI-capable cellphone): [MIDI](helper/chimes/meatloaf.mid)
+* [真宮寺さくら（横山智佐）& 帝国歌劇団 — 檄！帝国華撃団](https://www.youtube.com/watch?v=1unWMPRefn0): opening theme from Sakura Wars, [MIDI](helper/chimes/teikokukagekidan.mid)
 
 ## Creating your own melodies
 
