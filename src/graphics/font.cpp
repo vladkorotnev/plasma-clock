@@ -298,7 +298,7 @@ const font_definition_t * find_font(font_style_t style, font_fallback_behavior_t
     if(!fonts_loaded && !did_try_loading_font) load_fonts();
     did_try_loading_font = true;
 
-    if(style == FONT_STYLE_UI_TEXT || style == FONT_STYLE_CLOCK_FACE_SMALL || style == FONT_STYLE_CONSOLE) {
+    if(style == FONT_STYLE_UI_TEXT || style == FONT_STYLE_CLOCK_FACE_SMALL) {
         return &keyrus0808_font;
     }
     else if(style == FONT_STYLE_TALL_TEXT) {

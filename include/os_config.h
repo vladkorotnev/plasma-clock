@@ -3,7 +3,6 @@
 
 // ----- Task Priorities -----
 
-#define pisosTASK_PRIORITY_CONSOLE 2
 #define pisosTASK_PRIORITY_REMOTE_DESKTOP 3
 #define pisosTASK_PRIORITY_FRAMEBUFFER (configMAX_PRIORITIES - 1)
 #define pisosTASK_PRIORITY_WAVEOUT (configMAX_PRIORITIES - 1)

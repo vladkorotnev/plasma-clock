@@ -13,7 +13,6 @@ typedef enum font_style {
     FONT_STYLE_CLOCK_FACE_SMALL,
     /// @brief Tiny font for digits (e.g. chart legend or such)
     FONT_STYLE_HUD_DIGITS,
-    FONT_STYLE_CONSOLE
 } font_style_t;
 
 typedef enum font_fallback_behavior {
