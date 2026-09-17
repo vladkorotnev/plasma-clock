@@ -22,6 +22,16 @@ jobs:
           submodules: recursive
       - name: Copy CNAME
         run: cp ./CNAME ./webroot/CNAME
+      - name: Build PoMF Play
+        working-directory: helper/pomf-play
+        run: |
+          npm ci
+          npm run build
+      - name: Add PoMF Play to the web root
+        run: |
+          rm -rf ./webroot/pomfplay
+          mkdir -p ./webroot/pomfplay
+          cp -R ./helper/pomf-play/dist/. ./webroot/pomfplay/
       - name: Publish webroot via GitHub Pages
         uses: rayluo/github-pages-overwriter@v1.3
         with:
