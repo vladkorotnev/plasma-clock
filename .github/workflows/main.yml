@@ -24,8 +24,7 @@ jobs:
         uses: ./.github/actions/prepare_pio
       - name: Download AquesTalk
         run: |
-          wget https://www.a-quest.com/archive/package/aquestalk-esp32_0243.zip -O /tmp/aquestalk.zip
-          unzip /tmp/aquestalk.zip -d /tmp
+          unzip ./helper/aquestalk-esp32_0244.zip -d /tmp
           mv /tmp/aquestalk-esp32/src/esp32/libaquestalk.a ./lib/nonfree-aquestalk/libaquestalk.a
           mv /tmp/aquestalk-esp32/src/aquestalk.h ./lib/nonfree-aquestalk/aquestalk.h
       - name: Create env file
