@@ -9,3 +9,5 @@ captures/
 /data/music/WIP*.pomf
 /webroot/fvudata/*
 /local/
+/helper/pomf-play/node_modules/
+/helper/pomf-play/dist/

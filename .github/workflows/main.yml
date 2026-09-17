@@ -67,6 +67,16 @@ jobs:
           git add -f ./webroot/fvudata/*
           git commit -m "ci: Publish firmwares at $(git rev-parse --short HEAD)"
           git push --force -u origin pub
+      - name: Build PoMF Play for GitHub Pages
+        working-directory: helper/pomf-play
+        run: |
+          npm ci
+          npm run build
+      - name: Add PoMF Play to the web root
+        run: |
+          rm -rf ./webroot/pomfplay
+          mkdir -p ./webroot/pomfplay
+          cp -R ./helper/pomf-play/dist/. ./webroot/pomfplay/
       # Thanks to yet another weird limitation of Github Actions, we need to duplicate this action here
       # https://github.com/orgs/community/discussions/25702
       # Remove when a better solution is found

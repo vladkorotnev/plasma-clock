@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "WebWorker"],
+    "strict": true,
+    "allowJs": true,
+    "checkJs": false,
+    "skipLibCheck": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "types": ["vite/client", "node"],
+    "noEmit": true
+  },
+  "include": ["src/**/*.ts", "src/**/*.svelte", "test/**/*.ts", "build/**/*.ts", "vite.config.ts"]
+}

@@ -83,13 +83,15 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 
 **(All chime tones are covers adapted for single channel beeper or 1-bit PIS-OS Sequencer by DJ AKASAKA)**
 
+**NEW!** Now you can listen to all ringtones in your browser via PoMFPlay: [https://pis-os.genjit.su/pomfplay/]
+
 ### Beeper tones
 
 * Simple beep
 * PC-98 Boot Chime
 * Russ28 (Русь 28) Hourly Chime (poorly timed Beethoven's 5th Symphony)
 * Some mid-2000s Shtrikh-M (Штрих-М) POS Boot chime
-* [Caramell - Caramelldansen](https://youtu.be/o6Zp4cW8w8A?t=51): [MIDI](helper/chimes/caramelldansen.mid), [MP3 Recording](docs/rec/caramell.mp3)
+* [Caramell - Caramelldansen](https://youtu.be/o6Zp4cW8w8A?t=51): [MIDI](helper/chimes/caramelldansen.mid)
 * [BôA - Duvet](https://youtu.be/Uoox9fpmDP0) (simple version): [MIDI](helper/chimes/duvet.mid)
 * [T-Square - Truth](https://youtu.be/FZaUPGjjA4c?t=77): [MIDI](helper/chimes/truth.mid)
 * [Kosaki Satoru - Haruhi no Omoi](https://www.youtube.com/watch?v=KMKoyHKYSNk): [MIDI](helper/chimes/haruhi_no_omoi.mid)
@@ -98,40 +100,40 @@ More photos in [the gallery](https://pis-os.genjit.su/index.html#photos)
 * [FEX — Subways Of Your Mind (Like The Wind / The Most Mysterious Song On The Internet)](https://www.youtube.com/watch?v=uYpkri8Kv2E): [MIDI](helper/chimes/like_the_wind.mid)
 * [NightRadio - Waiting Freqs](https://www.youtube.com/watch?v=_0MBreuq94Y): [MIDI](helper/chimes/waiting_freqs.mid)
 * [NightRadio - The Way](https://nightradio.bandcamp.com/track/the-way): [MIDI](helper/chimes/the_way.mid)
-* [Dougal & Gammer — Guitar Hero](https://youtu.be/ID4pO9epHPA?t=89): [MIDI](helper/chimes/gtrhero.mid), [MP3 Recording](docs/rec/guitarhero.mp3)
+* [Dougal & Gammer — Guitar Hero](https://youtu.be/ID4pO9epHPA?t=89): [MIDI](helper/chimes/gtrhero.mid)
 * [蜂屋ななし — シャボン](https://youtu.be/UHRlXm_tV8o?t=41): [MIDI](helper/chimes/syabon.mid)
 * [Takeshi Abo — Gate of Steiner](https://www.youtube.com/watch?v=2Q9MqL83FeE): [MIDI](helper/chimes/steiner.mid)
 * [deadballP — 永遠に続く五線譜](https://www.youtube.com/watch?v=p1sh68qk4Nk): [MIDI](helper/chimes/towa.mid)
 * [Cream puff — Mermaid girl](https://youtu.be/AaUMvgfHpUo?t=16): [MIDI](helper/chimes/mermgrl.mid)
-* [Brisk & Trixxy — Eye Opener](https://youtu.be/81QqHUpyBhg?t=83): [MIDI](helper/chimes/eye_opener.mid), [MP3 Recording](docs/rec/eye_opener.mp3)
+* [Brisk & Trixxy — Eye Opener](https://youtu.be/81QqHUpyBhg?t=83): [MIDI](helper/chimes/eye_opener.mid)
 
 ### 1-bit Polyphony
 
-* [A.M. - Arise](https://youtu.be/cuOVP6pJ9Ww?t=264): [MIDI](helper/chimes/arise.mid), [MP3 Recording](docs/rec/arise.mp3)
+* [A.M. - Arise](https://youtu.be/cuOVP6pJ9Ww?t=264): [MIDI](helper/chimes/arise.mid)
 * [Hirano Aya - Bouken Desho Desho](https://www.youtube.com/watch?v=C337shIT9LI): [MIDI](helper/chimes/bouken.mid)
 * [Magome Togoshi, Shinji Orito - Gentle Jena](https://www.youtube.com/watch?v=lR4dw_B423E): [MIDI](helper/chimes/gentlejena.mid)
 * [OMEGA - Gammapolisz](https://www.youtube.com/watch?v=XCqdrQxMrxI): [MIDI](helper/chimes/gammapolisz.mid)
-* [Hiroyuki Oshima - The Ark Awakes From The Sea Of Chaos](https://www.youtube.com/watch?app=desktop&v=cB7eevDk1s0): [MIDI](helper/chimes/ark.mid), , [MP3 Recording](docs/rec/ark.mp3)
-* [Timbaland - Give It To Me](https://youtube.com/watch?v=RgoiSJ23cSc) also known as [Skibidi Toilet](https://youtu.be/6dMjCa0nqK0): [MIDI](helper/chimes/skibidi_toilet.mid), [MP3 Recording](docs/rec/skibidi.mp3)
-* [PinocchioP - God-ish (神っぽいな)](https://www.youtube.com/watch?v=EHBFKhLUVig): [MIDI](helper/chimes/kamippoina.mid), [MP3 Recording](docs/rec/kamippoina.mp3)
-* [KOTOKO - Re-sublimity](https://youtu.be/QXDwb2rueYM?t=65): [MIDI](helper/chimes/resublimity.mid), [MP3 Recording](docs/rec/re_sublimity.mp3) - simple piano-ish score, better cover TBD?
+* [Hiroyuki Oshima - The Ark Awakes From The Sea Of Chaos](https://www.youtube.com/watch?app=desktop&v=cB7eevDk1s0): [MIDI](helper/chimes/ark.mid)
+* [Timbaland - Give It To Me](https://youtube.com/watch?v=RgoiSJ23cSc) also known as [Skibidi Toilet](https://youtu.be/6dMjCa0nqK0): [MIDI](helper/chimes/skibidi_toilet.mid)
+* [PinocchioP - God-ish (神っぽいな)](https://www.youtube.com/watch?v=EHBFKhLUVig): [MIDI](helper/chimes/kamippoina.mid)
+* [KOTOKO - Re-sublimity](https://youtu.be/QXDwb2rueYM?t=65): [MIDI](helper/chimes/resublimity.mid) - simple piano-ish score, better cover TBD?
 * [Calvin Harris - Acceptable In The 80s](https://youtu.be/dOV5WXISM24?t=14): [MIDI](helper/chimes/inthe80s.mid)
-* [emon - shake it!](https://www.youtube.com/watch?v=WxexMGe83No): [MIDI](helper/chimes/shakeit.mid), [MP3 Recording](docs/rec/shakeit.mp3)
+* [emon - shake it!](https://www.youtube.com/watch?v=WxexMGe83No): [MIDI](helper/chimes/shakeit.mid)
 * [Omega - Én elmegyek](https://www.youtube.com/watch?v=L74IyC1N43M): [MIDI](helper/chimes/en_elmegyek.mid) (thanks [lemuel_producer](https://www.fiverr.com/lemuel_producer) for the help!)
 * [John Scatman - Scatman (Ski-Ba-Bop-Dop-Bop)](https://www.youtube.com/watch?v=Hy8kmNEo1i8): [MIDI](helper/chimes/scatman.mid)
-* [Minamotoya feat. motoko - Stasis](https://tanoc.bandcamp.com/track/stasis): [MIDI](helper/chimes/stasis.mid), [MP3 Recording](docs/rec/stasis.mp3)
-* [Roxette — Stars](https://www.youtube.com/watch?v=uzZRdjXd2qw): [MIDI](helper/chimes/stars.mid), [MP3 Recording](docs/rec/stars.mp3)
+* [Minamotoya feat. motoko - Stasis](https://tanoc.bandcamp.com/track/stasis): [MIDI](helper/chimes/stasis.mid)
+* [Roxette — Stars](https://www.youtube.com/watch?v=uzZRdjXd2qw): [MIDI](helper/chimes/stars.mid)
 * [HIRO — Space Harrier](https://datadiscs.bandcamp.com/track/main-theme): [MIDI](helper/chimes/space_harrier.mid) (scale altered for 1-bit output range)
 * [A-ha — Take On Me](https://www.youtube.com/watch?v=djV11Xbc914): [MIDI](helper/chimes/takeonme.mid)
 * [Ennio Morricone - My Name Is Nobody](https://www.youtube.com/watch?v=srSpyXwz-MQ): [MIDI](helper/chimes/mynameisnobody.mid)
-* [PPK - ResuRection (ППК - Воскрешение)](https://www.youtube.com/watch?v=KvOR2E_hZsw): [MIDI](helper/chimes/ppk.mid), [MP3](docs/rec/gagarin.mp3)
+* [PPK - ResuRection (ППК - Воскрешение)](https://www.youtube.com/watch?v=KvOR2E_hZsw): [MIDI](helper/chimes/ppk.mid)
 * [Owl City - Fireflies](https://www.youtube.com/watch?v=psuRGfAaju4): [MIDI](helper/chimes/fireflies.mid)
 * [Ado - Odo](https://www.youtube.com/watch?v=YnSW8ian29w): [MIDI](helper/chimes/odo.mid)
 * [ZUN - Legend of Hourai](https://www.youtube.com/watch?v=d2_tY7cl818): [MIDI](helper/chimes/hourai_sou1.mid) based on work by sou1
 * [Hiiragi Magnetite — Antenna 39](https://www.youtube.com/watch?v=7yJRsFFRoQY): [Recording](https://www.youtube.com/watch?v=zYAEvVJUqVs), [MIDI](helper/chimes/antenna39.mid)
-* [daniwellP - Nyan Cat](https://www.youtube.com/watch?v=LfKCLdPTqtM): [MIDI](helper/chimes/nyancat.mid), [MP3](docs/rec/squarecat.mp3)
+* [daniwellP - Nyan Cat](https://www.youtube.com/watch?v=LfKCLdPTqtM): [MIDI](helper/chimes/nyancat.mid)
 * [Neru - Tokyo Teddy Bear](https://www.youtube.com/watch?v=eSI7RsjZy1E): [MIDI](helper/chimes/tokyoteddybear.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=Y30ZyZbRCrE)
-* [LamazeP - Triple Baka](https://open.spotify.com/track/2dE6zWGJXZuqvfengytVGo): [MIDI](helper/chimes/3baka.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=HNPrwdLJC8g), [MP3](docs/rec/baka.mp3)
+* [LamazeP - Triple Baka](https://open.spotify.com/track/2dE6zWGJXZuqvfengytVGo): [MIDI](helper/chimes/3baka.mid) based on [MIDI by FDG/Danny G](https://www.youtube.com/watch?v=HNPrwdLJC8g)
 * [Desireless — Voyage Voyage](https://youtu.be/sM2ZhByFcDk): [MIDI](helper/chimes/voyage.mid)
 * [NightRadio — Pixel Cave](https://www.youtube.com/watch?v=GA1l-3_yTpM): [MIDI](helper/chimes/pixelcave.mid) based on original file from [SunVox](https://warmplace.ru/soft/sunvox/)
 * [S3RL — MTC](https://www.youtube.com/watch?v=bO-NaEj2dQ0): [MIDI](helper/chimes/mtc.mid) based on synthesia file by [Helipuma](https://www.youtube.com/watch?v=DguXF3tzq34)
