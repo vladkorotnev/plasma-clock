@@ -23,8 +23,10 @@ jobs:
       - name: Prepare environment
         uses: ./.github/actions/prepare_pio
       - name: Download AquesTalk
+        env:
+          ZIP_PASS: ${{ secrets.AQUESTALK_PROTECT_PASS }}
         run: |
-          unzip ./helper/aquestalk-esp32_0244.zip -d /tmp
+          unzip -P "$ZIP_PASS" ./helper/aquestalk-esp32_0244_protected.zip -d /tmp
           mv /tmp/aquestalk-esp32/src/esp32/libaquestalk.a ./lib/nonfree-aquestalk/libaquestalk.a
           mv /tmp/aquestalk-esp32/src/aquestalk.h ./lib/nonfree-aquestalk/aquestalk.h
       - name: Create env file
