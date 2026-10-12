@@ -2,6 +2,8 @@
 #include <rsrc/common_icons.h>
 #include <graphics/font.h>
 #include <esp32-hal-log.h>
+#include <service/localize.h>
+#include <input/keys.h>
 
 static const uint8_t sleep_icns_data[] = {
     // By PiiXL
@@ -22,6 +24,17 @@ NextAlarmView::NextAlarmView() {
     time_remaining = {0};
     disp_h = 0;
     disp_m = 0;
+    dismiss_button_was_pressed = false;
+    dismiss_hold_remain = 0;
+    dismiss_completed = false;
+    framecount = 0;
+
+    arrows = new TouchArrowOverlay();
+    arrows->active = true;
+    arrows->left = false;
+    arrows->top = false;
+    arrows->right = true;
+    arrows->bottom = false;
 
     hourView = new DroppingDigitView(2, 0);
     minuteView = new DroppingDigitView(2, 0);
@@ -32,7 +45,9 @@ NextAlarmView::NextAlarmView() {
 }
 
 NextAlarmView::~NextAlarmView() {
-    delete hourView, minuteView;
+    delete hourView;
+    delete minuteView;
+    delete arrows;
 }
 
 void NextAlarmView::prepare() {
@@ -70,26 +85,63 @@ void NextAlarmView::step() {
     recalculate();
     hourView->value = disp_h;
     minuteView->value = disp_m;
+    bool dismiss_is_pressed = hid_test_key_state(KEY_RIGHT);
+
+    if (dismiss_button_was_pressed) {
+        if (dismiss_is_pressed) {
+            if (dismiss_hold_remain <= 0 && !dismiss_completed) {
+                dismiss_upcoming_alarm();
+                dismiss_completed = true;
+            }
+        } else {
+            dismiss_button_was_pressed = false;
+            dismiss_completed = false;
+        }
+    } else {
+        dismiss_button_was_pressed = dismiss_is_pressed;
+        dismiss_completed = false;
+    }
+
     Composite::step();
 }
 
 void NextAlarmView::render(FantaManipulator *fb) {
-    int char_count = 5; // XX:XX
-    int text_width = char_count * font->width;
-    int left_offset = (fb->get_width() - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
-    hourView->x_offset = left_offset;
-    minuteView->x_offset = hourView->x_offset + hourView->width + font->width;
+    framecount++;
 
-    Composite::render(fb);
-    fb->put_sprite(&sleep_icns, 0, 0);
-    fb->put_glyph(font, ':', hourView->x_offset + hourView->width, 0);
+    if (!dismiss_button_was_pressed) {
+        // Normal view state
+        dismiss_hold_remain = fb->get_width();
+        int char_count = 5; // XX:XX
+        int text_width = char_count * font->width;
+        int left_offset = (fb->get_width() - alarm_icns.width) / 2 - text_width / 2 + alarm_icns.width;
+        hourView->x_offset = left_offset;
+        minuteView->x_offset = hourView->x_offset + hourView->width + font->width;
+
+        Composite::render(fb);
+        fb->put_sprite(&sleep_icns, 0, 0);
+        fb->put_glyph(font, ':', hourView->x_offset + hourView->width, 0);
+    } else {
+        // Dismiss hold state
+        static const font_definition_t * tall_font = find_font(FONT_STYLE_TALL_TEXT);
+        static const char * hold_str = localized_string("DISMISS");
+        fb->put_string(tall_font, hold_str, fb->get_width() - 12 - measure_string_width(tall_font, hold_str), 0);
+        arrows->render(fb);
+        if(dismiss_hold_remain > 0 && framecount % 2 == 0) dismiss_hold_remain -= 1;
+        FantaManipulator *holdProgress = fb->slice(0,  fb->get_width() - dismiss_hold_remain);
+        holdProgress->invert();
+        delete holdProgress;
+    }
 }
 
 int NextAlarmView::desired_display_time() {
     recalculate();
-    if(show_alarm && time_remaining.hour < 8) {
+    if(dismiss_button_was_pressed) {
+        return DISP_TIME_ATTENTION;
+    }
+    else if(show_alarm && time_remaining.hour < 8) {
         return DISP_TIME_NO_OVERRIDE;
-    } else {
+    } 
+    else {
         return DISP_TIME_DONT_SHOW;
     }
 }

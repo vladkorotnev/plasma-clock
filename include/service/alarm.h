@@ -29,3 +29,4 @@ void set_alarm(uint8_t idx, alarm_setting_t setting);
 const alarm_setting_t* get_triggered_alarm();
 const alarm_setting_t* get_upcoming_alarm();
 void clear_triggered_alarm();
+void dismiss_upcoming_alarm();

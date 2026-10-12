@@ -53,17 +53,10 @@ void clear_triggered_alarm() {
     triggered_alarm = nullptr;
 }
 
-static void _trigger_alarm_if_needed(tk_date& today, int index) {
+static void _mark_alarm_triggered(tk_date& today, int index) {
     alarm_setting_t alarm = alarms[index];
-    // a hash is probably in order here, but CBA.
-    if(memcmp(&alarm, &last_alarmed, sizeof(alarm_setting_t)) == 0 &&
-        memcmp(&today, &last_alarmed_day, sizeof(tk_date_t)) == 0) {
-        // already alarmed this alarm today, nothing to do
-        return;
-    }
 
-    ESP_LOGI(LOG_TAG, "Triggering alarm at index %i", index);
-    triggered_alarm = &alarms[index];
+    ESP_LOGI(LOG_TAG, "Marking alarm %i as triggered for today", index);
     memcpy(&last_alarmed, &alarm, sizeof(alarm_setting_t));
     memcpy(&last_alarmed_day, &today, sizeof(tk_date_t));
 
@@ -72,6 +65,24 @@ static void _trigger_alarm_if_needed(tk_date& today, int index) {
         alarm.enabled = false;
         set_alarm(index, alarm);
     }
+}
+
+static bool _did_alarm_trigger(tk_date& today, int index) {
+    alarm_setting_t alarm = alarms[index];
+    return memcmp(&alarm, &last_alarmed, sizeof(alarm_setting_t)) == 0 &&
+        memcmp(&today, &last_alarmed_day, sizeof(tk_date_t)) == 0;
+}
+
+static void _trigger_alarm_if_needed(tk_date& today, int index) {
+    if(_did_alarm_trigger(today, index)) {
+        // already alarmed this alarm today, nothing to do
+        return;
+    }
+
+    ESP_LOGI(LOG_TAG, "Triggering alarm at index %i", index);
+    triggered_alarm = &alarms[index];
+    
+    _mark_alarm_triggered(today, index);
 
     push_state(STATE_ALARMING, TRANSITION_WIPE);
 }
@@ -123,32 +134,48 @@ static void alarm_task(void*) {
     }
 }
 
-const alarm_setting_t* get_upcoming_alarm() {
+const int get_upcoming_alarm_index() {
     _load_alarm_list_if_needed();
 
     tk_time_of_day_t now = get_current_time_coarse();
     tk_date today = get_current_date();
 
     tk_time_of_day_t next_alarm_time = { .hour = INT_MAX, .minute = INT_MAX, .second = INT_MAX, .millisecond = INT_MAX };
-    const alarm_setting_t * next_alarm = nullptr;
+    int next_alarm_index = -1;
 
     // Look for any alarms in today
     for (int i = 0; i < ALARM_LIST_SIZE; i++) {
         const alarm_setting_t * alarm = &alarms[i];
-        if (alarm->enabled) {
+        if (alarm->enabled && !_did_alarm_trigger(today, i)) {
             if (alarm->days == 0 || ALARM_ON_DAY(*alarm, today.dayOfWeek)) {
                 tk_time_of_day_t alarm_time = { .hour = alarm->hour, .minute = alarm->minute, .second = 0, .millisecond = 0 };
                 if (alarm_time > now) {
                     if (alarm_time < next_alarm_time) {
                         next_alarm_time = alarm_time;
-                        next_alarm = alarm;
+                        next_alarm_index = i;
                     }
                 }
             }
         }
     }
 
-    return next_alarm;
+    return next_alarm_index;
+}
+
+const alarm_setting_t* get_upcoming_alarm() {
+    const int next_idx = get_upcoming_alarm_index();
+    if (next_idx < 0 || next_idx >= ALARM_LIST_SIZE) return nullptr;
+    return &alarms[next_idx];
+}
+
+void dismiss_upcoming_alarm() {
+    const int next_idx = get_upcoming_alarm_index();
+    if (next_idx < 0 || next_idx >= ALARM_LIST_SIZE) return;
+
+    tk_date today;
+    today = get_current_date();
+
+    _mark_alarm_triggered(today, next_idx);
 }
 
 void alarm_init(SensorPool* s) {

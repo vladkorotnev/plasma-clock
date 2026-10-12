@@ -19,6 +19,12 @@ private:
     tk_time_of_day_t time_remaining;
     bool show_alarm;
 
+    bool dismiss_button_was_pressed;
+    bool dismiss_completed;
+    int dismiss_hold_remain;
+    uint8_t framecount;
+    TouchArrowOverlay *arrows;
+
     int disp_h, disp_m;
     DroppingDigitView *hourView;
     DroppingDigitView *minuteView;
