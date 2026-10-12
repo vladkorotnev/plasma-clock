@@ -30,11 +30,6 @@ NextAlarmView::NextAlarmView() {
     framecount = 0;
 
     arrows = new TouchArrowOverlay();
-    arrows->active = true;
-    arrows->left = false;
-    arrows->top = false;
-    arrows->right = true;
-    arrows->bottom = false;
 
     hourView = new DroppingDigitView(2, 0);
     minuteView = new DroppingDigitView(2, 0);
@@ -87,6 +82,12 @@ void NextAlarmView::step() {
     minuteView->value = disp_m;
     bool dismiss_is_pressed = hid_test_key_state(KEY_RIGHT);
 
+    arrows->active = true;
+    arrows->left = false;
+    arrows->top = false;
+    arrows->right = true;
+    arrows->bottom = false;
+
     if (dismiss_button_was_pressed) {
         if (dismiss_is_pressed) {
             if (dismiss_hold_remain <= 0 && !dismiss_completed) {
@@ -125,23 +126,35 @@ void NextAlarmView::render(FantaManipulator *fb) {
         static const font_definition_t * tall_font = find_font(FONT_STYLE_TALL_TEXT);
         static const char * hold_str = localized_string("DISMISS");
         fb->put_string(tall_font, hold_str, fb->get_width() - 12 - measure_string_width(tall_font, hold_str), 0);
-        arrows->render(fb);
         if(dismiss_hold_remain > 0 && framecount % 2 == 0) dismiss_hold_remain -= 1;
         FantaManipulator *holdProgress = fb->slice(0,  fb->get_width() - dismiss_hold_remain);
         holdProgress->invert();
         delete holdProgress;
     }
+
+    arrows->render(fb);
 }
 
 int NextAlarmView::desired_display_time() {
     recalculate();
-    if(dismiss_button_was_pressed) {
+
+    if (dismiss_completed) {
+        if (hid_peek_key_any(KEY_RIGHT) != KEYSTATE_RELEASED) {
+            return DISP_TIME_DONT_SHOW;
+        }
+
+        // The button was released after leaving this screen.
+        dismiss_button_was_pressed = false;
+        dismiss_completed = false;
+    }
+
+    if (dismiss_button_was_pressed) {
         return DISP_TIME_ATTENTION;
     }
-    else if(show_alarm && time_remaining.hour < 8) {
+
+    if (show_alarm && time_remaining.hour < 8) {
         return DISP_TIME_NO_OVERRIDE;
-    } 
-    else {
-        return DISP_TIME_DONT_SHOW;
     }
+
+    return DISP_TIME_DONT_SHOW;
 }
