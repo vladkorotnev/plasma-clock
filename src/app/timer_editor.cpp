@@ -1,9 +1,11 @@
 #include <app/timer_editor.h>
+#include <app/countdown.h>
 #include <state.h>
 #include <views/menu/time_setting.h>
 #include <service/prefs.h>
 #include <service/localize.h>
 #include <input/keys.h>
+#include <esp_timer.h>
 
 class AppShimTimerEditor::TimerEditorMainScreen: public Composite {
 public:
@@ -35,12 +37,13 @@ public:
         load_prefs();
         cursorTimer = 0;
         isRunning = false;
+        deadlineUs = 0;
         mustRing = false;
         blinkState = false;
 
         hTimer = xTimerCreate(
             "TMR",
-            pdMS_TO_TICKS(1000),
+            pdMS_TO_TICKS(100),
             true,
             this,
             xTimerCallback
@@ -159,20 +162,9 @@ public:
     void tick() {
         if(!isRunning) return;
 
-        if(hour == 0 && minute == 0 && second == 0) {
-            isRunning = false;
-            push_state(STATE_TIMER_EDITOR); // in case we are on a different screen
-            if(sequencer) { 
-                secondView->sound = false;
-                minuteView->sound = false;
-                hourView->sound = false;
-                blinkState = true;
-                mustRing = true; // rather than increasing timer stack size just use a flag to kick off the melody in a bigger thread
-            }
-            load_prefs();
-        } else {
-            add_sec(false);
-        }
+        int remainingSeconds = countdown_seconds_remaining(deadlineUs, esp_timer_get_time());
+        if(remainingSeconds == 0) finish();
+        else set_time(remainingSeconds);
     }
 
 private:
@@ -195,16 +187,35 @@ private:
     bool mustRing;
     bool blinkState;
     TimerHandle_t hTimer;
+    int64_t deadlineUs;
 
-    void load_prefs() {
-        int saved_time = prefs_get_int(PREFS_KEY_TIMER_TIME_SECONDS);
-        hour = saved_time / 3600;
-        minute = (saved_time % 3600) / 60;
-        second = saved_time % 60;
-        cursorPosition = saved_time == 0 ? CursorPosition::SECOND : CursorPosition::PLAY_PAUSE;
+    void set_time(int totalSeconds) {
+        hour = totalSeconds / 3600;
+        minute = (totalSeconds % 3600) / 60;
+        second = totalSeconds % 60;
         hourView->value = hour;
         minuteView->value = minute;
         secondView->value = second;
+    }
+
+    void finish() {
+        isRunning = false;
+        xTimerStop(hTimer, 0);
+        push_state(STATE_TIMER_EDITOR); // in case we are on a different screen
+        if(sequencer) {
+            secondView->sound = false;
+            minuteView->sound = false;
+            hourView->sound = false;
+            blinkState = true;
+            mustRing = true; // rather than increasing timer stack size just use a flag to kick off the melody in a bigger thread
+        }
+        load_prefs();
+    }
+
+    void load_prefs() {
+        int saved_time = prefs_get_int(PREFS_KEY_TIMER_TIME_SECONDS);
+        set_time(saved_time);
+        cursorPosition = saved_time == 0 ? CursorPosition::SECOND : CursorPosition::PLAY_PAUSE;
     }
 
     void save_prefs() {
@@ -256,9 +267,11 @@ private:
         secondView->value = second;
     }
     void start_stop() {
-        isRunning = !isRunning;
-        if(isRunning) {
+        if(!isRunning) {
             save_prefs();
+            int totalSeconds = hour * 3600 + minute * 60 + second;
+            deadlineUs = esp_timer_get_time() + totalSeconds * COUNTDOWN_US_PER_SECOND;
+            isRunning = true;
             cursorPosition = CursorPosition::PLAY_PAUSE;
             xTimerStart(hTimer, 0);
             secondView->sound = true;
@@ -266,6 +279,13 @@ private:
             hourView->sound = false;
         } else {
             xTimerStop(hTimer, 0);
+            int remainingSeconds = countdown_seconds_remaining(deadlineUs, esp_timer_get_time());
+            if(remainingSeconds == 0) {
+                finish();
+                return;
+            }
+            isRunning = false;
+            set_time(remainingSeconds);
             // save time halfway through
             save_prefs();
             secondView->sound = true;
